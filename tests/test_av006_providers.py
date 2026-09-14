@@ -1,9 +1,11 @@
 """Cost/boundary and frozen-input regressions; no provider calls or credentials."""
 import json
+import os
 from pathlib import Path
 import tempfile
 import time
 import unittest
+from unittest.mock import patch
 
 from tools import av006_providers as experiment
 
@@ -77,6 +79,43 @@ class ProviderExperimentTests(unittest.TestCase):
             with self.assertRaises(ValueError) as error:
                 experiment.read_key(path)
             self.assertNotIn(path.read_text(), str(error.exception))
+
+    def test_environment_key_works_without_a_file(self):
+        key = "sk-or-" + "synthetic-env-key" * 3
+        with patch.dict(os.environ, {"ankivoice_oai": "  " + key + "\n"}, clear=True), \
+                patch.object(experiment, "read_key") as read_file:
+            self.assertEqual(experiment.load_key(), key)
+            read_file.assert_not_called()
+
+    def test_explicit_file_overrides_environment(self):
+        key = "sk-or-" + "synthetic-file-key" * 3
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "key"
+            path.write_text(key)
+            path.chmod(0o600)
+            with patch.dict(os.environ, {"ankivoice_oai": "invalid-env-value"}, clear=True):
+                self.assertEqual(experiment.load_key(path), key)
+                with self.assertRaises(FileNotFoundError):
+                    experiment.load_key(Path(directory) / "missing")
+
+    def test_default_file_remains_available_when_environment_is_unset(self):
+        key = "sk-or-" + "synthetic-default-key" * 3
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "key"
+            path.write_text(key)
+            path.chmod(0o600)
+            with patch.dict(os.environ, {}, clear=True), patch.object(experiment, "KEY", path):
+                self.assertEqual(experiment.load_key(), key)
+
+    def test_invalid_environment_never_falls_back_or_echoes_the_value(self):
+        for value in ("", "   ", "synthetic-invalid-secret", "sk-or-" + "x" * 40 + " inner-space"):
+            with self.subTest(value=value), patch.dict(os.environ, {"ankivoice_oai": value}, clear=True), \
+                    patch.object(experiment, "read_key") as read_file:
+                with self.assertRaisesRegex(ValueError, "Environment variable ankivoice_oai") as error:
+                    experiment.load_key()
+                if value.strip():
+                    self.assertNotIn(value, str(error.exception))
+                read_file.assert_not_called()
 
 
 if __name__ == "__main__":

@@ -22,6 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CORPUS = ROOT / "fixtures/providers/av006-corpus.json"
 AUDIO = ROOT / "docs/testing/av006/evidence/audio"
 KEY = Path.home() / ".config/ankivoice/openrouter.key"
+KEY_ENV = "ankivoice_oai"
 API = "https://openrouter.ai/api/v1/"
 CANDIDATES = {
     "stt": ("nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free", "nvidia"),
@@ -55,13 +56,27 @@ def load_corpus():
     return corpus
 
 
-def read_key(path):
-    key = path.read_text().strip()
+def validate_key(value, source):
+    key = value.strip()
     if not key.startswith("sk-or-") or len(key) < 30 or any(c.isspace() for c in key):
-        raise ValueError("Credential file must contain only the OpenRouter key")
+        raise ValueError(f"{source} must contain only the OpenRouter key")
+    return key
+
+
+def read_key(path):
+    key = validate_key(path.read_text(), "Credential file")
     if stat.S_IMODE(path.stat().st_mode) & 0o077:
         raise ValueError("Restrict credential file permissions with chmod 600")
     return key
+
+
+def load_key(path=None):
+    """Explicit file overrides the environment, which overrides the default file."""
+    if path is not None:
+        return read_key(path)
+    if KEY_ENV in os.environ:
+        return validate_key(os.environ[KEY_ENV], f"Environment variable {KEY_ENV}")
+    return read_key(KEY)
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -178,7 +193,7 @@ def decode_result(response, kind):
 
 def run(args):
     corpus = load_corpus()
-    key = read_key(args.key_file)
+    key = load_key(args.key_file)
     if args.output.exists():
         raise ValueError("Output already exists; preserve it and choose a new path")
     model, provider = CANDIDATES[args.kind]
@@ -241,7 +256,8 @@ def run(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("kind", choices=CANDIDATES)
-    parser.add_argument("--key-file", type=Path, default=KEY)
+    parser.add_argument("--key-file", type=Path,
+                        help=f"Credential file; overrides {KEY_ENV}. Otherwise use that variable, then {KEY}")
     parser.add_argument("--output", type=Path, required=True)
     try:
         run(parser.parse_args())

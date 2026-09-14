@@ -100,8 +100,25 @@ and lifecycle/product decisions remain outside this probe.
 
 The user selected free models only. The tested file was
 `$HOME/.config/ankivoice/openrouter.txt`, outside the repository. It contains only
-the key and has mode 600. The runner defaults to `openrouter.key`; supply
-`--key-file` for other names. Never put the key itself in arguments or Git.
+the key and has mode 600. Credentials are resolved in this order:
+
+1. An explicitly supplied `--key-file`.
+2. The case-sensitive environment variable `ankivoice_oai`.
+3. The default file `$HOME/.config/ankivoice/openrouter.key`.
+
+An empty or invalid environment value is an error; unset it to use the default
+file. An explicit file is authoritative even if it is missing or invalid. Neither
+failure silently switches credentials. Never put the key itself in arguments or
+Git. To load the existing file into the current shell environment without printing
+its contents:
+
+```sh
+export ankivoice_oai="$(cat "$HOME/.config/ankivoice/openrouter.txt")"
+```
+
+Then omit `--key-file` when running the commands below. This variable supplies an
+OpenRouter key; it does not switch providers. Environment-based credentials stay
+out of experiment output and do not change the free-only limits.
 
 The runner checks public endpoint prices and key limits, pins a provider,
 disables fallback, and sets price ceilings to zero. It writes per-attempt results
@@ -138,6 +155,7 @@ outputs as well as HTTP status. No result writes an Anki rating.
 ## Validation performed
 
 September 14, 2026: native APK built/installed and TTS/STT operations exercised;
-19 Python tests passed; evidence validator passed; `pip check` reported no broken
+23 Python tests passed, including credential-source precedence and validation;
+evidence validator passed; `pip check` reported no broken
 requirements; `git diff --check` passed. Remote CI was not run. See the decision
 report for the explicit runtime, quality and physical-device limitations.

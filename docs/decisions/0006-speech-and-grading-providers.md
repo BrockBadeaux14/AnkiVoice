@@ -193,8 +193,12 @@ a free endpoint and requires another availability check.
 
 The host credential is in a user-created file outside Git with owner-only
 permissions. It is never embedded in code/APK assets, printed or passed as a shell
-argument. `--key-file` accepts its path; the file contains only the key. The
-runner sends an HTTPS Authorization header to OpenRouter and refuses redirects.
+argument. The runner also accepts the case-sensitive environment variable
+`ankivoice_oai`. An explicit `--key-file` takes precedence, followed by the
+environment variable, then the default key file. Empty/invalid selected sources
+fail without switching credentials or echoing the value. Environment support was
+added after these measurements and validated locally without new provider calls.
+The runner sends an HTTPS Authorization header to OpenRouter and refuses redirects.
 The native probe has neither Internet nor Anki permission.
 
 #17 owns runtime Android key entry and private storage protected with Android
