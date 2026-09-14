@@ -14,3 +14,7 @@ Android-first dependency plan.
 
 See [AV-002: VoiceQA test collection](docs/testing/voiceqa-fixtures.md) to generate
 disposable collections, run the fixture checks, and reset or back up a test run.
+
+See [AV-004: AnkiDroid review access](docs/testing/av004-ankidroid-review-access.md)
+for the pinned emulator investigation, captured evidence, reproducible probe, and
+constraints on submission verification.

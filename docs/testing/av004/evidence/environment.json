@@ -1,0 +1,53 @@
+{
+  "date": "2026-09-14",
+  "timezone": "America/Chicago",
+  "source_commit": "69ebf28",
+  "branch": "codex/av-004-ankidroid-review-access",
+  "host": "macOS 26.6.2 (25G83), ARM64",
+  "avd": "AnkiVoice_AV004",
+  "device": "medium_phone",
+  "serial": "emulator-5584",
+  "display": "1080x2400 @ 420dpi",
+  "ram": "2 GiB",
+  "system_image": "system-images;android-36;google_apis_playstore;arm64-v8a",
+  "image_revision": 7,
+  "android_fingerprint": "google/sdk_gphone64_arm64/emu64a:16/BE2A.250530.026.D1/13818094:user/release-keys",
+  "emulator": "37.1.11.0 build 15917651",
+  "adb": "1.0.41 / 37.0.1-15733141",
+  "ankidroid": "2.24.1",
+  "version_code": 322401300,
+  "apk": "AnkiDroid-2.24.1-arm64-v8a.apk",
+  "apk_sha256": "3012692ca67b856b287430715f99ca6150e471588326f6c8c45f27bbe895afbf",
+  "upstream_tag": "v2.24.1",
+  "upstream_commit": "9f579c10bb151146728220729c510acbbd8faba7",
+  "build_tools": "36.0.0",
+  "compile_sdk": 36,
+  "probe_target_sdk": 35,
+  "jdk": "Android Studio JBR 25.0.2, javac --release 8",
+  "api_route": "ContentResolver to com.ichi2.anki.flashcards; constants from pinned FlashCardsContract; no Instant-Add library",
+  "fixture_backend": "anki==25.9.2",
+  "signed_in_accounts": 0,
+  "ankiweb": "Fresh AVD; Get Started, no Sync/login; synthetic-only collection",
+  "startup_flags": [
+    "-no-window",
+    "-no-audio",
+    "-no-boot-anim",
+    "-no-snapshot",
+    "-timezone America/Chicago"
+  ],
+  "hashes": {
+    "build/av004/upstream/CardContentProvider.kt": "e8173b0aad99a3be70ceec75e2a9d625dd72aeac493a0bdd7c55e4eff4d40223",
+    "build/av004/upstream/FlashCardsContract.kt": "b9e1f9ca9eaff7287359b26ca4a2f0387c000e381a45263df06af093226e8fa6",
+    "build/av004/upstream/preferences_advanced.xml": "00d1062d62239c8e80965c3287ea9a927dbd82849aee09a7506ef67707df4128",
+    "build/av004/upstream/IntentHandler.kt": "f7277e6c1e02fe5efaf1811895e266873acec9c6c0c6d2c0089174dc1984505f",
+    "build/av004/upstream/AdvancedSettingsFragment.kt": "06a7bcf5981acb1a2275a8fe8f9293169a3cbd2c131e4e616e8066f27049a98d",
+    "build/av004/fixtures/baseline/collection.colpkg": "c7c649a297bb4ff266e9f68ac4937798d1a40d36c30aedcdd6700ea11a7a5a28",
+    "build/av004/fixtures/limits/collection.colpkg": "25df91a0d94ac3e9f456e8e45db7485b6a80fadb9d9cb707e4e51e5b39be27f4",
+    "build/av004/fixtures/rejection/collection.colpkg": "cd01999e7c4cdc9d0da3e8db5055c24d340ec1a0366886a1a0df76fda1e91caa"
+  },
+  "avd_snapshots": [
+    "av004-limits-20260914",
+    "av004-baseline-20260914"
+  ],
+  "final_avd_state": "Pristine baseline, API and probe permission enabled, signed out of AnkiWeb"
+}
