@@ -189,7 +189,17 @@ final class Scenario {
                 .secondRecognizer()
                 .build());
 
-        all.add(new Builder("permission", "11. Microphone permission denied")
+        all.add(new Builder("unavailable", "11. Recognizer unavailable")
+                .instructions("BEFORE tapping Start: point the system at a recognition service "
+                        + "that does not exist, so the recognizer cannot be created:\n"
+                        + "adb shell settings put secure voice_recognition_service org.ankivoice.av005/.Missing\n"
+                        + "Say nothing. Restore it afterwards with 'settings delete secure "
+                        + "voice_recognition_service' and reboot the emulator.")
+                .turns(0)
+                .action(Action.EXTERNAL_SETUP)
+                .build());
+
+        all.add(new Builder("permission", "12. Microphone permission denied")
                 .instructions("BEFORE tapping Start: revoke the microphone permission for this app "
                         + "(long-press the app icon, App info, Permissions, Microphone, Don't allow). "
                         + "Return here and tap Start. Say nothing. Re-grant the permission afterwards.")
@@ -197,7 +207,7 @@ final class Scenario {
                 .action(Action.EXTERNAL_SETUP)
                 .build());
 
-        all.add(new Builder("network", "12. Network unavailable")
+        all.add(new Builder("network", "13. Network unavailable")
                 .instructions("BEFORE tapping Start: turn on Airplane mode in the emulator. Return "
                         + "here, tap Start and speak the answer normally. Turn Airplane mode off "
                         + "again afterwards.")
@@ -206,7 +216,7 @@ final class Scenario {
                 .watchdog(45000)
                 .build());
 
-        all.add(new Builder("background", "13. Background during playback and capture")
+        all.add(new Builder("background", "14. Background during playback and capture")
                 .instructions("Tap Start, then press Home while the prompt is still being spoken. "
                         + "Reopen the app from Recents. Repeat on the second turn, but press Home "
                         + "after SPEAK NOW appears. Playback and capture must stop safely.")
@@ -215,7 +225,7 @@ final class Scenario {
                 .watchdog(60000)
                 .build());
 
-        all.add(new Builder("lock", "14. Screen lock during a turn")
+        all.add(new Builder("lock", "15. Screen lock during a turn")
                 .instructions("Tap Start, then lock the screen (power button) while the turn is "
                         + "running. Unlock and reopen the app explicitly. Capture must not continue "
                         + "behind the lock screen and stale callbacks must not advance a turn.")
@@ -224,7 +234,7 @@ final class Scenario {
                 .watchdog(60000)
                 .build());
 
-        all.add(new Builder("focus", "15. Audio focus interruption")
+        all.add(new Builder("focus", "16. Audio focus interruption")
                 .instructions("Tap Start, then interrupt the audio: place an emulated call from "
                         + "Extended controls, or start playback in another app. Record what happens "
                         + "to prompt playback and capture.")

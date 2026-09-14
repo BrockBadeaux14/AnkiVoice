@@ -49,6 +49,22 @@ def fixture_prompts() -> dict:
     }
 
 
+def merge(paths: list) -> dict:
+    """Combines per-scenario runs into one document, keeping each run's own labels."""
+    merged: dict | None = None
+    for path in sorted(paths):
+        document = json.loads(path.read_text(encoding="utf-8"))
+        if merged is None:
+            merged = dict(document)
+            merged["scenarios"] = []
+            merged["sources"] = []
+        for scenario in document.get("scenarios", []):
+            scenario.setdefault("operated_by", document.get("operated_by", "human"))
+            merged["scenarios"].append(scenario)
+        merged["sources"].append(path.name)
+    return merged or {}
+
+
 def validate(document: dict) -> tuple[list, list, dict]:
     """Returns (assertions, failures, summary)."""
     assertions: list = []
@@ -71,9 +87,13 @@ def validate(document: dict) -> tuple[list, list, dict]:
     assert_(isinstance(environment.get("recognition_services"), list)
             and environment["recognition_services"], "recognition services enumerated")
 
-    summary: dict = {"scenarios": [], "turn_count": 0, "success_count": 0}
+    summary: dict = {"scenarios": [], "turn_count": 0, "success_count": 0, "human_transcripts": 0}
     for scenario in document.get("scenarios", []):
         name = scenario.get("scenario", "?")
+        operated_by = scenario.get("operated_by")
+        assert_(operated_by in {"human", "investigator_adb"},
+                f"{name} records who operated the run")
+        by_human = operated_by == "human"
         turns = scenario.get("turns", [])
         requested = scenario.get("requested_settings", {})
         successes = 0
@@ -105,6 +125,10 @@ def validate(document: dict) -> tuple[list, list, dict]:
                 assert_(error_name in (None, "null"),
                         f"{label} a success carries no error")
                 successes += 1
+                # A run driven over adb has no voice, so it can never be live-speech evidence.
+                assert_(by_human, f"{label} a transcript came from a human-operated run")
+                if by_human and turn.get("operator_attestation") == "spoke_answer":
+                    summary["human_transcripts"] += 1
 
             assert_(turn.get("echo_suspected") is not True,
                     f"{label} transcript was not the prompt echoed back")
@@ -135,6 +159,9 @@ def validate(document: dict) -> tuple[list, list, dict]:
             if status == "success" and attestation is not None:
                 assert_(attestation == "spoke_answer",
                         f"{label} a transcript is only counted when the operator spoke")
+            if not by_human:
+                assert_(attestation != "spoke_answer",
+                        f"{label} an adb-driven turn was not claimed as spoken")
 
         for entry in scenario.get("stale_callbacks", []):
             assert_(entry.get("advanced_turn") is False,
@@ -143,6 +170,8 @@ def validate(document: dict) -> tuple[list, list, dict]:
         summary["scenarios"].append({
             "scenario": name,
             "title": scenario.get("title"),
+            "operated_by": operated_by,
+            "voice_source": scenario.get("voice_source"),
             "turns": len(turns),
             "successes": successes,
             "stale_callbacks": len(scenario.get("stale_callbacks", [])),
@@ -162,48 +191,63 @@ def render(summary: dict, environment: dict) -> str:
     lines = [
         BEGIN,
         "",
-        f"Measured over {summary['turn_count']} recorded turns, "
-        f"{summary['success_count']} of which returned a transcript.",
+        f"Measured over {summary['turn_count']} recorded turns. "
+        f"{summary['success_count']} returned a transcript, of which "
+        f"{summary['human_transcripts']} came from a person speaking into the microphone.",
         "",
-        "| Scenario | Turns | Transcripts | Median capture | Median finalisation after end of speech | Errors seen | Stale callbacks |",
-        "| --- | ---: | ---: | ---: | ---: | --- | ---: |",
+        "| Scenario | Operated by | Turns | Transcripts | Median capture | Median settle | Errors seen | Stale callbacks |",
+        "| --- | --- | ---: | ---: | ---: | ---: | --- | ---: |",
     ]
-    for row in summary["scenarios"]:
+    def order(row):
+        """Scenario titles start with their position in the matrix."""
+        label = (row["title"] or "").split(".", 1)[0]
+        return int(label) if label.isdigit() else 999
+
+    for row in sorted(summary["scenarios"], key=order):
         lines.append(
-            "| {title} | {turns} | {successes} | {capture} | {final} | {errors} | {stale} |".format(
+            "| {title} | {who} | {turns} | {successes} | {capture} | {settle} | {errors} | {stale} |".format(
                 title=row["title"] or row["scenario"],
+                who="person" if row["operated_by"] == "human" else "adb, no voice",
                 turns=row["turns"],
                 successes=row["successes"],
                 capture=f"{row['median_capture_ms']} ms" if row["median_capture_ms"] is not None else "—",
-                final=f"{row['median_finalization_ms']} ms" if row["median_finalization_ms"] is not None else "—",
+                settle=f"{row['median_settle_ms']} ms" if row["median_settle_ms"] is not None else "—",
                 errors=", ".join(row["errors"]) or "—",
                 stale=row["stale_callbacks"],
             )
         )
-    blips = [b for row in summary["scenarios"] for b in row["focus_blips_ms"]]
-    if blips:
-        lines += [
-            "",
-            f"Self-inflicted audio-focus losses during the app's own prompt playback: "
-            f"{len(blips)} recorded, {min(blips)}–{max(blips)} ms.",
-        ]
+    own = [b for row in summary["scenarios"] if row["scenario"] != "focus"
+           for b in row["focus_blips_ms"]]
+    external = [b for row in summary["scenarios"] if row["scenario"] == "focus"
+                for b in row["focus_blips_ms"]]
+    def span(values: list) -> str:
+        return f"{values[0]} ms" if min(values) == max(values) else f"{min(values)}\u2013{max(values)} ms"
+
+    if own:
+        line = (f"Audio-focus losses caused by the app's own text to speech and recognizer: "
+                f"{len(own)} recorded, {span(own)}.")
+        if external:
+            line += (f" Losses during the deliberate interruption scenario: "
+                     f"{len(external)} recorded, {span(external)}.")
+        lines += ["", line]
     lines += ["", END]
     return "\n".join(lines)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("evidence", type=pathlib.Path,
-                        help="operator run pulled from the emulator")
+    parser.add_argument("evidence", type=pathlib.Path, nargs="+",
+                        help="one or more runs pulled from the emulator")
     parser.add_argument("--write", action="store_true",
                         help="refresh the measured tables in the AV-005 report")
     arguments = parser.parse_args()
 
-    if not arguments.evidence.exists():
-        print(f"FAIL: {arguments.evidence} does not exist. Run the suite first; see the runbook.",
-              file=sys.stderr)
+    missing = [path for path in arguments.evidence if not path.exists()]
+    if missing:
+        print(f"FAIL: {', '.join(str(m) for m in missing)} does not exist. "
+              "Run the suite first; see the runbook.", file=sys.stderr)
         return 2
-    document = json.loads(arguments.evidence.read_text(encoding="utf-8"))
+    document = merge(arguments.evidence)
     assertions, failures, summary = validate(document)
 
     for failure in failures:
@@ -213,7 +257,8 @@ def main() -> int:
         return 1
 
     print(f"PASS: {len(assertions)} evidence assertions "
-          f"({summary['turn_count']} turns, {summary['success_count']} transcripts; "
+          f"({summary['turn_count']} turns, {summary['success_count']} transcripts, "
+          f"{summary['human_transcripts']} of them from human speech; "
           "captured run, not a new emulator execution)")
 
     if arguments.write:

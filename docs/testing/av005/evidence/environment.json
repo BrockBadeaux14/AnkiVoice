@@ -14,8 +14,12 @@
   "min_sdk": 33,
   "target_sdk": 35,
   "probe_package": "org.ankivoice.av005",
-  "probe_apk_sha256": "b75910c7ad91c9f28f2803d0370d1b17005bfb7f7b2986b8396b77fb6faef3c8",
+  "probe_apk_sha256": "eed2e0a71cecac53f674351b14d6cae0b01becb7722b557867872fc1e868dea8",
   "host_audio_note": "The emulator binds the host default input device at start. Changing it while running killed the emulator; see emulator-audio-crash.log.",
   "anki_involved": false,
-  "cloud_credentials_used": false
+  "cloud_credentials_used": false,
+  "scenarios_in_matrix": 16,
+  "turns_recorded": 38,
+  "live_transcripts_obtained": 0,
+  "all_runs_operated_by": "investigator_adb (no human voice)"
 }

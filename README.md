@@ -20,7 +20,7 @@ for the pinned emulator investigation, captured evidence, reproducible probe, an
 constraints on submission verification.
 
 See [AV-005: Foreground speech](docs/testing/av005-foreground-speech.md) for the
-operator-driven speech suite, what it has already established about the emulator,
-and the [runbook](docs/testing/av005/runbook.md) for running the twelve-turn loop
-yourself. The suite requires a person to speak each answer; it has no unattended
-mode.
+constrained-go result on emulator speech, the full sixteen-scenario matrix and its
+measurements, and the limits of that evidence. The
+[runbook](docs/testing/av005/runbook.md) explains how to run the twelve-turn loop
+with your own voice, which is the one thing the recorded matrix could not supply.

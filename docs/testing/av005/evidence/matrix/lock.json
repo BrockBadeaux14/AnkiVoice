@@ -1,0 +1,188 @@
+{
+  "schema_version": 1,
+  "suite": "AV-005 foreground speech",
+  "operator_driven": true,
+  "operated_by": "investigator_adb",
+  "anki_touched": false,
+  "rating_produced": false,
+  "written_epoch_ms": 1789423893017,
+  "environment": {
+    "fingerprint": "google\/sdk_gphone64_arm64\/emu64a:16\/BE2A.250530.026.D1\/13818094:user\/release-keys",
+    "api": 36,
+    "device": "emu64a",
+    "product": "sdk_gphone64_arm64",
+    "locale": "en-US",
+    "engine": "com.google.android.tts",
+    "engine_version": "googletts.google-speech-apk_20241125.02_p2.702443970",
+    "engine_version_code": 210526444,
+    "recognition_available": true,
+    "on_device_recognition_available": true,
+    "record_audio_granted": true,
+    "tts_language_availability": 1,
+    "recognition_services": [
+      "com.google.android.as\/com.google.android.apps.miphone.aiai.app.AiAiSpeechRecognitionService",
+      "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService"
+    ],
+    "voice": {
+      "name": "en-US-language",
+      "network_required": false,
+      "local_en_us_voice_count": 9
+    },
+    "audio_mode": 0,
+    "airplane_mode_on": false,
+    "has_validated_internet": true
+  },
+  "scenarios": [
+    {
+      "schema_version": 1,
+      "scenario": "lock",
+      "title": "15. Screen lock during a turn",
+      "operator_action": "EXTERNAL_SETUP",
+      "operated_by": "investigator_adb",
+      "voice_source": "none",
+      "started_epoch_ms": 1789423878219,
+      "environment": {
+        "fingerprint": "google\/sdk_gphone64_arm64\/emu64a:16\/BE2A.250530.026.D1\/13818094:user\/release-keys",
+        "api": 36,
+        "device": "emu64a",
+        "product": "sdk_gphone64_arm64",
+        "locale": "en-US",
+        "engine": "com.google.android.tts",
+        "engine_version": "googletts.google-speech-apk_20241125.02_p2.702443970",
+        "engine_version_code": 210526444,
+        "recognition_available": true,
+        "on_device_recognition_available": true,
+        "record_audio_granted": true,
+        "tts_language_availability": 1,
+        "recognition_services": [
+          "com.google.android.as\/com.google.android.apps.miphone.aiai.app.AiAiSpeechRecognitionService",
+          "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService"
+        ],
+        "voice": {
+          "name": "en-US-language",
+          "network_required": false,
+          "local_en_us_voice_count": 9
+        },
+        "audio_mode": 0,
+        "airplane_mode_on": false,
+        "has_validated_internet": true
+      },
+      "requested_settings": {
+        "settle_ms": 400,
+        "operator_thinking_ms": 0,
+        "complete_silence_ms": 1200,
+        "possibly_complete_silence_ms": 900,
+        "minimum_length_ms": 1000,
+        "watchdog_ms": 60000,
+        "auto_cancel_ms": 0,
+        "second_recognizer": false,
+        "capture_during_playback": false
+      },
+      "turns": [
+        {
+          "turn_index": 0,
+          "position": 0,
+          "round": 1,
+          "example_id": "demo-reversal",
+          "prompt": "Reverse the sequence red, blue, green.",
+          "expected_answer": "Green, blue, red.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 0,
+          "partials": [],
+          "alternatives": [],
+          "rms_peak": 0,
+          "repeats": 0,
+          "manual_intervention": true,
+          "status": "halted",
+          "transcript": null,
+          "error_code": null,
+          "error_name": null,
+          "playback_start_ms": 187,
+          "playback_done_ms": 2941,
+          "listen_requested_ms": 3344,
+          "ready_for_speech_ms": 3407,
+          "beginning_of_speech_ms": null,
+          "end_of_speech_ms": null,
+          "final_ms": 4485,
+          "tts_request_ms": 76,
+          "tts_speak_result": 0,
+          "playback_failed": false,
+          "permission_at_capture": true,
+          "detail": "left_foreground",
+          "capture_ms": 1141,
+          "playback_ms": 2754,
+          "measured_settle_ms": 403,
+          "echo_suspected": false,
+          "operator_attestation": "interrupted",
+          "attested_epoch_ms": 1789423892407
+        }
+      ],
+      "lifecycle_events": [
+        {
+          "event": "audio_focus_change_-2",
+          "t_ms": 3373,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 0
+        },
+        {
+          "event": "audio_focus_loss_during_capture",
+          "t_ms": 3374,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 0
+        },
+        {
+          "event": "audio_focus_change_1",
+          "t_ms": 4414,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 0
+        },
+        {
+          "event": "on_pause",
+          "t_ms": 4485,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 0
+        },
+        {
+          "event": "stop_audio_work_on_pause",
+          "t_ms": 4485,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 0
+        },
+        {
+          "event": "on_resume",
+          "t_ms": 7857,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "stop_audio_work_scenario_end",
+          "t_ms": 14794,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        }
+      ],
+      "stale_callbacks": [
+        {
+          "callback": "onError:ERROR_CLIENT",
+          "t_ms": 4537,
+          "reason": "no_active_turn",
+          "advanced_turn": false
+        }
+      ],
+      "audio_focus_request": 1,
+      "self_inflicted_focus_blips_ms": [
+        1040
+      ],
+      "finished_epoch_ms": 1789423893015,
+      "duration_ms": 14795,
+      "completed_turns": 1
+    }
+  ]
+}

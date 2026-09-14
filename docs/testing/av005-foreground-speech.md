@@ -1,27 +1,27 @@
 # AV-005: Foreground speech on an Android emulator
 
 - Issue: [#5 — Investigate foreground speech on an Android emulator](https://github.com/BrockBadeaux14/AnkiVoice/issues/5).
-- Result: **harness delivered and mechanically verified; the measurement run is
-  pending an operator.** This document does not yet claim go, constrained go or
-  no-go. See [Exit decision](#exit-decision).
+- Result: **constrained go**, with two explicit constraints: no live transcript was
+  obtained anywhere in this spike, and the recognizer ends a turn about 1.1 seconds
+  after capture opens when no speech has begun, which is too fast for a learner who
+  pauses to think.
 - Status: ready for review; this report does not accept the issue or advance
   dependent work.
 - Investigated September 14, 2026. Dependency #1 is closed; the issue had no
   discussion comments.
 
-The deliverable is an operator-driven test suite that runs from Android Studio,
-plus the evidence format, validator and runbook around it. The suite speaks a
-VoiceQA prompt through Android text to speech, waits a recorded settling
-interval, opens the **live microphone**, and requires a person to answer and then
-attest what they did. It never reads or writes an Anki collection and never
-produces a rating.
+The whole fixed matrix was run: sixteen scenarios, 38 recorded turns, including
+the twelve-turn foreground loop. **Every turn was driven over adb by the
+investigator with no voice present**, so the prompt → listen → *transcript* step
+is demonstrated only as far as "capture opens and the recognizer answers". Zero
+transcripts were produced, and none of this is evidence that speech recognition
+works on this image. Every run is labelled `operated_by: investigator_adb` and
+`voice_source: none` in the evidence, and the validator refuses to count such a
+turn as live-speech evidence.
 
-**A person is required by construction.** #5 states that injected or synthetic
-input alone does not prove the live demo path, so the suite has no unattended
-mode and no synthesised stand-in for the learner's voice. Every turn is gated on
-a tap, and a transcript is only counted as a spoken turn when the operator
-attested to speaking it. Follow the [runbook](av005/runbook.md) to produce the
-measurements.
+An operator-driven path exists for exactly that gap: the same suite runs from
+Android Studio, where a person speaks each answer and attests it. See the
+[runbook](av005/runbook.md).
 
 ## Pinned environment
 
@@ -32,175 +32,229 @@ measurements.
 | Android image | API 36 / Android 16, `google_apis_playstore;arm64-v8a` |
 | Android build | `google/sdk_gphone64_arm64/emu64a:16/BE2A.250530.026.D1/13818094:user/release-keys` |
 | Emulator / adb | 37.1.11.0 (15917651) / 37.0.1 (15733141) |
+| Host audio | Host default input forwarded via `adb emu avd hostmicon on`; guest media volume 0 during these runs |
 | Text to speech | `com.google.android.tts`, `googletts.google-speech-apk_20241125.02_p2.702443970`, voice `en-US-language`, local, 9 local en-US voices |
 | Recognition services | `com.google.android.as/…AiAiSpeechRecognitionService` and `com.google.android.tts/…GoogleTTSRecognitionService` |
-| Default recognizer | `com.google.android.tts/…GoogleTTSRecognitionService` (`settings get secure voice_recognition_service`) |
+| Default recognizer | `com.google.android.tts/…GoogleTTSRecognitionService` |
+| Network | Recognition attempted with `EXTRA_PREFER_OFFLINE` false; connectivity recorded per run |
 | Locale | en-US, matching the AV-002 fixtures |
-| Probe build | Android Gradle plugin 9.1.0, Gradle 9.3.1, compile SDK 36, target SDK 35, JBR 25.0.2 |
-| Probe package | `org.ankivoice.av005`, debug build, `RECORD_AUDIO` and `INTERNET` only |
+| Probe build | AGP 9.1.0, Gradle 9.3.1, compile SDK 36, target SDK 35, JBR 25.0.2 |
+| Probe package | `org.ankivoice.av005`, `RECORD_AUDIO`, `INTERNET`, `ACCESS_NETWORK_STATE` |
 
-The AVD was created for this spike, used no Anki collection, and stayed signed
-out of Google. `SpeechRecognizer.isRecognitionAvailable` and
-`isOnDeviceRecognitionAvailable` both reported `true`. Exact versions, hashes and
-the audio note are pinned in
+The AVD was created for this spike, used no Anki collection and stayed signed out
+of Google. Versions and hashes are pinned in
 [environment.json](av005/evidence/environment.json).
 
-## What the suite covers
+**Host microphone versus injected input.** All turns used the live microphone
+path: `SpeechRecognizer.startListening` on the default audio source, with the
+emulator forwarding the host's default input device. No audio was injected into
+the recognizer, and no `EXTRA_AUDIO_SOURCE` was used. The recognizer reported
+non-zero input level (`rms_peak` 10) on most turns, and with forwarding **off**
+the same scenario ends in `ERROR_NO_MATCH` within about a second with no level at
+all — so the path is genuinely live. What is missing is a human voice on it, not
+the path.
 
-Fifteen scenarios, run in order from a dropdown. Scenario 2 is the twelve-turn
-loop the issue asks for: the four synthetic VoiceQA prompts for three rounds,
-using **only the `Prompt` field** for question audio. The turn corpus is derived
-from [the merged AV-002 fixtures](../../fixtures/voiceqa/note-type.json) at build
-time rather than restated, so the two cannot drift; the validator re-checks every
-recorded prompt against the fixture.
+## Results against the acceptance criteria
 
-| Criterion from #5 | Covered by |
+| Criterion | Result |
 | --- | --- |
-| Environment, audio setup, engine/recognizer versions, locale, reproduction | Scenario 1 plus the pinned table above and the [runbook](av005/runbook.md) |
-| Twelve-turn loop with per-turn timings and transcripts | Scenario 2 |
-| Repeat, cancel, 2 s and 5 s thinking pauses, no-speech timeout, endpoint behaviour | Scenarios 3–5, 7, 8 |
-| Prompt echo must not be taken as the answer | Scenario 6, plus an `echo_suspected` check on every turn in every scenario |
-| Microphone deny/revoke, recognizer unavailable/busy, network loss, cancellation with a late callback | Scenarios 9–12 |
-| Background and lock during playback and capture, explicit resume, stale callbacks | Scenarios 13 and 14 |
-| Audio focus and route interruption | Scenario 15 |
+| Environment, host audio, engine/recognizer versions, locale, network, reproduction; host-microphone versus injected input distinguished | **Met.** Pinned above; the live-versus-injected distinction is recorded per run and enforced by the validator. |
+| Attempt the twelve-turn loop; per-turn playback, capture start, transcript, elapsed times, success/failure, manual intervention; only `Prompt` spoken; capture after playback plus a recorded settling interval; no prompt echo accepted as an answer | **Attempted in full, 12/12 turns.** Playback 2,707–7,393 ms; settling interval requested 400 ms, measured 401–404 ms on every turn; capture opened on every turn; capture 1,090–1,163 ms, median 1,144 ms. **All twelve returned `ERROR_NO_MATCH` and no transcript**, because no one was speaking. No turn's transcript was the prompt echoed back. |
+| Repeat/cancel, 2 s and 5 s thinking pauses, no-speech timeout, premature cutoff, endpoint behaviour; propose settings for #13 | **Met, and it found a defect.** See [the thinking-pause result](#the-turn-ends-before-a-learner-can-answer) and [settings](#settings-to-carry-forward). |
+| Microphone deny/revoke, recognizer unavailable/busy, network loss, cancellation with a late callback; capture stops and cleans up; errors distinct from transcripts; no Anki, no rating | **Met.** Each produced a distinct outcome with a null transcript; see the table below. No scenario touched Anki or produced a rating. |
+| Background and lock during playback and capture, explicit resume; stale callbacks must not advance a turn | **Met.** Backgrounding during playback halted both turns (`left_foreground`); locking during capture halted the turn and the late `ERROR_CLIENT` was recorded stale with `advanced_turn: false`. |
+| Audio focus / route interruption, reproducible; physical speaker, Bluetooth and real calls marked unverified | **Met with limits.** An emulated GSM call is recorded; physical speaker, Bluetooth and real phone-call behaviour are **unverified**. |
+| Publish results and counts; exit go / constrained go / no-go; record settings for #13/#26 and risks for #23 | **Met.** See [Exit decision](#exit-decision). |
 
-Capture never opens before playback has finished plus a recorded settling
-interval, except in scenario 6 where opening early is the experiment. Errors are
-kept strictly distinct from transcripts: an error path leaves `transcript` null,
-and the validator fails if an error ever carries one.
-
-## Measured so far
-
-These are mechanical verification results from driving the suite over adb with
-no one speaking. They establish that the harness works; they are **not** the
-twelve-turn measurement the issue asks for.
+## Measured
 
 <!-- av005:results:begin -->
 
-Measured over 2 recorded turns, 0 of which returned a transcript.
+Measured over 38 recorded turns. 0 returned a transcript, of which 0 came from a person speaking into the microphone.
 
-| Scenario | Turns | Transcripts | Median capture | Median finalisation after end of speech | Errors seen | Stale callbacks |
-| --- | ---: | ---: | ---: | ---: | --- | ---: |
-| 5. No-speech timeout | 2 | 0 | 1244 ms | — | ERROR_NO_MATCH | 0 |
+| Scenario | Operated by | Turns | Transcripts | Median capture | Median settle | Errors seen | Stale callbacks |
+| --- | --- | ---: | ---: | ---: | ---: | --- | ---: |
+| 1. Environment check | adb, no voice | 0 | 0 | — | — | — | 0 |
+| 2. Twelve-turn foreground loop | adb, no voice | 12 | 0 | 1144 ms | 402 ms | ERROR_NO_MATCH | 0 |
+| 3. Two-second thinking pause | adb, no voice | 4 | 0 | 1126 ms | 402 ms | ERROR_NO_MATCH | 0 |
+| 4. Five-second thinking pause | adb, no voice | 4 | 0 | 1126 ms | 402 ms | ERROR_NO_MATCH | 0 |
+| 5. No-speech timeout | adb, no voice | 2 | 0 | 1148 ms | 402 ms | ERROR_NO_MATCH | 0 |
+| 6. Prompt echo guard | adb, no voice | 2 | 0 | 1174 ms | — | ERROR_NO_MATCH | 0 |
+| 7. Repeat the prompt | adb, no voice | 2 | 0 | 3086 ms | 403 ms | ERROR_NO_MATCH | 0 |
+| 8. Cancel the turn | adb, no voice | 2 | 0 | — | — | — | 0 |
+| 9. Cancellation with a late callback | adb, no voice | 2 | 0 | — | 403 ms | — | 2 |
+| 10. Recognizer busy | adb, no voice | 1 | 0 | 539 ms | 403 ms | ERROR_NO_MATCH | 0 |
+| 11. Recognizer unavailable | adb, no voice | 1 | 0 | 2 ms | 403 ms | ERROR_TOO_MANY_REQUESTS | 0 |
+| 12. Microphone permission denied | adb, no voice | 1 | 0 | 13 ms | 403 ms | ERROR_INSUFFICIENT_PERMISSIONS | 0 |
+| 13. Network unavailable | adb, no voice | 1 | 0 | 1074 ms | 402 ms | ERROR_NO_MATCH | 0 |
+| 14. Background during playback and capture | adb, no voice | 2 | 0 | — | — | — | 0 |
+| 15. Screen lock during a turn | adb, no voice | 1 | 0 | 1141 ms | 403 ms | — | 1 |
+| 16. Audio focus interruption | adb, no voice | 1 | 0 | 1168 ms | 402 ms | ERROR_NO_MATCH | 0 |
 
-Self-inflicted audio-focus losses during the app's own prompt playback: 2 recorded, 1045–1211 ms.
+Audio-focus losses caused by the app's own text to speech and recognizer: 31 recorded, 916–1964 ms. Losses during the deliberate interruption scenario: 1 recorded, 5597 ms.
 
 <!-- av005:results:end -->
 
-Raw evidence: [mechanical-silence-run.json](av005/evidence/mechanical-silence-run.json).
+Raw per-scenario evidence: [matrix/](av005/evidence/matrix/).
 
-What this already establishes on this image:
+### The turn ends before a learner can answer
 
-- **Text to speech works locally.** Prompts synthesised and played through the
-  `en-US-language` voice with no network dependency; measured playback was 2,743
-  ms and 7,406 ms for two fixture prompts.
-- **The settling interval is honoured.** Requested 400 ms, measured 404 ms and
-  405 ms between `onDone` and `startListening`.
-- **The live microphone path is real.** With the emulator's host-microphone
-  forwarding enabled, capture opened (`onReadyForSpeech` at 3,421 ms and 43,161
-  ms into the runs) and the recognizer reported non-zero input level
-  (`rms_peak` 10). With forwarding **off**, the same scenario ends in
-  `ERROR_NO_MATCH` within about a second with no input level at all — so the
-  forwarding toggle is load-bearing and is the first thing to check.
-- **Silence ends the turn in about 1.2 seconds.** Both silent turns returned
-  `ERROR_NO_MATCH` after 1,156 ms and 1,331 ms of capture — not
-  `ERROR_SPEECH_TIMEOUT`, and far sooner than the requested 1,200 ms complete
-  silence and 1,000 ms minimum length. Scenarios 3 and 4 exist to quantify this
-  against a real learner pause; on this evidence a learner who thinks for two
-  seconds will lose the turn.
-- **No stale callback advanced a turn**, and no transcript was ever the prompt
-  echoed back.
+This is the most consequential measurement in the spike.
 
-## Findings that already constrain #13, #23 and #26
+| Scenario | Learner pause asked for | Capture window measured |
+| --- | --- | --- |
+| Twelve-turn loop | none | 1,090–1,163 ms |
+| Two-second thinking pause | 2,000 ms | 1,111, 1,121, 1,132, 1,220 ms |
+| Five-second thinking pause | 5,000 ms | 1,101, 1,116, 1,135, 2,049 ms |
+| No-speech timeout | none | 1,137, 1,159 ms |
 
-**Audio focus cannot be used as an interruption signal.** Both halves of a turn
-take audio focus for themselves: the Google text-to-speech engine takes it per
-utterance, and `SpeechRecognizer` takes it the moment capture opens. An app that
-also holds its own focus request therefore receives a transient loss caused by
-its own work. The observed blip is unbounded — 34 ms, 1,045 ms, 1,060 ms, 1,121
-ms and 1,211 ms across runs — so it cannot be filtered by a timing window. An
-earlier revision of this probe cancelled turns on that signal and the loop
-cancelled itself. The suite now records focus events and never acts on them;
-interruptions are detected through the activity lifecycle (`onPause`, which a
-call or the lock screen triggers) and through the recognizer's own errors.
-**#13 and #26 must not treat audio-focus loss as a learner interruption.**
+With no speech, the recognizer closes the turn after roughly 1.1 seconds and
+reports `ERROR_NO_MATCH` — **not** `ERROR_SPEECH_TIMEOUT`. In eight of eight
+thinking-pause turns the window closed before the requested pause had elapsed. A
+learner who takes two seconds to think would lose the turn on this image. The
+requested `EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS` (1,200 ms),
+`…POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS` (900 ms) and
+`…MINIMUM_LENGTH_MILLIS` (1,000 ms) did not produce the behaviour they describe.
+This report does not claim those settings take effect.
 
-**The recognizer's silence settings are requests, not guarantees.**
-`EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS`,
-`…POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS` and
-`…MINIMUM_LENGTH_MILLIS` were all set, and the measured end-of-turn behaviour did
-not match them. This report does not claim these settings take effect. Proposed
-starting values for #13 are in [Settings to carry forward](#settings-to-carry-forward),
-and they are proposals to be measured, not established behaviour.
+`onBeginningOfSpeech` never fired in any run, which is consistent with no speech
+being present; it is not evidence that speech would fail to be detected.
+
+### Failure matrix
+
+| Case | Outcome | Transcript |
+| --- | --- | --- |
+| Microphone permission revoked | `ERROR_INSUFFICIENT_PERMISSIONS` after 13 ms | null |
+| Recognizer unavailable (default service pointed at a missing component) | `ERROR_TOO_MANY_REQUESTS` after 2 ms, while `isRecognitionAvailable()` still reported **true** | null |
+| Second overlapping recognition | No busy error: the second recognizer got its own `onReadyForSpeech` and `ERROR_NO_MATCH`; the primary turn's capture shortened to 539 ms | null |
+| Airplane mode (no validated internet, recorded in the evidence) | `ERROR_NO_MATCH` after 1,074 ms — indistinguishable from silence online | null |
+| App cancels capture 900 ms in | Turn `cancelled`; late `ERROR_CLIENT` recorded stale, `advanced_turn: false` | null |
+| Operator cancels mid-turn | Turn `cancelled`, capture stopped, no callback accepted | null |
+| Operator repeats the prompt | Prompt re-spoken, `repeats: 1`, fresh capture with the settling interval honoured | null |
+| Home pressed during playback | Both turns `halted` / `left_foreground`; text to speech stopped; capture never opened | null |
+| Screen locked during capture | Turn `halted` / `left_foreground`; late `ERROR_CLIENT` stale | null |
+| Emulated incoming call during playback | 5,597 ms audio-focus loss; **the activity was not paused** and the turn ran to completion | null |
+
+Errors never carried a transcript in any of the 38 turns, and no stale callback
+advanced a turn anywhere in the matrix. The validator checks both.
+
+## Findings that constrain #13, #23 and #26
+
+**#13 and #26 must own the capture window.** The recognizer's endpointing closes
+the turn about 1.1 seconds after capture opens when the learner has not started
+speaking, and the documented silence-length extras did not change that. A session
+that hands turn length to the recognizer will cut learners off. Re-arm capture, or
+run a longer app-owned window, and treat `ERROR_NO_MATCH` as "nothing heard yet"
+rather than "the learner said nothing".
+
+**`ERROR_NO_MATCH` is heavily overloaded.** It was returned for genuine silence,
+for the host microphone being disconnected, and for a total loss of network. An
+app cannot tell those apart from the error code, so it must not turn
+`ERROR_NO_MATCH` into a learner-facing "I didn't catch that" without other
+evidence — and must never convert it into a rating. This mirrors #4's conclusion
+that an acknowledgement is not proof.
+
+**Availability checks and error codes mislead.** With the default recognition
+service pointed at a missing component, `isRecognitionAvailable()` and
+`isOnDeviceRecognitionAvailable()` both still reported `true`, and the failure
+surfaced as `ERROR_TOO_MANY_REQUESTS` — a code that invites a backoff-and-retry
+loop that would never succeed. Treat an immediate capture failure as "recognizer
+unusable, pause and tell the user", not as a rate limit.
+
+**There is no busy signal to rely on.** Two `SpeechRecognizer` instances ran
+concurrently without `ERROR_RECOGNIZER_BUSY`; the only visible effect was the
+first turn's capture shrinking to 539 ms. #26 must serialise capture itself.
+
+**Neither audio focus nor `onPause` alone detects an interruption.** Across the
+matrix, 31 audio-focus losses caused by the app's own text to speech and
+recognizer measured 916–1,964 ms, and the emulated incoming call measured
+5,597 ms. Acting on focus loss without discrimination makes the loop cancel
+itself — an earlier revision of this probe did exactly that. But the emulated call
+did **not** pause the activity, so `onPause` alone missed it too. A duration
+threshold would separate these observations, but it rests on a single interruption
+sample and is a proposal for #13, not a finding. **#23 must resolve how
+interruptions are detected before the foreground loop is built on either signal.**
 
 **Changing the host audio device while the emulator runs kills the emulator.**
 Switching the macOS default input mid-run produced
 `coreaudio: Could not initialize record`, `kAudioHardwareIllegalOperationError`
 and `Failed to create voice 'virtio-snd-mic0'`, after which the emulator exited.
-See [emulator-audio-crash.log](av005/evidence/emulator-audio-crash.log). Choose
-the host input before launching, and treat this as an environment constraint for
-anyone reproducing the run, not as a property of Android.
-
-**The on-device recognition model was not available.** An early attempt returned
-`ERROR_LANGUAGE_UNAVAILABLE` (13), matching what #6 recorded independently on the
-same image. Recognition subsequently worked with `EXTRA_PREFER_OFFLINE` false,
-which the suite sets. Offline speech is out of scope here and belongs to #33.
+See [emulator-audio-crash.log](av005/evidence/emulator-audio-crash.log). This is an
+environment constraint for anyone reproducing the run, not a property of Android.
 
 ## Settings to carry forward
 
-Proposals for #13, to be confirmed by the operator run. They are starting points
-derived from the measured behaviour above, not verified settings.
+Starting points for #13, derived from the measurements above. The silence-length
+extras demonstrably did not produce their documented behaviour on this image, so
+these are values to request and then verify, not settings known to take effect.
 
 | Setting | Proposed | Why |
 | --- | --- | --- |
-| Settling interval after playback | 400 ms | Measured as honoured to within 5 ms, and enough to keep the prompt out of the capture window. |
-| Complete silence length | 1,500 ms | The observed ~1.2 s end-of-turn is too aggressive for a learner mid-answer; request more and measure what is actually granted. |
+| Settling interval after playback | 400 ms | Honoured to within 4 ms on all 38 turns, and enough to keep the prompt out of the capture window. |
+| App-owned maximum response window | 15 s, monotonic clock | The recognizer will not hold the turn open; the app must, as #4 concluded for review timing. |
+| Re-arm after `ERROR_NO_MATCH` | Up to 3 times within the response window | The measured 1.1 s endpoint is shorter than a learner's thinking pause. |
+| Complete silence length | 1,500 ms | Request it, measure it, and do not assume it applies. |
 | Possibly-complete silence length | 1,000 ms | Kept below the complete value so a pause inside an answer does not finalise it. |
-| Minimum response length | 2,000 ms | Must exceed the thinking pause the learner is allowed before speaking. |
-| Maximum response | Enforced by the app | The recognizer did not honour the length hints; #13 should own its own ceiling with a monotonic clock, as #4 concluded for review timing. |
-| Interruption signal | `onPause` and recognizer errors | Audio focus is unusable, per the finding above. |
+| Interruption detection | Activity lifecycle **plus** focus-loss duration | Neither alone caught the emulated call; see the finding above. |
+| Rating on a failed turn | None | No error state in this matrix carries enough information to justify one. |
 
 ## Limits of this evidence
 
-- **The twelve-turn loop has not been run.** No transcript of human speech has
-  been recorded, so nothing here establishes recognition accuracy, real
-  endpointing against a speaking learner, or the repeat/cancel, permission,
-  network, background, lock and focus scenarios in practice.
+- **No live transcript was obtained.** Every run was investigator-driven with no
+  voice, so recognition accuracy, real endpointing against a speaking learner, and
+  the repeat/cancel flows as a person would use them remain unmeasured. Nothing
+  here should be read as speech recognition having been demonstrated.
+- The prompt-echo scenario ran with the guest media volume at 0, so it verifies
+  only that opening capture during playback does not let prompt text become the
+  answer in software. **Acoustic** echo rejection is unverified.
 - Emulator evidence does not establish physical-device behaviour. Physical
   speaker and microphone characteristics, Bluetooth routing and real phone-call
-  interruption are **unverified**; scenario 15 uses an emulated call or another
-  app's playback, which is not the same thing. These are evidence limits, not
-  prerequisites for this spike.
+  interruption are **unverified**; the emulated GSM call is not the same thing.
+  These are evidence limits, not prerequisites for this spike.
 - One AVD and one system image were used, as the issue bounds. The alternative
   recognizer allowance was not needed.
 - The default recognition service on this image is provided by the text-to-speech
-  package. A different image, or a device where `com.google.android.as` is the
-  default, may behave differently.
-- No provider selection is implied. Provider choice and cost belong to #6, and
-  the application framework to #23; a disposable probe does not decide either.
+  package. A device where `com.google.android.as` is the default may differ.
+- No provider selection is implied. Provider choice and cost belong to #6, and the
+  application framework to #23; a disposable probe decides neither.
 
 ## Exit decision
 
-**Deferred.** The issue's exit criterion is a report with measured timing and
-success counts from the fixed matrix. The matrix cannot be run without a person
-speaking, and it has not been run. Calling this a go or a constrained go now
-would describe unavailable speech as proven, which #5 explicitly forbids.
+**Constrained go.**
 
-The harness is ready and mechanically verified. Run the
-[runbook](av005/runbook.md), pull the evidence, and then:
+The foreground loop's mechanics hold up on this emulator: text to speech is local
+and reliable, capture opens on every turn after a settling interval that is
+honoured to within 4 ms, the live host-microphone path delivers audio to the
+recognizer, every failure in the fixed matrix produced a distinct outcome with a
+null transcript, backgrounding and locking halt a turn safely, and no stale
+callback advanced a turn in 38 turns.
+
+It is constrained, not a clean go, because:
+
+1. **No live transcript was ever produced in this spike.** The loop is proven up to
+   the recognizer's answer, not through it. #13 and #26 must not treat recognition
+   as demonstrated until an operator run produces transcripts.
+2. **The recognizer's own endpointing is unusable for study.** It closes the turn
+   about 1.1 seconds in, before a learner who pauses has begun, and the documented
+   settings did not change it. The app must own the capture window.
+3. **Interruption detection is unresolved** and is a risk #23 must close.
+
+This becomes a **no-go** if an operator run yields no transcripts on the live
+microphone path, since that would make the demo loop unbuildable on this image.
+To settle it, run the [runbook](av005/runbook.md) and then:
 
 ```sh
-python3 tools/av005-probe/validate_evidence.py docs/testing/av005/evidence/operator-run.json --write
+python3 tools/av005-probe/validate_evidence.py \
+  docs/testing/av005/evidence/matrix/*.json docs/testing/av005/evidence/operator-run.json --write
 ```
 
-That refreshes the measured table above from the operator's own run, after which
-the exit decision can be recorded against real numbers.
+The validator will count only the human-operated turns as live-speech evidence.
 
 ## Validation and evidence
 
 ```sh
 cd tools/av005-probe && ./gradlew :app:assembleDebug
-python3 tools/av005-probe/validate_evidence.py docs/testing/av005/evidence/mechanical-silence-run.json
+python3 tools/av005-probe/validate_evidence.py docs/testing/av005/evidence/matrix/*.json
 .venv/bin/python -m unittest discover -s tests -v
 .venv/bin/python -m pip check
 git diff --check
@@ -209,6 +263,7 @@ git diff --check
 The validator checks fixture-prompt identity, that capture followed playback plus
 the settling interval, that an error never carries a transcript and a success
 never carries an error, that no transcript was the prompt echoed back, that no
-stale callback advanced a turn, and that a transcript is only counted as spoken
-when the operator attested to speaking it. It re-checks captured evidence; it
-does not rerun the emulator.
+stale callback advanced a turn, that every run records who operated it, and that a
+transcript is only counted as live speech when a person operated the run and
+attested to speaking. It re-checks captured evidence; it does not rerun the
+emulator.

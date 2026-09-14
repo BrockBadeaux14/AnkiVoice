@@ -69,8 +69,10 @@ export ANDROID_SDK_ROOT="$HOME/Library/Android/sdk"
    Android asks. To open straight onto one scenario, add
    `--es scenario <id>` to the run configuration's *Launch Flags*; the ids are
    `env`, `loop`, `pause2`, `pause5`, `silence`, `echo`, `repeat`, `cancel`,
-   `late_callback`, `busy`, `permission`, `network`, `background`, `lock` and
-   `focus`. Preselecting only changes the dropdown — a person still taps Start.
+   `late_callback`, `busy`, `unavailable`, `permission`, `network`, `background`,
+   `lock` and `focus`. Preselecting only changes the dropdown — a person still taps
+   Start. The banner under the title must read **MODE: human operator**; if it says
+   *investigator over adb*, the run will not count as live-speech evidence.
 
 ## Work through the scenarios
 
@@ -79,29 +81,36 @@ have to do; the notes below add what is easy to get wrong.
 
 | # | Scenario | What you do |
 | --- | --- | --- |
-| 1 | Environment check | Nothing. Tap Start; it records the engine, voice, recognizer services and permission state. |
+| 1 | Environment check | Nothing. Tap Start; it records the engine, voice, recognizer services, connectivity and permission state. |
 | 2 | Twelve-turn loop | The headline run. Listen to the prompt, wait for **SPEAK NOW**, read the answer shown on screen aloud at a normal pace, then attest. |
 | 3 | Two-second pause | As above, but wait about two seconds after SPEAK NOW before speaking. |
-| 4 | Five-second pause | As above with a five-second wait. Watch for the turn ending before you speak. |
+| 4 | Five-second pause | As above with a five-second wait. |
 | 5 | No-speech timeout | Say nothing and let the turn end by itself. |
-| 6 | Prompt echo guard | Say nothing. Capture opens while the prompt is still audible, to check the prompt cannot be transcribed as your answer. |
-| 7 | Repeat | Tap **REPEAT** instead of answering, then answer the second time. |
+| 6 | Prompt echo guard | Say nothing. Capture opens while the prompt is still audible. Turn the emulator volume **up** for this one: with the guest muted it only tests the software path, not acoustic echo. |
+| 7 | Repeat | Tap **REPEAT** while the prompt is still playing, then answer the second time. |
 | 8 | Cancel | Start speaking, then tap **CANCEL** mid-sentence. |
 | 9 | Late callback | Speak normally; the app cancels capture after 900 ms by itself. |
 | 10 | Recognizer busy | Speak normally; the app starts a second overlapping recognition. |
-| 11 | Permission denied | **Revoke the microphone permission before tapping Start** (long-press the app icon → App info → Permissions → Microphone → Don't allow). Re-grant it afterwards. |
-| 12 | Network unavailable | **Turn on Airplane mode before tapping Start.** Turn it off afterwards. |
-| 13 | Background | Tap Start, then press Home while the prompt is still speaking. Reopen from Recents. On the second turn press Home after SPEAK NOW. |
-| 14 | Screen lock | Tap Start, then lock the screen with the power button. Unlock and reopen the app explicitly. |
-| 15 | Audio focus | Tap Start, then interrupt: place an emulated call from Extended controls → Phone, or start playback in another app. |
+| 11 | Recognizer unavailable | Follow the on-screen `adb` command to point the system at a missing recognition service before tapping Start, then restore it. |
+| 12 | Permission denied | **Revoke the microphone permission before tapping Start** (long-press the app icon → App info → Permissions → Microphone → Don't allow). Re-grant it afterwards. |
+| 13 | Network unavailable | **Turn on Airplane mode before tapping Start.** Turn it off afterwards. |
+| 14 | Background | Tap Start, then press Home while the prompt is still speaking. Reopen from Recents. |
+| 15 | Screen lock | Tap Start, then lock the screen with the power button during capture. Unlock and reopen the app explicitly. |
+| 16 | Audio focus | Tap Start, then interrupt: place an emulated call from Extended controls → Phone, or start playback in another app. |
+
+**The turn closes fast.** Capture measured 1.1 seconds on this image when nobody
+speaks, so begin your answer as soon as SPEAK NOW appears. If the turn ends before
+you start, that is the measurement the spike is after — attest it honestly rather
+than retrying until it looks good.
 
 Attest every turn honestly with **I spoke it**, **I stayed silent** or
 **Interrupted**. The attestation is written into the evidence and the validator
 checks it against what the recognizer reported; a turn you did not actually speak
 must not be recorded as a spoken turn.
 
-Scenarios 11, 12, 14 and 15 change device state. Put the emulator back
-(permission granted, Airplane mode off, screen unlocked) before the next one.
+Scenarios 11, 12, 13, 15 and 16 change device state. Put the emulator back
+(recognition service restored, permission granted, Airplane mode off, screen
+unlocked, call ended) before the next one.
 
 ## Collect the evidence
 
@@ -120,12 +129,34 @@ Then validate it and regenerate the results table:
 
 ```sh
 python3 tools/av005-probe/validate_evidence.py docs/testing/av005/evidence/operator-run.json
-python3 tools/av005-probe/validate_evidence.py docs/testing/av005/evidence/operator-run.json --write
+python3 tools/av005-probe/validate_evidence.py \
+  docs/testing/av005/evidence/matrix/*.json \
+  docs/testing/av005/evidence/operator-run.json --write
 ```
 
 `--write` refreshes the measured tables in
 [the report](../av005-foreground-speech.md). Plain validation checks the evidence
-without modifying anything.
+without modifying anything. Only turns from a human-operated run, attested as
+spoken, are counted as live-speech evidence.
+
+## The investigator path, and what it cannot do
+
+[`drive.py`](../../../tools/av005-probe/drive.py) runs one scenario over adb. It
+exists so the parts of the matrix that need no voice — permission loss, recognizer
+unavailable or busy, network loss, cancellation with a late callback,
+backgrounding, screen lock, route interruption and the silence cases — can be
+measured without a person. The retained
+[matrix evidence](evidence/matrix/) was produced this way.
+
+```sh
+python3 tools/av005-probe/drive.py loop --turns 12 --attest "i stayed silent" \
+  --out build/av005/pulled/loop.json
+```
+
+Every run it starts is labelled `operated_by: investigator_adb` and
+`voice_source: none`, and the validator rejects any transcript claimed by such a
+run. **It cannot produce live-speech evidence.** Only the Android Studio path
+above can.
 
 ## Reset
 

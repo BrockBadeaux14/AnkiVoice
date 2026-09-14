@@ -92,8 +92,10 @@ public class ProbeActivity extends Activity implements RecognitionListener {
 
     private JSONArray corpus;
     private JSONObject environment;
+    private String operator = "human";
 
     private Spinner picker;
+    private TextView modeView;
     private TextView instructions;
     private TextView state;
     private TextView progressView;
@@ -146,14 +148,29 @@ public class ProbeActivity extends Activity implements RecognitionListener {
             start.setEnabled(false);
             return;
         }
-        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+        /* The permission-denied scenario needs the permission to stay denied, so the
+           request is skipped when that scenario is the one selected. */
+        boolean testingDenial = "permission".equals(getIntent().getStringExtra("scenario"));
+        if (!testingDenial
+                && checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSION_REQUEST);
         }
+        /* An investigator driving the suite over adb must never be recorded as a person
+           speaking into the microphone. The label travels with every scenario and the
+           validator refuses to count an investigator turn as live-speech evidence. */
+        String claimed = getIntent().getStringExtra("operator");
+        if ("investigator_adb".equals(claimed)) operator = "investigator_adb";
         selectScenarioFromIntent(getIntent());
         tts = new TextToSpeech(this, code -> main.post(() -> onTtsReady(code)), ENGINE);
         recognizer = SpeechRecognizer.createSpeechRecognizer(this);
         recognizer.setRecognitionListener(this);
+        modeView.setText("investigator_adb".equals(operator)
+                ? "MODE: investigator over adb \u2014 no human voice; not live-speech evidence"
+                : "MODE: human operator \u2014 speak each answer yourself");
+        modeView.setTextColor(android.graphics.Color.parseColor(
+                "investigator_adb".equals(operator) ? "#8a5a00" : "#1b3a7f"));
         log("AV-005 suite ready. Pick a scenario and read its instructions before tapping Start.");
+        log("Operated by: " + operator);
         log("Evidence is written to " + new File(getExternalFilesDir(null), "").getAbsolutePath());
     }
 
@@ -196,6 +213,8 @@ public class ProbeActivity extends Activity implements RecognitionListener {
         TextView title = text("AV-005 foreground speech suite", 20, true);
         root.addView(title);
         root.addView(text("Operator-driven. Every turn needs a person: listen, speak, attest.", 13, false));
+        modeView = text("", 13, true);
+        root.addView(modeView);
 
         picker = new Spinner(this);
         ArrayAdapter<Scenario> adapter =
@@ -383,6 +402,17 @@ public class ProbeActivity extends Activity implements RecognitionListener {
         put(voice, "local_en_us_voice_count", localVoiceCount);
         put(record, "voice", voice);
         put(record, "audio_mode", audio == null ? null : audio.getMode());
+        /* Network state matters: the recognizer on this image may use a remote service,
+           so the report must be able to show what connectivity was during each run. */
+        put(record, "airplane_mode_on",
+                android.provider.Settings.Global.getInt(getContentResolver(),
+                        android.provider.Settings.Global.AIRPLANE_MODE_ON, 0) == 1);
+        android.net.ConnectivityManager connectivity =
+                (android.net.ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        android.net.NetworkCapabilities capabilities = connectivity == null ? null
+                : connectivity.getNetworkCapabilities(connectivity.getActiveNetwork());
+        put(record, "has_validated_internet", capabilities != null
+                && capabilities.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED));
         return record;
     }
 
@@ -406,6 +436,8 @@ public class ProbeActivity extends Activity implements RecognitionListener {
         put(run, "scenario", scenario.id);
         put(run, "title", scenario.title);
         put(run, "operator_action", scenario.action.name());
+        put(run, "operated_by", operator);
+        put(run, "voice_source", "investigator_adb".equals(operator) ? "none" : "human_microphone");
         put(run, "started_epoch_ms", System.currentTimeMillis());
         put(run, "environment", describeEnvironment(
                 environment.optJSONObject("voice").optInt("local_en_us_voice_count")));
@@ -968,6 +1000,7 @@ public class ProbeActivity extends Activity implements RecognitionListener {
         put(document, "schema_version", 1);
         put(document, "suite", "AV-005 foreground speech");
         put(document, "operator_driven", true);
+        put(document, "operated_by", operator);
         put(document, "anki_touched", false);
         put(document, "rating_produced", false);
         put(document, "written_epoch_ms", System.currentTimeMillis());

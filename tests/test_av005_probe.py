@@ -11,7 +11,7 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-EVIDENCE = ROOT / "docs" / "testing" / "av005" / "evidence" / "mechanical-silence-run.json"
+MATRIX = ROOT / "docs" / "testing" / "av005" / "evidence" / "matrix"
 ASSET = ROOT / "tools" / "av005-probe" / "app" / "src" / "main" / "assets" / "av005-turns.json"
 
 
@@ -74,28 +74,61 @@ class EvidenceValidatorTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.document = json.loads(EVIDENCE.read_text(encoding="utf-8"))
+        cls.files = sorted(MATRIX.glob("*.json"))
+        cls.document = validator.merge(cls.files)
 
     def validate(self, document):
         return validator.validate(document)[1]
 
     def mutate(self, change):
+        """Applies a change to the twelve-turn loop scenario and revalidates."""
         document = copy.deepcopy(self.document)
-        change(document["scenarios"][0])
+        target = next(s for s in document["scenarios"] if s["scenario"] == "loop")
+        change(target)
         return self.validate(document)
 
-    def test_retained_evidence_passes(self):
+    def test_retained_matrix_passes(self):
         assertions, failures, summary = validator.validate(self.document)
         self.assertEqual(failures, [])
-        self.assertGreater(len(assertions), 20)
-        self.assertEqual(summary["turn_count"], 2)
+        self.assertGreater(len(assertions), 100)
+        self.assertGreaterEqual(summary["turn_count"], 30)
+
+    def test_every_scenario_records_who_operated_it(self):
+        for scenario in self.document["scenarios"]:
+            self.assertIn(scenario.get("operated_by"), {"human", "investigator_adb"})
+
+    def test_no_adb_run_claims_human_speech(self):
+        summary = validator.validate(self.document)[2]
+        self.assertEqual(summary["human_transcripts"], 0,
+                         "no retained run was operated by a person speaking")
+
+    def test_matrix_covers_the_fixed_failure_cases(self):
+        recorded = {s["scenario"] for s in self.document["scenarios"]}
+        for required in ("loop", "pause2", "pause5", "silence", "repeat", "cancel",
+                         "late_callback", "busy", "unavailable", "permission",
+                         "network", "background", "lock", "focus"):
+            self.assertIn(required, recorded)
 
     def test_summary_reports_median_capture(self):
         summary = validator.validate(self.document)[2]
-        row = summary["scenarios"][0]
-        self.assertEqual(row["scenario"], "silence")
-        self.assertIsNotNone(row["median_capture_ms"])
-        self.assertIn("ERROR_NO_MATCH", row["errors"])
+        rows = {row["scenario"]: row for row in summary["scenarios"]}
+        self.assertIsNotNone(rows["loop"]["median_capture_ms"])
+        self.assertIn("ERROR_NO_MATCH", rows["loop"]["errors"])
+
+    def test_adb_run_claiming_a_transcript_is_rejected(self):
+        """An adb-driven run has no voice, so a transcript there is not evidence."""
+        def change(scenario):
+            scenario["operated_by"] = "investigator_adb"
+            scenario["turns"][0].update(
+                status="success", transcript="five blocks", error_name=None,
+                operator_attestation=None,
+            )
+        failures = self.mutate(change)
+        self.assertTrue(any("human-operated run" in f for f in failures), failures)
+
+    def test_unlabelled_run_is_rejected(self):
+        failures = self.mutate(lambda s: s.pop("operated_by", None))
+        self.assertTrue(any("who operated" in f for f in failures), failures)
 
     def test_error_carrying_a_transcript_is_rejected(self):
         failures = self.mutate(lambda s: s["turns"][0].update(transcript="five blocks"))
@@ -151,7 +184,10 @@ class EvidenceValidatorTest(unittest.TestCase):
         self.assertTrue(any("operator spoke" in f for f in failures), failures)
 
     def test_silent_scenario_attested_as_spoken_is_rejected(self):
-        failures = self.mutate(lambda s: s["turns"][0].update(operator_attestation="spoke_answer"))
+        document = copy.deepcopy(self.document)
+        target = next(s for s in document["scenarios"] if s["scenario"] == "silence")
+        target["turns"][0]["operator_attestation"] = "spoke_answer"
+        failures = self.validate(document)
         self.assertTrue(any("not attested as spoken" in f for f in failures), failures)
 
     def test_prompt_not_matching_the_fixture_is_rejected(self):
