@@ -1,0 +1,58 @@
+09-14 14:37:52.052  9892  9906 E AnkiDroid: ContentProvider/ answerCard - RuntimeException on answering card
+09-14 14:37:52.052  9892  9906 E AnkiDroid: net.ankiweb.rsdroid.exceptions.BackendInvalidInputException: card was modified: Normal(
+09-14 14:37:52.052  9892  9906 E AnkiDroid:     New(
+09-14 14:37:52.052  9892  9906 E AnkiDroid:         NewState {
+09-14 14:37:52.052  9892  9906 E AnkiDroid:             position: 1,
+09-14 14:37:52.052  9892  9906 E AnkiDroid:         },
+09-14 14:37:52.052  9892  9906 E AnkiDroid:     ),
+09-14 14:37:52.052  9892  9906 E AnkiDroid: ) Normal(
+09-14 14:37:52.052  9892  9906 E AnkiDroid:     Review(
+09-14 14:37:52.052  9892  9906 E AnkiDroid:         ReviewState {
+09-14 14:37:52.052  9892  9906 E AnkiDroid:             scheduled_days: 30,
+09-14 14:37:52.052  9892  9906 E AnkiDroid:             elapsed_days: 30,
+09-14 14:37:52.052  9892  9906 E AnkiDroid:             ease_factor: 2.5,
+09-14 14:37:52.052  9892  9906 E AnkiDroid:             lapses: 0,
+09-14 14:37:52.052  9892  9906 E AnkiDroid:             leeched: false,
+09-14 14:37:52.052  9892  9906 E AnkiDroid:             memory_state: None,
+09-14 14:37:52.052  9892  9906 E AnkiDroid:         },
+09-14 14:37:52.052  9892  9906 E AnkiDroid:     ),
+09-14 14:37:52.052  9892  9906 E AnkiDroid: )
+09-14 14:37:52.052  9892  9906 E AnkiDroid: 	at k5.s.f(r8-map-id-84aa8d2b4972a7490b26bf0c4848dbf19ae54e85d82dbd1d09202c47080150fb:348)
+09-14 14:37:52.052  9892  9906 E AnkiDroid: 	at net.ankiweb.rsdroid.a.r0(r8-map-id-84aa8d2b4972a7490b26bf0c4848dbf19ae54e85d82dbd1d09202c47080150fb:21)
+09-14 14:37:52.052  9892  9906 E AnkiDroid: 	at y5.d.h(r8-map-id-84aa8d2b4972a7490b26bf0c4848dbf19ae54e85d82dbd1d09202c47080150fb:14)
+09-14 14:37:52.052  9892  9906 E AnkiDroid: 	at ia.h.a(r8-map-id-84aa8d2b4972a7490b26bf0c4848dbf19ae54e85d82dbd1d09202c47080150fb:36)
+09-14 14:37:52.052  9892  9906 E AnkiDroid: 	at com.ichi2.anki.provider.CardContentProvider.update(r8-map-id-84aa8d2b4972a7490b26bf0c4848dbf19ae54e85d82dbd1d09202c47080150fb:578)
+09-14 14:37:52.052  9892  9906 E AnkiDroid: 	at android.content.ContentProvider.update(ContentProvider.java:2074)
+09-14 14:37:52.052  9892  9906 E AnkiDroid: 	at android.content.ContentProvider$Transport.update(ContentProvider.java:578)
+09-14 14:37:52.052  9892  9906 E AnkiDroid: 	at android.content.ContentProviderNative.onTransact(ContentProviderNative.java:243)
+09-14 14:37:52.052  9892  9906 E AnkiDroid: 	at android.os.Binder.execTransactInternal(Binder.java:1421)
+09-14 14:37:52.052  9892  9906 E AnkiDroid: 	at android.os.Binder.execTransact(Binder.java:1365)
+09-14 14:37:52.052  9892  9906 E AnkiDroid:
+09-14 14:37:52.052  9892  9906 E AnkiDroid: net.ankiweb.rsdroid.exceptions.BackendInvalidInputException: card was modified: Normal(
+09-14 14:37:52.052  9892  9906 E AnkiDroid:     New(
+09-14 14:37:52.052  9892  9906 E AnkiDroid:         NewState {
+09-14 14:37:52.052  9892  9906 E AnkiDroid:             position: 1,
+09-14 14:37:52.052  9892  9906 E AnkiDroid:         },
+09-14 14:37:52.052  9892  9906 E AnkiDroid:     ),
+09-14 14:37:52.052  9892  9906 E AnkiDroid: ) Normal(
+09-14 14:37:52.052  9892  9906 E AnkiDroid:     Review(
+09-14 14:37:52.052  9892  9906 E AnkiDroid:         ReviewState {
+09-14 14:37:52.052  9892  9906 E AnkiDroid:             scheduled_days: 30,
+09-14 14:37:52.052  9892  9906 E AnkiDroid:             elapsed_days: 30,
+09-14 14:37:52.052  9892  9906 E AnkiDroid:             ease_factor: 2.5,
+09-14 14:37:52.052  9892  9906 E AnkiDroid:             lapses: 0,
+09-14 14:37:52.052  9892  9906 E AnkiDroid:             leeched: false,
+09-14 14:37:52.052  9892  9906 E AnkiDroid:             memory_state: None,
+09-14 14:37:52.052  9892  9906 E AnkiDroid:         },
+09-14 14:37:52.052  9892  9906 E AnkiDroid:     ),
+09-14 14:37:52.052  9892  9906 E AnkiDroid: )
+09-14 14:37:52.052  9892  9906 E AnkiDroid: 	at k5.s.f(r8-map-id-84aa8d2b4972a7490b26bf0c4848dbf19ae54e85d82dbd1d09202c47080150fb:348)
+09-14 14:37:52.052  9892  9906 E AnkiDroid: 	at net.ankiweb.rsdroid.a.r0(r8-map-id-84aa8d2b4972a7490b26bf0c4848dbf19ae54e85d82dbd1d09202c47080150fb:21)
+09-14 14:37:52.052  9892  9906 E AnkiDroid: 	at y5.d.h(r8-map-id-84aa8d2b4972a7490b26bf0c4848dbf19ae54e85d82dbd1d09202c47080150fb:14)
+09-14 14:37:52.052  9892  9906 E AnkiDroid: 	at ia.h.a(r8-map-id-84aa8d2b4972a7490b26bf0c4848dbf19ae54e85d82dbd1d09202c47080150fb:36)
+09-14 14:37:52.052  9892  9906 E AnkiDroid: 	at com.ichi2.anki.provider.CardContentProvider.update(r8-map-id-84aa8d2b4972a7490b26bf0c4848dbf19ae54e85d82dbd1d09202c47080150fb:578)
+09-14 14:37:52.052  9892  9906 E AnkiDroid: 	at android.content.ContentProvider.update(ContentProvider.java:2074)
+09-14 14:37:52.052  9892  9906 E AnkiDroid: 	at android.content.ContentProvider$Transport.update(ContentProvider.java:578)
+09-14 14:37:52.052  9892  9906 E AnkiDroid: 	at android.content.ContentProviderNative.onTransact(ContentProviderNative.java:243)
+09-14 14:37:52.052  9892  9906 E AnkiDroid: 	at android.os.Binder.execTransactInternal(Binder.java:1421)
+09-14 14:37:52.052  9892  9906 E AnkiDroid: 	at android.os.Binder.execTransact(Binder.java:1365)

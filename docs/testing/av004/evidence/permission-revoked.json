@@ -1,0 +1,8 @@
+{
+  "op": "answer",
+  "started_at_ms": 1789414813681,
+  "permission_granted": false,
+  "error_class": "java.lang.SecurityException",
+  "error": "Permission not granted for: CardContentProvider.query /decks (org.ankivoice.av004)",
+  "duration_ms": 137
+}
