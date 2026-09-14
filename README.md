@@ -18,3 +18,9 @@ disposable collections, run the fixture checks, and reset or back up a test run.
 See [AV-004: AnkiDroid review access](docs/testing/av004-ankidroid-review-access.md)
 for the pinned emulator investigation, captured evidence, reproducible probe, and
 constraints on submission verification.
+
+See [AV-005: Foreground speech](docs/testing/av005-foreground-speech.md) for the
+operator-driven speech suite, what it has already established about the emulator,
+and the [runbook](docs/testing/av005/runbook.md) for running the twelve-turn loop
+yourself. The suite requires a person to speak each answer; it has no unattended
+mode.

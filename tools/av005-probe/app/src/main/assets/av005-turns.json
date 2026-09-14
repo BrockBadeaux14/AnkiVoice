@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "source": "fixtures/voiceqa/note-type.json",
+  "rounds": 3,
+  "turns": [
+    {
+      "index": 0,
+      "round": 1,
+      "example_id": "demo-reversal",
+      "prompt": "Reverse the sequence red, blue, green.",
+      "expected_answer": "Green, blue, red.",
+      "expected_label": "correct",
+      "language": "en-US"
+    },
+    {
+      "index": 1,
+      "round": 1,
+      "example_id": "demo-rules",
+      "prompt": "In a game, a token is valid only if it is blue and square. A token is blue and round. Is it valid, and why?",
+      "expected_answer": "No, round does not satisfy square.",
+      "expected_label": "correct",
+      "language": "en-US"
+    },
+    {
+      "index": 2,
+      "round": 1,
+      "example_id": "demo-arithmetic",
+      "prompt": "A box has three red blocks and two blue blocks. How many blocks are there in total?",
+      "expected_answer": "Five.",
+      "expected_label": "correct",
+      "language": "en-US"
+    },
+    {
+      "index": 3,
+      "round": 1,
+      "example_id": "demo-explanation",
+      "prompt": "A machine sorts numbers from smallest to largest. Explain what it does to the list seven, two, five.",
+      "expected_answer": "It puts two first, then five, then seven.",
+      "expected_label": "correct",
+      "language": "en-US"
+    },
+    {
+      "index": 4,
+      "round": 2,
+      "example_id": "demo-reversal",
+      "prompt": "Reverse the sequence red, blue, green.",
+      "expected_answer": "Blue, green, red.",
+      "expected_label": "incorrect",
+      "language": "en-US"
+    },
+    {
+      "index": 5,
+      "round": 2,
+      "example_id": "demo-rules",
+      "prompt": "In a game, a token is valid only if it is blue and square. A token is blue and round. Is it valid, and why?",
+      "expected_answer": "Yes, because it is blue.",
+      "expected_label": "incorrect",
+      "language": "en-US"
+    },
+    {
+      "index": 6,
+      "round": 2,
+      "example_id": "demo-arithmetic",
+      "prompt": "A box has three red blocks and two blue blocks. How many blocks are there in total?",
+      "expected_answer": "Six.",
+      "expected_label": "incorrect",
+      "language": "en-US"
+    },
+    {
+      "index": 7,
+      "round": 2,
+      "example_id": "demo-explanation",
+      "prompt": "A machine sorts numbers from smallest to largest. Explain what it does to the list seven, two, five.",
+      "expected_answer": "It gives seven, five, two.",
+      "expected_label": "incorrect",
+      "language": "en-US"
+    },
+    {
+      "index": 8,
+      "round": 3,
+      "example_id": "demo-reversal",
+      "prompt": "Reverse the sequence red, blue, green.",
+      "expected_answer": "Green, blue, red.",
+      "expected_label": "correct",
+      "language": "en-US"
+    },
+    {
+      "index": 9,
+      "round": 3,
+      "example_id": "demo-rules",
+      "prompt": "In a game, a token is valid only if it is blue and square. A token is blue and round. Is it valid, and why?",
+      "expected_answer": "No.",
+      "expected_label": "partial",
+      "language": "en-US"
+    },
+    {
+      "index": 10,
+      "round": 3,
+      "example_id": "demo-arithmetic",
+      "prompt": "A box has three red blocks and two blue blocks. How many blocks are there in total?",
+      "expected_answer": "Five.",
+      "expected_label": "correct",
+      "language": "en-US"
+    },
+    {
+      "index": 11,
+      "round": 3,
+      "example_id": "demo-explanation",
+      "prompt": "A machine sorts numbers from smallest to largest. Explain what it does to the list seven, two, five.",
+      "expected_answer": "It puts two first, then five, then seven.",
+      "expected_label": "correct",
+      "language": "en-US"
+    }
+  ]
+}

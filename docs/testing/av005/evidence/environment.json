@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "issue": "AV-005",
+  "host_os": "26.6.2 (25G83), arm64",
+  "avd": "AnkiVoice_AV005",
+  "serial_used": "emulator-5554",
+  "system_image": "system-images;android-36;google_apis_playstore;arm64-v8a",
+  "emulator_version": "Android emulator version 37.1.11.0 (build_id 15917651) (CL:N/A)",
+  "adb_version": "Version 37.0.1-15733141",
+  "jdk": "openjdk version \"25.0.2\" 2026-01-20",
+  "gradle": "9.3.1",
+  "android_gradle_plugin": "9.1.0",
+  "compile_sdk": 36,
+  "min_sdk": 33,
+  "target_sdk": 35,
+  "probe_package": "org.ankivoice.av005",
+  "probe_apk_sha256": "b75910c7ad91c9f28f2803d0370d1b17005bfb7f7b2986b8396b77fb6faef3c8",
+  "host_audio_note": "The emulator binds the host default input device at start. Changing it while running killed the emulator; see emulator-audio-crash.log.",
+  "anki_involved": false,
+  "cloud_credentials_used": false
+}
