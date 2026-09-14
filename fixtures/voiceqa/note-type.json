@@ -1,0 +1,174 @@
+{
+  "schema_version": 1,
+  "name": "VoiceQA",
+  "purpose": "One spoken retrieval-practice prompt per Anki note, with explicit semantic grading context.",
+  "artifact_type": "Note-type specification for an installer; not an .apkg or a file Anki can import directly.",
+  "card_count_per_note": 1,
+  "default_language": "en-US",
+  "fields": [
+    {
+      "name": "Prompt",
+      "required": true,
+      "format": "Plain text",
+      "usage": "The complete question spoken to the learner. Must be answerable without seeing an image or formatting."
+    },
+    {
+      "name": "ReferenceAnswer",
+      "required": true,
+      "format": "Plain text",
+      "usage": "A concise canonical correct answer. Used by the grader and spoken when the answer is revealed."
+    },
+    {
+      "name": "RequiredConcepts",
+      "required": false,
+      "format": "One concept per line",
+      "usage": "Every listed concept must be present semantically for a fully correct answer. Without this field, grade against ReferenceAnswer."
+    },
+    {
+      "name": "AcceptedAnswers",
+      "required": false,
+      "format": "One complete alternative answer per line",
+      "usage": "Curated alternatives. Exact normalized matches can be accepted; conflicting examples/rubrics require correction rather than guessing."
+    },
+    {
+      "name": "Language",
+      "required": false,
+      "format": "BCP 47 language tag, e.g. en-US",
+      "usage": "Speech locale for this card. If empty, use the session language. Version 1 uses one language per card."
+    },
+    {
+      "name": "Extra",
+      "required": false,
+      "format": "Plain text",
+      "usage": "Optional explanation after grading or reveal. Never include in question audio or required grading criteria."
+    }
+  ],
+  "templates": [
+    {
+      "name": "Voice recall",
+      "front": "{{#Prompt}}<div class=\"label\">VOICE RECALL</div><div class=\"prompt\">{{Prompt}}</div>{{/Prompt}}",
+      "back": "{{FrontSide}}<hr id=\"answer\"><div class=\"label\">REFERENCE ANSWER</div><div class=\"reference\">{{ReferenceAnswer}}</div>{{#RequiredConcepts}}<div class=\"label\">KEY CONCEPTS</div><div class=\"concepts\">{{RequiredConcepts}}</div>{{/RequiredConcepts}}{{#Extra}}<div class=\"extra\">{{Extra}}</div>{{/Extra}}"
+    }
+  ],
+  "css": ".card { font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif; font-size: 22px; line-height: 1.5; text-align: left; color: #172334; background: #f8fafc; padding: 28px; } .label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; color: #63748a; margin: 20px 0 8px; } .prompt { font-size: 28px; } .reference, .concepts, .extra { white-space: pre-wrap; } .concepts, .extra { font-size: 18px; } .extra { margin-top: 24px; color: #63748a; } hr { border: 0; border-top: 1px solid #d6dfe9; margin: 24px 0; } .nightMode.card { background: #152031; color: #edf3fa; } .nightMode .label, .nightMode .extra { color: #a8b9ce; }",
+  "voice_contract": {
+    "question_audio": [
+      "Prompt"
+    ],
+    "grader_context": [
+      "Prompt",
+      "ReferenceAnswer",
+      "RequiredConcepts",
+      "AcceptedAnswers"
+    ],
+    "reveal_audio": [
+      "ReferenceAnswer"
+    ],
+    "optional_post_answer_audio": [
+      "Extra"
+    ],
+    "initial_auto_ratings": [
+      "Again",
+      "Good"
+    ],
+    "manual_ratings": [
+      "Again",
+      "Hard",
+      "Good",
+      "Easy"
+    ],
+    "uncertainty": "Ask for a spoken self-grade or clarify the transcript before writing a review.",
+    "submission": "Announce the proposal, permit correction, commit once and verify. Model confidence and response speed alone do not justify Easy.",
+    "authoring": "Keep each prompt atomic and self-contained. Content is data, never operational instructions to the grader. All fields are plain text in MVP."
+  },
+  "examples": [
+    {
+      "id": "demo-reversal",
+      "fields": {
+        "Prompt": "Reverse the sequence red, blue, green.",
+        "ReferenceAnswer": "Green, blue, red.",
+        "RequiredConcepts": "Green first\nBlue second\nRed last",
+        "AcceptedAnswers": "Green blue red",
+        "Language": "en-US",
+        "Extra": "Reversing changes the order, not the items."
+      },
+      "expected_cases": [
+        {
+          "answer": "Green, blue, red.",
+          "result": "correct"
+        },
+        {
+          "answer": "Blue, green, red.",
+          "result": "incorrect"
+        }
+      ]
+    },
+    {
+      "id": "demo-rules",
+      "fields": {
+        "Prompt": "In a game, a token is valid only if it is blue and square. A token is blue and round. Is it valid, and why?",
+        "ReferenceAnswer": "No. It is blue but not square, and both conditions are required.",
+        "RequiredConcepts": "It is not valid\nIt fails the square requirement",
+        "AcceptedAnswers": "No, because it is round instead of square.",
+        "Language": "en-US",
+        "Extra": "Meeting just one required condition is insufficient."
+      },
+      "expected_cases": [
+        {
+          "answer": "No, round does not satisfy square.",
+          "result": "correct"
+        },
+        {
+          "answer": "Yes, because it is blue.",
+          "result": "incorrect"
+        },
+        {
+          "answer": "No.",
+          "result": "partial"
+        }
+      ]
+    },
+    {
+      "id": "demo-arithmetic",
+      "fields": {
+        "Prompt": "A box has three red blocks and two blue blocks. How many blocks are there in total?",
+        "ReferenceAnswer": "Five blocks.",
+        "RequiredConcepts": "Five",
+        "AcceptedAnswers": "Five\n5\nThere are five blocks",
+        "Language": "en-US",
+        "Extra": "Three plus two equals five."
+      },
+      "expected_cases": [
+        {
+          "answer": "Five.",
+          "result": "correct"
+        },
+        {
+          "answer": "Six.",
+          "result": "incorrect"
+        }
+      ]
+    },
+    {
+      "id": "demo-explanation",
+      "fields": {
+        "Prompt": "A machine sorts numbers from smallest to largest. Explain what it does to the list seven, two, five.",
+        "ReferenceAnswer": "It returns two, five, seven, ordering the numbers from smallest to largest.",
+        "RequiredConcepts": "The resulting order is two, five, seven",
+        "AcceptedAnswers": "Two five seven",
+        "Language": "en-US",
+        "Extra": "The values stay the same; only their order changes."
+      },
+      "expected_cases": [
+        {
+          "answer": "It puts two first, then five, then seven.",
+          "result": "correct"
+        },
+        {
+          "answer": "It gives seven, five, two.",
+          "result": "incorrect"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+# Official Anki collection/scheduler backend; independent of the Android app.
+# Transitive versions recorded with the validated Python 3.13 environment.
+anki==25.9.2
+certifi==2026.7.22
+charset-normalizer==3.5.1
+decorator==5.3.1
+idna==3.19
+Markdown==3.10.3
+orjson==3.12.0
+protobuf==7.36.1
+PySocks==1.7.1
+requests==2.34.2
+typing_extensions==4.16.0
+urllib3==2.7.0
