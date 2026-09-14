@@ -18,3 +18,7 @@ disposable collections, run the fixture checks, and reset or back up a test run.
 See [AV-004: AnkiDroid review access](docs/testing/av004-ankidroid-review-access.md)
 for the pinned emulator investigation, captured evidence, reproducible probe, and
 constraints on submission verification.
+
+See [AV-006: Speech and grading providers](docs/decisions/0006-speech-and-grading-providers.md)
+for the measured native speech/OpenRouter comparison, free-only provider decision,
+fallback requirements, and reproducible evidence.

@@ -1,0 +1,26 @@
+{
+  "date": "2026-09-14",
+  "base_commit": "61e544c06cb53f57fb4bf2457829d6545a5b3579",
+  "branch": "codex/av006-provider-evaluation",
+  "avd": "AnkiVoice_AV006",
+  "serial": "emulator-5586",
+  "android_fingerprint": "google/sdk_gphone64_arm64/emu64a:16/BE2A.250530.026.D1/13818094:user/release-keys",
+  "timezone": "America/Chicago",
+  "signed_in_accounts": 0,
+  "host_mic": "off via emu avd hostmicon off; only recorded synthetic PCM sent",
+  "network": "emulator virtual Wi-Fi through host; no bandwidth/RTT shaping or measurement",
+  "audio": "mono 24000 Hz PCM16; native TTS files streamed at 20 ms intervals through EXTRA_AUDIO_SOURCE",
+  "startup_flags": [
+    "-no-window",
+    "-no-boot-anim",
+    "-no-snapshot",
+    "-timezone America/Chicago"
+  ],
+  "system_image": "system-images;android-36;google_apis_playstore;arm64-v8a revision 7",
+  "build_tools": "36.0.0",
+  "jdk": "Android Studio JBR 25.0.2 --release 8",
+  "app_permissions": [
+    "RECORD_AUDIO"
+  ],
+  "ankidroid_installed": false
+}

@@ -1,0 +1,297 @@
+{
+  "fingerprint": "google\/sdk_gphone64_arm64\/emu64a:16\/BE2A.250530.026.D1\/13818094:user\/release-keys",
+  "api": 36,
+  "started_epoch_ms": 1789416425177,
+  "engine": "com.google.android.tts",
+  "engine_version": "googletts.google-speech-apk_20241125.02_p2.702443970",
+  "engine_version_code": 210526444,
+  "recognition_service": "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService",
+  "recognition_available": true,
+  "on_device_recognition_available": true,
+  "attempts": [
+    {
+      "id": "prompt-demo-reversal",
+      "kind": "prompt",
+      "text": "Reverse the sequence red, blue, green.",
+      "status": "playback_completed",
+      "enqueue_status": 0,
+      "synthesis_ms": 108,
+      "duration_ms": 2710,
+      "playback_ms": 2840
+    },
+    {
+      "id": "prompt-demo-rules",
+      "kind": "prompt",
+      "text": "In a game, a token is valid only if it is blue and square. A token is blue and round. Is it valid, and why?",
+      "status": "playback_completed",
+      "enqueue_status": 0,
+      "synthesis_ms": 170,
+      "duration_ms": 7395,
+      "playback_ms": 7492
+    },
+    {
+      "id": "prompt-demo-arithmetic",
+      "kind": "prompt",
+      "text": "A box has three red blocks and two blue blocks. How many blocks are there in total?",
+      "status": "playback_completed",
+      "enqueue_status": 0,
+      "synthesis_ms": 97,
+      "duration_ms": 4860,
+      "playback_ms": 4964
+    },
+    {
+      "id": "prompt-demo-explanation",
+      "kind": "prompt",
+      "text": "A machine sorts numbers from smallest to largest. Explain what it does to the list seven, two, five.",
+      "status": "playback_completed",
+      "enqueue_status": 0,
+      "synthesis_ms": 155,
+      "duration_ms": 6595,
+      "playback_ms": 6705
+    },
+    {
+      "id": "answer-demo-reversal-1",
+      "kind": "answer",
+      "text": "Green, blue, red.",
+      "status": "synthesized",
+      "enqueue_status": 0,
+      "synthesis_ms": 81
+    },
+    {
+      "id": "answer-demo-reversal-2",
+      "kind": "answer",
+      "text": "Blue, green, red.",
+      "status": "synthesized",
+      "enqueue_status": 0,
+      "synthesis_ms": 42
+    },
+    {
+      "id": "answer-demo-reversal-3",
+      "kind": "answer",
+      "text": "Start with green, then blue, and finish with red.",
+      "status": "synthesized",
+      "enqueue_status": 0,
+      "synthesis_ms": 62
+    },
+    {
+      "id": "answer-demo-rules-1",
+      "kind": "answer",
+      "text": "No, round does not satisfy square.",
+      "status": "synthesized",
+      "enqueue_status": 0,
+      "synthesis_ms": 59
+    },
+    {
+      "id": "answer-demo-rules-2",
+      "kind": "answer",
+      "text": "Yes, because it is blue.",
+      "status": "synthesized",
+      "enqueue_status": 0,
+      "synthesis_ms": 38
+    },
+    {
+      "id": "answer-demo-rules-3",
+      "kind": "answer",
+      "text": "No.",
+      "status": "synthesized",
+      "enqueue_status": 0,
+      "synthesis_ms": 17
+    },
+    {
+      "id": "answer-demo-rules-4",
+      "kind": "answer",
+      "text": "It is not valid because it is not square.",
+      "status": "synthesized",
+      "enqueue_status": 0,
+      "synthesis_ms": 47
+    },
+    {
+      "id": "answer-demo-arithmetic-1",
+      "kind": "answer",
+      "text": "Five.",
+      "status": "synthesized",
+      "enqueue_status": 0,
+      "synthesis_ms": 14
+    },
+    {
+      "id": "answer-demo-arithmetic-2",
+      "kind": "answer",
+      "text": "Six.",
+      "status": "synthesized",
+      "enqueue_status": 0,
+      "synthesis_ms": 17
+    },
+    {
+      "id": "answer-demo-explanation-1",
+      "kind": "answer",
+      "text": "It puts two first, then five, then seven.",
+      "status": "synthesized",
+      "enqueue_status": 0,
+      "synthesis_ms": 74
+    },
+    {
+      "id": "answer-demo-explanation-2",
+      "kind": "answer",
+      "text": "It gives seven, five, two.",
+      "status": "synthesized",
+      "enqueue_status": 0,
+      "synthesis_ms": 62
+    },
+    {
+      "id": "answer-demo-explanation-3",
+      "kind": "answer",
+      "text": "It puts two first.",
+      "status": "synthesized",
+      "enqueue_status": 0,
+      "synthesis_ms": 32
+    }
+  ],
+  "operation": "tts",
+  "tts_init_status": 0,
+  "language_availability": 1,
+  "en_us_voices": [
+    {
+      "name": "en-us-x-tpf-local",
+      "network_required": false,
+      "features": [
+        "networkTimeoutMs",
+        "networkRetriesCount"
+      ]
+    },
+    {
+      "name": "en-us-x-sfg-network",
+      "network_required": true,
+      "features": [
+        "networkTimeoutMs",
+        "networkRetriesCount"
+      ]
+    },
+    {
+      "name": "en-us-x-sfg-local",
+      "network_required": false,
+      "features": [
+        "networkTimeoutMs",
+        "networkRetriesCount"
+      ]
+    },
+    {
+      "name": "en-us-x-iob-local",
+      "network_required": false,
+      "features": [
+        "networkTimeoutMs",
+        "networkRetriesCount"
+      ]
+    },
+    {
+      "name": "en-us-x-tpd-network",
+      "network_required": true,
+      "features": [
+        "networkTimeoutMs",
+        "networkRetriesCount"
+      ]
+    },
+    {
+      "name": "en-us-x-tpc-network",
+      "network_required": true,
+      "features": [
+        "networkTimeoutMs",
+        "networkRetriesCount"
+      ]
+    },
+    {
+      "name": "en-us-x-iob-network",
+      "network_required": true,
+      "features": [
+        "networkTimeoutMs",
+        "networkRetriesCount"
+      ]
+    },
+    {
+      "name": "en-us-x-iol-network",
+      "network_required": true,
+      "features": [
+        "networkTimeoutMs",
+        "networkRetriesCount"
+      ]
+    },
+    {
+      "name": "en-us-x-iom-network",
+      "network_required": true,
+      "features": [
+        "networkTimeoutMs",
+        "networkRetriesCount"
+      ]
+    },
+    {
+      "name": "en-us-x-iom-local",
+      "network_required": false,
+      "features": [
+        "networkTimeoutMs",
+        "networkRetriesCount"
+      ]
+    },
+    {
+      "name": "en-US-language",
+      "network_required": false,
+      "features": [
+        "networkTimeoutMs",
+        "legacySetLanguageVoice",
+        "networkRetriesCount"
+      ]
+    },
+    {
+      "name": "en-us-x-tpd-local",
+      "network_required": false,
+      "features": [
+        "networkTimeoutMs",
+        "networkRetriesCount"
+      ]
+    },
+    {
+      "name": "en-us-x-iog-network",
+      "network_required": true,
+      "features": [
+        "networkTimeoutMs",
+        "networkRetriesCount"
+      ]
+    },
+    {
+      "name": "en-us-x-tpf-network",
+      "network_required": true,
+      "features": [
+        "networkTimeoutMs",
+        "networkRetriesCount"
+      ]
+    },
+    {
+      "name": "en-us-x-iog-local",
+      "network_required": false,
+      "features": [
+        "networkTimeoutMs",
+        "networkRetriesCount"
+      ]
+    },
+    {
+      "name": "en-us-x-tpc-local",
+      "network_required": false,
+      "features": [
+        "networkTimeoutMs",
+        "networkRetriesCount"
+      ]
+    },
+    {
+      "name": "en-us-x-iol-local",
+      "network_required": false,
+      "features": [
+        "networkTimeoutMs",
+        "networkRetriesCount"
+      ]
+    }
+  ],
+  "selected_voice": "en-US-language",
+  "set_voice_status": 0,
+  "set_rate_status": 0,
+  "set_pitch_status": 0,
+  "error": null,
+  "finished_epoch_ms": 1789416449776
+}

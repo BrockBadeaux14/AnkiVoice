@@ -1,0 +1,9 @@
+{
+  "is_free_tier": false,
+  "limit": 20,
+  "limit_remaining": 20,
+  "limit_reset": null,
+  "usage": 0,
+  "usage_daily": 0,
+  "usage_monthly": 0
+}

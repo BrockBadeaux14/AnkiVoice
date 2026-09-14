@@ -1,0 +1,64 @@
+{
+  "data": {
+    "id": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+    "name": "NVIDIA: Nemotron 3 Nano Omni (free)",
+    "created": 1777393095,
+    "description": "NVIDIA Nemotron\u2122 3 Nano Omni is a 30B-A3B open multimodal model designed to function as a perception and context sub-agent in enterprise agent systems. It accepts text, image, video, and...",
+    "architecture": {
+      "tokenizer": "Other",
+      "instruct_type": null,
+      "modality": "text+image+audio+video->text",
+      "input_modalities": [
+        "text",
+        "audio",
+        "image",
+        "video"
+      ],
+      "output_modalities": [
+        "text"
+      ]
+    },
+    "endpoints": [
+      {
+        "name": "Nvidia | nvidia/nemotron-3-nano-omni-30b-a3b-reasoning-20260428:free",
+        "model_id": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+        "model_name": "NVIDIA: Nemotron 3 Nano Omni",
+        "context_length": 256000,
+        "pricing": {
+          "prompt": "0",
+          "completion": "0",
+          "discount": 0
+        },
+        "provider_name": "Nvidia",
+        "tag": "nvidia",
+        "quantization": "unknown",
+        "max_completion_tokens": 65536,
+        "max_prompt_tokens": null,
+        "supported_parameters": [
+          "reasoning",
+          "include_reasoning",
+          "temperature",
+          "max_tokens",
+          "seed",
+          "top_p",
+          "tool_choice",
+          "tools"
+        ],
+        "supports_tool_choice": {
+          "none": false,
+          "auto": false,
+          "required": false,
+          "function": false
+        },
+        "status": -2,
+        "uptime_last_30m": 85.94931080480214,
+        "uptime_last_5m": 86.13138686131386,
+        "uptime_last_1d": 83.98556737693744,
+        "supports_implicit_caching": false,
+        "supports_voice_cloning": false,
+        "latency_last_30m": null,
+        "throughput_last_30m": null
+      }
+    ]
+  }
+}
