@@ -1,0 +1,30 @@
+{
+  "fingerprint": "google\/sdk_gphone64_arm64\/emu64a:16\/BE2A.250530.026.D1\/13818094:user\/release-keys",
+  "api": 36,
+  "started_epoch_ms": 1789416572190,
+  "engine": "com.google.android.tts",
+  "engine_version": "googletts.google-speech-apk_20241125.02_p2.702443970",
+  "engine_version_code": 210526444,
+  "recognition_service": "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService",
+  "recognition_available": true,
+  "on_device_recognition_available": true,
+  "attempts": [
+    {
+      "id": "demo-reversal-1",
+      "expected_text": "Green, blue, red.",
+      "audio_seconds": 1.895,
+      "sample_rate": 24000,
+      "status": "error",
+      "ready_ms": 241,
+      "total_ms": 489,
+      "audio_eof_ms": null,
+      "end_of_speech_ms": null,
+      "finalization_after_eof_ms": null,
+      "transcript": null,
+      "error_code": 13
+    }
+  ],
+  "operation": "stt",
+  "error": "native_stt_error_stop",
+  "finished_epoch_ms": 1789416572689
+}

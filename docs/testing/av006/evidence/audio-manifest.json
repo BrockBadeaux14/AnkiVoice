@@ -1,0 +1,146 @@
+[
+  {
+    "file": "answer-demo-arithmetic-1.wav",
+    "sha256": "6116df7f288bd4fe585efd39042cf0678dd6d02fc3bcbe39cedb16df3536327b",
+    "sample_rate": 24000,
+    "channels": 1,
+    "sample_width_bytes": 2,
+    "frames": 15000,
+    "seconds": 0.625
+  },
+  {
+    "file": "answer-demo-arithmetic-2.wav",
+    "sha256": "72fd3158eef8aed04c60057d8b6021577583407ef6b028960b8741d339f7f76d",
+    "sample_rate": 24000,
+    "channels": 1,
+    "sample_width_bytes": 2,
+    "frames": 17520,
+    "seconds": 0.73
+  },
+  {
+    "file": "answer-demo-explanation-1.wav",
+    "sha256": "33730f67c281f6da78d94b9a5c599295e0b9de23e9f5306c77995d901d76b4a5",
+    "sample_rate": 24000,
+    "channels": 1,
+    "sample_width_bytes": 2,
+    "frames": 72840,
+    "seconds": 3.035
+  },
+  {
+    "file": "answer-demo-explanation-2.wav",
+    "sha256": "9ca8fe51d9c5b0767b7afc5f557746cf62e3ddc2100db1473c55e4d9834a73eb",
+    "sample_rate": 24000,
+    "channels": 1,
+    "sample_width_bytes": 2,
+    "frames": 52680,
+    "seconds": 2.195
+  },
+  {
+    "file": "answer-demo-explanation-3.wav",
+    "sha256": "0efa4193b4e14b04110df15292c7cbc42498a42d60c4b3d2a8a71ae84174ee6e",
+    "sample_rate": 24000,
+    "channels": 1,
+    "sample_width_bytes": 2,
+    "frames": 31200,
+    "seconds": 1.3
+  },
+  {
+    "file": "answer-demo-reversal-1.wav",
+    "sha256": "add43077d1dd6f930811068c25469c83cd72f12bea0f3044647e1440af2c4354",
+    "sample_rate": 24000,
+    "channels": 1,
+    "sample_width_bytes": 2,
+    "frames": 45480,
+    "seconds": 1.895
+  },
+  {
+    "file": "answer-demo-reversal-2.wav",
+    "sha256": "d2b8180eb420621022c91fbae5e6363de4be3ccaa92598082c5f17dbe5ade837",
+    "sample_rate": 24000,
+    "channels": 1,
+    "sample_width_bytes": 2,
+    "frames": 44640,
+    "seconds": 1.86
+  },
+  {
+    "file": "answer-demo-reversal-3.wav",
+    "sha256": "819bf17e57eee98968de00dbd38bd17634a841c38bffc1f6f97b36ac7f6bc16e",
+    "sample_rate": 24000,
+    "channels": 1,
+    "sample_width_bytes": 2,
+    "frames": 78960,
+    "seconds": 3.29
+  },
+  {
+    "file": "answer-demo-rules-1.wav",
+    "sha256": "ffdea7d4761ebee61791c058583234432514323cb6fc63d468efa516818e36dc",
+    "sample_rate": 24000,
+    "channels": 1,
+    "sample_width_bytes": 2,
+    "frames": 62760,
+    "seconds": 2.615
+  },
+  {
+    "file": "answer-demo-rules-2.wav",
+    "sha256": "25c2e96482d058626ea2e71f38f9c5dd9b17f02d02a06bbf3a1103b7c6e204a3",
+    "sample_rate": 24000,
+    "channels": 1,
+    "sample_width_bytes": 2,
+    "frames": 43920,
+    "seconds": 1.83
+  },
+  {
+    "file": "answer-demo-rules-3.wav",
+    "sha256": "7b9a2d4232aa5f296442a54ca78f771429598242552c393f122fbcd8c6d5ae13",
+    "sample_rate": 24000,
+    "channels": 1,
+    "sample_width_bytes": 2,
+    "frames": 13920,
+    "seconds": 0.58
+  },
+  {
+    "file": "answer-demo-rules-4.wav",
+    "sha256": "dc0df01ff701577b9b1e85ee642974e62d943be4e542b04a6e73b53b33667d61",
+    "sample_rate": 24000,
+    "channels": 1,
+    "sample_width_bytes": 2,
+    "frames": 58560,
+    "seconds": 2.44
+  },
+  {
+    "file": "prompt-demo-arithmetic.wav",
+    "sha256": "9f9ce2adbface254e5b0503063c80631c7e77d5ee763f02f0b6d98780310d37c",
+    "sample_rate": 24000,
+    "channels": 1,
+    "sample_width_bytes": 2,
+    "frames": 116640,
+    "seconds": 4.86
+  },
+  {
+    "file": "prompt-demo-explanation.wav",
+    "sha256": "d4130342d647d1886fe72d434a263c587cab5a1458789d85a3342ed16840c70d",
+    "sample_rate": 24000,
+    "channels": 1,
+    "sample_width_bytes": 2,
+    "frames": 158280,
+    "seconds": 6.595
+  },
+  {
+    "file": "prompt-demo-reversal.wav",
+    "sha256": "2b73713c69c1f272d1fefd5b8767d9ddc6d2799e02cfd143a56f4968ab9c228e",
+    "sample_rate": 24000,
+    "channels": 1,
+    "sample_width_bytes": 2,
+    "frames": 65040,
+    "seconds": 2.71
+  },
+  {
+    "file": "prompt-demo-rules.wav",
+    "sha256": "dc4ac27687af87da053cf936298951e778d48348156390b1a48b50cb5623f468",
+    "sample_rate": 24000,
+    "channels": 1,
+    "sample_width_bytes": 2,
+    "frames": 177480,
+    "seconds": 7.395
+  }
+]

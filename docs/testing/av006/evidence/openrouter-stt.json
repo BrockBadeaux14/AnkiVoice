@@ -1,0 +1,161 @@
+{
+  "kind": "stt",
+  "model": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+  "endpoint": {
+    "name": "Nvidia | nvidia/nemotron-3-nano-omni-30b-a3b-reasoning-20260428:free",
+    "model_id": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+    "model_name": "NVIDIA: Nemotron 3 Nano Omni",
+    "context_length": 256000,
+    "pricing": {
+      "prompt": "0",
+      "completion": "0",
+      "discount": 0
+    },
+    "provider_name": "Nvidia",
+    "tag": "nvidia",
+    "quantization": "unknown",
+    "max_completion_tokens": 65536,
+    "max_prompt_tokens": null,
+    "supported_parameters": [
+      "reasoning",
+      "include_reasoning",
+      "temperature",
+      "max_tokens",
+      "seed",
+      "top_p",
+      "tool_choice",
+      "tools"
+    ],
+    "supports_tool_choice": {
+      "none": false,
+      "auto": false,
+      "required": false,
+      "function": false
+    },
+    "status": -2,
+    "uptime_last_30m": 84.16461641690897,
+    "uptime_last_5m": 79.3929712460064,
+    "uptime_last_1d": 83.97447530304096,
+    "supports_implicit_caching": false,
+    "supports_voice_cloning": false,
+    "latency_last_30m": null,
+    "throughput_last_30m": null
+  },
+  "corpus_sha256": "a7f4468f2f46c30eb9857f03043fc17dabb5fe0f58664fa03fbd962d927e6fed",
+  "key_before": {
+    "is_free_tier": false,
+    "limit": 20,
+    "limit_remaining": 20,
+    "limit_reset": null,
+    "usage": 0,
+    "usage_daily": 0,
+    "usage_monthly": 0
+  },
+  "started_epoch": 1789416965.157687,
+  "attempts": [
+    {
+      "case_id": "demo-reversal-1",
+      "expected_text": "Green, blue, red.",
+      "expected_label": "correct",
+      "response_id": "gen-1789416965-E8HhjI5jO6pM58Srk070",
+      "served_model": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+      "provider": "Nvidia",
+      "usage": {
+        "prompt_tokens": 41,
+        "completion_tokens": 195,
+        "total_tokens": 236,
+        "cost": 0,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 0,
+          "upstream_inference_prompt_cost": 0,
+          "upstream_inference_completions_cost": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 217,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "verified_zero_cost": true,
+      "finish_reason": "stop",
+      "response_text": "Please provide the audio file you\u2019d like transcribed.",
+      "status": "success",
+      "transcript": "Please provide the audio file you\u2019d like transcribed.",
+      "request_to_final_ms": 4148.621
+    },
+    {
+      "case_id": "demo-reversal-2",
+      "expected_text": "Blue, green, red.",
+      "expected_label": "incorrect",
+      "response_id": "gen-1789416969-SMfkDLSGUBAsaG51oSAf",
+      "served_model": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+      "provider": "Nvidia",
+      "usage": {
+        "prompt_tokens": 41,
+        "completion_tokens": 157,
+        "total_tokens": 198,
+        "cost": 0,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 0,
+          "upstream_inference_prompt_cost": 0,
+          "upstream_inference_completions_cost": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 158,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "verified_zero_cost": true,
+      "finish_reason": "stop",
+      "response_text": "I\u2019m sorry, but I can\u2019t transcribe the audio without having the audio file. Could you please provide the audio?",
+      "status": "success",
+      "transcript": "I\u2019m sorry, but I can\u2019t transcribe the audio without having the audio file. Could you please provide the audio?",
+      "request_to_final_ms": 3327.381
+    },
+    {
+      "case_id": "demo-reversal-3",
+      "expected_text": "Start with green, then blue, and finish with red.",
+      "expected_label": "correct",
+      "response_id": "gen-1789416973-Zf9x3qII3JobusZ0nVBm",
+      "served_model": null,
+      "provider": null,
+      "usage": {},
+      "verified_zero_cost": false,
+      "status": "provider_error",
+      "request_to_final_ms": 824.445
+    }
+  ],
+  "capture": "host HTTPS; fixed Android TTS WAV for STT, frozen expected transcripts for both graders",
+  "timeout_seconds": 30,
+  "automatic_retries": 0,
+  "stopped": "failure_or_cost_not_verified; no automatic retry",
+  "key_after": {
+    "is_free_tier": false,
+    "limit": 20,
+    "limit_remaining": 20,
+    "limit_reset": null,
+    "usage": 0,
+    "usage_daily": 0,
+    "usage_monthly": 0
+  },
+  "finished_epoch": 1789416974.221175,
+  "counts": {
+    "success": 2,
+    "provider_error": 1
+  }
+}

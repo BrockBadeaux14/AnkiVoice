@@ -1,0 +1,7 @@
+{
+  "date": "2026-09-14",
+  "listener": "user",
+  "scope": "All four concatenated prompt WAVs in reversal, rules, arithmetic, explanation order",
+  "result": "All four are intelligible",
+  "conditions": "User listened through chat audio preview; no physical Android or Bluetooth claim"
+}
