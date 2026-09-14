@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "profiles": {
+    "baseline": {
+      "deck": "AV002 Baseline",
+      "new_per_day": 20,
+      "reviews_per_day": 20,
+      "cards": [
+        {"id": "new", "example": "demo-arithmetic", "state": "new"},
+        {"id": "learning", "example": "demo-reversal", "state": "learning"},
+        {"id": "relearning", "example": "demo-rules", "state": "relearning"},
+        {"id": "mature", "example": "demo-explanation", "state": "mature"},
+        {"id": "suspended", "example": "demo-arithmetic", "state": "suspended"},
+        {"id": "buried-manual", "example": "demo-rules", "state": "buried-manual"},
+        {"id": "buried-sibling", "example": "demo-reversal", "state": "buried-sibling"},
+        {"id": "future", "example": "demo-explanation", "state": "future"}
+      ]
+    },
+    "limits": {
+      "deck": "AV002 Limits",
+      "new_per_day": 1,
+      "reviews_per_day": 2,
+      "cards": [
+        {"id": "new-1", "example": "demo-arithmetic", "state": "new"},
+        {"id": "new-2", "example": "demo-reversal", "state": "new"},
+        {"id": "new-3", "example": "demo-explanation", "state": "new"},
+        {"id": "review-1", "example": "demo-rules", "state": "mature"},
+        {"id": "review-2", "example": "demo-arithmetic", "state": "mature"},
+        {"id": "review-3", "example": "demo-explanation", "state": "mature"}
+      ]
+    },
+    "rejection": {
+      "deck": "AV002 Rejection Only",
+      "new_per_day": 20,
+      "reviews_per_day": 20,
+      "cards": [
+        {"id": "valid-control", "example": "demo-arithmetic", "state": "new"},
+        {"id": "basic", "note_type": "Basic", "state": "new", "fields": {"Front": "How many sides does a triangle have?", "Back": "Three."}, "expected_rejection": "unsupported_note_type"},
+        {"id": "cloze", "note_type": "Cloze", "state": "new", "fields": {"Text": "A triangle has {{c1::three}} sides.", "Back Extra": "Rejection fixture only."}, "expected_rejection": "unsupported_note_type"},
+        {"id": "missing-reference", "example": "demo-reversal", "state": "new", "fields": {"ReferenceAnswer": ""}, "expected_rejection": "missing_reference_answer"}
+      ]
+    }
+  }
+}
