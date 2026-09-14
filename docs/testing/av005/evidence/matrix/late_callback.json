@@ -1,0 +1,242 @@
+{
+  "schema_version": 1,
+  "suite": "AV-005 foreground speech",
+  "operator_driven": true,
+  "operated_by": "investigator_adb",
+  "anki_touched": false,
+  "rating_produced": false,
+  "written_epoch_ms": 1789423449606,
+  "environment": {
+    "fingerprint": "google\/sdk_gphone64_arm64\/emu64a:16\/BE2A.250530.026.D1\/13818094:user\/release-keys",
+    "api": 36,
+    "device": "emu64a",
+    "product": "sdk_gphone64_arm64",
+    "locale": "en-US",
+    "engine": "com.google.android.tts",
+    "engine_version": "googletts.google-speech-apk_20241125.02_p2.702443970",
+    "engine_version_code": 210526444,
+    "recognition_available": true,
+    "on_device_recognition_available": true,
+    "record_audio_granted": true,
+    "tts_language_availability": 1,
+    "recognition_services": [
+      "com.google.android.as\/com.google.android.apps.miphone.aiai.app.AiAiSpeechRecognitionService",
+      "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService"
+    ],
+    "voice": {
+      "name": "en-US-language",
+      "network_required": false,
+      "local_en_us_voice_count": 9
+    },
+    "audio_mode": 0
+  },
+  "scenarios": [
+    {
+      "schema_version": 1,
+      "scenario": "late_callback",
+      "title": "9. Cancellation with a late callback",
+      "operator_action": "SPEAK_ANSWER",
+      "operated_by": "investigator_adb",
+      "voice_source": "none",
+      "started_epoch_ms": 1789423422855,
+      "environment": {
+        "fingerprint": "google\/sdk_gphone64_arm64\/emu64a:16\/BE2A.250530.026.D1\/13818094:user\/release-keys",
+        "api": 36,
+        "device": "emu64a",
+        "product": "sdk_gphone64_arm64",
+        "locale": "en-US",
+        "engine": "com.google.android.tts",
+        "engine_version": "googletts.google-speech-apk_20241125.02_p2.702443970",
+        "engine_version_code": 210526444,
+        "recognition_available": true,
+        "on_device_recognition_available": true,
+        "record_audio_granted": true,
+        "tts_language_availability": 1,
+        "recognition_services": [
+          "com.google.android.as\/com.google.android.apps.miphone.aiai.app.AiAiSpeechRecognitionService",
+          "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService"
+        ],
+        "voice": {
+          "name": "en-US-language",
+          "network_required": false,
+          "local_en_us_voice_count": 9
+        },
+        "audio_mode": 0
+      },
+      "requested_settings": {
+        "settle_ms": 400,
+        "operator_thinking_ms": 0,
+        "complete_silence_ms": 1200,
+        "possibly_complete_silence_ms": 900,
+        "minimum_length_ms": 1000,
+        "watchdog_ms": 30000,
+        "auto_cancel_ms": 900,
+        "second_recognizer": false,
+        "capture_during_playback": false
+      },
+      "turns": [
+        {
+          "turn_index": 0,
+          "position": 0,
+          "round": 1,
+          "example_id": "demo-reversal",
+          "prompt": "Reverse the sequence red, blue, green.",
+          "expected_answer": "Green, blue, red.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 0,
+          "partials": [],
+          "alternatives": [],
+          "rms_peak": 10,
+          "repeats": 0,
+          "manual_intervention": false,
+          "status": "cancelled",
+          "transcript": null,
+          "error_code": null,
+          "error_name": null,
+          "playback_start_ms": 309,
+          "playback_done_ms": 3041,
+          "listen_requested_ms": 3444,
+          "ready_for_speech_ms": 3508,
+          "beginning_of_speech_ms": null,
+          "end_of_speech_ms": null,
+          "final_ms": null,
+          "tts_request_ms": 97,
+          "tts_speak_result": 0,
+          "playback_failed": false,
+          "permission_at_capture": true,
+          "app_cancelled_ms": 4367,
+          "detail": "app_cancel_auto",
+          "playback_ms": 2732,
+          "measured_settle_ms": 403,
+          "echo_suspected": false,
+          "operator_attestation": "stayed_silent",
+          "attested_epoch_ms": 1789423433287
+        },
+        {
+          "turn_index": 1,
+          "position": 1,
+          "round": 1,
+          "example_id": "demo-rules",
+          "prompt": "In a game, a token is valid only if it is blue and square. A token is blue and round. Is it valid, and why?",
+          "expected_answer": "No, round does not satisfy square.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 0,
+          "partials": [],
+          "alternatives": [],
+          "rms_peak": 10,
+          "repeats": 0,
+          "manual_intervention": false,
+          "status": "cancelled",
+          "transcript": null,
+          "error_code": null,
+          "error_name": null,
+          "playback_start_ms": 11179,
+          "playback_done_ms": 18604,
+          "listen_requested_ms": 19007,
+          "ready_for_speech_ms": 19207,
+          "beginning_of_speech_ms": null,
+          "end_of_speech_ms": null,
+          "final_ms": null,
+          "tts_request_ms": 11066,
+          "tts_speak_result": 0,
+          "playback_failed": false,
+          "permission_at_capture": true,
+          "app_cancelled_ms": 19912,
+          "detail": "app_cancel_auto",
+          "playback_ms": 7425,
+          "measured_settle_ms": 403,
+          "echo_suspected": false,
+          "operator_attestation": "stayed_silent",
+          "attested_epoch_ms": 1789423449001
+        }
+      ],
+      "lifecycle_events": [
+        {
+          "event": "audio_focus_change_-2",
+          "t_ms": 3468,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 0
+        },
+        {
+          "event": "audio_focus_loss_during_capture",
+          "t_ms": 3472,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 0
+        },
+        {
+          "event": "app_cancelled_mid_capture",
+          "t_ms": 4367,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 0
+        },
+        {
+          "event": "audio_focus_change_1",
+          "t_ms": 4401,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 0
+        },
+        {
+          "event": "audio_focus_change_-2",
+          "t_ms": 19029,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 1
+        },
+        {
+          "event": "audio_focus_loss_during_capture",
+          "t_ms": 19030,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 1
+        },
+        {
+          "event": "app_cancelled_mid_capture",
+          "t_ms": 19912,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 1
+        },
+        {
+          "event": "audio_focus_change_1",
+          "t_ms": 19946,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 1
+        },
+        {
+          "event": "stop_audio_work_scenario_end",
+          "t_ms": 26750,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        }
+      ],
+      "stale_callbacks": [
+        {
+          "callback": "onError:ERROR_CLIENT",
+          "t_ms": 4426,
+          "reason": "capture_already_closed",
+          "advanced_turn": false
+        },
+        {
+          "callback": "onError:ERROR_CLIENT",
+          "t_ms": 19946,
+          "reason": "capture_already_closed",
+          "advanced_turn": false
+        }
+      ],
+      "audio_focus_request": 1,
+      "self_inflicted_focus_blips_ms": [
+        930,
+        916
+      ],
+      "finished_epoch_ms": 1789423449605,
+      "duration_ms": 26750,
+      "completed_turns": 2
+    }
+  ]
+}

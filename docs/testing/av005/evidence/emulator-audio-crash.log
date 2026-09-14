@@ -1,0 +1,7 @@
+coreaudio: Could not initialize record
+coreaudio: Could not set audio format change listener
+coreaudio: Reason: kAudioHardwareIllegalOperationError
+coreaudio: Could not initialize record
+coreaudio: Could not set audio format change listener
+coreaudio: Reason: kAudioHardwareIllegalOperationError
+Failed to create voice `virtio-snd-mic0'

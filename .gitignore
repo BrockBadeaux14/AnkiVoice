@@ -3,3 +3,7 @@ __pycache__/
 *.py[cod]
 build/
 .DS_Store
+.idea/
+.gradle/
+local.properties
+*.iml

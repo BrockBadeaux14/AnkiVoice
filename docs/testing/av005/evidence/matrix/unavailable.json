@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "suite": "AV-005 foreground speech",
+  "operator_driven": true,
+  "operated_by": "investigator_adb",
+  "anki_touched": false,
+  "rating_produced": false,
+  "written_epoch_ms": 1789423499307,
+  "environment": {
+    "fingerprint": "google\/sdk_gphone64_arm64\/emu64a:16\/BE2A.250530.026.D1\/13818094:user\/release-keys",
+    "api": 36,
+    "device": "emu64a",
+    "product": "sdk_gphone64_arm64",
+    "locale": "en-US",
+    "engine": "com.google.android.tts",
+    "engine_version": "googletts.google-speech-apk_20241125.02_p2.702443970",
+    "engine_version_code": 210526444,
+    "recognition_available": true,
+    "on_device_recognition_available": true,
+    "record_audio_granted": true,
+    "tts_language_availability": 1,
+    "recognition_services": [
+      "com.google.android.as\/com.google.android.apps.miphone.aiai.app.AiAiSpeechRecognitionService",
+      "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService"
+    ],
+    "voice": {
+      "name": "en-US-language",
+      "network_required": false,
+      "local_en_us_voice_count": 9
+    },
+    "audio_mode": 0
+  },
+  "scenarios": [
+    {
+      "schema_version": 1,
+      "scenario": "unavailable",
+      "title": "11. Recognizer unavailable",
+      "operator_action": "EXTERNAL_SETUP",
+      "operated_by": "investigator_adb",
+      "voice_source": "none",
+      "started_epoch_ms": 1789423493203,
+      "environment": {
+        "fingerprint": "google\/sdk_gphone64_arm64\/emu64a:16\/BE2A.250530.026.D1\/13818094:user\/release-keys",
+        "api": 36,
+        "device": "emu64a",
+        "product": "sdk_gphone64_arm64",
+        "locale": "en-US",
+        "engine": "com.google.android.tts",
+        "engine_version": "googletts.google-speech-apk_20241125.02_p2.702443970",
+        "engine_version_code": 210526444,
+        "recognition_available": true,
+        "on_device_recognition_available": true,
+        "record_audio_granted": true,
+        "tts_language_availability": 1,
+        "recognition_services": [
+          "com.google.android.as\/com.google.android.apps.miphone.aiai.app.AiAiSpeechRecognitionService",
+          "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService"
+        ],
+        "voice": {
+          "name": "en-US-language",
+          "network_required": false,
+          "local_en_us_voice_count": 9
+        },
+        "audio_mode": 0
+      },
+      "requested_settings": {
+        "settle_ms": 400,
+        "operator_thinking_ms": 0,
+        "complete_silence_ms": 1200,
+        "possibly_complete_silence_ms": 900,
+        "minimum_length_ms": 1000,
+        "watchdog_ms": 30000,
+        "auto_cancel_ms": 0,
+        "second_recognizer": false,
+        "capture_during_playback": false
+      },
+      "turns": [
+        {
+          "turn_index": 0,
+          "position": 0,
+          "round": 1,
+          "example_id": "demo-reversal",
+          "prompt": "Reverse the sequence red, blue, green.",
+          "expected_answer": "Green, blue, red.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 0,
+          "partials": [],
+          "alternatives": [],
+          "rms_peak": 0,
+          "repeats": 0,
+          "manual_intervention": true,
+          "status": "error",
+          "transcript": null,
+          "error_code": 10,
+          "error_name": "ERROR_TOO_MANY_REQUESTS",
+          "playback_start_ms": 335,
+          "playback_done_ms": 3061,
+          "listen_requested_ms": 3464,
+          "ready_for_speech_ms": null,
+          "beginning_of_speech_ms": null,
+          "end_of_speech_ms": null,
+          "final_ms": 3466,
+          "tts_request_ms": 104,
+          "tts_speak_result": 0,
+          "playback_failed": false,
+          "permission_at_capture": true,
+          "capture_ms": 2,
+          "playback_ms": 2726,
+          "measured_settle_ms": 403,
+          "echo_suspected": false,
+          "operator_attestation": "stayed_silent",
+          "attested_epoch_ms": 1789423498701
+        }
+      ],
+      "lifecycle_events": [
+        {
+          "event": "stop_audio_work_scenario_end",
+          "t_ms": 6102,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        }
+      ],
+      "stale_callbacks": [],
+      "audio_focus_request": 1,
+      "finished_epoch_ms": 1789423499307,
+      "duration_ms": 6103,
+      "completed_turns": 1
+    }
+  ]
+}

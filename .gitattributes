@@ -1,0 +1,8 @@
+# The Gradle wrapper ships a Windows batch script with CRLF endings and a JAR.
+# Declaring them stops `git diff --check` reporting Gradle's own files as
+# trailing whitespace.
+*.bat           text eol=crlf
+gradlew         text eol=lf
+*.jar           binary
+*.png           binary
+*.apk           binary
