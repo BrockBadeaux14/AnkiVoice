@@ -1,0 +1,16 @@
+{
+  "fingerprint": "google\/sdk_gphone64_arm64\/emu64a:16\/BE2A.250530.026.D1\/13818094:user\/release-keys",
+  "api": 36,
+  "started_epoch_ms": 1789416466942,
+  "engine": "com.google.android.tts",
+  "engine_version": "googletts.google-speech-apk_20241125.02_p2.702443970",
+  "engine_version_code": 210526444,
+  "recognition_service": "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService",
+  "recognition_available": true,
+  "on_device_recognition_available": true,
+  "attempts": [],
+  "operation": "support",
+  "recognition_support_error": 14,
+  "error": "recognition_support_error",
+  "finished_epoch_ms": 1789416467184
+}

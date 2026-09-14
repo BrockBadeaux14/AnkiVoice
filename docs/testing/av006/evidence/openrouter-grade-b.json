@@ -1,0 +1,575 @@
+{
+  "kind": "grade-b",
+  "model": "liquid/lfm-2.5-2.6b:free",
+  "endpoint": {
+    "name": "Liquid | liquid/lfm-2.5-2.6b-20260811:free",
+    "model_id": "liquid/lfm-2.5-2.6b:free",
+    "model_name": "LiquidAI: LFM2.5-2.6B",
+    "context_length": 65536,
+    "pricing": {
+      "prompt": "0",
+      "completion": "0",
+      "discount": 0
+    },
+    "provider_name": "Liquid",
+    "tag": "liquid/fp8",
+    "quantization": "fp8",
+    "max_completion_tokens": 8192,
+    "max_prompt_tokens": null,
+    "supported_parameters": [
+      "reasoning",
+      "include_reasoning",
+      "max_tokens",
+      "temperature",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "seed",
+      "top_k",
+      "min_p",
+      "repetition_penalty",
+      "max_completion_tokens",
+      "response_format",
+      "structured_outputs",
+      "tools",
+      "tool_choice",
+      "logprobs",
+      "top_logprobs"
+    ],
+    "supports_tool_choice": {
+      "none": false,
+      "auto": true,
+      "required": true,
+      "function": true
+    },
+    "status": 0,
+    "uptime_last_30m": 99.97512437810944,
+    "uptime_last_5m": 100,
+    "uptime_last_1d": 99.88141239843425,
+    "supports_implicit_caching": false,
+    "supports_voice_cloning": false,
+    "latency_last_30m": null,
+    "throughput_last_30m": null
+  },
+  "corpus_sha256": "a7f4468f2f46c30eb9857f03043fc17dabb5fe0f58664fa03fbd962d927e6fed",
+  "key_before": {
+    "is_free_tier": false,
+    "limit": 20,
+    "limit_remaining": 20,
+    "limit_reset": null,
+    "usage": 0,
+    "usage_daily": 0,
+    "usage_monthly": 0
+  },
+  "started_epoch": 1789416897.806771,
+  "attempts": [
+    {
+      "case_id": "demo-reversal-1",
+      "expected_text": "Green, blue, red.",
+      "expected_label": "correct",
+      "response_id": "gen-1789416897-Cu6bhuVJr1Mp4mj1MM7h",
+      "served_model": "liquid/lfm-2.5-2.6b:free",
+      "provider": "Liquid",
+      "usage": {
+        "prompt_tokens": 180,
+        "completion_tokens": 395,
+        "total_tokens": 575,
+        "cost": 0,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 0,
+          "upstream_inference_prompt_cost": 0,
+          "upstream_inference_completions_cost": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 339,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "verified_zero_cost": true,
+      "finish_reason": "stop",
+      "response_text": "{\"label\": \"correct\", \"reason\": \"The answer 'Green, blue, red.' correctly reverses the sequence from 'red, blue, green' as specified in the prompt, matching the required concept that Green comes first, Blue second, and Red last.\"}",
+      "status": "success",
+      "grade": {
+        "label": "correct",
+        "reason": "The answer 'Green, blue, red.' correctly reverses the sequence from 'red, blue, green' as specified in the prompt, matching the required concept that Green comes first, Blue second, and Red last."
+      },
+      "request_to_final_ms": 2062.03,
+      "matches_expected": true
+    },
+    {
+      "case_id": "demo-reversal-2",
+      "expected_text": "Blue, green, red.",
+      "expected_label": "incorrect",
+      "response_id": "gen-1789416901-MSN6MGnalczMdT7LqbFt",
+      "served_model": "liquid/lfm-2.5-2.6b:free",
+      "provider": "Liquid",
+      "usage": {
+        "prompt_tokens": 180,
+        "completion_tokens": 749,
+        "total_tokens": 929,
+        "cost": 0,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 0,
+          "upstream_inference_prompt_cost": 0,
+          "upstream_inference_completions_cost": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 694,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "verified_zero_cost": true,
+      "finish_reason": "stop",
+      "response_text": "{\"label\": \"incorrect\", \"reason\": \"The student's answer 'Blue, green, red.' does not reverse the sequence correctly; it should be 'Green, blue, red' per the required concepts (Green first, Blue second, Red last).\"}",
+      "status": "success",
+      "grade": {
+        "label": "incorrect",
+        "reason": "The student's answer 'Blue, green, red.' does not reverse the sequence correctly; it should be 'Green, blue, red' per the required concepts (Green first, Blue second, Red last)."
+      },
+      "request_to_final_ms": 5793.129,
+      "matches_expected": true
+    },
+    {
+      "case_id": "demo-reversal-3",
+      "expected_text": "Start with green, then blue, and finish with red.",
+      "expected_label": "correct",
+      "response_id": "gen-1789416907-906QmEE1Psribxk5Ttvc",
+      "served_model": "liquid/lfm-2.5-2.6b:free",
+      "provider": "Liquid",
+      "usage": {
+        "prompt_tokens": 186,
+        "completion_tokens": 360,
+        "total_tokens": 546,
+        "cost": 0,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 160,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 0,
+          "upstream_inference_prompt_cost": 0,
+          "upstream_inference_completions_cost": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 298,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "verified_zero_cost": true,
+      "finish_reason": "stop",
+      "response_text": "{\n  \"label\": \"correct\",\n  \"reason\": \"The answer 'Green, blue, red' correctly reverses the original sequence 'red, blue, green' and aligns with all required concepts (Green first, Blue second, Red last), as well as the accepted answer and transcript.\"\n}",
+      "status": "success",
+      "grade": {
+        "label": "correct",
+        "reason": "The answer 'Green, blue, red' correctly reverses the original sequence 'red, blue, green' and aligns with all required concepts (Green first, Blue second, Red last), as well as the accepted answer and transcript."
+      },
+      "request_to_final_ms": 1937.59,
+      "matches_expected": true
+    },
+    {
+      "case_id": "demo-rules-1",
+      "expected_text": "No, round does not satisfy square.",
+      "expected_label": "correct",
+      "response_id": "gen-1789416911-ctgh3YlCDRYIaU8LOayz",
+      "served_model": "liquid/lfm-2.5-2.6b:free",
+      "provider": "Liquid",
+      "usage": {
+        "prompt_tokens": 220,
+        "completion_tokens": 411,
+        "total_tokens": 631,
+        "cost": 0,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 0,
+          "upstream_inference_prompt_cost": 0,
+          "upstream_inference_completions_cost": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 373,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "verified_zero_cost": true,
+      "finish_reason": "stop",
+      "response_text": "{\"label\": \"correct\", \"reason\": \"The answer correctly states the token is not valid because it fails the square requirement, matching both the reference answer and accepted answer.\"}",
+      "status": "success",
+      "grade": {
+        "label": "correct",
+        "reason": "The answer correctly states the token is not valid because it fails the square requirement, matching both the reference answer and accepted answer."
+      },
+      "request_to_final_ms": 1695.572,
+      "matches_expected": true
+    },
+    {
+      "case_id": "demo-rules-2",
+      "expected_text": "Yes, because it is blue.",
+      "expected_label": "incorrect",
+      "response_id": "gen-1789416915-cp3deCXIq2SStI07nJCH",
+      "served_model": "liquid/lfm-2.5-2.6b:free",
+      "provider": "Liquid",
+      "usage": {
+        "prompt_tokens": 219,
+        "completion_tokens": 951,
+        "total_tokens": 1170,
+        "cost": 0,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 112,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 0,
+          "upstream_inference_prompt_cost": 0,
+          "upstream_inference_completions_cost": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 906,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "verified_zero_cost": true,
+      "finish_reason": "stop",
+      "response_text": "{\"label\": \"incorrect\", \"reason\": \"The answer incorrectly affirms validity by ignoring the square requirement, while the reference and required concepts explicitly state the token fails due to being round instead of square.\"}",
+      "status": "success",
+      "grade": {
+        "label": "incorrect",
+        "reason": "The answer incorrectly affirms validity by ignoring the square requirement, while the reference and required concepts explicitly state the token fails due to being round instead of square."
+      },
+      "request_to_final_ms": 3185.456,
+      "matches_expected": true
+    },
+    {
+      "case_id": "demo-rules-3",
+      "expected_text": "No.",
+      "expected_label": "partial",
+      "response_id": "gen-1789416919-ymXXJE1zkK6EZIIs7HbL",
+      "served_model": "liquid/lfm-2.5-2.6b:free",
+      "provider": "Liquid",
+      "usage": {
+        "prompt_tokens": 214,
+        "completion_tokens": 393,
+        "total_tokens": 607,
+        "cost": 0,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 192,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 0,
+          "upstream_inference_prompt_cost": 0,
+          "upstream_inference_completions_cost": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 355,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "verified_zero_cost": true,
+      "finish_reason": "stop",
+      "response_text": "{\"label\": \"correct\", \"reason\": \"The answer correctly states the token is not valid due to failing the square requirement, matching both the reference answer and required concepts.\"}",
+      "status": "success",
+      "grade": {
+        "label": "correct",
+        "reason": "The answer correctly states the token is not valid due to failing the square requirement, matching both the reference answer and required concepts."
+      },
+      "request_to_final_ms": 1812.185,
+      "matches_expected": false
+    },
+    {
+      "case_id": "demo-rules-4",
+      "expected_text": "It is not valid because it is not square.",
+      "expected_label": "correct",
+      "response_id": "gen-1789416923-eEJGS2Ni4Hyf9mhRb2i4",
+      "served_model": "liquid/lfm-2.5-2.6b:free",
+      "provider": "Liquid",
+      "usage": {
+        "prompt_tokens": 222,
+        "completion_tokens": 373,
+        "total_tokens": 595,
+        "cost": 0,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 192,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 0,
+          "upstream_inference_prompt_cost": 0,
+          "upstream_inference_completions_cost": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 330,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "verified_zero_cost": true,
+      "finish_reason": "stop",
+      "response_text": "{\"label\": \"correct\", \"reason\": \"The answer correctly states the token is not valid and identifies the failure as not meeting the square requirement, which matches both the reference answer and required concepts.\"}",
+      "status": "success",
+      "grade": {
+        "label": "correct",
+        "reason": "The answer correctly states the token is not valid and identifies the failure as not meeting the square requirement, which matches both the reference answer and required concepts."
+      },
+      "request_to_final_ms": 3400.589,
+      "matches_expected": true
+    },
+    {
+      "case_id": "demo-arithmetic-1",
+      "expected_text": "Five.",
+      "expected_label": "correct",
+      "response_id": "gen-1789416927-bhFZtF69y7ObC0mYCFc6",
+      "served_model": "liquid/lfm-2.5-2.6b:free",
+      "provider": "Liquid",
+      "usage": {
+        "prompt_tokens": 181,
+        "completion_tokens": 456,
+        "total_tokens": 637,
+        "cost": 0,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 112,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 0,
+          "upstream_inference_prompt_cost": 0,
+          "upstream_inference_completions_cost": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 398,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "verified_zero_cost": true,
+      "finish_reason": "stop",
+      "response_text": "{\n  \"label\": \"correct\",\n  \"reason\": \"The answer 'Five blocks.' correctly states the total count of 5 blocks (3 red + 2 blue) and includes the required concept 'Five' as seen in both the reference answer and accepted answers.\"\n}",
+      "status": "success",
+      "grade": {
+        "label": "correct",
+        "reason": "The answer 'Five blocks.' correctly states the total count of 5 blocks (3 red + 2 blue) and includes the required concept 'Five' as seen in both the reference answer and accepted answers."
+      },
+      "request_to_final_ms": 2517.14,
+      "matches_expected": true
+    },
+    {
+      "case_id": "demo-arithmetic-2",
+      "expected_text": "Six.",
+      "expected_label": "incorrect",
+      "response_id": "gen-1789416931-X6QhFLqOEPxTvQBHiXPf",
+      "served_model": "liquid/lfm-2.5-2.6b:free",
+      "provider": "Liquid",
+      "usage": {
+        "prompt_tokens": 181,
+        "completion_tokens": 772,
+        "total_tokens": 953,
+        "cost": 0,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 112,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 0,
+          "upstream_inference_prompt_cost": 0,
+          "upstream_inference_completions_cost": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 724,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "verified_zero_cost": true,
+      "finish_reason": "stop",
+      "response_text": "{\n  \"label\": \"correct\",\n  \"reason\": \"The total of three red blocks and two blue blocks equals five blocks, which matches the reference answer 'Five blocks' and satisfies the required concept 'Five'.\"\n}",
+      "status": "success",
+      "grade": {
+        "label": "correct",
+        "reason": "The total of three red blocks and two blue blocks equals five blocks, which matches the reference answer 'Five blocks' and satisfies the required concept 'Five'."
+      },
+      "request_to_final_ms": 3072.667,
+      "matches_expected": false
+    },
+    {
+      "case_id": "demo-explanation-1",
+      "expected_text": "It puts two first, then five, then seven.",
+      "expected_label": "correct",
+      "response_id": "gen-1789416935-RomJtv71dsSSLAwDg5pc",
+      "served_model": "liquid/lfm-2.5-2.6b:free",
+      "provider": "Liquid",
+      "usage": {
+        "prompt_tokens": 208,
+        "completion_tokens": 360,
+        "total_tokens": 568,
+        "cost": 0,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 112,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 0,
+          "upstream_inference_prompt_cost": 0,
+          "upstream_inference_completions_cost": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 314,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "verified_zero_cost": true,
+      "finish_reason": "stop",
+      "response_text": "{\"label\": \"correct\", \"reason\": \"The answer correctly describes the sorting process, showing the numbers ordered from smallest to largest as two, five, seven, which matches both the reference answer and accepted answers.\"}",
+      "status": "success",
+      "grade": {
+        "label": "correct",
+        "reason": "The answer correctly describes the sorting process, showing the numbers ordered from smallest to largest as two, five, seven, which matches both the reference answer and accepted answers."
+      },
+      "request_to_final_ms": 1936.91,
+      "matches_expected": true
+    },
+    {
+      "case_id": "demo-explanation-2",
+      "expected_text": "It gives seven, five, two.",
+      "expected_label": "incorrect",
+      "response_id": "gen-1789416940-JnJChgHBmiElUULEQF7D",
+      "served_model": "liquid/lfm-2.5-2.6b:free",
+      "provider": "Liquid",
+      "usage": {
+        "prompt_tokens": 205,
+        "completion_tokens": 913,
+        "total_tokens": 1118,
+        "cost": 0,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 112,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 0,
+          "upstream_inference_prompt_cost": 0,
+          "upstream_inference_completions_cost": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 872,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "verified_zero_cost": true,
+      "finish_reason": "stop",
+      "response_text": "{\"label\": \"correct\", \"reason\": \"The reference answer correctly states the sorted order as two, five, seven, which matches the required concept of ordering numbers from smallest to largest.\"}",
+      "status": "success",
+      "grade": {
+        "label": "correct",
+        "reason": "The reference answer correctly states the sorted order as two, five, seven, which matches the required concept of ordering numbers from smallest to largest."
+      },
+      "request_to_final_ms": 4189.437,
+      "matches_expected": false
+    },
+    {
+      "case_id": "demo-explanation-3",
+      "expected_text": "It puts two first.",
+      "expected_label": "partial",
+      "response_id": "gen-1789416943-6FmdRbgOOdVssdseDgxz",
+      "served_model": "liquid/lfm-2.5-2.6b:free",
+      "provider": "Liquid",
+      "usage": {
+        "prompt_tokens": 202,
+        "completion_tokens": 434,
+        "total_tokens": 636,
+        "cost": 0,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 176,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 0,
+          "upstream_inference_prompt_cost": 0,
+          "upstream_inference_completions_cost": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 393,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "verified_zero_cost": true,
+      "finish_reason": "stop",
+      "response_text": "{\"label\": \"correct\", \"reason\": \"The reference answer, accepted answers, and transcript all consistently state that the sorted order is two, five, seven, matching the required concept.\"}",
+      "status": "success",
+      "grade": {
+        "label": "correct",
+        "reason": "The reference answer, accepted answers, and transcript all consistently state that the sorted order is two, five, seven, matching the required concept."
+      },
+      "request_to_final_ms": 1865.205,
+      "matches_expected": false
+    }
+  ],
+  "capture": "host HTTPS; fixed Android TTS WAV for STT, frozen expected transcripts for both graders",
+  "timeout_seconds": 30,
+  "automatic_retries": 0,
+  "key_after": {
+    "is_free_tier": false,
+    "limit": 20,
+    "limit_remaining": 20,
+    "limit_reset": null,
+    "usage": 0,
+    "usage_daily": 0,
+    "usage_monthly": 0
+  },
+  "finished_epoch": 1789416945.803312,
+  "counts": {
+    "success": 12
+  }
+}

@@ -24,3 +24,7 @@ constrained-go result on emulator speech, the full sixteen-scenario matrix and i
 measurements, and the limits of that evidence. The
 [runbook](docs/testing/av005/runbook.md) explains how to run the twelve-turn loop
 with your own voice, which is the one thing the recorded matrix could not supply.
+
+See [AV-006: Speech and grading providers](docs/decisions/0006-speech-and-grading-providers.md)
+for the measured native speech/OpenRouter comparison, free-only provider decision,
+fallback requirements, and reproducible evidence.

@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "frozen_before_provider_comparison": true,
+  "source": "fixtures/voiceqa/note-type.json",
+  "source_sha256": "714ce3e6b4afefe3bb6bd6f18ddedb7e1c0ef2c2632a0db104b8236c75e5a617",
+  "language": "en-US",
+  "limits": {
+    "passes_per_candidate": 2,
+    "answers_per_pass": 12,
+    "max_answer_seconds": 30,
+    "max_stt_candidates": 2,
+    "max_grader_candidates": 2,
+    "max_stt_attempts": 48,
+    "max_grading_requests": 48
+  },
+  "examples": [
+    {
+      "id": "demo-reversal",
+      "fields": {
+        "Prompt": "Reverse the sequence red, blue, green.",
+        "ReferenceAnswer": "Green, blue, red.",
+        "RequiredConcepts": "Green first\nBlue second\nRed last",
+        "AcceptedAnswers": "Green blue red",
+        "Language": "en-US",
+        "Extra": "Reversing changes the order, not the items."
+      }
+    },
+    {
+      "id": "demo-rules",
+      "fields": {
+        "Prompt": "In a game, a token is valid only if it is blue and square. A token is blue and round. Is it valid, and why?",
+        "ReferenceAnswer": "No. It is blue but not square, and both conditions are required.",
+        "RequiredConcepts": "It is not valid\nIt fails the square requirement",
+        "AcceptedAnswers": "No, because it is round instead of square.",
+        "Language": "en-US",
+        "Extra": "Meeting just one required condition is insufficient."
+      }
+    },
+    {
+      "id": "demo-arithmetic",
+      "fields": {
+        "Prompt": "A box has three red blocks and two blue blocks. How many blocks are there in total?",
+        "ReferenceAnswer": "Five blocks.",
+        "RequiredConcepts": "Five",
+        "AcceptedAnswers": "Five\n5\nThere are five blocks",
+        "Language": "en-US",
+        "Extra": "Three plus two equals five."
+      }
+    },
+    {
+      "id": "demo-explanation",
+      "fields": {
+        "Prompt": "A machine sorts numbers from smallest to largest. Explain what it does to the list seven, two, five.",
+        "ReferenceAnswer": "It returns two, five, seven, ordering the numbers from smallest to largest.",
+        "RequiredConcepts": "The resulting order is two, five, seven",
+        "AcceptedAnswers": "Two five seven",
+        "Language": "en-US",
+        "Extra": "The values stay the same; only their order changes."
+      }
+    }
+  ],
+  "cases": [
+    {
+      "id": "demo-reversal-1",
+      "example_id": "demo-reversal",
+      "answer": "Green, blue, red.",
+      "expected_label": "correct",
+      "case_kind": "av002-original"
+    },
+    {
+      "id": "demo-reversal-2",
+      "example_id": "demo-reversal",
+      "answer": "Blue, green, red.",
+      "expected_label": "incorrect",
+      "case_kind": "av002-original"
+    },
+    {
+      "id": "demo-reversal-3",
+      "example_id": "demo-reversal",
+      "answer": "Start with green, then blue, and finish with red.",
+      "expected_label": "correct",
+      "case_kind": "paraphrase"
+    },
+    {
+      "id": "demo-rules-1",
+      "example_id": "demo-rules",
+      "answer": "No, round does not satisfy square.",
+      "expected_label": "correct",
+      "case_kind": "av002-original"
+    },
+    {
+      "id": "demo-rules-2",
+      "example_id": "demo-rules",
+      "answer": "Yes, because it is blue.",
+      "expected_label": "incorrect",
+      "case_kind": "av002-original"
+    },
+    {
+      "id": "demo-rules-3",
+      "example_id": "demo-rules",
+      "answer": "No.",
+      "expected_label": "partial",
+      "case_kind": "av002-original"
+    },
+    {
+      "id": "demo-rules-4",
+      "example_id": "demo-rules",
+      "answer": "It is not valid because it is not square.",
+      "expected_label": "correct",
+      "case_kind": "negation"
+    },
+    {
+      "id": "demo-arithmetic-1",
+      "example_id": "demo-arithmetic",
+      "answer": "Five.",
+      "expected_label": "correct",
+      "case_kind": "av002-original"
+    },
+    {
+      "id": "demo-arithmetic-2",
+      "example_id": "demo-arithmetic",
+      "answer": "Six.",
+      "expected_label": "incorrect",
+      "case_kind": "av002-original"
+    },
+    {
+      "id": "demo-explanation-1",
+      "example_id": "demo-explanation",
+      "answer": "It puts two first, then five, then seven.",
+      "expected_label": "correct",
+      "case_kind": "av002-original"
+    },
+    {
+      "id": "demo-explanation-2",
+      "example_id": "demo-explanation",
+      "answer": "It gives seven, five, two.",
+      "expected_label": "incorrect",
+      "case_kind": "av002-original"
+    },
+    {
+      "id": "demo-explanation-3",
+      "example_id": "demo-explanation",
+      "answer": "It puts two first.",
+      "expected_label": "partial",
+      "case_kind": "incomplete-number-sequence"
+    }
+  ]
+}

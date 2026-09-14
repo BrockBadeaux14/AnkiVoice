@@ -1,0 +1,134 @@
+{
+  "tts": {
+    "prompts": 4,
+    "playback_completed": 4,
+    "human_intelligible": 4,
+    "synthesis": {
+      "n": 4,
+      "median_ms": 131.5,
+      "max_ms": 170
+    },
+    "playback": {
+      "n": 4,
+      "median_ms": 5834.5,
+      "max_ms": 7492
+    }
+  },
+  "native_stt": {
+    "total_attempts_including_offline_preflight": 13,
+    "online_permitted_attempts": 12,
+    "transcripts_returned": 10,
+    "normalized_exact_matches": 9,
+    "errors": {
+      "7": 2
+    },
+    "finalization_after_audio_eof": {
+      "n": 10,
+      "median_ms": 135.0,
+      "max_ms": 445
+    },
+    "request_to_final": {
+      "n": 10,
+      "median_ms": 2399.0,
+      "max_ms": 3956
+    }
+  },
+  "cloud": {
+    "openrouter-grade-a.json": {
+      "attempts": 1,
+      "counts": {
+        "http_error": 1
+      },
+      "matching_labels": 0,
+      "valid_response_latency": {
+        "n": 0,
+        "median_ms": null,
+        "max_ms": null
+      },
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    },
+    "openrouter-grade-a-pass2.json": {
+      "attempts": 1,
+      "counts": {
+        "http_error": 1
+      },
+      "matching_labels": 0,
+      "valid_response_latency": {
+        "n": 0,
+        "median_ms": null,
+        "max_ms": null
+      },
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    },
+    "openrouter-grade-b.json": {
+      "attempts": 12,
+      "counts": {
+        "success": 12
+      },
+      "matching_labels": 8,
+      "valid_response_latency": {
+        "n": 12,
+        "median_ms": 2289.585,
+        "max_ms": 5793.129
+      },
+      "prompt_tokens": 2398,
+      "completion_tokens": 6567
+    },
+    "openrouter-grade-b-pass2.json": {
+      "attempts": 12,
+      "counts": {
+        "success": 11,
+        "incomplete_or_empty": 1
+      },
+      "matching_labels": 11,
+      "valid_response_latency": {
+        "n": 11,
+        "median_ms": 3259.846,
+        "max_ms": 12253.046
+      },
+      "prompt_tokens": 3538,
+      "completion_tokens": 6882
+    },
+    "openrouter-stt.json": {
+      "attempts": 3,
+      "counts": {
+        "success": 2,
+        "provider_error": 1
+      },
+      "matching_labels": 0,
+      "valid_response_latency": {
+        "n": 2,
+        "median_ms": 3738.001,
+        "max_ms": 4148.621
+      },
+      "prompt_tokens": 82,
+      "completion_tokens": 352,
+      "usable_transcripts": 0,
+      "valid_transcript_latency": {
+        "n": 0,
+        "median_ms": null,
+        "max_ms": null
+      },
+      "failure_assessment": "2 non-transcriptions + 1 provider error; 9 not attempted"
+    }
+  },
+  "usage": {
+    "cloud_requests": 29,
+    "grading_requests": 26,
+    "cloud_stt_requests": 3,
+    "total_stt_attempts": 16,
+    "incremental_cost_usd": 0,
+    "answer_audio_seconds": 22.395,
+    "30_turn_estimate": {
+      "assumption": "same prompt/answer mix as this small synthetic corpus, one grade per turn",
+      "tts_seconds": 161.7,
+      "stt_seconds": 55.9875,
+      "grading_requests": 30,
+      "grading_prompt_tokens": 8845.0,
+      "grading_completion_tokens": 17205.0,
+      "cost_usd_at_selected_zero_prices": 0
+    }
+  }
+}
