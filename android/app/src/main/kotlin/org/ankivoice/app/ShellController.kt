@@ -3,6 +3,9 @@ package org.ankivoice.app
 import org.ankivoice.ankidroid.AccessSnapshot
 import org.ankivoice.ankidroid.Deck
 import org.ankivoice.ankidroid.DeckAccess
+import org.ankivoice.ankidroid.ProvisioningReport
+import org.ankivoice.ankidroid.ProvisioningStep
+import org.ankivoice.ankidroid.Provisioner
 import org.ankivoice.core.contracts.*
 
 internal interface ShellSettings {
@@ -27,6 +30,11 @@ internal data class ShellState(
     val accessFailure: Failure? = null,
     val checking: Boolean = true,
     val status: PreviewStatus = PreviewStatus.Idle,
+    /** AV-039: the last thing setup found or did. Null until setup has been inspected. */
+    val setup: ProvisioningReport? = null,
+    val setupBusy: Boolean = false,
+    /** True while the full-sync disclosure is waiting for the learner's answer. */
+    val disclosing: Boolean = false,
 )
 
 /**
@@ -36,6 +44,7 @@ internal data class ShellState(
 internal class ShellController(
     private val access: DeckAccess,
     private val settings: ShellSettings,
+    private val provisioner: Provisioner,
     private val cardProvider: () -> CardProvider?,
 ) : ForegroundEventPort {
     var state = ShellState(selectedDeckId = settings.selectedDeckId, language = settings.language)
@@ -87,6 +96,44 @@ internal class ShellController(
                 refresh()
             }
         }
+    }
+
+    /**
+     * AV-039 setup. Inspection is read-only, so it is safe to run whenever the learner asks.
+     * Provisioning is never automatic: it happens only after [confirmSetup], and
+     * [declineSetup] still reaches the provisioner so the refusal, not the UI, is what
+     * keeps the collection unchanged.
+     */
+    fun checkSetup() {
+        if (!foreground || state.setupBusy) return
+        publish(state.copy(setupBusy = true, disclosing = false))
+        provisioner.inspect(::finishSetup)
+    }
+
+    fun startSetup() {
+        if (!foreground || state.setupBusy) return
+        val report = state.setup
+        // Disclose before the first write, using what the last inspection found.
+        if (report != null && report.workRemains) publish(state.copy(disclosing = true)) else checkSetup()
+    }
+
+    fun confirmSetup() = answerDisclosure(accepted = true)
+    fun declineSetup() = answerDisclosure(accepted = false)
+
+    private fun answerDisclosure(accepted: Boolean) {
+        if (!state.disclosing || state.setupBusy) return
+        publish(state.copy(setupBusy = true, disclosing = false))
+        provisioner.provision(accepted, ::finishSetup)
+    }
+
+    /**
+     * A provisioning report describes work that has already happened, so it is published
+     * even when the shell has moved on. Only the deck re-read waits for the foreground.
+     */
+    private fun finishSetup(report: ProvisioningReport) {
+        publish(state.copy(setup = report, setupBusy = false, disclosing = false))
+        // A created demo deck is the only thing provisioning adds to the deck list.
+        if (foreground && report.demoDeck == ProvisioningStep.CREATED) refresh()
     }
 
     fun setLanguage(language: String) {
@@ -156,7 +203,8 @@ internal class ShellController(
                     PreviewStatus.Starting, PreviewStatus.CardReady, PreviewStatus.Exhausted -> PreviewStatus.Paused()
                     else -> state.status
                 }
-                publish(state.copy(checking = false, status = status))
+                // A pending disclosure is not carried across a return; setup is asked again.
+                publish(state.copy(checking = false, status = status, disclosing = false))
             }
         }
     }

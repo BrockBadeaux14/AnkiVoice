@@ -1,0 +1,1 @@
+AV023 evidence verified: onboarding, deck/session/lifecycle, settings, release boundary, 90 JVM / 182 Python tests, 8 unchanged cards and 11 unchanged reviews.

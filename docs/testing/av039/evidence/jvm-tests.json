@@ -1,0 +1,76 @@
+{
+  "core": {
+    "org.ankivoice.core.contracts.CardProviderResultTest": {
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "org.ankivoice.core.contracts.FailureTaxonomyTest": {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "org.ankivoice.core.contracts.ManifestDriftTest": {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "org.ankivoice.core.contracts.QuestionAndGradingContextTest": {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "org.ankivoice.core.contracts.RatingsAndCapabilitiesTest": {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "org.ankivoice.core.contracts.ReviewLifecycleTest": {
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "org.ankivoice.core.fakes.FakesTest": {
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "ankidroid": {
+    "org.ankivoice.ankidroid.AnkiDroidAccessTest": {
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "org.ankivoice.ankidroid.ProvisioningTest": {
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "org.ankivoice.ankidroid.VoiceQaNoteTypeTest": {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "app": {
+    "org.ankivoice.app.ShellControllerTest": {
+      "tests": 29,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "total_tests": 134,
+  "failures": 0
+}

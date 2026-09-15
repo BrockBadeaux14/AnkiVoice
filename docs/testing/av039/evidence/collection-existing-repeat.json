@@ -1,0 +1,483 @@
+{
+  "notetypes": {
+    "1789515446819": {
+      "name": "Basic",
+      "fields": [
+        "Front",
+        "Back"
+      ],
+      "templates": [
+        "Card 1"
+      ]
+    },
+    "1789515446820": {
+      "name": "Basic (and reversed card)",
+      "fields": [
+        "Front",
+        "Back"
+      ],
+      "templates": [
+        "Card 1",
+        "Card 2"
+      ]
+    },
+    "1789515446821": {
+      "name": "Basic (optional reversed card)",
+      "fields": [
+        "Front",
+        "Back",
+        "Add Reverse"
+      ],
+      "templates": [
+        "Card 1",
+        "Card 2"
+      ]
+    },
+    "1789515446822": {
+      "name": "Basic (type in the answer)",
+      "fields": [
+        "Front",
+        "Back"
+      ],
+      "templates": [
+        "Card 1"
+      ]
+    },
+    "1789515446823": {
+      "name": "Cloze",
+      "fields": [
+        "Text",
+        "Back Extra"
+      ],
+      "templates": [
+        "Cloze"
+      ]
+    },
+    "1789515446824": {
+      "name": "Image Occlusion",
+      "fields": [
+        "Occlusion",
+        "Image",
+        "Header",
+        "Back Extra",
+        "Comments"
+      ],
+      "templates": [
+        "Image Occlusion"
+      ]
+    },
+    "1789515446828": {
+      "name": "VoiceQA",
+      "fields": [
+        "Prompt",
+        "ReferenceAnswer",
+        "RequiredConcepts",
+        "AcceptedAnswers",
+        "Language",
+        "Extra"
+      ],
+      "templates": [
+        "Voice recall"
+      ]
+    }
+  },
+  "decks": {
+    "1": "Default",
+    "1789515446823": "AV002 Baseline",
+    "1789515615235": "VoiceQA Demo"
+  },
+  "notes": [
+    {
+      "id": 1789515446831,
+      "notetype": "VoiceQA",
+      "tags": "av002 fixture::new profile::baseline state::new",
+      "fields": [
+        "A box has three red blocks and two blue blocks. How many blocks are there in total?",
+        "Five blocks.",
+        "Five",
+        "Five\n5\nThere are five blocks",
+        "en-US",
+        "Three plus two equals five."
+      ]
+    },
+    {
+      "id": 1789515446832,
+      "notetype": "VoiceQA",
+      "tags": "av002 fixture::learning profile::baseline state::learning",
+      "fields": [
+        "Reverse the sequence red, blue, green.",
+        "Green, blue, red.",
+        "Green first\nBlue second\nRed last",
+        "Green blue red",
+        "en-US",
+        "Reversing changes the order, not the items."
+      ]
+    },
+    {
+      "id": 1789515446833,
+      "notetype": "VoiceQA",
+      "tags": "av002 fixture::relearning profile::baseline state::relearning",
+      "fields": [
+        "In a game, a token is valid only if it is blue and square. A token is blue and round. Is it valid, and why?",
+        "No. It is blue but not square, and both conditions are required.",
+        "It is not valid\nIt fails the square requirement",
+        "No, because it is round instead of square.",
+        "en-US",
+        "Meeting just one required condition is insufficient."
+      ]
+    },
+    {
+      "id": 1789515446834,
+      "notetype": "VoiceQA",
+      "tags": "av002 fixture::mature profile::baseline state::mature",
+      "fields": [
+        "A machine sorts numbers from smallest to largest. Explain what it does to the list seven, two, five.",
+        "It returns two, five, seven, ordering the numbers from smallest to largest.",
+        "The resulting order is two, five, seven",
+        "Two five seven",
+        "en-US",
+        "The values stay the same; only their order changes."
+      ]
+    },
+    {
+      "id": 1789515446835,
+      "notetype": "VoiceQA",
+      "tags": "av002 fixture::suspended profile::baseline state::suspended",
+      "fields": [
+        "A box has three red blocks and two blue blocks. How many blocks are there in total?",
+        "Five blocks.",
+        "Five",
+        "Five\n5\nThere are five blocks",
+        "en-US",
+        "Three plus two equals five."
+      ]
+    },
+    {
+      "id": 1789515446836,
+      "notetype": "VoiceQA",
+      "tags": "av002 fixture::buried-manual profile::baseline state::buried-manual",
+      "fields": [
+        "In a game, a token is valid only if it is blue and square. A token is blue and round. Is it valid, and why?",
+        "No. It is blue but not square, and both conditions are required.",
+        "It is not valid\nIt fails the square requirement",
+        "No, because it is round instead of square.",
+        "en-US",
+        "Meeting just one required condition is insufficient."
+      ]
+    },
+    {
+      "id": 1789515446837,
+      "notetype": "VoiceQA",
+      "tags": "av002 fixture::buried-sibling profile::baseline state::buried-sibling",
+      "fields": [
+        "Reverse the sequence red, blue, green.",
+        "Green, blue, red.",
+        "Green first\nBlue second\nRed last",
+        "Green blue red",
+        "en-US",
+        "Reversing changes the order, not the items."
+      ]
+    },
+    {
+      "id": 1789515446838,
+      "notetype": "VoiceQA",
+      "tags": "av002 fixture::future profile::baseline state::future",
+      "fields": [
+        "A machine sorts numbers from smallest to largest. Explain what it does to the list seven, two, five.",
+        "It returns two, five, seven, ordering the numbers from smallest to largest.",
+        "The resulting order is two, five, seven",
+        "Two five seven",
+        "en-US",
+        "The values stay the same; only their order changes."
+      ]
+    },
+    {
+      "id": 1789515615247,
+      "notetype": "VoiceQA",
+      "tags": "ankivoice-demo demo-reversal",
+      "fields": [
+        "Reverse the sequence red, blue, green.",
+        "Green, blue, red.",
+        "Green first\nBlue second\nRed last",
+        "Green blue red",
+        "en-US",
+        "Reversing changes the order, not the items."
+      ]
+    },
+    {
+      "id": 1789515615283,
+      "notetype": "VoiceQA",
+      "tags": "ankivoice-demo demo-rules",
+      "fields": [
+        "In a game, a token is valid only if it is blue and square. A token is blue and round. Is it valid, and why?",
+        "No. It is blue but not square, and both conditions are required.",
+        "It is not valid\nIt fails the square requirement",
+        "No, because it is round instead of square.",
+        "en-US",
+        "Meeting just one required condition is insufficient."
+      ]
+    },
+    {
+      "id": 1789515615315,
+      "notetype": "VoiceQA",
+      "tags": "ankivoice-demo demo-arithmetic",
+      "fields": [
+        "A box has three red blocks and two blue blocks. How many blocks are there in total?",
+        "Five blocks.",
+        "Five",
+        "Five\n5\nThere are five blocks",
+        "en-US",
+        "Three plus two equals five."
+      ]
+    },
+    {
+      "id": 1789515615328,
+      "notetype": "VoiceQA",
+      "tags": "ankivoice-demo demo-explanation",
+      "fields": [
+        "A machine sorts numbers from smallest to largest. Explain what it does to the list seven, two, five.",
+        "It returns two, five, seven, ordering the numbers from smallest to largest.",
+        "The resulting order is two, five, seven",
+        "Two five seven",
+        "en-US",
+        "The values stay the same; only their order changes."
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "id": 1789515446831,
+      "note": 1789515446831,
+      "deck": "AV002 Baseline",
+      "ord": 0,
+      "type": 0,
+      "queue": 0,
+      "due": 1,
+      "ivl": 0,
+      "reps": 0,
+      "lapses": 0
+    },
+    {
+      "id": 1789515446832,
+      "note": 1789515446832,
+      "deck": "AV002 Baseline",
+      "ord": 0,
+      "type": 1,
+      "queue": 1,
+      "due": 1789515386,
+      "ivl": 0,
+      "reps": 1,
+      "lapses": 0
+    },
+    {
+      "id": 1789515446833,
+      "note": 1789515446833,
+      "deck": "AV002 Baseline",
+      "ord": 0,
+      "type": 3,
+      "queue": 1,
+      "due": 1789515386,
+      "ivl": 1,
+      "reps": 4,
+      "lapses": 1
+    },
+    {
+      "id": 1789515446834,
+      "note": 1789515446834,
+      "deck": "AV002 Baseline",
+      "ord": 0,
+      "type": 2,
+      "queue": 2,
+      "due": 90,
+      "ivl": 30,
+      "reps": 3,
+      "lapses": 0
+    },
+    {
+      "id": 1789515446835,
+      "note": 1789515446835,
+      "deck": "AV002 Baseline",
+      "ord": 0,
+      "type": 0,
+      "queue": -1,
+      "due": 5,
+      "ivl": 0,
+      "reps": 0,
+      "lapses": 0
+    },
+    {
+      "id": 1789515446836,
+      "note": 1789515446836,
+      "deck": "AV002 Baseline",
+      "ord": 0,
+      "type": 0,
+      "queue": -3,
+      "due": 6,
+      "ivl": 0,
+      "reps": 0,
+      "lapses": 0
+    },
+    {
+      "id": 1789515446837,
+      "note": 1789515446837,
+      "deck": "AV002 Baseline",
+      "ord": 0,
+      "type": 0,
+      "queue": -2,
+      "due": 7,
+      "ivl": 0,
+      "reps": 0,
+      "lapses": 0
+    },
+    {
+      "id": 1789515446838,
+      "note": 1789515446838,
+      "deck": "AV002 Baseline",
+      "ord": 0,
+      "type": 2,
+      "queue": 2,
+      "due": 97,
+      "ivl": 30,
+      "reps": 3,
+      "lapses": 0
+    },
+    {
+      "id": 1789515615248,
+      "note": 1789515615247,
+      "deck": "VoiceQA Demo",
+      "ord": 0,
+      "type": 0,
+      "queue": 0,
+      "due": 9,
+      "ivl": 0,
+      "reps": 0,
+      "lapses": 0
+    },
+    {
+      "id": 1789515615283,
+      "note": 1789515615283,
+      "deck": "VoiceQA Demo",
+      "ord": 0,
+      "type": 0,
+      "queue": 0,
+      "due": 10,
+      "ivl": 0,
+      "reps": 0,
+      "lapses": 0
+    },
+    {
+      "id": 1789515615315,
+      "note": 1789515615315,
+      "deck": "VoiceQA Demo",
+      "ord": 0,
+      "type": 0,
+      "queue": 0,
+      "due": 11,
+      "ivl": 0,
+      "reps": 0,
+      "lapses": 0
+    },
+    {
+      "id": 1789515615328,
+      "note": 1789515615328,
+      "deck": "VoiceQA Demo",
+      "ord": 0,
+      "type": 0,
+      "queue": 0,
+      "due": 12,
+      "ivl": 0,
+      "reps": 0,
+      "lapses": 0
+    }
+  ],
+  "revlog": [
+    {
+      "id": 1786232246003,
+      "card": 1789515446833,
+      "ease": 3,
+      "ivl": 1,
+      "time": 2500,
+      "type": 0
+    },
+    {
+      "id": 1786232246004,
+      "card": 1789515446834,
+      "ease": 3,
+      "ivl": 1,
+      "time": 2500,
+      "type": 0
+    },
+    {
+      "id": 1786318646003,
+      "card": 1789515446833,
+      "ease": 3,
+      "ivl": 7,
+      "time": 2500,
+      "type": 1
+    },
+    {
+      "id": 1786318646004,
+      "card": 1789515446834,
+      "ease": 3,
+      "ivl": 7,
+      "time": 2500,
+      "type": 1
+    },
+    {
+      "id": 1786837046008,
+      "card": 1789515446838,
+      "ease": 3,
+      "ivl": 1,
+      "time": 2500,
+      "type": 0
+    },
+    {
+      "id": 1786923446003,
+      "card": 1789515446833,
+      "ease": 3,
+      "ivl": 30,
+      "time": 2500,
+      "type": 1
+    },
+    {
+      "id": 1786923446004,
+      "card": 1789515446834,
+      "ease": 3,
+      "ivl": 30,
+      "time": 2500,
+      "type": 1
+    },
+    {
+      "id": 1786923446008,
+      "card": 1789515446838,
+      "ease": 3,
+      "ivl": 7,
+      "time": 2500,
+      "type": 1
+    },
+    {
+      "id": 1787528246008,
+      "card": 1789515446838,
+      "ease": 3,
+      "ivl": 30,
+      "time": 2500,
+      "type": 1
+    },
+    {
+      "id": 1789514786003,
+      "card": 1789515446833,
+      "ease": 1,
+      "ivl": -600,
+      "time": 2500,
+      "type": 1
+    },
+    {
+      "id": 1789515326002,
+      "card": 1789515446832,
+      "ease": 1,
+      "ivl": -60,
+      "time": 2500,
+      "type": 0
+    }
+  ]
+}

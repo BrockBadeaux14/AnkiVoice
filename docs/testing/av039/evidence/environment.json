@@ -1,0 +1,41 @@
+{
+  "issue": 10,
+  "plan_id": "AV-039",
+  "host": {
+    "os": "macOS 26.6.2",
+    "build": "25G83",
+    "arch": "arm64",
+    "build_matches_av022_baseline": true
+  },
+  "avd": {
+    "name": "AnkiVoice_AV039",
+    "serial": "emulator-5584",
+    "created_for": "AV-039",
+    "reused_existing_avd": false
+  },
+  "emulator": "Android emulator version 37.1.11.0 (build_id 15917651) (CL:N/A)",
+  "adb": "Version 37.0.1-15733141",
+  "device": {
+    "model": "sdk_gphone64_arm64",
+    "sdk": "36",
+    "release": "16",
+    "build": "google/sdk_gphone64_arm64/emu64a:16/BE2A.250530.026.D1/13818094:user/release-keys",
+    "abi": "arm64-v8a",
+    "timezone": "America/Chicago"
+  },
+  "system_image": "system-images;android-36;google_apis_playstore;arm64-v8a",
+  "ankidroid": {
+    "versionName": "2.24.1",
+    "versionCode": "322401300",
+    "apk_sha256": "3012692ca67b856b287430715f99ca6150e471588326f6c8c45f27bbe895afbf"
+  },
+  "ankivoice": {
+    "applicationId": "org.ankivoice",
+    "variant": "debug",
+    "apk_sha256": "dc09faa8618df4fe26844fe987fac2f4c93e85538883ac346ee013b1028f0dec"
+  },
+  "build_jdk": "Android Studio JBR 25.0.2 (CI runs Temurin 17)",
+  "google_account_signed_in": false,
+  "ankiweb_signed_in": false,
+  "sync_performed": false
+}

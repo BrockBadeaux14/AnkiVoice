@@ -54,3 +54,9 @@ See [AV-023: Mobile shell and permission onboarding](docs/testing/av023/results.
 for the Compose shell, deck selection, debug sample-session controls, private settings,
 and the pinned-emulator evidence. The [runbook](docs/testing/av023/runbook.md) reproduces
 the onboarding and lifecycle checks without submitting any reviews.
+
+See [AV-039: VoiceQA note type provisioning](docs/testing/av039/results.md)
+for the explicit setup action, the reuse/refuse and demo-content policy, the confirmed
+AnkiDroid 2.24.1 provider route, and the pinned-emulator evidence that no review was
+added or altered. The [runbook](docs/testing/av039/runbook.md) reproduces every
+provisioning scenario on a disposable collection.

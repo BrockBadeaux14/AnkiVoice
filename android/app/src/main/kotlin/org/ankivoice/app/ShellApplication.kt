@@ -5,6 +5,7 @@ import android.content.Context
 import java.util.concurrent.Executors
 import org.ankivoice.ankidroid.AndroidAccessPlatform
 import org.ankivoice.ankidroid.AnkiDroidAccess
+import org.ankivoice.ankidroid.AnkiDroidProvisioning
 import org.ankivoice.core.contracts.ForegroundEventPort
 
 /** Process-owned composition root; retains the shell through Activity recreation. */
@@ -15,9 +16,14 @@ class ShellApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // One serial worker for every AnkiDroid call, so a deck read and a provisioning
+        // write can never run against the collection at the same time.
+        val platform = AndroidAccessPlatform(this)
+        val worker = Executors.newSingleThreadExecutor()
         controller = ShellController(
-            AnkiDroidAccess(AndroidAccessPlatform(this), Executors.newSingleThreadExecutor(), mainExecutor),
+            AnkiDroidAccess(platform, worker, mainExecutor),
             PrivateShellSettings(this),
+            AnkiDroidProvisioning(platform, worker, mainExecutor),
             ::previewCardProvider,
         )
     }
