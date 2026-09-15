@@ -1,0 +1,182 @@
+[
+  {
+    "module": "core",
+    "name": "org.ankivoice.core.contracts.CardProviderResultTest",
+    "tests": "8",
+    "skipped": "0",
+    "failures": "0",
+    "errors": "0",
+    "cases": [
+      "each script entry replaces one call and a null entry falls through()",
+      "a null cursor is a failure, whatever its known cause, never exhaustion()",
+      "a rebuilt queue does not reserve the previously offered card()",
+      "the provider validates VoiceQA identity and content before exposing a card()",
+      "the identity is the tuple AV-004 proved readable()",
+      "a card that no longer exists is not found()",
+      "a valid empty queue is exhaustion()",
+      "a missing deck is a failure, not exhaustion()"
+    ]
+  },
+  {
+    "module": "core",
+    "name": "org.ankivoice.core.contracts.FailureTaxonomyTest",
+    "tests": "5",
+    "skipped": "0",
+    "failures": "0",
+    "errors": "0",
+    "cases": [
+      "all 34 failures are grouped under their five contracts()",
+      "a shared name in two contracts is two distinct failures()",
+      "a failure reads as contract dot specification name()",
+      "no api converts a failure into a rating()",
+      "a failure mode is exhaustively matchable by contract()"
+    ]
+  },
+  {
+    "module": "core",
+    "name": "org.ankivoice.core.contracts.ManifestDriftTest",
+    "tests": "6",
+    "skipped": "0",
+    "failures": "0",
+    "errors": "0",
+    "cases": [
+      "the five contracts and their operations match the binding()",
+      "capability flags and their defaults match()",
+      "review states and their terminal flags match()",
+      "failure names match per contract, in order()",
+      "the review transport seam matches the binding()",
+      "grade labels and their proposals match()"
+    ]
+  },
+  {
+    "module": "core",
+    "name": "org.ankivoice.core.contracts.QuestionAndGradingContextTest",
+    "tests": "7",
+    "skipped": "0",
+    "failures": "0",
+    "errors": "0",
+    "cases": [
+      "the grading context is closed over exactly six fields()",
+      "the fake grader sees only the grading context()",
+      "question audio carries the prompt and nothing else()",
+      "the card language falls back to the session language()",
+      "reveal and elaboration are separate purposes()",
+      "question audio is built from Prompt only()",
+      "Extra is never part of the grading context()"
+    ]
+  },
+  {
+    "module": "core",
+    "name": "org.ankivoice.core.contracts.RatingsAndCapabilitiesTest",
+    "tests": "7",
+    "skipped": "0",
+    "failures": "0",
+    "errors": "0",
+    "cases": [
+      "an empty permitted range is representable and proposes nothing()",
+      "labels map to proposals, never to commits()",
+      "a zero time cap is a valid cap, a negative one is not()",
+      "a proposal is limited to the ratings permitted for this card()",
+      "permitted ratings are read per card, not assumed constant()",
+      "partial and uncertain propose nothing for any permitted range()",
+      "defaults record the AV-004 measurements()"
+    ]
+  },
+  {
+    "module": "core",
+    "name": "org.ankivoice.core.contracts.ReviewLifecycleTest",
+    "tests": "14",
+    "skipped": "0",
+    "failures": "0",
+    "errors": "0",
+    "cases": [
+      "a zero cap stores zero, and zero elapsed is never capped()",
+      "a raw acknowledgement is exhaustively matchable and never proof of a save()",
+      "correction is closed once the intent leaves pending()",
+      "correction is open while pending and clears the confirmation()",
+      "tokens match on session, turn and sequence together()",
+      "spoken and touch confirmations each authorize the intent they are bound to()",
+      "an uncapped time is expected unchanged()",
+      "a grading reply holds a label or a failure, never a rating()",
+      "a new intent is pending with no confirmation()",
+      "uncertain, partial or mismatched confirmations never authorize()",
+      "playback and capture results are exhaustively matchable and a failure carries no text()",
+      "the five review states in lifecycle order()",
+      "without a submitted write there is no cap and no expected stored time()",
+      "the cap truncates the expected stored time without being an error()"
+    ]
+  },
+  {
+    "module": "core",
+    "name": "org.ankivoice.core.fakes.FakesTest",
+    "tests": "8",
+    "skipped": "0",
+    "failures": "0",
+    "errors": "0",
+    "cases": [
+      "the demo collection holds the two AV-002 fixture cards()",
+      "the fake clock is deterministic and needs no real time()",
+      "stand-in scheduling matches the Python reference, ties rounding to even()",
+      "the review log records the capped time and the writer()",
+      "each write anomaly returns what AV-004 observed or the contract must survive()",
+      "the grader answers the current request and fails once its script runs out()",
+      "speech input turns script entries into capture events()",
+      "speech output records attempts and honours scripted results and cancellation()"
+    ]
+  },
+  {
+    "module": "ankidroid",
+    "name": "org.ankivoice.ankidroid.AnkiDroidAccessTest",
+    "tests": "17",
+    "skipped": "0",
+    "failures": "0",
+    "errors": "0",
+    "cases": [
+      "selection only writes selected deck and reads it back()",
+      "null rechecks a component disabled during query()",
+      "disabled component identifies API disabled()",
+      "valid empty cursor is successful access()",
+      "null selection readback is unavailable()",
+      "missing deck never causes selection write()",
+      "permission revoked during selection is denied without retry()",
+      "unconfirmed update is not successful selection()",
+      "missing or disabled package wins before any resolver call()",
+      "denied microphone has its own speech failure()",
+      "null with unknown cause never becomes an empty result()",
+      "permission revoked between preflight and query is denied()",
+      "unexpected provider failure stays unknown()",
+      "deck removed during selection is missing()",
+      "never granted and revoked database permission deny access()",
+      "resolver calls run on worker and callbacks wait for main delivery()",
+      "missing selected deck is not empty or exhausted()"
+    ]
+  },
+  {
+    "module": "app",
+    "name": "org.ankivoice.app.ShellControllerTest",
+    "tests": "18",
+    "skipped": "0",
+    "failures": "0",
+    "errors": "0",
+    "cases": [
+      "release without provider retains onboarding and reports unavailable()",
+      "start checks access then capabilities and a card without a review()",
+      "start refuses a missing deck even if adapter reports success()",
+      "card failure is named and paused()",
+      "stopped session stays stopped through resume and revoked permission()",
+      "every preflight failure prevents provider creation()",
+      "stop rejects a late failure too()",
+      "refresh pauses an active preview if access was revoked()",
+      "late selection after stop does not change status or setting()",
+      "pause cancels pending start and resume only checks access()",
+      "capability failure pauses before asking for a card()",
+      "failed selection preserves saved deck()",
+      "settings survive controller recreation and language change stops preview()",
+      "selected deck saved only after successful selection()",
+      "empty fake queue is exhausted()",
+      "stop rejects a late successful preflight and never starts provider()",
+      "configuration resume during start rechecks access and completes the authorized start()",
+      "configuration resume during selection preserves result then rechecks access()"
+    ]
+  }
+]

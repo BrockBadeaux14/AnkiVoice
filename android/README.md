@@ -6,8 +6,11 @@
 - Specification: [AV-007: Integration contracts and review lifecycle](../docs/contracts/av007-session-contracts.md).
 
 This is the Gradle build and the Kotlin copy of the AV-007 contracts that every Android
-card builds on. It contains no UI shell, no AnkiDroid, speech or network code, and no
-session logic yet. Those belong to #24, #25, #26, #17 and #14.
+card builds on. AV-023 (#24) adds the Compose shell, AnkiDroid access preflight and deck
+selection, permission onboarding, app-private settings, and a debug sample-session
+preview. See the [AV-023 results](../docs/testing/av023/results.md) and
+[runbook](../docs/testing/av023/runbook.md). Real card access, speech, network access and
+ReviewSession integration belong to #25, #26, #17 and #14.
 
 ## Build
 
@@ -21,6 +24,7 @@ Requirements:
 ```sh
 cd android
 ./gradlew checkModuleBoundaries :core:test assembleDebug
+./gradlew :ankidroid:testDebugUnitTest :app:testDebugUnitTest :app:assembleRelease :app:lintDebug
 ```
 
 On Windows, run `gradlew.bat` with the same arguments.
@@ -30,8 +34,10 @@ On Windows, run `gradlew.bat` with the same arguments.
 | `checkModuleBoundaries` | The module graph follows AV-022 (see [Modules](#modules)). It also runs as part of `check`. |
 | `:core:test` | The contract-level JVM tests and the Kotlin half of the drift guard. |
 | `assembleDebug` | All five modules compile, and `:app` produces `app/build/outputs/apk/debug/app-debug.apk`. |
+| `:ankidroid:testDebugUnitTest :app:testDebugUnitTest` | Access classification, deck selection, session cancellation and lifecycle regression tests for AV-023. |
+| `:app:assembleRelease :app:lintDebug` | Release compilation without fakes; Android lint. |
 
-[`.github/workflows/android.yml`](../.github/workflows/android.yml) runs the same command on
+[`.github/workflows/android.yml`](../.github/workflows/android.yml) runs both commands on
 `ubuntu-24.04` with Temurin 17, for every push and pull request. The
 [`VoiceQA fixtures`](../.github/workflows/fixtures.yml) workflow runs the Python half of
 the drift guard.
@@ -92,10 +98,10 @@ flowchart TD
 | Module | Kind | Contents now | Owner of what comes next |
 | --- | --- | --- | --- |
 | `:core` | Kotlin/JVM, no Android plugin or dependency | The AV-007 contract port in `org.ankivoice.core.contracts`; the fakes in its `testFixtures` source set | #14, #13, #25, #16/#18, #15, #20 |
-| `:ankidroid` | Android library | A marker object; no platform calls | #24 (preflight), #25, #10 |
+| `:ankidroid` | Android library | Access preflight; `decks` reads and verified `selected_deck` updates | #25, #10 |
 | `:speech` | Android library | A marker object; no platform calls | #26 |
 | `:provider` | Android library | A marker object; no platform calls or network access | #17, #18 |
-| `:app` | Android application | A placeholder Compose activity | #24 (shell), #27, #17 |
+| `:app` | Android application | Single-activity shell, onboarding, private settings, lifecycle delivery and debug sample session | #27, #17 |
 
 `checkModuleBoundaries` fails the build when:
 
@@ -116,8 +122,9 @@ testImplementation(testFixtures(project(":core")))  // in :core this is automati
 debugImplementation(testFixtures(project(":core")))  // what :app declares
 ```
 
-`:app` proves both sides. Its `src/debug` status line reads the demo collection from
-the fakes. Its `src/release` counterpart cannot see them: the release APK contains no
+`:app` proves both sides. Its `src/debug` composition root reads the demo collection from
+the fakes. Its `src/release` counterpart supplies no card provider: study is unavailable
+while onboarding and deck selection remain usable. The release APK contains no
 `org.ankivoice.core.fakes` classes.
 
 ## The contract port
@@ -225,9 +232,10 @@ cd android && ./gradlew :core:test
 
 ## What this does not establish
 
-- Nothing here has run on an emulator or a device. The debug APK was built, not installed
-  or launched.
-- The local validation ran on a Windows 11 x86_64 host, not the macOS ARM64 evidence host
+- AV-041's original validation built the debug APK without launching it. AV-023 now
+  records a focused onboarding/deck/session run on the pinned macOS ARM64 AVD in its
+  [results](../docs/testing/av023/results.md). Physical-device behavior remains unverified.
+- AV-041's original local validation ran on a Windows 11 x86_64 host, not the macOS ARM64 evidence host
   with AV-022's validated pins. A JVM build and its unit tests do not depend on the host.
   Any device or emulator evidence in later cards still needs the pinned host.
 - The fakes are not a scheduler. They cannot prove timing, threading or Android lifecycle

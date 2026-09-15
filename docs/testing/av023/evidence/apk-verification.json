@@ -1,0 +1,24 @@
+{
+  "debug": {
+    "apk_sha256": "5f82dfebaa3e8338daa94aed201e2d85e8fc61328efd1b157c5034fca6d7a81b",
+    "fake_classes_present": true,
+    "permissions": [
+      "android.permission.RECORD_AUDIO",
+      "com.ichi2.anki.permission.READ_WRITE_DATABASE",
+      "org.ankivoice.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+    ],
+    "target_sdk": 35,
+    "activities": 1
+  },
+  "release": {
+    "apk_sha256": "32eb3d693cc610e807af2a404490553b6f10c3ee4ab4c1ebfa89ba2c10aab4ea",
+    "fake_classes_present": false,
+    "permissions": [
+      "android.permission.RECORD_AUDIO",
+      "com.ichi2.anki.permission.READ_WRITE_DATABASE",
+      "org.ankivoice.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+    ],
+    "target_sdk": 35,
+    "activities": 1
+  }
+}
