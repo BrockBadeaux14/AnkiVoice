@@ -36,3 +36,8 @@ measurements, and the five-state review lifecycle. The
 driving every state and failure mode with no emulator and no network, including
 explicit spoken/touch confirmation, transcript edits, stale callbacks and manual
 self-grading fallback.
+
+See [AV-022: Android implementation](docs/decisions/0022-android-implementation.md)
+for the scored Kotlin-versus-Flutter decision, the pinned build/support baseline,
+component ownership across the five AV-007 contracts, and the implementation
+breakdown for the Android cards.
