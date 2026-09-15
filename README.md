@@ -49,3 +49,8 @@ breakdown for the Android cards.
 See [AV-041: Android build](android/README.md) for the `android/` Gradle build, its
 pins and five modules, and the Kotlin port of the AV-007 contract types and fakes. That
 page also covers the drift guard that keeps the port in step with the Python binding.
+
+See [AV-023: Mobile shell and permission onboarding](docs/testing/av023/results.md)
+for the Compose shell, deck selection, debug sample-session controls, private settings,
+and the pinned-emulator evidence. The [runbook](docs/testing/av023/runbook.md) reproduces
+the onboarding and lifecycle checks without submitting any reviews.

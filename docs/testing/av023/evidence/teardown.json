@@ -1,0 +1,17 @@
+{
+  "captured_at": "2026-09-15T20:36:57.446594+00:00",
+  "avd": "AnkiVoice_AV023\nOK",
+  "enabled_ankidroid": "package:com.ichi2.anki",
+  "permissions": [
+    "com.ichi2.anki.permission.READ_WRITE_DATABASE: granted=true, flags=[ USER_SET]",
+    "android.permission.RECORD_AUDIO: granted=true, flags=[ USER_SET|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]"
+  ],
+  "user_rotation": "0",
+  "session": "Stopped",
+  "language": "en-US",
+  "selected_deck": 1789503146470,
+  "api_enabled": true,
+  "api_evidence": "api-restored.xml",
+  "debug_apk_restored": true,
+  "emulator_shutdown": "OK: killing emulator, bye bye\nOK"
+}
