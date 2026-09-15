@@ -29,6 +29,10 @@ See [AV-006: Speech and grading providers](docs/decisions/0006-speech-and-gradin
 for the measured native speech/OpenRouter comparison, free-only provider decision,
 fallback requirements, and reproducible evidence.
 
+See [AV-040: Live microphone and interruptions](docs/testing/av040-live-microphone.md)
+for the bounded human investigation, its no-go result, raw evidence and measured
+policy limits. Live capture and interruption safety remain gates for #13/#26.
+
 See [AV-007: Integration contracts and review lifecycle](docs/contracts/av007-session-contracts.md)
 for the five session contracts, the card-identity and capability rules bound to AV-004's
 measurements, and the five-state review lifecycle. The

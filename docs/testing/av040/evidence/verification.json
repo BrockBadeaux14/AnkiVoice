@@ -1,0 +1,62 @@
+{
+  "recorded_at_utc": "2026-09-15T16:31:09.999471+00:00",
+  "checks": [
+    {
+      "name": "runtime attempt guard 24",
+      "source": "budget-guard-24-adb.json",
+      "assertions": 12,
+      "turns": 0,
+      "result": "PASS",
+      "additional_checks": [
+        "persistent cap unchanged",
+        "no turns",
+        "investigator_adb",
+        "stopped_at_attempt_limit",
+        "UI refusal message"
+      ]
+    },
+    {
+      "name": "runtime attempt guard 28",
+      "source": "budget-guard-28-adb.json",
+      "assertions": 12,
+      "turns": 0,
+      "result": "PASS",
+      "additional_checks": [
+        "persistent cap unchanged",
+        "no turns",
+        "investigator_adb",
+        "stopped_at_attempt_limit",
+        "UI refusal message"
+      ]
+    },
+    {
+      "name": "accepted AV-005 matrix",
+      "assertions": 334,
+      "turns": 38,
+      "human_transcripts": 0,
+      "result": "PASS"
+    },
+    {
+      "name": "canonical human evidence",
+      "assertions": 538,
+      "turns": 40,
+      "raw_transcripts": 4,
+      "human_transcripts": 3,
+      "follow_up_attempt_ids": "1\u201328, each exactly once",
+      "result": "PASS"
+    },
+    {
+      "name": "Python repository tests",
+      "tests": 182,
+      "result": "PASS",
+      "source": "python-tests.txt"
+    },
+    {
+      "name": "probe debug APK build",
+      "result": "PASS",
+      "source": "probe-build.txt",
+      "apk_sha256": "c82128378707b6f4ce7717fc759b4ad811e099226243a9df4231990edbb8e39e"
+    }
+  ],
+  "interpretation": "Evidence integrity, build and checks passed. Capability outcome remains no-go; not integrated MVP acceptance."
+}

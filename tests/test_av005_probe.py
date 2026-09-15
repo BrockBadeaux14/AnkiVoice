@@ -210,5 +210,111 @@ class EvidenceValidatorTest(unittest.TestCase):
         self.assertTrue(any("no rating" in f for f in self.validate(document)))
 
 
+class LiveFollowUpValidatorTest(unittest.TestCase):
+    """Mutated fixtures test AV-040 evidence rejection; these are not emulator runs."""
+
+    def setUp(self):
+        self.document = validator.merge([MATRIX / "loop.json"])
+        scenario = self.document["scenarios"][0]
+        scenario.update(scenario="av040_pause2", follow_up="AV-040",
+                        capture_policy="explicit_start_done_v1", interruption_rule="candidate_v1",
+                        capture_limit_ms=15000, finalization_limit_ms=5000, automatic_rearms=0,
+                        operated_by="human", voice_source="human_microphone")
+        scenario["turns"] = [scenario["turns"][0]]
+        self.scenario = scenario
+        self.turn = scenario["turns"][0]
+        self.turn.update(av040_attempt=1, token=1, terminal_token=2,
+                         operator_attestation="spoke_answer", operator_thinking_ms=2000,
+                         measured_thinking_ms=2100)
+
+    def failures(self):
+        return validator.validate(self.document)[1]
+
+    def test_honest_failed_attempt_remains_valid_evidence(self):
+        _, failures, summary = validator.validate(self.document)
+        self.assertEqual(failures, [])
+        self.assertEqual(summary["human_transcripts"], 0)
+        self.assertEqual(len(summary["capability_findings"]), 1)
+
+    def test_attempt_bound(self):
+        self.turn["av040_attempt"] = 25
+        self.assertTrue(any("24-turn bound" in f for f in self.failures()))
+
+    def test_extension_requires_explicit_validation_and_evidence(self):
+        self.turn["av040_attempt"] = 25
+        self.assertTrue(validator.validate(self.document, 28)[1])
+        self.scenario["authorized_four_turn_extension"] = True
+        self.assertEqual(validator.validate(self.document, 28)[1], [])
+        self.assertTrue(any("24-turn bound" in f for f in self.failures()))
+
+    def test_extension_stops_at_28(self):
+        self.scenario["authorized_four_turn_extension"] = True
+        self.turn["av040_attempt"] = 29
+        self.assertTrue(any("28-turn bound" in f for f in validator.validate(self.document, 28)[1]))
+        with self.assertRaises(ValueError):
+            validator.validate(self.document, 29)
+
+    def test_duplicate_cumulative_snapshot(self):
+        self.document["scenarios"].append(copy.deepcopy(self.scenario))
+        self.assertTrue(any("double-counted" in f for f in self.failures()))
+
+    def test_missing_attestation(self):
+        self.turn.pop("operator_attestation")
+        self.assertTrue(any("explicit operator attestation" in f for f in self.failures()))
+
+    def test_token_must_be_invalidated(self):
+        self.turn["terminal_token"] = self.turn["token"]
+        self.assertTrue(any("invalidates" in f for f in self.failures()))
+
+    def test_interrupted_turn_cannot_retain_a_transcript(self):
+        for status in ("halted", "cancelled", "timeout"):
+            with self.subTest(status=status):
+                self.turn.update(status=status, transcript="stale recognized answer")
+                self.assertTrue(any("carries no transcript" in f for f in self.failures()))
+
+    def test_stale_callback_must_retain_its_old_token(self):
+        entry = dict(callback="onResults", reason="invalidated_token",
+                     expected_token=1, current_token=2, advanced_turn=False)
+        self.scenario["stale_callbacks"] = [entry]
+        self.assertEqual(self.failures(), [])
+        entry["expected_token"] = 2
+        self.assertTrue(any("older token" in f for f in self.failures()))
+
+    def test_thinking_is_before_capture(self):
+        self.turn["measured_thinking_ms"] = 1000
+        self.assertTrue(any("thinking interval" in f for f in self.failures()))
+
+    def test_first_finalization_deadline_wins(self):
+        self.turn.update(done_requested_ms=1000, end_of_speech_ms=4000, final_ms=8000)
+        self.assertTrue(any("first finalization deadline" in f for f in self.failures()))
+
+    def test_segmented_speech_pause_does_not_start_finalization(self):
+        self.scenario["segmented_session_requested"] = True
+        self.turn.update(end_of_speech_ms=1000, finish_requested_ms=7000, final_ms=9000)
+        self.assertEqual(self.failures(), [])
+
+    def test_segmented_done_has_a_bounded_finalization_wait(self):
+        self.scenario["segmented_session_requested"] = True
+        self.turn.update(end_of_speech_ms=1000, finish_requested_ms=2000, final_ms=8000)
+        self.assertTrue(any("first finalization deadline" in f for f in self.failures()))
+
+    def test_echo_is_retained_as_a_capability_failure(self):
+        self.scenario["scenario"] = "av040_echo"
+        self.turn.update(status="success", transcript=self.turn["prompt"], error_name=None,
+                         echo_suspected=True, operator_attestation="stayed_silent")
+        _, failures, summary = validator.validate(self.document)
+        self.assertEqual(failures, [])
+        self.assertEqual(summary["human_transcripts"], 0)
+        self.assertIn("contamination", summary["capability_findings"][0])
+
+    def test_spoken_echo_deviation_is_retained_without_claiming_echo_coverage(self):
+        self.scenario["scenario"] = "av040_echo"
+        self.turn["operator_attestation"] = "spoke_answer"
+        _, failures, summary = validator.validate(self.document)
+        self.assertEqual(failures, [])
+        self.assertTrue(any("silent protocol not confirmed" in f
+                            for f in summary["capability_findings"]))
+
+
 if __name__ == "__main__":
     unittest.main()

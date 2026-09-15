@@ -1,0 +1,18 @@
+09-15 10:56:01.139   666  1122 E AS.AudioService: Error 1 in getPreferredDeviceForStrategy(0)
+09-15 10:56:01.235   666   861 I AS.AudioService: onUpdateContextualVolumes: absolute volume driving streams 3 avrcp supported: false
+09-15 10:56:01.236   666   858 I AS.AudioDeviceBroker: setCommunicationRouteForClient for uid: 1000 device: AudioDeviceAttributes: role:output type:speaker addr: name:sdk_gphone64_arm64 profiles:[] descriptors:[] isPrivileged: true from API: setCommunicationDevice() from u/pid:1000/666
+09-15 10:56:01.750   666   861 I AS.AudioService: onUpdateContextualVolumes: absolute volume driving streams 3 avrcp supported: false
+09-15 10:56:03.765   666   861 I AS.AudioService: onUpdateContextualVolumes: absolute volume driving streams 3 avrcp supported: false
+09-15 10:56:03.765   666   858 I AS.AudioDeviceBroker: setCommunicationRouteForClient for uid: 1000 device: null isPrivileged: true from API: clearCommunicationDevice() from u/pid:1000/666
+09-15 10:56:04.266   666   861 I AS.AudioService: onUpdateContextualVolumes: absolute volume driving streams 3 avrcp supported: false
+09-15 10:56:17.638   666  1122 E AS.AudioService: Error 1 in getPreferredDeviceForStrategy(0)
+09-15 10:56:17.701   666   861 I AS.AudioService: onUpdateContextualVolumes: absolute volume driving streams 3 avrcp supported: false
+09-15 10:56:17.702   666   858 I AS.AudioDeviceBroker: setCommunicationRouteForClient for uid: 1000 device: AudioDeviceAttributes: role:output type:speaker addr: name:sdk_gphone64_arm64 profiles:[] descriptors:[] isPrivileged: true from API: setCommunicationDevice() from u/pid:1000/666
+09-15 10:56:18.204   666   861 I AS.AudioService: onUpdateContextualVolumes: absolute volume driving streams 3 avrcp supported: false
+09-15 10:56:20.573   666   858 I AS.AudioDeviceBroker: setCommunicationRouteForClient for uid: 1000 device: null isPrivileged: true from API: clearCommunicationDevice() from u/pid:1000/666
+09-15 10:56:20.763   666   861 I AS.AudioService: onUpdateContextualVolumes: absolute volume driving streams 3 avrcp supported: false
+09-15 10:56:21.078   666   861 I AS.AudioService: onUpdateContextualVolumes: absolute volume driving streams 3 avrcp supported: false
+09-15 10:58:42.932   666  4946 I AS.AudioService: shouldNotificationSoundPlay false: exclusive focus owner recording  uid:10152 attr:AudioAttributes: usage=USAGE_NOTIFICATION_RINGTONE content=CONTENT_TYPE_SONIFICATION flags=0x800 tags= bundle=null
+09-15 10:58:48.784   666  1126 E AS.AudioService: Timeout waiting for audio mode reset
+09-15 10:59:07.651   666  4946 I AS.AudioService: shouldNotificationSoundPlay false: exclusive focus owner recording  uid:10152 attr:AudioAttributes: usage=USAGE_NOTIFICATION_RINGTONE content=CONTENT_TYPE_SONIFICATION flags=0x800 tags= bundle=null
+09-15 10:59:13.336   666  1126 E AS.AudioService: Timeout waiting for audio mode reset

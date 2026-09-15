@@ -1,0 +1,16 @@
+{
+  "verified_at_utc": "2026-09-15T16:32:54.421241+00:00",
+  "issue": 45,
+  "title": "[AV-040] Validate live microphone capture and foreground interruptions",
+  "url": "https://github.com/BrockBadeaux14/AnkiVoice/issues/45",
+  "project_url": "https://github.com/users/BrockBadeaux14/projects/2",
+  "item_id": "PVTI_lAHOA4i8mM4Bjey3zg68nrI",
+  "status": "In review",
+  "investigation_result": "no-go",
+  "branch": "codex/av040-live-microphone-interruptions",
+  "working_tree": "uncommitted changes",
+  "pr_created": false,
+  "merged": false,
+  "deployed": false,
+  "next_action": "User review; leave In review until reviewed and accepted. No new task or speech trials automatically."
+}

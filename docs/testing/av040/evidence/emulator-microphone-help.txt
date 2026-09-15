@@ -1,0 +1,4 @@
+'avd hostmicon' allows real audio to go through the guest microphone input.
+OK
+'avd hostmicoff' sends zeroes to the guest microphone input regardless of host microphone signals.
+OK

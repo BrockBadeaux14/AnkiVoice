@@ -1,0 +1,45 @@
+{
+  "recorded_at_utc": "2026-09-15T12:59:09.597273+00:00",
+  "operator": "project owner",
+  "source": "User reply in this task",
+  "question": "For the twelve-turn baseline you just operated, were the spoken prompts clearly audible, and did you mark Interrupted mainly because capture closed before you could answer?",
+  "answer": "Yes",
+  "scope": "Baseline audibility and reason for Interrupted attestations; individual turn attestations remain in baseline-human.json.",
+  "follow_up_candidate1": {
+    "question": "On those four attempts, did you speak into the WH-1000XM5 immediately after tapping START ANSWER, or did the turn close before you began?",
+    "answer": "It closed before I began",
+    "attempts": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "scope": "No recognition accuracy claim; all four attested interrupted. Two-second scenario was run twice."
+  },
+  "follow_up_final_confirmation": {
+    "recorded_at_utc": "2026-09-15T16:09:30.041943+00:00",
+    "echo_question": "After the echo check finishes: were both echo prompts audible through the WH-1000XM5, and did you stay silent throughout both turns?",
+    "echo_answer": "Yes, both audible and I stayed silent",
+    "wording_question": "For the spoken follow-up turns, did you read the displayed wording, including It puts two first, then five, then seven and No, round does not satisfy square, or did you change those answers?",
+    "wording_answer": "I read the displayed wording",
+    "scope": "Owner confirmation of echo audibility/silence and intended wording. Individual app attestations and raw callbacks remain the primary per-turn observations.",
+    "echo_timing_caveat": "The reply arrived before the echo scenario appeared in the probe log and while the reserved attempt count was still 22. Treat it as provisional audibility confirmation; collect actual attempts 23/24 and subsequent attestations before claiming echo completion."
+  },
+  "actual_echo_confirmation": {
+    "recorded_at_utc": "2026-09-15T16:13:28.169512+00:00",
+    "echo_answer": "No\u2014there was a deviation",
+    "other_audio_answer": "No other speech or audio",
+    "scope": "Owner confirms silence but inaudible prompts on attempts 23/24. These are not valid audible-volume echo trials; retain their raw observations and repeat only under the explicitly authorized extension.",
+    "deviation_detail": "Prompts where inaudible, I did not speak."
+  },
+  "macbook_extension_echo_confirmation": {
+    "recorded_at_utc": "2026-09-15T16:22:12.089975+00:00",
+    "attempts": [
+      27,
+      28
+    ],
+    "question": "For the final two MacBook echo turns, the app recorded I SPOKE IT and DONE. Which describes what happened, and were the prompts audible?",
+    "answer": "I spoke; prompts were audible",
+    "scope": "App attestations accurately record speech. These are audible spoken protocol deviations, not silent echo evidence; both also used Done."
+  }
+}

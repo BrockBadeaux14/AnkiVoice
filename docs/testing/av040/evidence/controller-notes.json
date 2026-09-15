@@ -1,0 +1,59 @@
+{
+  "recorded_at_utc": "2026-09-15T16:01:46.196191+00:00",
+  "notes": [
+    {
+      "attempt": 9,
+      "event": "investigator scenario-switch intent arrived after owner started another run",
+      "effect": "onPause stopped playback; scenario selection refused because running. Retained as a halted attempt, not one of the planned Home tests."
+    },
+    {
+      "attempt": 17,
+      "event": "owner returned from Home through launcher icon",
+      "effect": "Android stacked a new default AV005 Activity above the original AV040 Activity. Investigator verified two Activity records then pressed Back once, restoring the original awaiting-attestation run without starting audio. No extra capture or attempt was started by that new screen. Use Recents for the next Home test."
+    },
+    {
+      "attempt": 19,
+      "recorded_at_utc": "2026-09-15T16:04:38.993210+00:00",
+      "event": "Investigator woke emulator for attestation after observing Asleep and stopped playback.",
+      "commands": [
+        "shell input keyevent 224",
+        "shell wm dismiss-keyguard"
+      ],
+      "effect": "Explicit controller return only; no new audio turn or capture started."
+    },
+    {
+      "attempt": 20,
+      "recorded_at_utc": "2026-09-15T16:06:03.043816+00:00",
+      "event": "Investigator wake/unlock after capture lock was triggered and recorded.",
+      "commands": [
+        "shell input keyevent 224",
+        "shell wm dismiss-keyguard"
+      ],
+      "effect": "Explicit controller return only; human still attests and starts subsequent turns."
+    },
+    {
+      "attempt": 21,
+      "event": "Cancel automation coordinates derived from the idle selected scenario UI tree.",
+      "ui_tree": "cancel-playback-ui.xml",
+      "effect": "Controller Cancel tap is an investigator touch action, not human speech or a human attestation."
+    },
+    {
+      "attempt": 22,
+      "event": "Cancel automation coordinates derived from the idle selected scenario UI tree.",
+      "ui_tree": "cancel-capture-ui.xml",
+      "effect": "Controller Cancel tap is an investigator touch action, not human speech or a human attestation."
+    }
+  ],
+  "system_log_excerpt_provenance": {
+    "capture-call-system-logcat.txt": "Lines from adb logcat -d -v threadtime, captured immediately after both capture calls; selected device time prefixes 10:58:4,10:59:0,10:59:1 and call/ringing/mode patterns. TC@3 and TC@4 are the two emulated calls.",
+    "call-audio-volume-logcat.txt": "Same logcat snapshot; audio-service/volume lines from 10:56 through 10:59. Shows ringtone suppressed while exclusive recording focus owner UID 10152 is active.",
+    "capture-call-audio-dump.txt": "Excerpt of adb shell dumpsys audio after calls, from Audio Focus stack entries through ring/music stream levels. Focus history identifies UID 10152 as com.google.android.tts; ring setting is 5/7, music 5/15."
+  },
+  "text_export_formatting": {
+    "files": [
+      "capture-call-audio-dump.txt",
+      "emulator-microphone-help.txt"
+    ],
+    "change": "Terminal CRLF converted to LF and trailing blank lines removed for Git whitespace checks; text content preserved. Canonical human JSON files unchanged."
+  }
+}

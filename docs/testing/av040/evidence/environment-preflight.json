@@ -1,0 +1,58 @@
+{
+  "phase": "preflight_only; no human-run result recorded in this file",
+  "captured_at_utc": "2026-09-15T12:50:57.684142+00:00",
+  "base_commit": "96caf9467a8e2f3259d0f3e9ee6af76e62ae3822",
+  "branch": "codex/av040-live-microphone-interruptions",
+  "host": {
+    "os": "ProductName:\t\tmacOS\nProductVersion:\t\t26.6.2\nBuildVersion:\t\t25G83",
+    "architecture": "arm64",
+    "audio_routing": {
+      "default_input": "MacBook Pro Microphone",
+      "default_output": "MacBook Pro Speakers"
+    },
+    "volume": "output volume:6, input volume:64, alert volume:100, output muted:false"
+  },
+  "avd": "AnkiVoice_AV005",
+  "serial": "emulator-5588",
+  "startup_flags": [
+    "-avd",
+    "AnkiVoice_AV005",
+    "-port",
+    "5588",
+    "-no-snapshot",
+    "-no-boot-anim",
+    "-timezone",
+    "America/Chicago"
+  ],
+  "android_fingerprint": "google/sdk_gphone64_arm64/emu64a:16/BE2A.250530.026.D1/13818094:user/release-keys",
+  "android_api": "36",
+  "guest_locale": "en-US (ro.product.locale; persist.sys.locale unset)",
+  "recognition_locale": "en-US",
+  "system_image": "Pkg.Desc=System Image arm64-v8a with Google Play.\nPkg.Revision=7\nPkg.Dependencies=emulator#35.4.9\nAndroidVersion.ApiLevel=36\nAndroidVersion.ExtensionLevel=17\nAndroidVersion.IsBaseSdk=true\nSystemImage.Abi=arm64-v8a\nSystemImage.TagId=google_apis_playstore\nSystemImage.TagDisplay=Google Play\nSystemImage.GpuSupport=true\nAddon.VendorId=google\nAddon.VendorDisplay=Google Inc.\n",
+  "emulator_version": "Android emulator version 37.1.11.0 (build_id 15917651) (CL:N/A)",
+  "adb_version": "Android Debug Bridge version 1.0.41\nVersion 37.0.1-15733141\nInstalled as /Users/brockbadeaux/Library/Android/sdk/platform-tools/adb\nRunning on Darwin 25.6.0 (arm64)",
+  "recognition_service": "com.google.android.tts/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService",
+  "tts_engine": "com.google.android.tts",
+  "tts_package_version_lines": [
+    "versionCode=210526444 minSdk=26 targetSdk=35",
+    "versionName=googletts.google-speech-apk_20241125.02_p2.702443970"
+  ],
+  "tts_voice": "en-US-language (confirmed in probe startup UI)",
+  "signed_in_accounts": 0,
+  "host_microphone_forwarding": "enabled via adb emu avd hostmicon on; default input unchanged; user starts capture with START",
+  "audio_source": "live default microphone; no injected audio",
+  "guest_media_volume": "[V] will control stream=3 (STREAM_MUSIC)\n[V] will get volume\n[V] Connecting to AudioService\n[V] volume is 5 in range [0..15]",
+  "airplane_mode": "0",
+  "wifi_enabled": "1",
+  "network": "emulator network through host, no shaping; per-run validated-internet state is recorded by the probe",
+  "jdk": "openjdk version \"25.0.2\" 2026-01-20\nOpenJDK Runtime Environment (build 25.0.2+-15348964-b329.117)\nOpenJDK 64-Bit Server VM (build 25.0.2+-15348964-b329.117, mixed mode)",
+  "probe_apk_sha256": "bf3923e141780496abf249556daa0e1244d34e0271b86a4029ac6f3344829562",
+  "probe_build": "Existing AV-005 probe; Gradle 9.3.1, AGP 9.1.0, compile SDK 36, target SDK 35, min SDK 33, Java 17 bytecode",
+  "operator": "Project owner, per issue #45; per-turn spoken attestation and audibility confirmation still required",
+  "evidence_bound": "One 12-turn baseline, then at most 24 additional turns; at most two capture/finish candidates and one interruption rule",
+  "deviations": [
+    "Guest media volume initially 0. The media_session --set command did not change it; volume-up key events raised it to 5/15, verified with get and dumpsys audio. Operator audibility confirmation is pending.",
+    "AV-005 AVD reused, matching issue allowance; AV-006 used a separate AVD and injected audio. This run uses live microphone input.",
+    "This preflight is not a recognition or interruption measurement."
+  ]
+}

@@ -1,0 +1,962 @@
+{
+  "schema_version": 1,
+  "suite": "AV-005 foreground speech",
+  "operator_driven": true,
+  "operated_by": "human",
+  "anki_touched": false,
+  "rating_produced": false,
+  "written_epoch_ms": 1789476832273,
+  "environment": {
+    "fingerprint": "google\/sdk_gphone64_arm64\/emu64a:16\/BE2A.250530.026.D1\/13818094:user\/release-keys",
+    "api": 36,
+    "device": "emu64a",
+    "product": "sdk_gphone64_arm64",
+    "locale": "en-US",
+    "engine": "com.google.android.tts",
+    "engine_version": "googletts.google-speech-apk_20241125.02_p2.702443970",
+    "engine_version_code": 210526444,
+    "recognition_available": true,
+    "on_device_recognition_available": true,
+    "record_audio_granted": true,
+    "tts_language_availability": 1,
+    "recognition_services": [
+      "com.google.android.as\/com.google.android.apps.miphone.aiai.app.AiAiSpeechRecognitionService",
+      "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService"
+    ],
+    "voice": {
+      "name": "en-US-language",
+      "network_required": false,
+      "local_en_us_voice_count": 9
+    },
+    "audio_mode": 0,
+    "airplane_mode_on": false,
+    "has_validated_internet": true
+  },
+  "scenarios": [
+    {
+      "schema_version": 1,
+      "scenario": "loop",
+      "title": "2. Twelve-turn foreground loop",
+      "operator_action": "SPEAK_ANSWER",
+      "operated_by": "human",
+      "voice_source": "human_microphone",
+      "started_epoch_ms": 1789476608301,
+      "environment": {
+        "fingerprint": "google\/sdk_gphone64_arm64\/emu64a:16\/BE2A.250530.026.D1\/13818094:user\/release-keys",
+        "api": 36,
+        "device": "emu64a",
+        "product": "sdk_gphone64_arm64",
+        "locale": "en-US",
+        "engine": "com.google.android.tts",
+        "engine_version": "googletts.google-speech-apk_20241125.02_p2.702443970",
+        "engine_version_code": 210526444,
+        "recognition_available": true,
+        "on_device_recognition_available": true,
+        "record_audio_granted": true,
+        "tts_language_availability": 1,
+        "recognition_services": [
+          "com.google.android.as\/com.google.android.apps.miphone.aiai.app.AiAiSpeechRecognitionService",
+          "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService"
+        ],
+        "voice": {
+          "name": "en-US-language",
+          "network_required": false,
+          "local_en_us_voice_count": 9
+        },
+        "audio_mode": 0,
+        "airplane_mode_on": false,
+        "has_validated_internet": true
+      },
+      "requested_settings": {
+        "settle_ms": 400,
+        "operator_thinking_ms": 0,
+        "complete_silence_ms": 1200,
+        "possibly_complete_silence_ms": 900,
+        "minimum_length_ms": 1000,
+        "watchdog_ms": 30000,
+        "auto_cancel_ms": 0,
+        "second_recognizer": false,
+        "capture_during_playback": false
+      },
+      "turns": [
+        {
+          "turn_index": 0,
+          "position": 0,
+          "round": 1,
+          "example_id": "demo-reversal",
+          "prompt": "Reverse the sequence red, blue, green.",
+          "expected_answer": "Green, blue, red.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 0,
+          "partials": [],
+          "alternatives": [],
+          "rms_peak": 10,
+          "repeats": 0,
+          "manual_intervention": false,
+          "status": "error",
+          "transcript": null,
+          "error_code": 7,
+          "error_name": "ERROR_NO_MATCH",
+          "playback_start_ms": 481,
+          "playback_done_ms": 3209,
+          "listen_requested_ms": 3612,
+          "ready_for_speech_ms": 6968,
+          "beginning_of_speech_ms": null,
+          "end_of_speech_ms": null,
+          "final_ms": 8161,
+          "tts_request_ms": 202,
+          "tts_speak_result": 0,
+          "playback_failed": false,
+          "permission_at_capture": true,
+          "capture_ms": 4549,
+          "playback_ms": 2728,
+          "measured_settle_ms": 403,
+          "echo_suspected": false,
+          "operator_attestation": "interrupted",
+          "attested_epoch_ms": 1789476665435
+        },
+        {
+          "turn_index": 1,
+          "position": 1,
+          "round": 1,
+          "example_id": "demo-rules",
+          "prompt": "In a game, a token is valid only if it is blue and square. A token is blue and round. Is it valid, and why?",
+          "expected_answer": "No, round does not satisfy square.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 0,
+          "partials": [
+            {
+              "t_ms": 67149,
+              "text": ""
+            },
+            {
+              "t_ms": 67291,
+              "text": ""
+            },
+            {
+              "t_ms": 67394,
+              "text": ""
+            },
+            {
+              "t_ms": 67543,
+              "text": ""
+            },
+            {
+              "t_ms": 67673,
+              "text": "no"
+            },
+            {
+              "t_ms": 67758,
+              "text": "no it"
+            },
+            {
+              "t_ms": 67858,
+              "text": "no it is"
+            },
+            {
+              "t_ms": 68221,
+              "text": "no it is not"
+            },
+            {
+              "t_ms": 68298,
+              "text": "no it is not"
+            },
+            {
+              "t_ms": 69031,
+              "text": "no it is not valid"
+            },
+            {
+              "t_ms": 69112,
+              "text": "no it is not valid"
+            },
+            {
+              "t_ms": 69669,
+              "text": "no it is not valid because"
+            },
+            {
+              "t_ms": 70810,
+              "text": "no it is not valid because"
+            },
+            {
+              "t_ms": 71526,
+              "text": "no it is not valid because the"
+            },
+            {
+              "t_ms": 71624,
+              "text": "no it is not valid because the"
+            },
+            {
+              "t_ms": 72087,
+              "text": "no it is not valid because the square"
+            }
+          ],
+          "alternatives": [],
+          "rms_peak": 10,
+          "repeats": 0,
+          "manual_intervention": false,
+          "status": "error",
+          "transcript": null,
+          "error_code": null,
+          "error_name": null,
+          "playback_start_ms": 57897,
+          "playback_done_ms": 65274,
+          "listen_requested_ms": 65677,
+          "ready_for_speech_ms": 65835,
+          "beginning_of_speech_ms": 66345,
+          "end_of_speech_ms": 72055,
+          "final_ms": 72172,
+          "tts_request_ms": 57742,
+          "tts_speak_result": 0,
+          "playback_failed": false,
+          "permission_at_capture": true,
+          "detail": "empty_results_bundle",
+          "capture_ms": 6495,
+          "finalization_after_eos_ms": 117,
+          "playback_ms": 7377,
+          "measured_settle_ms": 403,
+          "echo_suspected": false,
+          "operator_attestation": "spoke_answer",
+          "attested_epoch_ms": 1789476715500
+        },
+        {
+          "turn_index": 2,
+          "position": 2,
+          "round": 1,
+          "example_id": "demo-arithmetic",
+          "prompt": "A box has three red blocks and two blue blocks. How many blocks are there in total?",
+          "expected_answer": "Five.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 0,
+          "partials": [
+            {
+              "t_ms": 114767,
+              "text": ""
+            },
+            {
+              "t_ms": 114951,
+              "text": ""
+            },
+            {
+              "t_ms": 115471,
+              "text": "there"
+            },
+            {
+              "t_ms": 115513,
+              "text": "there are"
+            },
+            {
+              "t_ms": 115643,
+              "text": "there are"
+            },
+            {
+              "t_ms": 115864,
+              "text": "there are"
+            },
+            {
+              "t_ms": 116045,
+              "text": "there are five"
+            },
+            {
+              "t_ms": 116169,
+              "text": "there are five"
+            },
+            {
+              "t_ms": 116324,
+              "text": "there are five"
+            },
+            {
+              "t_ms": 116386,
+              "text": "there are five"
+            },
+            {
+              "t_ms": 116432,
+              "text": "there are five blocks"
+            },
+            {
+              "t_ms": 116875,
+              "text": "there are five blocks in"
+            },
+            {
+              "t_ms": 116898,
+              "text": "there are five blocks in total"
+            }
+          ],
+          "alternatives": [],
+          "rms_peak": 10,
+          "repeats": 0,
+          "manual_intervention": false,
+          "status": "error",
+          "transcript": null,
+          "error_code": null,
+          "error_name": null,
+          "playback_start_ms": 107915,
+          "playback_done_ms": 112822,
+          "listen_requested_ms": 113229,
+          "ready_for_speech_ms": 113389,
+          "beginning_of_speech_ms": 113912,
+          "end_of_speech_ms": 116848,
+          "final_ms": 116954,
+          "tts_request_ms": 107809,
+          "tts_speak_result": 0,
+          "playback_failed": false,
+          "permission_at_capture": true,
+          "detail": "empty_results_bundle",
+          "capture_ms": 3725,
+          "finalization_after_eos_ms": 106,
+          "playback_ms": 4907,
+          "measured_settle_ms": 407,
+          "echo_suspected": false,
+          "operator_attestation": "spoke_answer",
+          "attested_epoch_ms": 1789476732911
+        },
+        {
+          "turn_index": 3,
+          "position": 3,
+          "round": 1,
+          "example_id": "demo-explanation",
+          "prompt": "A machine sorts numbers from smallest to largest. Explain what it does to the list seven, two, five.",
+          "expected_answer": "It puts two first, then five, then seven.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 0,
+          "partials": [],
+          "alternatives": [],
+          "rms_peak": 10,
+          "repeats": 0,
+          "manual_intervention": false,
+          "status": "error",
+          "transcript": null,
+          "error_code": 7,
+          "error_name": "ERROR_NO_MATCH",
+          "playback_start_ms": 125272,
+          "playback_done_ms": 131907,
+          "listen_requested_ms": 132308,
+          "ready_for_speech_ms": 132372,
+          "beginning_of_speech_ms": null,
+          "end_of_speech_ms": null,
+          "final_ms": 133451,
+          "tts_request_ms": 125213,
+          "tts_speak_result": 0,
+          "playback_failed": false,
+          "permission_at_capture": true,
+          "capture_ms": 1143,
+          "playback_ms": 6635,
+          "measured_settle_ms": 401,
+          "echo_suspected": false,
+          "operator_attestation": "interrupted",
+          "attested_epoch_ms": 1789476744849
+        },
+        {
+          "turn_index": 4,
+          "position": 4,
+          "round": 2,
+          "example_id": "demo-reversal",
+          "prompt": "Reverse the sequence red, blue, green.",
+          "expected_answer": "Blue, green, red.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 0,
+          "partials": [],
+          "alternatives": [],
+          "rms_peak": 10,
+          "repeats": 0,
+          "manual_intervention": false,
+          "status": "error",
+          "transcript": null,
+          "error_code": 7,
+          "error_name": "ERROR_NO_MATCH",
+          "playback_start_ms": 137178,
+          "playback_done_ms": 139908,
+          "listen_requested_ms": 140310,
+          "ready_for_speech_ms": 140395,
+          "beginning_of_speech_ms": null,
+          "end_of_speech_ms": null,
+          "final_ms": 141446,
+          "tts_request_ms": 137150,
+          "tts_speak_result": 0,
+          "playback_failed": false,
+          "permission_at_capture": true,
+          "capture_ms": 1136,
+          "playback_ms": 2730,
+          "measured_settle_ms": 402,
+          "echo_suspected": false,
+          "operator_attestation": "interrupted",
+          "attested_epoch_ms": 1789476751854
+        },
+        {
+          "turn_index": 5,
+          "position": 5,
+          "round": 2,
+          "example_id": "demo-rules",
+          "prompt": "In a game, a token is valid only if it is blue and square. A token is blue and round. Is it valid, and why?",
+          "expected_answer": "Yes, because it is blue.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 0,
+          "partials": [],
+          "alternatives": [],
+          "rms_peak": 10,
+          "repeats": 0,
+          "manual_intervention": false,
+          "status": "error",
+          "transcript": null,
+          "error_code": 7,
+          "error_name": "ERROR_NO_MATCH",
+          "playback_start_ms": 144164,
+          "playback_done_ms": 151558,
+          "listen_requested_ms": 151960,
+          "ready_for_speech_ms": 152088,
+          "beginning_of_speech_ms": null,
+          "end_of_speech_ms": null,
+          "final_ms": 153111,
+          "tts_request_ms": 144158,
+          "tts_speak_result": 0,
+          "playback_failed": false,
+          "permission_at_capture": true,
+          "capture_ms": 1151,
+          "playback_ms": 7394,
+          "measured_settle_ms": 402,
+          "echo_suspected": false,
+          "operator_attestation": "interrupted",
+          "attested_epoch_ms": 1789476764895
+        },
+        {
+          "turn_index": 6,
+          "position": 6,
+          "round": 2,
+          "example_id": "demo-arithmetic",
+          "prompt": "A box has three red blocks and two blue blocks. How many blocks are there in total?",
+          "expected_answer": "Six.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 0,
+          "partials": [],
+          "alternatives": [],
+          "rms_peak": 10,
+          "repeats": 0,
+          "manual_intervention": false,
+          "status": "error",
+          "transcript": null,
+          "error_code": 7,
+          "error_name": "ERROR_NO_MATCH",
+          "playback_start_ms": 157229,
+          "playback_done_ms": 162133,
+          "listen_requested_ms": 162534,
+          "ready_for_speech_ms": 162646,
+          "beginning_of_speech_ms": null,
+          "end_of_speech_ms": null,
+          "final_ms": 163699,
+          "tts_request_ms": 157197,
+          "tts_speak_result": 0,
+          "playback_failed": false,
+          "permission_at_capture": true,
+          "capture_ms": 1165,
+          "playback_ms": 4904,
+          "measured_settle_ms": 401,
+          "echo_suspected": false,
+          "operator_attestation": "interrupted",
+          "attested_epoch_ms": 1789476774263
+        },
+        {
+          "turn_index": 7,
+          "position": 7,
+          "round": 2,
+          "example_id": "demo-explanation",
+          "prompt": "A machine sorts numbers from smallest to largest. Explain what it does to the list seven, two, five.",
+          "expected_answer": "It gives seven, five, two.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 0,
+          "partials": [
+            {
+              "t_ms": 175295,
+              "text": ""
+            },
+            {
+              "t_ms": 175708,
+              "text": ""
+            },
+            {
+              "t_ms": 175946,
+              "text": "it"
+            },
+            {
+              "t_ms": 176305,
+              "text": "it gives"
+            },
+            {
+              "t_ms": 176504,
+              "text": "it gives"
+            },
+            {
+              "t_ms": 176581,
+              "text": "it gives"
+            },
+            {
+              "t_ms": 176633,
+              "text": "it gives"
+            },
+            {
+              "t_ms": 176749,
+              "text": "it gives"
+            },
+            {
+              "t_ms": 177315,
+              "text": "it gives 752"
+            },
+            {
+              "t_ms": 177481,
+              "text": "it gives 752"
+            }
+          ],
+          "alternatives": [],
+          "rms_peak": 10,
+          "repeats": 0,
+          "manual_intervention": false,
+          "status": "error",
+          "transcript": null,
+          "error_code": null,
+          "error_name": null,
+          "playback_start_ms": 166594,
+          "playback_done_ms": 173229,
+          "listen_requested_ms": 173631,
+          "ready_for_speech_ms": 173841,
+          "beginning_of_speech_ms": 174533,
+          "end_of_speech_ms": 177403,
+          "final_ms": 177555,
+          "tts_request_ms": 166565,
+          "tts_speak_result": 0,
+          "playback_failed": false,
+          "permission_at_capture": true,
+          "detail": "empty_results_bundle",
+          "capture_ms": 3924,
+          "finalization_after_eos_ms": 152,
+          "playback_ms": 6635,
+          "measured_settle_ms": 402,
+          "echo_suspected": false,
+          "operator_attestation": "spoke_answer",
+          "attested_epoch_ms": 1789476791084
+        },
+        {
+          "turn_index": 8,
+          "position": 8,
+          "round": 3,
+          "example_id": "demo-reversal",
+          "prompt": "Reverse the sequence red, blue, green.",
+          "expected_answer": "Green, blue, red.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 0,
+          "partials": [],
+          "alternatives": [],
+          "rms_peak": 10,
+          "repeats": 0,
+          "manual_intervention": false,
+          "status": "error",
+          "transcript": null,
+          "error_code": 7,
+          "error_name": "ERROR_NO_MATCH",
+          "playback_start_ms": 183400,
+          "playback_done_ms": 186155,
+          "listen_requested_ms": 186557,
+          "ready_for_speech_ms": 186694,
+          "beginning_of_speech_ms": null,
+          "end_of_speech_ms": null,
+          "final_ms": 188075,
+          "tts_request_ms": 183392,
+          "tts_speak_result": 0,
+          "playback_failed": false,
+          "permission_at_capture": true,
+          "capture_ms": 1518,
+          "playback_ms": 2755,
+          "measured_settle_ms": 402,
+          "echo_suspected": false,
+          "operator_attestation": "interrupted",
+          "attested_epoch_ms": 1789476798717
+        },
+        {
+          "turn_index": 9,
+          "position": 9,
+          "round": 3,
+          "example_id": "demo-rules",
+          "prompt": "In a game, a token is valid only if it is blue and square. A token is blue and round. Is it valid, and why?",
+          "expected_answer": "No.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 0,
+          "partials": [],
+          "alternatives": [],
+          "rms_peak": 10,
+          "repeats": 0,
+          "manual_intervention": false,
+          "status": "error",
+          "transcript": null,
+          "error_code": 7,
+          "error_name": "ERROR_NO_MATCH",
+          "playback_start_ms": 191033,
+          "playback_done_ms": 198427,
+          "listen_requested_ms": 198829,
+          "ready_for_speech_ms": 198918,
+          "beginning_of_speech_ms": 199961,
+          "end_of_speech_ms": null,
+          "final_ms": 200064,
+          "tts_request_ms": 191023,
+          "tts_speak_result": 0,
+          "playback_failed": false,
+          "permission_at_capture": true,
+          "capture_ms": 1235,
+          "playback_ms": 7394,
+          "measured_settle_ms": 402,
+          "echo_suspected": false,
+          "operator_attestation": "interrupted",
+          "attested_epoch_ms": 1789476810683
+        },
+        {
+          "turn_index": 10,
+          "position": 10,
+          "round": 3,
+          "example_id": "demo-arithmetic",
+          "prompt": "A box has three red blocks and two blue blocks. How many blocks are there in total?",
+          "expected_answer": "Five.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 0,
+          "partials": [],
+          "alternatives": [],
+          "rms_peak": 10,
+          "repeats": 0,
+          "manual_intervention": false,
+          "status": "error",
+          "transcript": null,
+          "error_code": 7,
+          "error_name": "ERROR_NO_MATCH",
+          "playback_start_ms": 202999,
+          "playback_done_ms": 207914,
+          "listen_requested_ms": 208317,
+          "ready_for_speech_ms": 208373,
+          "beginning_of_speech_ms": null,
+          "end_of_speech_ms": null,
+          "final_ms": 209508,
+          "tts_request_ms": 202983,
+          "tts_speak_result": 0,
+          "playback_failed": false,
+          "permission_at_capture": true,
+          "capture_ms": 1191,
+          "playback_ms": 4915,
+          "measured_settle_ms": 403,
+          "echo_suspected": false,
+          "operator_attestation": "interrupted",
+          "attested_epoch_ms": 1789476820932
+        },
+        {
+          "turn_index": 11,
+          "position": 11,
+          "round": 3,
+          "example_id": "demo-explanation",
+          "prompt": "A machine sorts numbers from smallest to largest. Explain what it does to the list seven, two, five.",
+          "expected_answer": "It puts two first, then five, then seven.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 0,
+          "partials": [],
+          "alternatives": [],
+          "rms_peak": 10,
+          "repeats": 0,
+          "manual_intervention": false,
+          "status": "error",
+          "transcript": null,
+          "error_code": 7,
+          "error_name": "ERROR_NO_MATCH",
+          "playback_start_ms": 213259,
+          "playback_done_ms": 219885,
+          "listen_requested_ms": 220289,
+          "ready_for_speech_ms": 220371,
+          "beginning_of_speech_ms": null,
+          "end_of_speech_ms": null,
+          "final_ms": 221550,
+          "tts_request_ms": 213232,
+          "tts_speak_result": 0,
+          "playback_failed": false,
+          "permission_at_capture": true,
+          "capture_ms": 1261,
+          "playback_ms": 6626,
+          "measured_settle_ms": 404,
+          "echo_suspected": false,
+          "operator_attestation": "interrupted",
+          "attested_epoch_ms": 1789476831666
+        }
+      ],
+      "lifecycle_events": [
+        {
+          "event": "audio_focus_change_-2",
+          "t_ms": 3675,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 0
+        },
+        {
+          "event": "audio_focus_loss_during_capture",
+          "t_ms": 3676,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 0
+        },
+        {
+          "event": "audio_focus_change_1",
+          "t_ms": 8019,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 0
+        },
+        {
+          "event": "audio_focus_change_-2",
+          "t_ms": 65699,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 1
+        },
+        {
+          "event": "audio_focus_loss_during_capture",
+          "t_ms": 65699,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 1
+        },
+        {
+          "event": "audio_focus_change_1",
+          "t_ms": 72067,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 1
+        },
+        {
+          "event": "audio_focus_change_-2",
+          "t_ms": 113251,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 2
+        },
+        {
+          "event": "audio_focus_loss_during_capture",
+          "t_ms": 113253,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 2
+        },
+        {
+          "event": "audio_focus_change_1",
+          "t_ms": 116874,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 2
+        },
+        {
+          "event": "audio_focus_change_-2",
+          "t_ms": 132330,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 3
+        },
+        {
+          "event": "audio_focus_loss_during_capture",
+          "t_ms": 132339,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 3
+        },
+        {
+          "event": "audio_focus_change_1",
+          "t_ms": 133371,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 3
+        },
+        {
+          "event": "audio_focus_change_-2",
+          "t_ms": 140324,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 4
+        },
+        {
+          "event": "audio_focus_loss_during_capture",
+          "t_ms": 140326,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 4
+        },
+        {
+          "event": "audio_focus_change_1",
+          "t_ms": 141376,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 4
+        },
+        {
+          "event": "audio_focus_change_-2",
+          "t_ms": 151975,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 5
+        },
+        {
+          "event": "audio_focus_loss_during_capture",
+          "t_ms": 151976,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 5
+        },
+        {
+          "event": "audio_focus_change_1",
+          "t_ms": 153042,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 5
+        },
+        {
+          "event": "audio_focus_change_-2",
+          "t_ms": 162548,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 6
+        },
+        {
+          "event": "audio_focus_loss_during_capture",
+          "t_ms": 162549,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 6
+        },
+        {
+          "event": "audio_focus_change_1",
+          "t_ms": 163609,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 6
+        },
+        {
+          "event": "audio_focus_change_-2",
+          "t_ms": 173653,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 7
+        },
+        {
+          "event": "audio_focus_loss_during_capture",
+          "t_ms": 173656,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 7
+        },
+        {
+          "event": "audio_focus_change_1",
+          "t_ms": 177419,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 7
+        },
+        {
+          "event": "audio_focus_change_-2",
+          "t_ms": 186570,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 8
+        },
+        {
+          "event": "audio_focus_loss_during_capture",
+          "t_ms": 186571,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 8
+        },
+        {
+          "event": "audio_focus_change_1",
+          "t_ms": 187645,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 8
+        },
+        {
+          "event": "audio_focus_change_-2",
+          "t_ms": 198851,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 9
+        },
+        {
+          "event": "audio_focus_loss_during_capture",
+          "t_ms": 198854,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 9
+        },
+        {
+          "event": "audio_focus_change_1",
+          "t_ms": 199915,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 9
+        },
+        {
+          "event": "audio_focus_change_-2",
+          "t_ms": 208333,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 10
+        },
+        {
+          "event": "audio_focus_loss_during_capture",
+          "t_ms": 208334,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 10
+        },
+        {
+          "event": "audio_focus_change_1",
+          "t_ms": 209368,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 10
+        },
+        {
+          "event": "audio_focus_change_-2",
+          "t_ms": 220304,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 11
+        },
+        {
+          "event": "audio_focus_loss_during_capture",
+          "t_ms": 220306,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 11
+        },
+        {
+          "event": "audio_focus_change_1",
+          "t_ms": 221362,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 11
+        },
+        {
+          "event": "stop_audio_work_scenario_end",
+          "t_ms": 223969,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        }
+      ],
+      "stale_callbacks": [],
+      "audio_focus_request": 1,
+      "self_inflicted_focus_blips_ms": [
+        4345,
+        6368,
+        3622,
+        1033,
+        1051,
+        1066,
+        1061,
+        3765,
+        1075,
+        1062,
+        1035,
+        1056
+      ],
+      "finished_epoch_ms": 1789476832272,
+      "duration_ms": 223971,
+      "completed_turns": 12
+    }
+  ]
+}

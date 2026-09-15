@@ -75,9 +75,9 @@ public class ProbeActivity extends Activity implements RecognitionListener {
      * transient loss caused by its own work, at unpredictable length (34 ms to over
      * 1.3 s on this image). Cancelling a turn on that signal makes the loop cancel
      * itself, which is exactly what happened in this investigation before the rule
-     * below was adopted. Real interruptions are detected through the activity
-     * lifecycle (onPause, which a call or lock screen triggers) and through the
-     * recognizer's own errors. The focus listener only records.
+     * below was adopted. The original probe observes lifecycle and recognizer errors;
+     * an emulated call need not produce onPause. The AV-040 candidate also observes
+     * audio-mode changes and unsolicited TTS stops. The focus listener only records.
      */
 
     private final Handler main = new Handler(Looper.getMainLooper());
@@ -110,6 +110,8 @@ public class ProbeActivity extends Activity implements RecognitionListener {
     private Button silent;
     private Button interrupted;
     private Button save;
+    private Button startAnswer;
+    private Button doneAnswer;
     private TextView logView;
     private ScrollView logScroll;
 
@@ -132,15 +134,46 @@ public class ProbeActivity extends Activity implements RecognitionListener {
     private Runnable watchdog;
     private Runnable pendingStart;
     private long focusLostAtMs = -1;
+    private boolean av040;
+    private boolean segmentedCapture;
+    private boolean waitingForAnswer;
+    private long answerEnabledAt;
+    private AudioManager.OnModeChangedListener modeListener;
+    private TokenListener activeListener;
+    private int liveAttemptLimit = 24;
+    private static final int CAPTURE_LIMIT_MS = 15000;
+    private static final int FINALIZATION_LIMIT_MS = 5000;
 
     // ------------------------------------------------------------------ setup
 
     @Override
     protected void onCreate(Bundle saved) {
         super.onCreate(saved);
+        av040 = getIntent().getBooleanExtra("av040", false);
+        segmentedCapture = av040 && getIntent().getBooleanExtra("av040_segmented", false);
+        // The owner explicitly authorized four additional MacBook-route turns.
+        // Default runs retain the original bound; the stored counter is never reset.
+        if (av040 && getIntent().getBooleanExtra("av040_authorized_four_turn_extension", false)) {
+            liveAttemptLimit = 28;
+        }
+        if (av040) {
+            scenarios.clear();
+            scenarios.addAll(Scenario.liveFollowUp());
+        }
         setContentView(buildLayout());
         base = SystemClock.elapsedRealtime();
         audio = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        if (av040) {
+            modeListener = mode -> {
+                note("audio_mode_" + mode);
+                // The recognizer's own focus loss can last longer than an emulated call.
+                // Evaluate telephony/communication modes rather than a duration threshold.
+                if (mode >= AudioManager.MODE_RINGTONE && mode <= 6) {
+                    interruptLiveTurn("external_audio_mode_" + mode);
+                }
+            };
+            audio.addOnModeChangedListener(getMainExecutor(), modeListener);
+        }
         try {
             corpus = new JSONObject(read(getAssets().open("av005-turns.json"))).getJSONArray("turns");
         } catch (Exception error) {
@@ -184,7 +217,7 @@ public class ProbeActivity extends Activity implements RecognitionListener {
         for (int i = 0; i < scenarios.size(); i++) {
             if (scenarios.get(i).id.equals(wanted)) {
                 picker.setSelection(i);
-                instructions.setText(scenarios.get(i).instructions);
+                showSelectedScenario(scenarios.get(i));
                 log("Preselected scenario \"" + wanted + "\" from the launch intent.");
                 return;
             }
@@ -196,6 +229,19 @@ public class ProbeActivity extends Activity implements RecognitionListener {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         if (!running) selectScenarioFromIntent(intent);
+    }
+
+    private void showSelectedScenario(Scenario selected) {
+        instructions.setText(selected.instructions);
+        if (av040 && !running && !awaitingAttestation && state != null) {
+            // A new selection must not display the previous case's completion/result.
+            state.setText("Ready — tap START");
+            progressView.setText("");
+            promptView.setText("");
+            heardView.setText("");
+            timingView.setText("");
+            start.setText("START");
+        }
     }
 
     private View buildLayout() {
@@ -210,7 +256,7 @@ public class ProbeActivity extends Activity implements RecognitionListener {
             return insets;
         });
 
-        TextView title = text("AV-005 foreground speech suite", 20, true);
+        TextView title = text(av040 ? "AV-040 live speech comparison" : "AV-005 foreground speech suite", 20, true);
         root.addView(title);
         root.addView(text("Operator-driven. Every turn needs a person: listen, speak, attest.", 13, false));
         modeView = text("", 13, true);
@@ -222,7 +268,7 @@ public class ProbeActivity extends Activity implements RecognitionListener {
         picker.setAdapter(adapter);
         picker.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> parent, View view, int index, long id) {
-                if (!running) instructions.setText(scenarios.get(index).instructions);
+                if (!running) showSelectedScenario(scenarios.get(index));
             }
             @Override public void onNothingSelected(AdapterView<?> parent) { }
         });
@@ -233,13 +279,25 @@ public class ProbeActivity extends Activity implements RecognitionListener {
         root.addView(instructions);
 
         LinearLayout controls = row();
-        start = button("Start", v -> startScenario());
+        start = button("Start", v -> {
+            if (av040 && running && !awaitingAttestation && turn == null) nextTurn();
+            else startScenario();
+        });
         cancel = button("CANCEL", v -> operatorCancel());
         repeat = button("REPEAT", v -> operatorRepeat());
         controls.addView(start);
         controls.addView(repeat);
         controls.addView(cancel);
         root.addView(controls);
+
+        if (av040) {
+            LinearLayout captureControls = row();
+            startAnswer = button("START ANSWER", v -> beginAnswer());
+            doneAnswer = button("DONE", v -> finishAnswer());
+            captureControls.addView(startAnswer);
+            captureControls.addView(doneAnswer);
+            root.addView(captureControls);
+        }
 
         state = text("Idle", 22, true);
         state.setPadding(0, 24, 0, 8);
@@ -317,13 +375,19 @@ public class ProbeActivity extends Activity implements RecognitionListener {
 
     private void setBusy(boolean busy) {
         start.setEnabled(!busy && !awaitingAttestation);
-        picker.setEnabled(!busy && !awaitingAttestation);
-        repeat.setEnabled(busy);
+        picker.setEnabled(!busy && !awaitingAttestation && !(av040 && running));
+        repeat.setEnabled(busy && !av040);
         cancel.setEnabled(busy);
         spoke.setEnabled(awaitingAttestation);
         silent.setEnabled(awaitingAttestation);
         interrupted.setEnabled(awaitingAttestation);
         save.setEnabled(!busy);
+        if (av040) {
+            startAnswer.setEnabled(busy && waitingForAnswer && now() >= answerEnabledAt);
+            doneAnswer.setEnabled(busy && listening && turn != null
+                    && !turn.has("finish_requested_ms") && !turn.has("done_requested_ms")
+                    && (segmentedCapture || optLong(turn, "end_of_speech_ms") == null));
+        }
     }
 
     // ------------------------------------------------------------ environment
@@ -358,7 +422,12 @@ public class ProbeActivity extends Activity implements RecognitionListener {
             @Override public void onDone(String id) { main.post(() -> playbackDone(id, false)); }
             @Override public void onError(String id) { main.post(() -> playbackDone(id, true)); }
             @Override public void onStop(String id, boolean interruptedFlag) {
-                main.post(() -> note("tts_stopped"));
+                main.post(() -> {
+                    note("tts_stopped:" + id);
+                    if (av040 && speaking && utteranceId().equals(id)) {
+                        interruptLiveTurn("unsolicited_tts_stop");
+                    }
+                });
             }
         });
         environment = describeEnvironment(localCount);
@@ -402,6 +471,10 @@ public class ProbeActivity extends Activity implements RecognitionListener {
         put(voice, "local_en_us_voice_count", localVoiceCount);
         put(record, "voice", voice);
         put(record, "audio_mode", audio == null ? null : audio.getMode());
+        put(record, "media_volume", audio.getStreamVolume(AudioManager.STREAM_MUSIC));
+        put(record, "media_volume_max", audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
+        put(record, "default_recognition_service", android.provider.Settings.Secure.getString(
+                getContentResolver(), "voice_recognition_service"));
         /* Network state matters: the recognizer on this image may use a remote service,
            so the report must be able to show what connectivity was during each run. */
         put(record, "airplane_mode_on",
@@ -433,6 +506,19 @@ public class ProbeActivity extends Activity implements RecognitionListener {
         running = true;
         base = SystemClock.elapsedRealtime();
         put(run, "schema_version", 1);
+        if (av040) {
+            put(run, "follow_up", "AV-040");
+            put(run, "authorized_four_turn_extension", liveAttemptLimit == 28);
+            put(run, "capture_policy", segmentedCapture
+                    ? "explicit_start_segmented_done_v2" : "explicit_start_done_v1");
+            put(run, "segmented_session_requested", segmentedCapture);
+            put(run, "segmented_minimum_ms", segmentedCapture ? CAPTURE_LIMIT_MS : null);
+            put(run, "interruption_rule", "lifecycle_audio_mode_unsolicited_tts_stop_v1");
+            put(run, "capture_limit_ms", CAPTURE_LIMIT_MS);
+            put(run, "finalization_limit_ms", FINALIZATION_LIMIT_MS);
+            put(run, "automatic_rearms", 0);
+            put(run, "same_turn_retries", 0);
+        }
         put(run, "scenario", scenario.id);
         put(run, "title", scenario.title);
         put(run, "operator_action", scenario.action.name());
@@ -446,7 +532,7 @@ public class ProbeActivity extends Activity implements RecognitionListener {
         put(requested, "operator_thinking_ms", scenario.thinkingMs);
         put(requested, "complete_silence_ms", scenario.completeSilenceMs);
         put(requested, "possibly_complete_silence_ms", scenario.possiblyCompleteSilenceMs);
-        put(requested, "minimum_length_ms", scenario.minimumMs);
+        put(requested, "minimum_length_ms", segmentedCapture ? CAPTURE_LIMIT_MS : scenario.minimumMs);
         put(requested, "watchdog_ms", scenario.watchdogMs);
         put(requested, "auto_cancel_ms", scenario.autoCancelMs);
         put(requested, "second_recognizer", scenario.secondRecognizer);
@@ -472,11 +558,41 @@ public class ProbeActivity extends Activity implements RecognitionListener {
             finishScenario();
             return;
         }
+        if (av040 && (!foreground || (audio.getMode() >= AudioManager.MODE_RINGTONE
+                && audio.getMode() <= 6))) {
+            state.setText("Paused. Return after the interruption, then tap NEXT / RESUME.");
+            start.setText("NEXT / RESUME");
+            start.setEnabled(true);
+            return;
+        }
+        if (av040) {
+            int used = getPreferences(MODE_PRIVATE).getInt("av040_attempts", 0);
+            if (used >= liveAttemptLimit) {
+                put(run, "stopped_at_attempt_limit", true);
+                finishScenario();
+                state.setText("AV-040 limit reached: " + liveAttemptLimit + " attempts. Stop and report.");
+                return;
+            }
+            // Reserve before starting any playback/capture; survives relaunches.
+            if (!getPreferences(MODE_PRIVATE).edit().putInt("av040_attempts", used + 1).commit()) {
+                finishScenario();
+                state.setText("Cannot reserve an attempt. Stop and report.");
+                return;
+            }
+        }
         try {
             int index = queue.get(position);
             JSONObject source = corpus.getJSONObject(index);
             token++;
+            start.setText("START");
             turn = new JSONObject();
+            if (av040) {
+                put(turn, "av040_attempt", getPreferences(MODE_PRIVATE).getInt("av040_attempts", 0));
+                put(turn, "token", token);
+                put(turn, "operator_actions", new JSONArray());
+                put(turn, "result_events", new JSONArray());
+                put(turn, "segments", new JSONArray());
+            }
             put(turn, "turn_index", index);
             put(turn, "position", position);
             put(turn, "round", source.getInt("round"));
@@ -503,10 +619,12 @@ public class ProbeActivity extends Activity implements RecognitionListener {
             progressView.setText(String.format(Locale.US, "Turn %d of %d  \u00b7  round %d  \u00b7  %s",
                     position + 1, queue.size(), source.getInt("round"), source.getString("example_id")));
             promptView.setText("Prompt: " + source.getString("prompt"));
-            heardView.setText("");
+            heardView.setText(av040 && scenario.action != Scenario.Action.STAY_SILENT
+                    ? "Read aloud when ready: " + source.getString("expected_answer") : "");
             timingView.setText("");
             level.setProgress(0);
             state.setText("Listen to the prompt…");
+            setBusy(true);
             speakPrompt(source.getString("prompt"));
         } catch (JSONException error) {
             log("Corpus error: " + error);
@@ -564,7 +682,20 @@ public class ProbeActivity extends Activity implements RecognitionListener {
         pendingStart = () -> {
             pendingStart = null;
             if (!running || expected != token) return;
-            startListening();
+            if (av040 && scenario.action != Scenario.Action.STAY_SILENT) {
+                clearWatchdog(); // Thinking is not an active recognizer attempt.
+                waitingForAnswer = true;
+                put(turn, "thinking_started_ms", now());
+                answerEnabledAt = now() + scenario.thinkingMs;
+                state.setText("Think, then tap START ANSWER");
+                setBusy(true);
+                main.postDelayed(() -> {
+                    if (running && token == expected && waitingForAnswer) setBusy(true);
+                }, scenario.thinkingMs);
+                mark("thinking_started");
+            } else {
+                startListening();
+            }
         };
         main.postDelayed(pendingStart, scenario.settleMs);
     }
@@ -583,6 +714,10 @@ public class ProbeActivity extends Activity implements RecognitionListener {
         }
         put(turn, "listen_requested_ms", now());
         listening = true;
+        if (av040) {
+            activeListener = new TokenListener(token);
+            recognizer.setRecognitionListener(activeListener);
+        }
         recognizer.startListening(recognitionIntent());
         mark("listen_requested");
         state.setText("SPEAK NOW");
@@ -595,7 +730,11 @@ public class ProbeActivity extends Activity implements RecognitionListener {
         if (scenario.action == Scenario.Action.USE_REPEAT) state.setText("TAP REPEAT");
         if (scenario.action == Scenario.Action.USE_CANCEL) state.setText("SPEAK, THEN TAP CANCEL");
         if (scenario.thinkingMs > 0) {
-            state.setText("WAIT " + (scenario.thinkingMs / 1000) + "s, THEN SPEAK");
+            if (!av040) state.setText("WAIT " + (scenario.thinkingMs / 1000) + "s, THEN SPEAK");
+        }
+        if (av040) {
+            armWatchdog(CAPTURE_LIMIT_MS, "capture_limit");
+            setBusy(true);
         }
         if (scenario.autoCancelMs > 0) {
             final int expected = token;
@@ -639,12 +778,64 @@ public class ProbeActivity extends Activity implements RecognitionListener {
         intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS,
                 scenario.possiblyCompleteSilenceMs);
         intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, scenario.minimumMs);
+        if (segmentedCapture) {
+            intent.putExtra(RecognizerIntent.EXTRA_SEGMENTED_SESSION,
+                    RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS);
+            intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, CAPTURE_LIMIT_MS);
+        }
         return intent;
     }
 
     // ------------------------------------------------------- operator actions
 
+    private void recordAction(String action) {
+        if (!av040 || turn == null) return;
+        JSONObject entry = new JSONObject();
+        put(entry, "action", action);
+        put(entry, "t_ms", now());
+        turn.optJSONArray("operator_actions").put(entry);
+    }
+
+    private void beginAnswer() {
+        if (!running || turn == null || !waitingForAnswer || now() < answerEnabledAt) return;
+        waitingForAnswer = false;
+        recordAction("start_answer");
+        put(turn, "measured_thinking_ms", now() - turn.optLong("thinking_started_ms"));
+        startListening();
+    }
+
+    private void finishAnswer() {
+        requestFinalization(true);
+    }
+
+    private void requestFinalization(boolean byOperator) {
+        if (!running || turn == null || !listening || turn.has("finish_requested_ms")) return;
+        if (byOperator) {
+            recordAction("done");
+            put(turn, "done_requested_ms", now());
+        }
+        put(turn, "finish_requested_ms", now());
+        put(turn, "finish_trigger", byOperator ? "operator_done" : "capture_limit");
+        recognizer.stopListening();
+        state.setText("Finalising…");
+        armWatchdog(FINALIZATION_LIMIT_MS, "finalization_limit");
+        setBusy(true);
+    }
+
+    private void interruptLiveTurn(String reason) {
+        if (!av040 || !running || turn == null) return;
+        put(turn, "interruption_detected_ms", now());
+        put(turn, "interruption_phase", speaking ? "playback" : listening ? "capture" : "thinking");
+        stopAudioWork(reason);
+        put(turn, "final_ms", now());
+        completeTurn("halted", reason);
+    }
+
     private void operatorRepeat() {
+        if (av040) {
+            toast("No repeat in this comparison. Preserve this attempt and attest it.");
+            return;
+        }
         if (!running || turn == null) return;
         note("operator_repeat");
         put(turn, "repeats", turn.optInt("repeats") + 1);
@@ -664,6 +855,7 @@ public class ProbeActivity extends Activity implements RecognitionListener {
     private void operatorCancel() {
         if (!running) return;
         note("operator_cancel");
+        recordAction("cancel");
         if (turn != null) put(turn, "manual_intervention", true);
         stopAudioWork("operator_cancel");
         if (turn != null) {
@@ -684,6 +876,19 @@ public class ProbeActivity extends Activity implements RecognitionListener {
         awaitingAttestation = false;
         log("  attested: " + attestation);
         position++;
+        if (av040) {
+            // Attestation records an observation; it is not permission to resume audio.
+            if (position >= queue.size()) {
+                finishScenario();
+            } else {
+                setBusy(false);
+                start.setText("NEXT / RESUME");
+                start.setEnabled(true);
+                state.setText("Recorded. Tap NEXT / RESUME when ready.");
+                saveEvidence();
+            }
+            return;
+        }
         setBusy(true);
         main.postDelayed(this::nextTurn, 600);
     }
@@ -693,6 +898,10 @@ public class ProbeActivity extends Activity implements RecognitionListener {
     private void completeTurn(String outcome, String detail) {
         if (!running || turn == null) return;
         clearWatchdog();
+        if (av040) {
+            stopAudioWork("turn_complete");
+            put(turn, "terminal_token", token);
+        }
         if (listening) {
             listening = false;
             recognizer.cancel();
@@ -760,10 +969,11 @@ public class ProbeActivity extends Activity implements RecognitionListener {
         put(run, "completed_turns", turns.length());
         completedScenarios.put(run);
         progressView.setText("");
-        state.setText("Scenario complete");
+        state.setText(av040 ? "Scenario complete — stop here" : "Scenario complete");
         state.setTextColor(Color.parseColor("#1b3a7f"));
         log("--- " + scenario.title + " complete (" + turns.length() + " turns). Tap Save evidence.");
         setBusy(false);
+        start.setText(av040 ? "RERUN SELECTED CASE" : "START");
         saveEvidence();
     }
 
@@ -813,7 +1023,15 @@ public class ProbeActivity extends Activity implements RecognitionListener {
         if (rejectStale("onEndOfSpeech")) return;
         put(turn, "end_of_speech_ms", now());
         mark("speech_end");
-        state.setText("Finalising…");
+        state.setText(segmentedCapture && !turn.has("finish_requested_ms")
+                ? "Listening — tap DONE when finished" : "Finalising…");
+        if (av040) {
+            // Do not extend the deadline if DONE already started finalization.
+            if (!segmentedCapture && !turn.has("finish_requested_ms")) {
+                armWatchdog(FINALIZATION_LIMIT_MS, "finalization_limit");
+            }
+            setBusy(true);
+        }
     }
 
     @Override public void onPartialResults(Bundle partial) {
@@ -831,6 +1049,7 @@ public class ProbeActivity extends Activity implements RecognitionListener {
 
     @Override public void onResults(Bundle results) {
         if (rejectStale("onResults")) return;
+        recordResultBundle("final", results);
         listening = false;
         put(turn, "final_ms", now());
         ArrayList<String> texts = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
@@ -852,6 +1071,88 @@ public class ProbeActivity extends Activity implements RecognitionListener {
         put(turn, "error_name", errorName(code));
         /* An error is never a transcript: the transcript field stays null. */
         completeTurn("error", null);
+    }
+
+    private void recordResultBundle(String kind, Bundle results) {
+        if (!av040 || turn == null) return;
+        JSONObject event = new JSONObject();
+        put(event, "kind", kind);
+        put(event, "t_ms", now());
+        put(event, "keys", results == null ? new JSONArray() : new JSONArray(results.keySet()));
+        ArrayList<String> texts = results == null ? null
+                : results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+        put(event, "recognition_texts", texts == null ? null : new JSONArray(texts));
+        turn.optJSONArray("result_events").put(event);
+    }
+
+    /** Every capture callback retains its originating token, including after a new turn. */
+    private final class TokenListener implements RecognitionListener {
+        private final int expected;
+        TokenListener(int expected) { this.expected = expected; }
+        private boolean reject(String name) {
+            if (expected == token) return rejectStale(name);
+            JSONObject event = new JSONObject();
+            put(event, "callback", name);
+            put(event, "t_ms", now());
+            put(event, "expected_token", expected);
+            put(event, "current_token", token);
+            put(event, "reason", "invalidated_token");
+            put(event, "advanced_turn", false);
+            if (stale != null) stale.put(event);
+            mark("stale_token:" + name);
+            return true;
+        }
+        @Override public void onReadyForSpeech(Bundle b) { if (!reject("onReadyForSpeech")) ProbeActivity.this.onReadyForSpeech(b); }
+        @Override public void onBeginningOfSpeech() { if (!reject("onBeginningOfSpeech")) ProbeActivity.this.onBeginningOfSpeech(); }
+        @Override public void onEndOfSpeech() { if (!reject("onEndOfSpeech")) ProbeActivity.this.onEndOfSpeech(); }
+        @Override public void onError(int code) { if (!reject("onError:" + errorName(code))) ProbeActivity.this.onError(code); }
+        @Override public void onResults(Bundle b) { if (!reject("onResults")) ProbeActivity.this.onResults(b); }
+        @Override public void onPartialResults(Bundle b) {
+            if (!reject("onPartialResults")) {
+                recordResultBundle("partial", b);
+                ProbeActivity.this.onPartialResults(b);
+            }
+        }
+        @Override public void onSegmentResults(Bundle b) {
+            if (reject("onSegmentResults")) return;
+            recordResultBundle("segment", b);
+            if (segmentedCapture) {
+                ArrayList<String> texts = b.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                if (texts != null && !texts.isEmpty() && !texts.get(0).trim().isEmpty()) {
+                    JSONObject segment = new JSONObject();
+                    put(segment, "t_ms", now());
+                    put(segment, "text", texts.get(0));
+                    turn.optJSONArray("segments").put(segment);
+                    heardView.setText("Heard segment: " + texts.get(0));
+                }
+            }
+        }
+        @Override public void onEndOfSegmentedSession() {
+            if (reject("onEndOfSegmentedSession")) return;
+            note("segmented_session_end");
+            if (!segmentedCapture) return;
+            listening = false;
+            put(turn, "final_ms", now());
+            JSONArray segments = turn.optJSONArray("segments");
+            StringBuilder transcript = new StringBuilder();
+            for (int i = 0; i < segments.length(); i++) {
+                if (transcript.length() > 0) transcript.append(' ');
+                transcript.append(segments.optJSONObject(i).optString("text"));
+            }
+            if (transcript.length() == 0) {
+                completeTurn("error", "empty_segmented_session");
+            } else {
+                put(turn, "transcript", transcript.toString());
+                completeTurn("success", null);
+            }
+        }
+        @Override public void onRmsChanged(float rms) {
+            if (expected == token && listening) ProbeActivity.this.onRmsChanged(rms);
+        }
+        @Override public void onBufferReceived(byte[] b) { }
+        @Override public void onEvent(int type, Bundle b) {
+            if (!reject("onEvent:" + type)) recordResultBundle("event:" + type, b);
+        }
     }
 
     /** Records the overlapping recognition used by the busy scenario. */
@@ -937,6 +1238,13 @@ public class ProbeActivity extends Activity implements RecognitionListener {
 
     /** Stops playback and capture without letting a late callback advance a turn. */
     private void stopAudioWork(String reason) {
+        if (av040) {
+            // Invalidate before tts.stop/recognizer.cancel can enqueue a callback.
+            token++;
+            waitingForAnswer = false;
+            note("token_invalidated:" + reason);
+            if (turn != null) put(turn, "invalidated_before_cleanup_ms", now());
+        }
         note("stop_audio_work_" + reason);
         if (tts != null && speaking) {
             tts.stop();
@@ -977,6 +1285,7 @@ public class ProbeActivity extends Activity implements RecognitionListener {
         if (secondRecognizer != null) secondRecognizer.destroy();
         if (tts != null) { tts.stop(); tts.shutdown(); }
         abandonFocus();
+        if (modeListener != null) audio.removeOnModeChangedListener(modeListener);
         super.onDestroy();
     }
 
@@ -992,12 +1301,17 @@ public class ProbeActivity extends Activity implements RecognitionListener {
     // ---------------------------------------------------------------- evidence
 
     private void saveEvidence() {
-        if (completedScenarios.length() == 0) {
+        if (completedScenarios.length() == 0 && !(av040 && running && turns != null && turns.length() > 0)) {
             toast("Nothing to save yet");
             return;
         }
         JSONObject document = new JSONObject();
         put(document, "schema_version", 1);
+        if (av040) {
+            put(document, "follow_up", "AV-040");
+            put(document, "reserved_attempts", getPreferences(MODE_PRIVATE).getInt("av040_attempts", 0));
+            put(document, "attempt_limit", liveAttemptLimit);
+        }
         put(document, "suite", "AV-005 foreground speech");
         put(document, "operator_driven", true);
         put(document, "operated_by", operator);
@@ -1005,7 +1319,10 @@ public class ProbeActivity extends Activity implements RecognitionListener {
         put(document, "rating_produced", false);
         put(document, "written_epoch_ms", System.currentTimeMillis());
         put(document, "environment", environment);
-        put(document, "scenarios", completedScenarios);
+        JSONArray snapshot = new JSONArray();
+        for (int i = 0; i < completedScenarios.length(); i++) snapshot.put(completedScenarios.opt(i));
+        if (av040 && running && run != null && turns.length() > 0) snapshot.put(run);
+        put(document, "scenarios", snapshot);
         String stamp = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(new Date());
         File target = new File(getExternalFilesDir(null), "av005-" + stamp + ".json");
         File staging = new File(getExternalFilesDir(null), "av005-" + stamp + ".json.part");
@@ -1065,6 +1382,10 @@ public class ProbeActivity extends Activity implements RecognitionListener {
         final int expected = token;
         watchdog = () -> {
             if (!running || token != expected || turn == null) return;
+            if (segmentedCapture && "capture_limit".equals(reason)) {
+                requestFinalization(false);
+                return;
+            }
             put(turn, "final_ms", now());
             put(turn, "watchdog_reason", reason);
             completeTurn("timeout", reason);

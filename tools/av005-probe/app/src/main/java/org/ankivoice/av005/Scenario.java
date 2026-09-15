@@ -246,6 +246,45 @@ final class Scenario {
         return all;
     }
 
+    /** AV-040 only: 18 planned turns, leaving at most six bounded follow-up attempts. */
+    static List<Scenario> liveFollowUp() {
+        List<Scenario> all = new ArrayList<>();
+        all.add(new Builder("av040_pause2", "1. Think two seconds, then Start answer")
+                .instructions("Read the answer before capture. After the prompt, wait for the "
+                        + "two-second thinking interval, then tap START ANSWER and speak immediately. "
+                        + "Tap DONE when finished if capture is still open. Attest honestly.")
+                .turns(0, 2).thinking(2000).build());
+        all.add(new Builder("av040_pause5", "2. Think five seconds, then Start answer")
+                .instructions("Read the answer first. Think for at least five seconds after the prompt, "
+                        + "then tap START ANSWER and speak immediately. Tap DONE if still listening.")
+                .turns(1, 3).thinking(5000).build());
+        all.add(new Builder("av040_finish", "3. Explicit finish and short numbers")
+                .instructions("Read the answer first. After playback, tap START ANSWER, speak it, "
+                        + "then tap DONE promptly. A recognizer may finish first; that is recorded.")
+                .turns(6, 7).build());
+        for (String phase : new String[]{"playback", "capture"}) {
+            all.add(new Builder("av040_call_" + phase, "Call during " + phase)
+                    .instructions("The investigator places two emulated calls during " + phase
+                            + ". Read the answer, start capture when offered, and attest INTERRUPTED "
+                            + "after each interruption. Resume only explicitly after the call ends.")
+                    .turns(1, 3).build());
+        }
+        for (String action : new String[]{"home", "lock", "cancel"}) {
+            for (String phase : new String[]{"playback", "capture"}) {
+                all.add(new Builder("av040_" + action + "_" + phase, action + " during " + phase)
+                        .instructions("One " + phase + " turn: " + action
+                                + " interrupts it. Start capture when offered. Return explicitly "
+                                + "if needed, then attest INTERRUPTED. Do not restart the scenario.")
+                        .turns(3).build());
+            }
+        }
+        all.add(new Builder("av040_echo", "Audible prompt echo, stay silent")
+                .instructions("Keep the prompt audible and stay silent for both turns. Capture "
+                        + "opens automatically after playback plus 400 ms. Attest I STAYED SILENT.")
+                .turns(0, 1).action(Action.STAY_SILENT).build());
+        return all;
+    }
+
     @Override public String toString() {
         return title + "  [" + turns.length + (turns.length == 1 ? " turn]" : " turns]");
     }

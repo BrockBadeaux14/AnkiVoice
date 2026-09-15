@@ -1,0 +1,44 @@
+{
+  "recorded_at_utc": "2026-09-15T16:27:14.402584+00:00",
+  "actions": [
+    {
+      "command": [
+        "emu",
+        "avd",
+        "name"
+      ],
+      "stdout": "AnkiVoice_AV005\nOK",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "emu",
+        "avd",
+        "hostmicoff"
+      ],
+      "stdout": "OK",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "shell",
+        "am",
+        "force-stop",
+        "org.ankivoice.av005"
+      ],
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "emu",
+        "kill"
+      ],
+      "stdout": "OK: killing emulator, bye bye\nOK"
+    }
+  ],
+  "host_audio_defaults": "{\n  \"default_input\" : \"MacBook Pro Microphone\",\n  \"default_output\" : \"MacBook Pro Speakers\"\n}",
+  "remaining_adb_devices": "List of devices attached\nemulator-5556          device product:sdk_gphone64_arm64 model:sdk_gphone64_arm64 device:emu64a transport_id:1",
+  "scope": "Test AVD microphone disabled, probe stopped, test AVD shut down. No command targeted Medium_Phone emulator-5556 or changed host audio defaults.",
+  "log_provenance": "macbook-probe-logcat.txt copied from the extension log stream after force-stop; includes the zero-turn 24/28 guard and UI checks, which are not human trials."
+}

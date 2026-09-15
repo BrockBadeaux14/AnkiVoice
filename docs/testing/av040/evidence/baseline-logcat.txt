@@ -1,0 +1,185 @@
+--------- beginning of main
+09-15 07:48:08.823  3702  3702 I AV005   : Preselected scenario "loop" from the launch intent.
+09-15 07:48:08.827  3702  3702 I AV005   : AV-005 suite ready. Pick a scenario and read its instructions before tapping Start.
+09-15 07:48:08.827  3702  3702 I AV005   : Operated by: human
+09-15 07:48:08.828  3702  3702 I AV005   : Evidence is written to /storage/emulated/0/Android/data/org.ankivoice.av005/files
+09-15 07:48:09.914  3702  3702 I AV005   : Engine googletts.google-speech-apk_20241125.02_p2.702443970, voice en-US-language, recognition available true
+09-15 07:50:08.464  3702  3702 I AV005   : --- 2. Twelve-turn foreground loop (12 turns)
+09-15 07:50:08.503  3702  3702 I AV005   : MARK scenario=loop event=playback_request t=202
+09-15 07:50:08.782  3702  3702 I AV005   : MARK scenario=loop event=playback_start t=482
+09-15 07:50:11.510  3702  3702 I AV005   : MARK scenario=loop event=playback_done t=3210
+09-15 07:50:11.918  3702  3702 I AV005   : MARK scenario=loop event=listen_requested t=3617
+09-15 07:50:11.975  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_change_-2 t=3675
+09-15 07:50:11.976  3702  3702 I AV005   :   audio focus change: -2 (recorded, not acted on)
+09-15 07:50:11.976  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_loss_during_capture t=3676
+09-15 07:50:15.269  3702  3702 I AV005   : MARK scenario=loop event=capture_ready t=6968
+09-15 07:50:16.319  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_change_1 t=8019
+09-15 07:50:16.321  3702  3702 I AV005   :   audio focus change: 1 (recorded, not acted on)
+09-15 07:50:16.322  3702  3702 I AV005   :   audio focus regained after 4345ms
+09-15 07:50:16.461  3702  3702 I AV005   : MARK scenario=loop event=turn_done t=8161
+09-15 07:50:16.464  3702  3702 I AV005   :   turn 0 error ERROR_NO_MATCH
+09-15 07:51:05.438  3702  3702 I AV005   :   attested: interrupted
+09-15 07:51:06.043  3702  3702 I AV005   : MARK scenario=loop event=playback_request t=57742
+09-15 07:51:06.197  3702  3702 I AV005   : MARK scenario=loop event=playback_start t=57897
+09-15 07:51:13.575  3702  3702 I AV005   : MARK scenario=loop event=playback_done t=65274
+09-15 07:51:13.978  3702  3702 I AV005   : MARK scenario=loop event=listen_requested t=65677
+09-15 07:51:13.999  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_change_-2 t=65699
+09-15 07:51:14.000  3702  3702 I AV005   :   audio focus change: -2 (recorded, not acted on)
+09-15 07:51:14.000  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_loss_during_capture t=65700
+09-15 07:51:14.135  3702  3702 I AV005   : MARK scenario=loop event=capture_ready t=65835
+09-15 07:51:14.646  3702  3702 I AV005   : MARK scenario=loop event=speech_begin t=66345
+09-15 07:51:20.355  3702  3702 I AV005   : MARK scenario=loop event=speech_end t=72055
+09-15 07:51:20.367  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_change_1 t=72067
+09-15 07:51:20.368  3702  3702 I AV005   :   audio focus change: 1 (recorded, not acted on)
+09-15 07:51:20.368  3702  3702 I AV005   :   audio focus regained after 6368ms
+09-15 07:51:20.473  3702  3702 I AV005   : MARK scenario=loop event=turn_done t=72172
+09-15 07:51:20.477  3702  3702 I AV005   :   turn 1 error null
+09-15 07:51:55.501  3702  3702 I AV005   :   attested: spoke_answer
+09-15 07:51:56.110  3702  3702 I AV005   : MARK scenario=loop event=playback_request t=107809
+09-15 07:51:56.215  3702  3702 I AV005   : MARK scenario=loop event=playback_start t=107915
+09-15 07:52:01.123  3702  3702 I AV005   : MARK scenario=loop event=playback_done t=112822
+09-15 07:52:01.530  3702  3702 I AV005   : MARK scenario=loop event=listen_requested t=113230
+09-15 07:52:01.552  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_change_-2 t=113251
+09-15 07:52:01.553  3702  3702 I AV005   :   audio focus change: -2 (recorded, not acted on)
+09-15 07:52:01.553  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_loss_during_capture t=113253
+09-15 07:52:01.690  3702  3702 I AV005   : MARK scenario=loop event=capture_ready t=113389
+09-15 07:52:02.212  3702  3702 I AV005   : MARK scenario=loop event=speech_begin t=113912
+09-15 07:52:05.148  3702  3702 I AV005   : MARK scenario=loop event=speech_end t=116848
+09-15 07:52:05.174  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_change_1 t=116874
+09-15 07:52:05.176  3702  3702 I AV005   :   audio focus change: 1 (recorded, not acted on)
+09-15 07:52:05.176  3702  3702 I AV005   :   audio focus regained after 3622ms
+09-15 07:52:05.255  3702  3702 I AV005   : MARK scenario=loop event=turn_done t=116954
+09-15 07:52:05.255  3702  3702 I AV005   :   turn 2 error null
+09-15 07:52:12.912  3702  3702 I AV005   :   attested: spoke_answer
+09-15 07:52:13.513  3702  3702 I AV005   : MARK scenario=loop event=playback_request t=125213
+09-15 07:52:13.572  3702  3702 I AV005   : MARK scenario=loop event=playback_start t=125272
+09-15 07:52:20.207  3702  3702 I AV005   : MARK scenario=loop event=playback_done t=131907
+09-15 07:52:20.609  3702  3702 I AV005   : MARK scenario=loop event=listen_requested t=132309
+09-15 07:52:20.630  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_change_-2 t=132330
+09-15 07:52:20.639  3702  3702 I AV005   :   audio focus change: -2 (recorded, not acted on)
+09-15 07:52:20.639  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_loss_during_capture t=132339
+09-15 07:52:20.673  3702  3702 I AV005   : MARK scenario=loop event=capture_ready t=132372
+09-15 07:52:21.671  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_change_1 t=133371
+09-15 07:52:21.672  3702  3702 I AV005   :   audio focus change: 1 (recorded, not acted on)
+09-15 07:52:21.673  3702  3702 I AV005   :   audio focus regained after 1033ms
+09-15 07:52:21.752  3702  3702 I AV005   : MARK scenario=loop event=turn_done t=133451
+09-15 07:52:21.752  3702  3702 I AV005   :   turn 3 error ERROR_NO_MATCH
+09-15 07:52:24.849  3702  3702 I AV005   :   attested: interrupted
+09-15 07:52:25.450  3702  3702 I AV005   : MARK scenario=loop event=playback_request t=137150
+09-15 07:52:25.479  3702  3702 I AV005   : MARK scenario=loop event=playback_start t=137178
+09-15 07:52:28.209  3702  3702 I AV005   : MARK scenario=loop event=playback_done t=139908
+09-15 07:52:28.611  3702  3702 I AV005   : MARK scenario=loop event=listen_requested t=140310
+09-15 07:52:28.625  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_change_-2 t=140324
+09-15 07:52:28.626  3702  3702 I AV005   :   audio focus change: -2 (recorded, not acted on)
+09-15 07:52:28.626  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_loss_during_capture t=140326
+09-15 07:52:28.696  3702  3702 I AV005   : MARK scenario=loop event=capture_ready t=140395
+09-15 07:52:29.676  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_change_1 t=141376
+09-15 07:52:29.677  3702  3702 I AV005   :   audio focus change: 1 (recorded, not acted on)
+09-15 07:52:29.677  3702  3702 I AV005   :   audio focus regained after 1051ms
+09-15 07:52:29.747  3702  3702 I AV005   : MARK scenario=loop event=turn_done t=141446
+09-15 07:52:29.747  3702  3702 I AV005   :   turn 4 error ERROR_NO_MATCH
+09-15 07:52:31.855  3702  3702 I AV005   :   attested: interrupted
+09-15 07:52:32.459  3702  3702 I AV005   : MARK scenario=loop event=playback_request t=144158
+09-15 07:52:32.465  3702  3702 I AV005   : MARK scenario=loop event=playback_start t=144164
+09-15 07:52:39.858  3702  3702 I AV005   : MARK scenario=loop event=playback_done t=151558
+09-15 07:52:40.260  3702  3702 I AV005   : MARK scenario=loop event=listen_requested t=151960
+09-15 07:52:40.276  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_change_-2 t=151975
+09-15 07:52:40.277  3702  3702 I AV005   :   audio focus change: -2 (recorded, not acted on)
+09-15 07:52:40.277  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_loss_during_capture t=151977
+09-15 07:52:40.388  3702  3702 I AV005   : MARK scenario=loop event=capture_ready t=152088
+09-15 07:52:41.343  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_change_1 t=153042
+09-15 07:52:41.343  3702  3702 I AV005   :   audio focus change: 1 (recorded, not acted on)
+09-15 07:52:41.343  3702  3702 I AV005   :   audio focus regained after 1066ms
+09-15 07:52:41.412  3702  3702 I AV005   : MARK scenario=loop event=turn_done t=153111
+09-15 07:52:41.412  3702  3702 I AV005   :   turn 5 error ERROR_NO_MATCH
+09-15 07:52:44.896  3702  3702 I AV005   :   attested: interrupted
+09-15 07:52:45.497  3702  3702 I AV005   : MARK scenario=loop event=playback_request t=157197
+09-15 07:52:45.530  3702  3702 I AV005   : MARK scenario=loop event=playback_start t=157229
+09-15 07:52:50.433  3702  3702 I AV005   : MARK scenario=loop event=playback_done t=162133
+09-15 07:52:50.835  3702  3702 I AV005   : MARK scenario=loop event=listen_requested t=162535
+09-15 07:52:50.849  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_change_-2 t=162548
+09-15 07:52:50.849  3702  3702 I AV005   :   audio focus change: -2 (recorded, not acted on)
+09-15 07:52:50.849  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_loss_during_capture t=162549
+09-15 07:52:50.946  3702  3702 I AV005   : MARK scenario=loop event=capture_ready t=162646
+09-15 07:52:51.910  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_change_1 t=163609
+09-15 07:52:51.910  3702  3702 I AV005   :   audio focus change: 1 (recorded, not acted on)
+09-15 07:52:51.911  3702  3702 I AV005   :   audio focus regained after 1061ms
+09-15 07:52:52.000  3702  3702 I AV005   : MARK scenario=loop event=turn_done t=163699
+09-15 07:52:52.000  3702  3702 I AV005   :   turn 6 error ERROR_NO_MATCH
+09-15 07:52:54.264  3702  3702 I AV005   :   attested: interrupted
+09-15 07:52:54.865  3702  3702 I AV005   : MARK scenario=loop event=playback_request t=166565
+09-15 07:52:54.895  3702  3702 I AV005   : MARK scenario=loop event=playback_start t=166594
+09-15 07:53:01.530  3702  3702 I AV005   : MARK scenario=loop event=playback_done t=173230
+09-15 07:53:01.932  3702  3702 I AV005   : MARK scenario=loop event=listen_requested t=173631
+09-15 07:53:01.954  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_change_-2 t=173653
+09-15 07:53:01.956  3702  3702 I AV005   :   audio focus change: -2 (recorded, not acted on)
+09-15 07:53:01.956  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_loss_during_capture t=173656
+09-15 07:53:02.142  3702  3702 I AV005   : MARK scenario=loop event=capture_ready t=173841
+09-15 07:53:02.834  3702  3702 I AV005   : MARK scenario=loop event=speech_begin t=174533
+09-15 07:53:05.703  3702  3702 I AV005   : MARK scenario=loop event=speech_end t=177403
+09-15 07:53:05.719  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_change_1 t=177419
+09-15 07:53:05.720  3702  3702 I AV005   :   audio focus change: 1 (recorded, not acted on)
+09-15 07:53:05.727  3702  3702 I AV005   :   audio focus regained after 3765ms
+09-15 07:53:05.855  3702  3702 I AV005   : MARK scenario=loop event=turn_done t=177555
+09-15 07:53:05.856  3702  3702 I AV005   :   turn 7 error null
+09-15 07:53:11.085  3702  3702 I AV005   :   attested: spoke_answer
+09-15 07:53:11.693  3702  3702 I AV005   : MARK scenario=loop event=playback_request t=183392
+09-15 07:53:11.700  3702  3702 I AV005   : MARK scenario=loop event=playback_start t=183400
+09-15 07:53:14.456  3702  3702 I AV005   : MARK scenario=loop event=playback_done t=186155
+09-15 07:53:14.858  3702  3702 I AV005   : MARK scenario=loop event=listen_requested t=186557
+09-15 07:53:14.871  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_change_-2 t=186570
+09-15 07:53:14.871  3702  3702 I AV005   :   audio focus change: -2 (recorded, not acted on)
+09-15 07:53:14.871  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_loss_during_capture t=186571
+09-15 07:53:14.994  3702  3702 I AV005   : MARK scenario=loop event=capture_ready t=186694
+09-15 07:53:15.946  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_change_1 t=187645
+09-15 07:53:15.946  3702  3702 I AV005   :   audio focus change: 1 (recorded, not acted on)
+09-15 07:53:15.946  3702  3702 I AV005   :   audio focus regained after 1075ms
+09-15 07:53:16.376  3702  3702 I AV005   : MARK scenario=loop event=turn_done t=188075
+09-15 07:53:16.378  3702  3702 I AV005   :   turn 8 error ERROR_NO_MATCH
+09-15 07:53:18.718  3702  3702 I AV005   :   attested: interrupted
+09-15 07:53:19.323  3702  3702 I AV005   : MARK scenario=loop event=playback_request t=191023
+09-15 07:53:19.333  3702  3702 I AV005   : MARK scenario=loop event=playback_start t=191033
+09-15 07:53:26.728  3702  3702 I AV005   : MARK scenario=loop event=playback_done t=198427
+09-15 07:53:27.130  3702  3702 I AV005   : MARK scenario=loop event=listen_requested t=198829
+09-15 07:53:27.152  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_change_-2 t=198851
+09-15 07:53:27.154  3702  3702 I AV005   :   audio focus change: -2 (recorded, not acted on)
+09-15 07:53:27.154  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_loss_during_capture t=198854
+09-15 07:53:27.218  3702  3702 I AV005   : MARK scenario=loop event=capture_ready t=198918
+09-15 07:53:28.216  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_change_1 t=199915
+09-15 07:53:28.216  3702  3702 I AV005   :   audio focus change: 1 (recorded, not acted on)
+09-15 07:53:28.217  3702  3702 I AV005   :   audio focus regained after 1062ms
+09-15 07:53:28.262  3702  3702 I AV005   : MARK scenario=loop event=speech_begin t=199961
+09-15 07:53:28.365  3702  3702 I AV005   : MARK scenario=loop event=turn_done t=200064
+09-15 07:53:28.366  3702  3702 I AV005   :   turn 9 error ERROR_NO_MATCH
+09-15 07:53:30.683  3702  3702 I AV005   :   attested: interrupted
+09-15 07:53:31.284  3702  3702 I AV005   : MARK scenario=loop event=playback_request t=202983
+09-15 07:53:31.299  3702  3702 I AV005   : MARK scenario=loop event=playback_start t=202999
+09-15 07:53:36.215  3702  3702 I AV005   : MARK scenario=loop event=playback_done t=207914
+09-15 07:53:36.618  3702  3702 I AV005   : MARK scenario=loop event=listen_requested t=208317
+09-15 07:53:36.634  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_change_-2 t=208333
+09-15 07:53:36.635  3702  3702 I AV005   :   audio focus change: -2 (recorded, not acted on)
+09-15 07:53:36.635  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_loss_during_capture t=208334
+09-15 07:53:36.673  3702  3702 I AV005   : MARK scenario=loop event=capture_ready t=208373
+09-15 07:53:37.668  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_change_1 t=209368
+09-15 07:53:37.669  3702  3702 I AV005   :   audio focus change: 1 (recorded, not acted on)
+09-15 07:53:37.669  3702  3702 I AV005   :   audio focus regained after 1035ms
+09-15 07:53:37.809  3702  3702 I AV005   : MARK scenario=loop event=turn_done t=209508
+09-15 07:53:37.810  3702  3702 I AV005   :   turn 10 error ERROR_NO_MATCH
+09-15 07:53:40.933  3702  3702 I AV005   :   attested: interrupted
+09-15 07:53:41.533  3702  3702 I AV005   : MARK scenario=loop event=playback_request t=213232
+09-15 07:53:41.560  3702  3702 I AV005   : MARK scenario=loop event=playback_start t=213259
+09-15 07:53:48.186  3702  3702 I AV005   : MARK scenario=loop event=playback_done t=219885
+09-15 07:53:48.589  3702  3702 I AV005   : MARK scenario=loop event=listen_requested t=220289
+09-15 07:53:48.605  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_change_-2 t=220304
+09-15 07:53:48.607  3702  3702 I AV005   :   audio focus change: -2 (recorded, not acted on)
+09-15 07:53:48.607  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_loss_during_capture t=220306
+09-15 07:53:48.672  3702  3702 I AV005   : MARK scenario=loop event=capture_ready t=220371
+09-15 07:53:49.663  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:audio_focus_change_1 t=221362
+09-15 07:53:49.663  3702  3702 I AV005   :   audio focus change: 1 (recorded, not acted on)
+09-15 07:53:49.663  3702  3702 I AV005   :   audio focus regained after 1056ms
+09-15 07:53:49.850  3702  3702 I AV005   : MARK scenario=loop event=turn_done t=221550
+09-15 07:53:49.851  3702  3702 I AV005   :   turn 11 error ERROR_NO_MATCH
+09-15 07:53:51.666  3702  3702 I AV005   :   attested: interrupted
+09-15 07:53:52.269  3702  3702 I AV005   : MARK scenario=loop event=lifecycle:stop_audio_work_scenario_end t=223969
+09-15 07:53:52.273  3702  3702 I AV005   : --- 2. Twelve-turn foreground loop complete (12 turns). Tap Save evidence.
+09-15 07:53:52.327  3702  3702 I AV005   : Saved /storage/emulated/0/Android/data/org.ankivoice.av005/files/av005-20260915-075352.json

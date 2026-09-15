@@ -1,0 +1,25 @@
+{
+  "started_at_utc": "2026-09-15T16:01:45.085663+00:00",
+  "scenario": "av040_home_capture",
+  "serial": "emulator-5588",
+  "human_controls_start_and_attestation": true,
+  "required_triggers": 1,
+  "trigger_delay_ms": 200,
+  "emulated_call_hold_ms": 3000,
+  "events": [
+    {
+      "trigger_marker": "09-15 11:02:16.097  4094  4094 I AV005   : MARK scenario=av040_home_capture event=capture_ready t=8603",
+      "marker_received_at_utc": "2026-09-15T16:02:16.660454+00:00",
+      "dispatched_at_utc": "2026-09-15T16:02:16.863789+00:00",
+      "command": [
+        "shell",
+        "input",
+        "keyevent",
+        "3"
+      ],
+      "result": ""
+    }
+  ],
+  "all_triggers_dispatched": true,
+  "finished_at_utc": "2026-09-15T16:02:16.930447+00:00"
+}

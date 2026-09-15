@@ -1,0 +1,106 @@
+Audio Focus stack entries (last is top of stack):
+
+
+No external focus policy
+
+
+
+ Notify on duck:  true
+
+ In ring or call: false
+
+
+
+Events log: focus commands as seen by MediaFocusControl
+09-15 10:46:51:822 focus owner: android.media.AudioManager@78d6d15org.ankivoice.av005.ProbeActivity$$ExternalSyntheticLambda11@1b2082a in uid: 10215 pack: org.ankivoice.av005 code: 1 event: handleGain
+09-15 10:47:00:910 abandonAudioFocus() from uid/pid 10215/4094 clientId=android.media.AudioManager@78d6d15org.ankivoice.av005.ProbeActivity$$ExternalSyntheticLambda11@1b2082a callingPack=org.ankivoice.av005
+09-15 10:50:44:770 requestAudioFocus() from uid/pid 10215/4094 AA=USAGE_ASSISTANT/CONTENT_TYPE_SPEECH clientId=android.media.AudioManager@78d6d15org.ankivoice.av005.ProbeActivity$$ExternalSyntheticLambda11@a5cd111 callingPack=org.ankivoice.av005 req=2 flags=0x0 sdk=35
+09-15 10:51:03:772 requestAudioFocus() from uid/pid 10152/2409 AA=USAGE_MEDIA/CONTENT_TYPE_UNKNOWN clientId=android.media.AudioManager@a3b9431efz@cd8685e callingPack=com.google.android.tts req=4 flags=0x0 sdk=35
+09-15 10:51:03:774 focus owner: android.media.AudioManager@78d6d15org.ankivoice.av005.ProbeActivity$$ExternalSyntheticLambda11@a5cd111 in uid: 10215 pack: org.ankivoice.av005 code: -2 event: handleLoss
+09-15 10:51:10:576 abandonAudioFocus() from uid/pid 10152/2409 clientId=android.media.AudioManager@a3b9431efz@cd8685e callingPack=com.google.android.tts
+09-15 10:51:10:709 focus owner: android.media.AudioManager@78d6d15org.ankivoice.av005.ProbeActivity$$ExternalSyntheticLambda11@a5cd111 in uid: 10215 pack: org.ankivoice.av005 code: 1 event: handleGain
+09-15 10:51:58:284 requestAudioFocus() from uid/pid 10152/2409 AA=USAGE_MEDIA/CONTENT_TYPE_UNKNOWN clientId=android.media.AudioManager@a3b9431efz@c5e434f callingPack=com.google.android.tts req=4 flags=0x0 sdk=35
+09-15 10:51:58:285 focus owner: android.media.AudioManager@78d6d15org.ankivoice.av005.ProbeActivity$$ExternalSyntheticLambda11@a5cd111 in uid: 10215 pack: org.ankivoice.av005 code: -2 event: handleLoss
+09-15 10:52:08:643 abandonAudioFocus() from uid/pid 10152/2409 clientId=android.media.AudioManager@a3b9431efz@c5e434f callingPack=com.google.android.tts
+09-15 10:52:08:643 focus owner: android.media.AudioManager@78d6d15org.ankivoice.av005.ProbeActivity$$ExternalSyntheticLambda11@a5cd111 in uid: 10215 pack: org.ankivoice.av005 code: 1 event: handleGain
+09-15 10:52:12:057 abandonAudioFocus() from uid/pid 10215/4094 clientId=android.media.AudioManager@78d6d15org.ankivoice.av005.ProbeActivity$$ExternalSyntheticLambda11@a5cd111 callingPack=org.ankivoice.av005
+09-15 10:52:27:649 requestAudioFocus() from uid/pid 10215/4094 AA=USAGE_ASSISTANT/CONTENT_TYPE_SPEECH clientId=android.media.AudioManager@78d6d15org.ankivoice.av005.ProbeActivity$$ExternalSyntheticLambda11@9f6f361 callingPack=org.ankivoice.av005 req=2 flags=0x0 sdk=35
+09-15 10:52:58:192 requestAudioFocus() from uid/pid 10152/2409 AA=USAGE_MEDIA/CONTENT_TYPE_UNKNOWN clientId=android.media.AudioManager@a3b9431efz@94fd9b4 callingPack=com.google.android.tts req=4 flags=0x0 sdk=35
+09-15 10:52:58:193 focus owner: android.media.AudioManager@78d6d15org.ankivoice.av005.ProbeActivity$$ExternalSyntheticLambda11@9f6f361 in uid: 10215 pack: org.ankivoice.av005 code: -2 event: handleLoss
+09-15 10:53:06:281 abandonAudioFocus() from uid/pid 10152/2409 clientId=android.media.AudioManager@a3b9431efz@94fd9b4 callingPack=com.google.android.tts
+09-15 10:53:06:281 focus owner: android.media.AudioManager@78d6d15org.ankivoice.av005.ProbeActivity$$ExternalSyntheticLambda11@9f6f361 in uid: 10215 pack: org.ankivoice.av005 code: 1 event: handleGain
+09-15 10:53:09:102 abandonAudioFocus() from uid/pid 10215/4094 clientId=android.media.AudioManager@78d6d15org.ankivoice.av005.ProbeActivity$$ExternalSyntheticLambda11@9f6f361 callingPack=org.ankivoice.av005
+09-15 10:53:18:683 requestAudioFocus() from uid/pid 10215/4094 AA=USAGE_ASSISTANT/CONTENT_TYPE_SPEECH clientId=android.media.AudioManager@78d6d15org.ankivoice.av005.ProbeActivity$$ExternalSyntheticLambda11@6bd735 callingPack=org.ankivoice.av005 req=2 flags=0x0 sdk=35
+09-15 10:53:42:378 requestAudioFocus() from uid/pid 10152/2409 AA=USAGE_MEDIA/CONTENT_TYPE_UNKNOWN clientId=android.media.AudioManager@a3b9431efz@8f4381c callingPack=com.google.android.tts req=4 flags=0x0 sdk=35
+09-15 10:53:42:379 focus owner: android.media.AudioManager@78d6d15org.ankivoice.av005.ProbeActivity$$ExternalSyntheticLambda11@6bd735 in uid: 10215 pack: org.ankivoice.av005 code: -2 event: handleLoss
+09-15 10:53:54:747 abandonAudioFocus() from uid/pid 10152/2409 clientId=android.media.AudioManager@a3b9431efz@8f4381c callingPack=com.google.android.tts
+09-15 10:53:54:748 focus owner: android.media.AudioManager@78d6d15org.ankivoice.av005.ProbeActivity$$ExternalSyntheticLambda11@6bd735 in uid: 10215 pack: org.ankivoice.av005 code: 1 event: handleGain
+09-15 10:54:41:164 requestAudioFocus() from uid/pid 10152/2409 AA=USAGE_MEDIA/CONTENT_TYPE_UNKNOWN clientId=android.media.AudioManager@a3b9431efz@23cb6ba callingPack=com.google.android.tts req=4 flags=0x0 sdk=35
+09-15 10:54:41:164 focus owner: android.media.AudioManager@78d6d15org.ankivoice.av005.ProbeActivity$$ExternalSyntheticLambda11@6bd735 in uid: 10215 pack: org.ankivoice.av005 code: -2 event: handleLoss
+09-15 10:54:48:988 abandonAudioFocus() from uid/pid 10152/2409 clientId=android.media.AudioManager@a3b9431efz@23cb6ba callingPack=com.google.android.tts
+09-15 10:54:48:988 focus owner: android.media.AudioManager@78d6d15org.ankivoice.av005.ProbeActivity$$ExternalSyntheticLambda11@6bd735 in uid: 10215 pack: org.ankivoice.av005 code: 1 event: handleGain
+09-15 10:55:06:130 abandonAudioFocus() from uid/pid 10215/4094 clientId=android.media.AudioManager@78d6d15org.ankivoice.av005.ProbeActivity$$ExternalSyntheticLambda11@6bd735 callingPack=org.ankivoice.av005
+09-15 10:56:00:370 requestAudioFocus() from uid/pid 10215/4094 AA=USAGE_ASSISTANT/CONTENT_TYPE_SPEECH clientId=android.media.AudioManager@78d6d15org.ankivoice.av005.ProbeActivity$$ExternalSyntheticLambda11@5e82c85 callingPack=org.ankivoice.av005 req=2 flags=0x0 sdk=35
+09-15 10:56:01:123 requestAudioFocus() from uid/pid 1000/666 AA=USAGE_NOTIFICATION_RINGTONE/CONTENT_TYPE_SONIFICATION clientId=AudioFocus_For_Phone_Ring_And_Calls callingPack=com.android.server.telecom req=2 flags=0x4 sdk=0
+09-15 10:56:01:123 focus owner: android.media.AudioManager@78d6d15org.ankivoice.av005.ProbeActivity$$ExternalSyntheticLambda11@5e82c85 in uid: 10215 pack: org.ankivoice.av005 code: -2 event: handleLoss
+09-15 10:56:03:936 abandonAudioFocus() from uid/pid 1000/666 clientId=AudioFocus_For_Phone_Ring_And_Calls callingPack=com.android.server.telecom
+09-15 10:56:03:936 focus owner: android.media.AudioManager@78d6d15org.ankivoice.av005.ProbeActivity$$ExternalSyntheticLambda11@5e82c85 in uid: 10215 pack: org.ankivoice.av005 code: 1 event: handleGain
+09-15 10:56:17:629 requestAudioFocus() from uid/pid 1000/666 AA=USAGE_NOTIFICATION_RINGTONE/CONTENT_TYPE_SONIFICATION clientId=AudioFocus_For_Phone_Ring_And_Calls callingPack=com.android.server.telecom req=2 flags=0x4 sdk=0
+09-15 10:56:17:629 focus owner: android.media.AudioManager@78d6d15org.ankivoice.av005.ProbeActivity$$ExternalSyntheticLambda11@5e82c85 in uid: 10215 pack: org.ankivoice.av005 code: -2 event: handleLoss
+09-15 10:56:20:765 abandonAudioFocus() from uid/pid 1000/666 clientId=AudioFocus_For_Phone_Ring_And_Calls callingPack=com.android.server.telecom
+09-15 10:56:20:766 focus owner: android.media.AudioManager@78d6d15org.ankivoice.av005.ProbeActivity$$ExternalSyntheticLambda11@5e82c85 in uid: 10215 pack: org.ankivoice.av005 code: 1 event: handleGain
+09-15 10:57:51:604 abandonAudioFocus() from uid/pid 10215/4094 clientId=android.media.AudioManager@78d6d15org.ankivoice.av005.ProbeActivity$$ExternalSyntheticLambda11@5e82c85 callingPack=org.ankivoice.av005
+09-15 10:58:31:619 requestAudioFocus() from uid/pid 10215/4094 AA=USAGE_ASSISTANT/CONTENT_TYPE_SPEECH clientId=android.media.AudioManager@78d6d15org.ankivoice.av005.ProbeActivity$$ExternalSyntheticLambda11@4539ee1 callingPack=org.ankivoice.av005 req=2 flags=0x0 sdk=35
+09-15 10:58:42:278 requestAudioFocus() from uid/pid 10152/2409 AA=USAGE_MEDIA/CONTENT_TYPE_UNKNOWN clientId=android.media.AudioManager@a3b9431efz@39c3d08 callingPack=com.google.android.tts req=4 flags=0x0 sdk=35
+09-15 10:58:42:278 focus owner: android.media.AudioManager@78d6d15org.ankivoice.av005.ProbeActivity$$ExternalSyntheticLambda11@4539ee1 in uid: 10215 pack: org.ankivoice.av005 code: -2 event: handleLoss
+09-15 10:58:48:784 abandonAudioFocus() from uid/pid 1000/666 clientId=AudioFocus_For_Phone_Ring_And_Calls callingPack=com.android.server.telecom
+09-15 10:58:49:989 abandonAudioFocus() from uid/pid 10152/2409 clientId=android.media.AudioManager@a3b9431efz@39c3d08 callingPack=com.google.android.tts
+09-15 10:58:49:990 focus owner: android.media.AudioManager@78d6d15org.ankivoice.av005.ProbeActivity$$ExternalSyntheticLambda11@4539ee1 in uid: 10215 pack: org.ankivoice.av005 code: 1 event: handleGain
+09-15 10:59:06:911 requestAudioFocus() from uid/pid 10152/2409 AA=USAGE_MEDIA/CONTENT_TYPE_UNKNOWN clientId=android.media.AudioManager@a3b9431efz@250e32a callingPack=com.google.android.tts req=4 flags=0x0 sdk=35
+09-15 10:59:06:914 focus owner: android.media.AudioManager@78d6d15org.ankivoice.av005.ProbeActivity$$ExternalSyntheticLambda11@4539ee1 in uid: 10215 pack: org.ankivoice.av005 code: -2 event: handleLoss
+09-15 10:59:13:337 abandonAudioFocus() from uid/pid 1000/666 clientId=AudioFocus_For_Phone_Ring_And_Calls callingPack=com.android.server.telecom
+09-15 10:59:14:897 abandonAudioFocus() from uid/pid 10152/2409 clientId=android.media.AudioManager@a3b9431efz@250e32a callingPack=com.google.android.tts
+09-15 10:59:14:897 focus owner: android.media.AudioManager@78d6d15org.ankivoice.av005.ProbeActivity$$ExternalSyntheticLambda11@4539ee1 in uid: 10215 pack: org.ankivoice.av005 code: 1 event: handleGain
+09-15 10:59:19:573 abandonAudioFocus() from uid/pid 10215/4094 clientId=android.media.AudioManager@78d6d15org.ankivoice.av005.ProbeActivity$$ExternalSyntheticLambda11@4539ee1 callingPack=org.ankivoice.av005
+Multi Audio Focus enabled :false
+
+Stream volumes (device: index)
+- STREAM_VOICE_CALL:
+   Muted: false
+   Muted Internally: false
+   Min: 1
+   Max: 15
+   streamVolume:3
+   Current: 2 (speaker): 3, 40000000 (default): 3
+   Devices: speaker(2)
+   Volume Group: AUDIO_STREAM_VOICE_CALL
+
+- STREAM_SYSTEM (aliased to: STREAM_RING):
+   Muted: false
+   Muted Internally: false
+   Min: 0
+   Max: 7
+   streamVolume:5
+   Current: 2 (speaker): 5, 40000000 (default): 5
+   Devices: speaker(2)
+   Volume Group: AUDIO_STREAM_SYSTEM
+
+- STREAM_RING:
+   Muted: false
+   Muted Internally: false
+   Min: 0
+   Max: 7
+   streamVolume:5
+   Current: 2 (speaker): 5, 40000000 (default): 5
+   Devices: speaker(2)
+   Volume Group: AUDIO_STREAM_RING
+
+- STREAM_MUSIC:
+   Muted: false
+   Muted Internally: false
+   Min: 0
+   Max: 15
+   streamVolume:5
+   Current: 2 (speaker): 5, 40000000 (default): 5
+   Devices: speaker(2)
+   Volume Group: AUDIO_STREAM_MUSIC
