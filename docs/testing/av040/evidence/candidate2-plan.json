@@ -1,0 +1,66 @@
+{
+  "recorded_at_utc": "2026-09-15T15:44:48.446667+00:00",
+  "phase": "second and final capture candidate, not validated",
+  "capture_policy": "explicit_start_segmented_done_v2",
+  "reason": "Candidate 1 closed before the operator began in all four attempts. Request segmented mode with a minimum session duration and measure whether the service honors it.",
+  "source": "https://developer.android.com/reference/android/speech/RecognizerIntent#EXTRA_SEGMENTED_SESSION",
+  "audio_source": "live default microphone, WH-1000XM5 host route; no EXTRA_AUDIO_SOURCE or prerecorded audio",
+  "requested_segmented_type": "android.speech.extras.SPEECH_INPUT_MINIMUM_LENGTH_MILLIS",
+  "requested_minimum_ms": 15000,
+  "capture_cap_ms": 15000,
+  "finalization_cap_ms": 5000,
+  "done": "stopListening, then await standard final or onEndOfSegmentedSession; append only nonempty final segment texts, never partial hypotheses",
+  "interruption_rule": "lifecycle_audio_mode_unsolicited_tts_stop_v1 (unchanged)",
+  "additional_attempts_already_used": 4,
+  "maximum_additional_attempts_remaining": 20,
+  "revised_remaining_plan": {
+    "av040_pause2": 2,
+    "av040_pause5": 2,
+    "av040_finish": 2,
+    "av040_call_playback": 2,
+    "av040_call_capture": 2,
+    "av040_home_playback": 1,
+    "av040_home_capture": 1,
+    "av040_lock_playback": 1,
+    "av040_lock_capture": 1,
+    "av040_cancel_playback": 1,
+    "av040_cancel_capture": 1,
+    "av040_echo": 2
+  },
+  "planned_remaining_total": 18,
+  "unallocated_remaining": 2,
+  "apk_sha256": "a0f139868f00f16baf682cf91556148b6003f722cac2cae7223fea572a2188b2",
+  "execution_deviations": [
+    {
+      "recorded_at_utc": "2026-09-15T15:53:21.948097+00:00",
+      "attempts": [
+        9,
+        10
+      ],
+      "scenario": "av040_pause5",
+      "reason": "A new two-turn five-second run started before the investigator scenario-selection intent. The single-top intent caused onPause and halted attempt 9; onNewIntent correctly refused selection while running. Attempt 10 continued in the same scenario. Both retained; no deletion or replacement.",
+      "allocation_effect": "Consumes the two previously unallocated attempts. After this run, 10 follow-up attempts are used, leaving exactly 14 for finish (2), calls (4), Home/lock/cancel (6), echo (2). No reserve remains."
+    },
+    {
+      "recorded_at_utc": "2026-09-15T15:55:23.218630+00:00",
+      "attempts": [
+        11,
+        12
+      ],
+      "scenario": "av040_pause5",
+      "reason": "The owner started another two-turn five-second run before the stop-and-switch coordination was established. All attempts will remain counted.",
+      "allocation_effect": "After attempt 12, reserve the remaining 12 for calls (4), Home/lock/cancel in both phases (6), and echo (2). Omit the optional additional finish-only pair: Done has already been tested on the spoken comparison turns. Six remains in the failed baseline; no new human Six transcript is claimed."
+    }
+  ],
+  "latest_remaining_plan_after_attempt_12": {
+    "av040_call_playback": 2,
+    "av040_call_capture": 2,
+    "av040_home_playback": 1,
+    "av040_home_capture": 1,
+    "av040_lock_playback": 1,
+    "av040_lock_capture": 1,
+    "av040_cancel_playback": 1,
+    "av040_cancel_capture": 1,
+    "av040_echo": 2
+  }
+}

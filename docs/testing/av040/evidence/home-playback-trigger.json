@@ -1,0 +1,25 @@
+{
+  "started_at_utc": "2026-09-15T15:59:57.823174+00:00",
+  "scenario": "av040_home_playback",
+  "serial": "emulator-5588",
+  "human_controls_start_and_attestation": true,
+  "required_triggers": 1,
+  "trigger_delay_ms": 200,
+  "emulated_call_hold_ms": 3000,
+  "events": [
+    {
+      "trigger_marker": "09-15 11:00:27.586  4094  4094 I AV005   : MARK scenario=av040_home_playback event=playback_start t=130",
+      "marker_received_at_utc": "2026-09-15T16:00:28.059706+00:00",
+      "dispatched_at_utc": "2026-09-15T16:00:28.265268+00:00",
+      "command": [
+        "shell",
+        "input",
+        "keyevent",
+        "3"
+      ],
+      "result": ""
+    }
+  ],
+  "all_triggers_dispatched": true,
+  "finished_at_utc": "2026-09-15T16:00:28.385261+00:00"
+}

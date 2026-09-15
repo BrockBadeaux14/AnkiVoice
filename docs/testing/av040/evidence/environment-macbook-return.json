@@ -1,0 +1,21 @@
+{
+  "recorded_at_utc": "2026-09-15T16:13:28.431770+00:00",
+  "user_request": "Change test to use Default MacBook pro speakers and microphone.",
+  "observed_before_any_agent_device_switch": {
+    "default_input": "MacBook Pro Microphone",
+    "default_output": "MacBook Pro Speakers"
+  },
+  "agent_changed_host_defaults": false,
+  "host_volume": "output volume:36, input volume:64, alert volume:100, output muted:false",
+  "note": "Requested devices were already selected when inspected; WH-1000XM5 was no longer listed by hostaudio. Exact time of change is unknown. Do not assume it occurred only after the echo trials.",
+  "last_measured_apk_sha256": "a0f139868f00f16baf682cf91556148b6003f722cac2cae7223fea572a2188b2",
+  "post_measurement_ui_fix_apk_sha256": "123580954e5d5fe12138e92e426d58424ed52900693ce8dd25e20ba64468cfcc",
+  "after_restart_at_utc": "2026-09-15T16:16:42.492055+00:00",
+  "after_restart_host_audio": {
+    "default_input": "MacBook Pro Microphone",
+    "default_output": "MacBook Pro Speakers"
+  },
+  "guest_media_volume": "[V] will control stream=3 (STREAM_MUSIC)\n[V] will get volume\n[V] Connecting to AudioService\n[V] volume is 5 in range [0..15]",
+  "test_avd_restarted": true,
+  "other_avd": "Medium_Phone left running; host defaults already matched, so no device switch was performed by the agent."
+}

@@ -1,0 +1,32 @@
+{
+  "recorded_at_utc": "2026-09-15T16:15:11.275076+00:00",
+  "user_question": "AV-040 has used all 24 allowed follow-up turns. With the MacBook microphone and speakers, should I extend the investigation by at most four turns using the existing second policy, or finish the current report without further speech trials?",
+  "user_answer": "Extend by at most four turns",
+  "original_follow_up_bound": 24,
+  "authorized_follow_up_bound": 28,
+  "baseline_remains_once": true,
+  "capture_policy": "explicit_start_segmented_done_v2",
+  "interruption_rule": "lifecycle_audio_mode_unsolicited_tts_stop_v1",
+  "planned_attempts": [
+    {
+      "ids": [
+        25,
+        26
+      ],
+      "scenario": "av040_pause2",
+      "purpose": "Spoken reversal and Five through the MacBook route"
+    },
+    {
+      "ids": [
+        27,
+        28
+      ],
+      "scenario": "av040_echo",
+      "purpose": "Audible speaker echo; remain silent and await automatic closure without Done"
+    }
+  ],
+  "counter_reset": false,
+  "launch_extension_extra": "--ez av040_authorized_four_turn_extension true",
+  "apk_sha256": "c82128378707b6f4ce7717fc759b4ad811e099226243a9df4231990edbb8e39e",
+  "changes_from_original_measured_candidate2": "Same speech/interruption policy. Explicit 28-turn bound only when enabled; record extension per scenario. Clear previous results on selection and label rerun to avoid accidental repeat. No third capture policy."
+}

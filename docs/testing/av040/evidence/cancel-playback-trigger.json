@@ -1,0 +1,27 @@
+{
+  "started_at_utc": "2026-09-15T16:06:29.380659+00:00",
+  "scenario": "av040_cancel_playback",
+  "serial": "emulator-5588",
+  "human_controls_start_and_attestation": true,
+  "required_triggers": 1,
+  "trigger_delay_ms": 200,
+  "emulated_call_hold_ms": 3000,
+  "events": [
+    {
+      "trigger_marker": "09-15 11:06:52.621  4094  4094 I AV005   : MARK scenario=av040_cancel_playback event=playback_start t=121",
+      "marker_received_at_utc": "2026-09-15T16:06:53.097147+00:00",
+      "dispatched_at_utc": "2026-09-15T16:06:53.298724+00:00",
+      "command": [
+        "shell",
+        "input",
+        "tap",
+        "878",
+        "608"
+      ],
+      "coordinate_source": "idle scenario UI tree; Cancel button bounds",
+      "result": ""
+    }
+  ],
+  "all_triggers_dispatched": true,
+  "finished_at_utc": "2026-09-15T16:06:53.383400+00:00"
+}

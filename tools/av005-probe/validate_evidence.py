@@ -65,8 +65,10 @@ def merge(paths: list) -> dict:
     return merged or {}
 
 
-def validate(document: dict) -> tuple[list, list, dict]:
+def validate(document: dict, av040_attempt_limit: int = 24) -> tuple[list, list, dict]:
     """Returns (assertions, failures, summary)."""
+    if av040_attempt_limit not in (24, 28):
+        raise ValueError("Only the original 24 or explicitly authorized 28-turn bound is supported")
     assertions: list = []
     failures: list = []
     prompts = fixture_prompts()
@@ -87,9 +89,19 @@ def validate(document: dict) -> tuple[list, list, dict]:
     assert_(isinstance(environment.get("recognition_services"), list)
             and environment["recognition_services"], "recognition services enumerated")
 
-    summary: dict = {"scenarios": [], "turn_count": 0, "success_count": 0, "human_transcripts": 0}
+    summary: dict = {"scenarios": [], "turn_count": 0, "success_count": 0, "human_transcripts": 0,
+                     "av040_attempts": [], "capability_findings": []}
+    policies: set = set()
+    interruption_rules: set = set()
     for scenario in document.get("scenarios", []):
         name = scenario.get("scenario", "?")
+        live_follow_up = scenario.get("follow_up") == "AV-040"
+        if live_follow_up:
+            policies.add(scenario.get("capture_policy"))
+            interruption_rules.add(scenario.get("interruption_rule"))
+            assert_(bool(scenario.get("capture_policy")), f"{name} names its capture candidate")
+            assert_(bool(scenario.get("interruption_rule")), f"{name} names its interruption candidate")
+            assert_(scenario.get("automatic_rearms") == 0, f"{name} performs no automatic rearm")
         operated_by = scenario.get("operated_by")
         assert_(operated_by in {"human", "investigator_adb"},
                 f"{name} records who operated the run")
@@ -104,6 +116,8 @@ def validate(document: dict) -> tuple[list, list, dict]:
         for turn in turns:
             label = f"{name}[{turn.get('turn_index')}]"
             example = turn.get("example_id")
+            if live_follow_up:
+                assert_(example in prompts, f"{label} identifies an AV-002 fixture")
             if example in prompts:
                 assert_(turn.get("prompt") == prompts[example]["prompt"],
                         f"{label} prompt matches the AV-002 fixture")
@@ -130,8 +144,17 @@ def validate(document: dict) -> tuple[list, list, dict]:
                 if by_human and turn.get("operator_attestation") == "spoke_answer":
                     summary["human_transcripts"] += 1
 
-            assert_(turn.get("echo_suspected") is not True,
-                    f"{label} transcript was not the prompt echoed back")
+            if live_follow_up:
+                if status in {"halted", "cancelled", "timeout"}:
+                    assert_(transcript in (None, "null"),
+                            f"{label} an interrupted or expired turn carries no transcript")
+                # An echo is a capability failure, not permission to discard or rewrite
+                # honest experimental evidence from an intentionally silent trial.
+                if turn.get("echo_suspected") or (name == "av040_echo" and transcript):
+                    summary["capability_findings"].append(f"{label}: possible prompt/ambient contamination")
+            else:
+                assert_(turn.get("echo_suspected") is not True,
+                        f"{label} transcript was not the prompt echoed back")
 
             playback_done = turn.get("playback_done_ms")
             listen_at = turn.get("listen_requested_ms")
@@ -151,12 +174,50 @@ def validate(document: dict) -> tuple[list, list, dict]:
                 finalisation.append(turn["finalization_after_eos_ms"])
 
             attestation = turn.get("operator_attestation")
+            if live_follow_up:
+                assert_(scenario.get("voice_source") == ("human_microphone" if by_human else "none"),
+                        f"{label} voice source agrees with the operator")
+                assert_(attestation in {"spoke_answer", "stayed_silent", "interrupted"},
+                        f"{label} records an explicit operator attestation")
+                attempt = turn.get("av040_attempt")
+                assert_(type(attempt) is int and 1 <= attempt <= av040_attempt_limit,
+                        f"{label} reserves an attempt within the {av040_attempt_limit}-turn bound")
+                if type(attempt) is int and attempt > 24:
+                    assert_(scenario.get("authorized_four_turn_extension") is True,
+                            f"{label} records the owner's four-turn extension")
+                summary["av040_attempts"].append(attempt)
+                assert_(type(turn.get("token")) is int and type(turn.get("terminal_token")) is int
+                        and turn["terminal_token"] > turn["token"],
+                        f"{label} invalidates its originating token at completion")
+                thinking = turn.get("measured_thinking_ms")
+                if thinking is not None:
+                    assert_(thinking >= turn.get("operator_thinking_ms", 0),
+                            f"{label} permits the requested thinking interval before capture")
+                capture = turn.get("capture_ms")
+                if capture is not None:
+                    assert_(capture <= scenario["capture_limit_ms"] + scenario["finalization_limit_ms"] + 250,
+                            f"{label} stays inside capture plus finalization limits (250 ms scheduling tolerance)")
+                final_at = turn.get("final_ms")
+                deadlines = [turn.get("finish_requested_ms"), turn.get("done_requested_ms")]
+                if not scenario.get("segmented_session_requested"):
+                    deadlines.append(turn.get("end_of_speech_ms"))
+                deadlines = [value for value in deadlines if isinstance(value, (int, float))]
+                if deadlines and isinstance(final_at, (int, float)):
+                    assert_(final_at - min(deadlines) <= scenario["finalization_limit_ms"] + 250,
+                            f"{label} honors the first finalization deadline")
+                if status != "success":
+                    summary["capability_findings"].append(
+                        f"{label}: {status} / {error_name or turn.get('detail') or 'no transcript'}")
             if name in SPOKEN_SCENARIOS and status in {"success", "error", "cancelled"}:
                 assert_(attestation is not None, f"{label} operator attested the turn")
-            if name in SILENT_SCENARIOS and attestation is not None:
-                assert_(attestation != "spoke_answer",
-                        f"{label} a silent scenario was not attested as spoken")
-            if status == "success" and attestation is not None:
+            if name in SILENT_SCENARIOS | {"av040_echo"} and attestation is not None:
+                if live_follow_up and attestation == "spoke_answer":
+                    summary["capability_findings"].append(
+                        f"{label}: silent protocol not confirmed; app attestation records speech")
+                else:
+                    assert_(attestation != "spoke_answer",
+                            f"{label} a silent scenario was not attested as spoken")
+            if status == "success" and attestation is not None and name != "av040_echo":
                 assert_(attestation == "spoke_answer",
                         f"{label} a transcript is only counted when the operator spoke")
             if not by_human:
@@ -166,6 +227,11 @@ def validate(document: dict) -> tuple[list, list, dict]:
         for entry in scenario.get("stale_callbacks", []):
             assert_(entry.get("advanced_turn") is False,
                     f"{name} stale {entry.get('callback')} did not advance a turn")
+            if live_follow_up and entry.get("reason") == "invalidated_token":
+                expected = entry.get("expected_token")
+                current = entry.get("current_token")
+                assert_(type(expected) is int and type(current) is int and expected < current,
+                        f"{name} stale {entry.get('callback')} belongs to an older token")
 
         summary["scenarios"].append({
             "scenario": name,
@@ -183,6 +249,15 @@ def validate(document: dict) -> tuple[list, list, dict]:
         })
         summary["turn_count"] += len(turns)
         summary["success_count"] += successes
+
+    attempts = summary["av040_attempts"]
+    if attempts:
+        assert_(len(attempts) <= av040_attempt_limit,
+                f"AV-040 has at most {av040_attempt_limit} additional turns")
+        assert_(len({str(value) for value in attempts}) == len(attempts),
+                "AV-040 attempt IDs are unique; cumulative snapshots are not double-counted")
+        assert_(len(policies) <= 2, "AV-040 compares at most two capture candidates")
+        assert_(len(interruption_rules) == 1, "AV-040 evaluates one interruption rule")
 
     return assertions, failures, summary
 
@@ -240,6 +315,8 @@ def main() -> int:
                         help="one or more runs pulled from the emulator")
     parser.add_argument("--write", action="store_true",
                         help="refresh the measured tables in the AV-005 report")
+    parser.add_argument("--av040-attempt-limit", type=int, choices=(24, 28), default=24,
+                        help="28 only for the owner's documented four-turn MacBook extension")
     arguments = parser.parse_args()
 
     missing = [path for path in arguments.evidence if not path.exists()]
@@ -248,7 +325,7 @@ def main() -> int:
               "Run the suite first; see the runbook.", file=sys.stderr)
         return 2
     document = merge(arguments.evidence)
-    assertions, failures, summary = validate(document)
+    assertions, failures, summary = validate(document, arguments.av040_attempt_limit)
 
     for failure in failures:
         print(f"FAIL: {failure}", file=sys.stderr)
@@ -260,6 +337,11 @@ def main() -> int:
           f"({summary['turn_count']} turns, {summary['success_count']} transcripts, "
           f"{summary['human_transcripts']} of them from human speech; "
           "captured run, not a new emulator execution)")
+    if summary["av040_attempts"]:
+        print(f"AV-040: {len(summary['av040_attempts'])}/{arguments.av040_attempt_limit} follow-up attempts in these files. "
+              "Integrity validation is not a capability go decision.")
+        for finding in summary["capability_findings"]:
+            print(f"OBSERVATION: {finding}")
 
     if arguments.write:
         if not REPORT.exists():

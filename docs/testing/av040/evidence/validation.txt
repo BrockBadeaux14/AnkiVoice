@@ -1,0 +1,29 @@
+PASS: 538 evidence assertions (40 turns, 4 transcripts, 3 of them from human speech; captured run, not a new emulator execution)
+AV-040: 28/28 follow-up attempts in these files. Integrity validation is not a capability go decision.
+OBSERVATION: av040_pause2[0]: error / ERROR_NO_MATCH
+OBSERVATION: av040_pause2[2]: error / ERROR_NO_MATCH
+OBSERVATION: av040_pause2[0]: error / ERROR_NO_MATCH
+OBSERVATION: av040_pause2[2]: error / ERROR_NO_MATCH
+OBSERVATION: av040_pause2[0]: error / ERROR_NO_MATCH
+OBSERVATION: av040_pause2[2]: error / ERROR_NO_MATCH
+OBSERVATION: av040_pause5[1]: error / ERROR_NO_MATCH
+OBSERVATION: av040_pause5[1]: halted / left_foreground
+OBSERVATION: av040_pause5[3]: error / ERROR_NO_MATCH
+OBSERVATION: av040_pause5[1]: error / ERROR_NO_MATCH
+OBSERVATION: av040_pause5[3]: error / ERROR_NO_MATCH
+OBSERVATION: av040_call_playback[1]: halted / external_audio_mode_1
+OBSERVATION: av040_call_playback[3]: halted / external_audio_mode_1
+OBSERVATION: av040_call_capture[3]: error / ERROR_NO_MATCH
+OBSERVATION: av040_home_playback[3]: halted / left_foreground
+OBSERVATION: av040_home_capture[3]: halted / left_foreground
+OBSERVATION: av040_lock_playback[3]: halted / left_foreground
+OBSERVATION: av040_lock_capture[3]: halted / left_foreground
+OBSERVATION: av040_cancel_playback[3]: cancelled / operator_cancel
+OBSERVATION: av040_cancel_capture[3]: cancelled / operator_cancel
+OBSERVATION: av040_echo[0]: possible prompt/ambient contamination
+OBSERVATION: av040_echo[1]: error / ERROR_NO_MATCH
+OBSERVATION: av040_pause2[2]: error / ERROR_NO_MATCH
+OBSERVATION: av040_echo[0]: error / ERROR_NO_MATCH
+OBSERVATION: av040_echo[0]: silent protocol not confirmed; app attestation records speech
+OBSERVATION: av040_echo[1]: error / ERROR_NO_MATCH
+OBSERVATION: av040_echo[1]: silent protocol not confirmed; app attestation records speech

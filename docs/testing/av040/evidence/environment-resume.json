@@ -1,0 +1,25 @@
+{
+  "captured_at_utc": "2026-09-15T15:38:19.331881+00:00",
+  "phase": "resumed preflight; no follow-up attempts yet",
+  "avd": "AnkiVoice_AV005",
+  "serial": "emulator-5588",
+  "host_audio_routing": {
+    "default_input": "WH-1000XM5",
+    "default_output": "WH-1000XM5"
+  },
+  "user_instruction": "Use WH-1000XM5 and record the changed audio setup",
+  "baseline_audio_routing": "MacBook Pro Microphone / MacBook Pro Speakers",
+  "deviation": "Changed host input/output to WH-1000XM5 before launching the test AVD; no default-device change by this task. Host headset routing does not validate Android Bluetooth routing or physical-device behavior.",
+  "host_volume": "output volume:24, input volume:50, alert volume:100, output muted:false",
+  "candidate_apk_sha256": "778e7bc9e9807d37b96d9fef66b7b22808a9e8fa87af236f8b2878189b58137c",
+  "android_fingerprint": "google/sdk_gphone64_arm64/emu64a:16/BE2A.250530.026.D1/13818094:user/release-keys",
+  "recognition_service": "com.google.android.tts/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService",
+  "tts_version_lines": [
+    "versionCode=210526444 minSdk=26 targetSdk=35",
+    "versionName=googletts.google-speech-apk_20241125.02_p2.702443970"
+  ],
+  "guest_media_volume": "[V] will control stream=3 (STREAM_MUSIC)\n[V] will get volume\n[V] Connecting to AudioService\n[V] volume is 5 in range [0..15]",
+  "airplane_mode": "0",
+  "wifi_enabled": "1",
+  "host_microphone_forwarding": "Enabled explicitly after emulator startup; default audio input unchanged during run."
+}

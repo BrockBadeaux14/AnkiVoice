@@ -1,0 +1,41 @@
+{
+  "started_at_utc": "2026-09-15T15:52:43.143589+00:00",
+  "scenario": "av040_call_playback",
+  "serial": "emulator-5588",
+  "human_controls_start_and_attestation": true,
+  "required_triggers": 2,
+  "trigger_delay_ms": 200,
+  "emulated_call_hold_ms": 3000,
+  "events": [
+    {
+      "trigger_marker": "09-15 10:56:00.391  4094  4094 I AV005   : MARK scenario=av040_call_playback event=playback_start t=85",
+      "marker_received_at_utc": "2026-09-15T15:56:00.862834+00:00",
+      "dispatched_at_utc": "2026-09-15T15:56:01.066520+00:00",
+      "command": [
+        "emu",
+        "gsm",
+        "call",
+        "5550400"
+      ],
+      "result": "OK",
+      "call_end_at_utc": "2026-09-15T15:56:04.088986+00:00",
+      "call_end_result": "OK"
+    },
+    {
+      "trigger_marker": "09-15 10:56:17.256  4094  4094 I AV005   : MARK scenario=av040_call_playback event=playback_start t=16950",
+      "marker_received_at_utc": "2026-09-15T15:56:17.731088+00:00",
+      "dispatched_at_utc": "2026-09-15T15:56:17.935733+00:00",
+      "command": [
+        "emu",
+        "gsm",
+        "call",
+        "5550400"
+      ],
+      "result": "OK",
+      "call_end_at_utc": "2026-09-15T15:56:20.957373+00:00",
+      "call_end_result": "OK"
+    }
+  ],
+  "all_triggers_dispatched": true,
+  "finished_at_utc": "2026-09-15T15:56:20.983341+00:00"
+}

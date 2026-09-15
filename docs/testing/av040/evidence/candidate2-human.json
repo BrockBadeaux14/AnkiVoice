@@ -1,0 +1,4243 @@
+{
+  "schema_version": 1,
+  "follow_up": "AV-040",
+  "reserved_attempts": 24,
+  "attempt_limit": 24,
+  "suite": "AV-005 foreground speech",
+  "operator_driven": true,
+  "operated_by": "human",
+  "anki_touched": false,
+  "rating_produced": false,
+  "written_epoch_ms": 1789488642598,
+  "environment": {
+    "fingerprint": "google\/sdk_gphone64_arm64\/emu64a:16\/BE2A.250530.026.D1\/13818094:user\/release-keys",
+    "api": 36,
+    "device": "emu64a",
+    "product": "sdk_gphone64_arm64",
+    "locale": "en-US",
+    "engine": "com.google.android.tts",
+    "engine_version": "googletts.google-speech-apk_20241125.02_p2.702443970",
+    "engine_version_code": 210526444,
+    "recognition_available": true,
+    "on_device_recognition_available": true,
+    "record_audio_granted": true,
+    "tts_language_availability": 1,
+    "recognition_services": [
+      "com.google.android.as\/com.google.android.apps.miphone.aiai.app.AiAiSpeechRecognitionService",
+      "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService"
+    ],
+    "voice": {
+      "name": "en-US-language",
+      "network_required": false,
+      "local_en_us_voice_count": 9
+    },
+    "audio_mode": 0,
+    "media_volume": 5,
+    "media_volume_max": 15,
+    "default_recognition_service": "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService",
+    "airplane_mode_on": false,
+    "has_validated_internet": true
+  },
+  "scenarios": [
+    {
+      "schema_version": 1,
+      "follow_up": "AV-040",
+      "capture_policy": "explicit_start_segmented_done_v2",
+      "segmented_session_requested": true,
+      "segmented_minimum_ms": 15000,
+      "interruption_rule": "lifecycle_audio_mode_unsolicited_tts_stop_v1",
+      "capture_limit_ms": 15000,
+      "finalization_limit_ms": 5000,
+      "automatic_rearms": 0,
+      "same_turn_retries": 0,
+      "scenario": "av040_pause2",
+      "title": "1. Think two seconds, then Start answer",
+      "operator_action": "SPEAK_ANSWER",
+      "operated_by": "human",
+      "voice_source": "human_microphone",
+      "started_epoch_ms": 1789487150696,
+      "environment": {
+        "fingerprint": "google\/sdk_gphone64_arm64\/emu64a:16\/BE2A.250530.026.D1\/13818094:user\/release-keys",
+        "api": 36,
+        "device": "emu64a",
+        "product": "sdk_gphone64_arm64",
+        "locale": "en-US",
+        "engine": "com.google.android.tts",
+        "engine_version": "googletts.google-speech-apk_20241125.02_p2.702443970",
+        "engine_version_code": 210526444,
+        "recognition_available": true,
+        "on_device_recognition_available": true,
+        "record_audio_granted": true,
+        "tts_language_availability": 1,
+        "recognition_services": [
+          "com.google.android.as\/com.google.android.apps.miphone.aiai.app.AiAiSpeechRecognitionService",
+          "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService"
+        ],
+        "voice": {
+          "name": "en-US-language",
+          "network_required": false,
+          "local_en_us_voice_count": 9
+        },
+        "audio_mode": 0,
+        "media_volume": 5,
+        "media_volume_max": 15,
+        "default_recognition_service": "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService",
+        "airplane_mode_on": false,
+        "has_validated_internet": true
+      },
+      "requested_settings": {
+        "settle_ms": 400,
+        "operator_thinking_ms": 2000,
+        "complete_silence_ms": 1200,
+        "possibly_complete_silence_ms": 900,
+        "minimum_length_ms": 15000,
+        "watchdog_ms": 30000,
+        "auto_cancel_ms": 0,
+        "second_recognizer": false,
+        "capture_during_playback": false
+      },
+      "turns": [
+        {
+          "av040_attempt": 5,
+          "token": 1,
+          "operator_actions": [
+            {
+              "action": "start_answer",
+              "t_ms": 8046
+            },
+            {
+              "action": "done",
+              "t_ms": 11097
+            }
+          ],
+          "result_events": [
+            {
+              "kind": "segment",
+              "t_ms": 11247,
+              "keys": [
+                "current_locale",
+                "results_recognition"
+              ],
+              "recognition_texts": []
+            }
+          ],
+          "segments": [],
+          "turn_index": 0,
+          "position": 0,
+          "round": 1,
+          "example_id": "demo-reversal",
+          "prompt": "Reverse the sequence red, blue, green.",
+          "expected_answer": "Green, blue, red.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 2000,
+          "partials": [],
+          "alternatives": [],
+          "rms_peak": 0,
+          "repeats": 0,
+          "manual_intervention": false,
+          "status": "error",
+          "transcript": null,
+          "error_code": 7,
+          "error_name": "ERROR_NO_MATCH",
+          "playback_start_ms": 825,
+          "playback_done_ms": 3564,
+          "listen_requested_ms": 8046,
+          "ready_for_speech_ms": 8388,
+          "beginning_of_speech_ms": null,
+          "end_of_speech_ms": null,
+          "final_ms": 11248,
+          "tts_request_ms": 618,
+          "tts_speak_result": 0,
+          "playback_failed": false,
+          "thinking_started_ms": 3965,
+          "measured_thinking_ms": 4081,
+          "permission_at_capture": true,
+          "done_requested_ms": 11097,
+          "finish_requested_ms": 11097,
+          "finish_trigger": "operator_done",
+          "invalidated_before_cleanup_ms": 11249,
+          "terminal_token": 2,
+          "capture_ms": 3202,
+          "playback_ms": 2739,
+          "measured_settle_ms": 4482,
+          "echo_suspected": false,
+          "operator_attestation": "spoke_answer",
+          "attested_epoch_ms": 1789487191344
+        },
+        {
+          "av040_attempt": 6,
+          "token": 3,
+          "operator_actions": [
+            {
+              "action": "start_answer",
+              "t_ms": 56648
+            },
+            {
+              "action": "done",
+              "t_ms": 61093
+            }
+          ],
+          "result_events": [
+            {
+              "kind": "partial",
+              "t_ms": 60012,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                ""
+              ]
+            },
+            {
+              "kind": "segment",
+              "t_ms": 60341,
+              "keys": [
+                "current_locale",
+                "results_recognition"
+              ],
+              "recognition_texts": []
+            }
+          ],
+          "segments": [],
+          "turn_index": 2,
+          "position": 1,
+          "round": 1,
+          "example_id": "demo-arithmetic",
+          "prompt": "A box has three red blocks and two blue blocks. How many blocks are there in total?",
+          "expected_answer": "Five.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 2000,
+          "partials": [
+            {
+              "t_ms": 60012,
+              "text": ""
+            }
+          ],
+          "alternatives": [],
+          "rms_peak": 10,
+          "repeats": 0,
+          "manual_intervention": false,
+          "status": "error",
+          "transcript": null,
+          "error_code": 7,
+          "error_name": "ERROR_NO_MATCH",
+          "playback_start_ms": 47361,
+          "playback_done_ms": 52274,
+          "listen_requested_ms": 56648,
+          "ready_for_speech_ms": 56954,
+          "beginning_of_speech_ms": 58194,
+          "end_of_speech_ms": 60327,
+          "final_ms": 61210,
+          "tts_request_ms": 47122,
+          "tts_speak_result": 0,
+          "playback_failed": false,
+          "thinking_started_ms": 52676,
+          "measured_thinking_ms": 3972,
+          "permission_at_capture": true,
+          "done_requested_ms": 61093,
+          "finish_requested_ms": 61093,
+          "finish_trigger": "operator_done",
+          "invalidated_before_cleanup_ms": 61210,
+          "terminal_token": 4,
+          "capture_ms": 4562,
+          "finalization_after_eos_ms": 883,
+          "playback_ms": 4913,
+          "measured_settle_ms": 4374,
+          "echo_suspected": false,
+          "operator_attestation": "spoke_answer",
+          "attested_epoch_ms": 1789487220906
+        }
+      ],
+      "lifecycle_events": [
+        {
+          "event": "audio_focus_change_-2",
+          "t_ms": 8234,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 0
+        },
+        {
+          "event": "audio_focus_loss_during_capture",
+          "t_ms": 8235,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 0
+        },
+        {
+          "event": "audio_focus_change_1",
+          "t_ms": 11175,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 0
+        },
+        {
+          "event": "token_invalidated:turn_complete",
+          "t_ms": 11249,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 0
+        },
+        {
+          "event": "stop_audio_work_turn_complete",
+          "t_ms": 11249,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 0
+        },
+        {
+          "event": "audio_focus_change_-2",
+          "t_ms": 56788,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 2
+        },
+        {
+          "event": "audio_focus_loss_during_capture",
+          "t_ms": 56788,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 2
+        },
+        {
+          "event": "audio_focus_change_1",
+          "t_ms": 61131,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 2
+        },
+        {
+          "event": "token_invalidated:turn_complete",
+          "t_ms": 61210,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 2
+        },
+        {
+          "event": "stop_audio_work_turn_complete",
+          "t_ms": 61210,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 2
+        },
+        {
+          "event": "token_invalidated:scenario_end",
+          "t_ms": 70210,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "stop_audio_work_scenario_end",
+          "t_ms": 70210,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "on_pause",
+          "t_ms": 272763,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "token_invalidated:on_pause",
+          "t_ms": 272763,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "stop_audio_work_on_pause",
+          "t_ms": 272763,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "on_resume",
+          "t_ms": 272769,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        }
+      ],
+      "stale_callbacks": [],
+      "audio_focus_request": 1,
+      "self_inflicted_focus_blips_ms": [
+        2941,
+        4343
+      ],
+      "finished_epoch_ms": 1789487220914,
+      "duration_ms": 70217,
+      "completed_turns": 2
+    },
+    {
+      "schema_version": 1,
+      "follow_up": "AV-040",
+      "capture_policy": "explicit_start_segmented_done_v2",
+      "segmented_session_requested": true,
+      "segmented_minimum_ms": 15000,
+      "interruption_rule": "lifecycle_audio_mode_unsolicited_tts_stop_v1",
+      "capture_limit_ms": 15000,
+      "finalization_limit_ms": 5000,
+      "automatic_rearms": 0,
+      "same_turn_retries": 0,
+      "scenario": "av040_pause5",
+      "title": "2. Think five seconds, then Start answer",
+      "operator_action": "SPEAK_ANSWER",
+      "operated_by": "human",
+      "voice_source": "human_microphone",
+      "started_epoch_ms": 1789487444322,
+      "environment": {
+        "fingerprint": "google\/sdk_gphone64_arm64\/emu64a:16\/BE2A.250530.026.D1\/13818094:user\/release-keys",
+        "api": 36,
+        "device": "emu64a",
+        "product": "sdk_gphone64_arm64",
+        "locale": "en-US",
+        "engine": "com.google.android.tts",
+        "engine_version": "googletts.google-speech-apk_20241125.02_p2.702443970",
+        "engine_version_code": 210526444,
+        "recognition_available": true,
+        "on_device_recognition_available": true,
+        "record_audio_granted": true,
+        "tts_language_availability": 1,
+        "recognition_services": [
+          "com.google.android.as\/com.google.android.apps.miphone.aiai.app.AiAiSpeechRecognitionService",
+          "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService"
+        ],
+        "voice": {
+          "name": "en-US-language",
+          "network_required": false,
+          "local_en_us_voice_count": 9
+        },
+        "audio_mode": 0,
+        "media_volume": 5,
+        "media_volume_max": 15,
+        "default_recognition_service": "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService",
+        "airplane_mode_on": false,
+        "has_validated_internet": true
+      },
+      "requested_settings": {
+        "settle_ms": 400,
+        "operator_thinking_ms": 5000,
+        "complete_silence_ms": 1200,
+        "possibly_complete_silence_ms": 900,
+        "minimum_length_ms": 15000,
+        "watchdog_ms": 30000,
+        "auto_cancel_ms": 0,
+        "second_recognizer": false,
+        "capture_during_playback": false
+      },
+      "turns": [
+        {
+          "av040_attempt": 7,
+          "token": 7,
+          "operator_actions": [
+            {
+              "action": "start_answer",
+              "t_ms": 19300
+            },
+            {
+              "action": "done",
+              "t_ms": 26249
+            }
+          ],
+          "result_events": [
+            {
+              "kind": "segment",
+              "t_ms": 24404,
+              "keys": [
+                "current_locale",
+                "results_recognition"
+              ],
+              "recognition_texts": []
+            },
+            {
+              "kind": "segment",
+              "t_ms": 25752,
+              "keys": [
+                "current_locale",
+                "results_recognition"
+              ],
+              "recognition_texts": []
+            },
+            {
+              "kind": "segment",
+              "t_ms": 26505,
+              "keys": [
+                "current_locale",
+                "results_recognition"
+              ],
+              "recognition_texts": []
+            }
+          ],
+          "segments": [],
+          "turn_index": 1,
+          "position": 0,
+          "round": 1,
+          "example_id": "demo-rules",
+          "prompt": "In a game, a token is valid only if it is blue and square. A token is blue and round. Is it valid, and why?",
+          "expected_answer": "No, round does not satisfy square.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 5000,
+          "partials": [],
+          "alternatives": [],
+          "rms_peak": 10,
+          "repeats": 0,
+          "manual_intervention": false,
+          "status": "error",
+          "transcript": null,
+          "error_code": 7,
+          "error_name": "ERROR_NO_MATCH",
+          "playback_start_ms": 655,
+          "playback_done_ms": 8032,
+          "listen_requested_ms": 19300,
+          "ready_for_speech_ms": 19541,
+          "beginning_of_speech_ms": 22692,
+          "end_of_speech_ms": 26504,
+          "final_ms": 26505,
+          "tts_request_ms": 478,
+          "tts_speak_result": 0,
+          "playback_failed": false,
+          "thinking_started_ms": 8434,
+          "measured_thinking_ms": 10866,
+          "permission_at_capture": true,
+          "done_requested_ms": 26249,
+          "finish_requested_ms": 26249,
+          "finish_trigger": "operator_done",
+          "invalidated_before_cleanup_ms": 26505,
+          "terminal_token": 8,
+          "capture_ms": 7205,
+          "finalization_after_eos_ms": 1,
+          "playback_ms": 7377,
+          "measured_settle_ms": 11268,
+          "echo_suspected": false,
+          "operator_attestation": "spoke_answer",
+          "attested_epoch_ms": 1789487499692
+        },
+        {
+          "av040_attempt": 8,
+          "token": 9,
+          "operator_actions": [
+            {
+              "action": "start_answer",
+              "t_ms": 73935
+            },
+            {
+              "action": "done",
+              "t_ms": 84285
+            }
+          ],
+          "result_events": [
+            {
+              "kind": "partial",
+              "t_ms": 78236,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                ""
+              ]
+            },
+            {
+              "kind": "partial",
+              "t_ms": 78485,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                ""
+              ]
+            },
+            {
+              "kind": "partial",
+              "t_ms": 78649,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                ""
+              ]
+            },
+            {
+              "kind": "partial",
+              "t_ms": 78769,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                ""
+              ]
+            },
+            {
+              "kind": "partial",
+              "t_ms": 78804,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                "it"
+              ]
+            },
+            {
+              "kind": "partial",
+              "t_ms": 79303,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                "it inputs"
+              ]
+            },
+            {
+              "kind": "partial",
+              "t_ms": 79702,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                "it inputs"
+              ]
+            },
+            {
+              "kind": "partial",
+              "t_ms": 79853,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                "it inputs"
+              ]
+            },
+            {
+              "kind": "partial",
+              "t_ms": 80369,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                "it inputs two"
+              ]
+            },
+            {
+              "kind": "partial",
+              "t_ms": 80410,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                "it inputs two first"
+              ]
+            },
+            {
+              "kind": "partial",
+              "t_ms": 80652,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                "it inputs two first"
+              ]
+            },
+            {
+              "kind": "partial",
+              "t_ms": 81134,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                "it inputs two first"
+              ]
+            },
+            {
+              "kind": "partial",
+              "t_ms": 81329,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                "it inputs two first five"
+              ]
+            },
+            {
+              "kind": "partial",
+              "t_ms": 81435,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                "it inputs two first five"
+              ]
+            },
+            {
+              "kind": "partial",
+              "t_ms": 81678,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                "it inputs two first five and"
+              ]
+            },
+            {
+              "kind": "partial",
+              "t_ms": 81931,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                "it inputs two first five and then"
+              ]
+            },
+            {
+              "kind": "segment",
+              "t_ms": 82170,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "confidence_scores"
+              ],
+              "recognition_texts": [
+                "it inputs two first five and then seven",
+                "it inputs two first five and then 7",
+                "it inputs to first five and then seven"
+              ]
+            }
+          ],
+          "segments": [
+            {
+              "t_ms": 82170,
+              "text": "it inputs two first five and then seven"
+            }
+          ],
+          "turn_index": 3,
+          "position": 1,
+          "round": 1,
+          "example_id": "demo-explanation",
+          "prompt": "A machine sorts numbers from smallest to largest. Explain what it does to the list seven, two, five.",
+          "expected_answer": "It puts two first, then five, then seven.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 5000,
+          "partials": [
+            {
+              "t_ms": 78236,
+              "text": ""
+            },
+            {
+              "t_ms": 78485,
+              "text": ""
+            },
+            {
+              "t_ms": 78649,
+              "text": ""
+            },
+            {
+              "t_ms": 78769,
+              "text": ""
+            },
+            {
+              "t_ms": 78804,
+              "text": "it"
+            },
+            {
+              "t_ms": 79303,
+              "text": "it inputs"
+            },
+            {
+              "t_ms": 79703,
+              "text": "it inputs"
+            },
+            {
+              "t_ms": 79853,
+              "text": "it inputs"
+            },
+            {
+              "t_ms": 80369,
+              "text": "it inputs two"
+            },
+            {
+              "t_ms": 80410,
+              "text": "it inputs two first"
+            },
+            {
+              "t_ms": 80652,
+              "text": "it inputs two first"
+            },
+            {
+              "t_ms": 81134,
+              "text": "it inputs two first"
+            },
+            {
+              "t_ms": 81329,
+              "text": "it inputs two first five"
+            },
+            {
+              "t_ms": 81435,
+              "text": "it inputs two first five"
+            },
+            {
+              "t_ms": 81678,
+              "text": "it inputs two first five and"
+            },
+            {
+              "t_ms": 81931,
+              "text": "it inputs two first five and then"
+            }
+          ],
+          "alternatives": [],
+          "rms_peak": 10,
+          "repeats": 0,
+          "manual_intervention": false,
+          "status": "success",
+          "transcript": "it inputs two first five and then seven",
+          "error_code": null,
+          "error_name": null,
+          "playback_start_ms": 59805,
+          "playback_done_ms": 66468,
+          "listen_requested_ms": 73935,
+          "ready_for_speech_ms": 74130,
+          "beginning_of_speech_ms": 75895,
+          "end_of_speech_ms": 82146,
+          "final_ms": 84430,
+          "tts_request_ms": 59629,
+          "tts_speak_result": 0,
+          "playback_failed": false,
+          "thinking_started_ms": 66870,
+          "measured_thinking_ms": 7065,
+          "permission_at_capture": true,
+          "done_requested_ms": 84285,
+          "finish_requested_ms": 84285,
+          "finish_trigger": "operator_done",
+          "invalidated_before_cleanup_ms": 84430,
+          "terminal_token": 10,
+          "capture_ms": 10495,
+          "finalization_after_eos_ms": 2284,
+          "playback_ms": 6663,
+          "measured_settle_ms": 7467,
+          "echo_suspected": false,
+          "operator_attestation": "spoke_answer",
+          "attested_epoch_ms": 1789487532056
+        }
+      ],
+      "lifecycle_events": [
+        {
+          "event": "audio_focus_change_-2",
+          "t_ms": 19492,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 1
+        },
+        {
+          "event": "audio_focus_loss_during_capture",
+          "t_ms": 19496,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 1
+        },
+        {
+          "event": "audio_focus_change_1",
+          "t_ms": 26404,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 1
+        },
+        {
+          "event": "token_invalidated:turn_complete",
+          "t_ms": 26505,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 1
+        },
+        {
+          "event": "stop_audio_work_turn_complete",
+          "t_ms": 26505,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 1
+        },
+        {
+          "event": "audio_focus_change_-2",
+          "t_ms": 73985,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 3
+        },
+        {
+          "event": "audio_focus_loss_during_capture",
+          "t_ms": 73988,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 3
+        },
+        {
+          "event": "audio_focus_change_1",
+          "t_ms": 84343,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 3
+        },
+        {
+          "event": "segmented_session_end",
+          "t_ms": 84430,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 3
+        },
+        {
+          "event": "token_invalidated:turn_complete",
+          "t_ms": 84430,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "stop_audio_work_turn_complete",
+          "t_ms": 84430,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "token_invalidated:scenario_end",
+          "t_ms": 87734,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "stop_audio_work_scenario_end",
+          "t_ms": 87734,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        }
+      ],
+      "stale_callbacks": [],
+      "audio_focus_request": 1,
+      "self_inflicted_focus_blips_ms": [
+        6909,
+        10384
+      ],
+      "finished_epoch_ms": 1789487532058,
+      "duration_ms": 87736,
+      "completed_turns": 2
+    },
+    {
+      "schema_version": 1,
+      "follow_up": "AV-040",
+      "capture_policy": "explicit_start_segmented_done_v2",
+      "segmented_session_requested": true,
+      "segmented_minimum_ms": 15000,
+      "interruption_rule": "lifecycle_audio_mode_unsolicited_tts_stop_v1",
+      "capture_limit_ms": 15000,
+      "finalization_limit_ms": 5000,
+      "automatic_rearms": 0,
+      "same_turn_retries": 0,
+      "scenario": "av040_pause5",
+      "title": "2. Think five seconds, then Start answer",
+      "operator_action": "SPEAK_ANSWER",
+      "operated_by": "human",
+      "voice_source": "human_microphone",
+      "started_epoch_ms": 1789487547605,
+      "environment": {
+        "fingerprint": "google\/sdk_gphone64_arm64\/emu64a:16\/BE2A.250530.026.D1\/13818094:user\/release-keys",
+        "api": 36,
+        "device": "emu64a",
+        "product": "sdk_gphone64_arm64",
+        "locale": "en-US",
+        "engine": "com.google.android.tts",
+        "engine_version": "googletts.google-speech-apk_20241125.02_p2.702443970",
+        "engine_version_code": 210526444,
+        "recognition_available": true,
+        "on_device_recognition_available": true,
+        "record_audio_granted": true,
+        "tts_language_availability": 1,
+        "recognition_services": [
+          "com.google.android.as\/com.google.android.apps.miphone.aiai.app.AiAiSpeechRecognitionService",
+          "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService"
+        ],
+        "voice": {
+          "name": "en-US-language",
+          "network_required": false,
+          "local_en_us_voice_count": 9
+        },
+        "audio_mode": 0,
+        "media_volume": 5,
+        "media_volume_max": 15,
+        "default_recognition_service": "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService",
+        "airplane_mode_on": false,
+        "has_validated_internet": true
+      },
+      "requested_settings": {
+        "settle_ms": 400,
+        "operator_thinking_ms": 5000,
+        "complete_silence_ms": 1200,
+        "possibly_complete_silence_ms": 900,
+        "minimum_length_ms": 15000,
+        "watchdog_ms": 30000,
+        "auto_cancel_ms": 0,
+        "second_recognizer": false,
+        "capture_during_playback": false
+      },
+      "turns": [
+        {
+          "av040_attempt": 9,
+          "token": 12,
+          "operator_actions": [],
+          "result_events": [],
+          "segments": [],
+          "turn_index": 1,
+          "position": 0,
+          "round": 1,
+          "example_id": "demo-rules",
+          "prompt": "In a game, a token is valid only if it is blue and square. A token is blue and round. Is it valid, and why?",
+          "expected_answer": "No, round does not satisfy square.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 5000,
+          "partials": [],
+          "alternatives": [],
+          "rms_peak": 0,
+          "repeats": 0,
+          "manual_intervention": false,
+          "status": "halted",
+          "transcript": null,
+          "error_code": null,
+          "error_name": null,
+          "playback_start_ms": 76,
+          "playback_done_ms": null,
+          "listen_requested_ms": null,
+          "ready_for_speech_ms": null,
+          "beginning_of_speech_ms": null,
+          "end_of_speech_ms": null,
+          "final_ms": 4284,
+          "tts_request_ms": 51,
+          "tts_speak_result": 0,
+          "invalidated_before_cleanup_ms": 4284,
+          "terminal_token": 14,
+          "detail": "left_foreground",
+          "echo_suspected": false,
+          "operator_attestation": "interrupted",
+          "attested_epoch_ms": 1789487560955
+        },
+        {
+          "av040_attempt": 10,
+          "token": 15,
+          "operator_actions": [
+            {
+              "action": "start_answer",
+              "t_ms": 30568
+            },
+            {
+              "action": "done",
+              "t_ms": 38660
+            }
+          ],
+          "result_events": [
+            {
+              "kind": "segment",
+              "t_ms": 35518,
+              "keys": [
+                "current_locale",
+                "results_recognition"
+              ],
+              "recognition_texts": []
+            },
+            {
+              "kind": "segment",
+              "t_ms": 36803,
+              "keys": [
+                "current_locale",
+                "results_recognition"
+              ],
+              "recognition_texts": []
+            },
+            {
+              "kind": "segment",
+              "t_ms": 37587,
+              "keys": [
+                "current_locale",
+                "results_recognition"
+              ],
+              "recognition_texts": []
+            },
+            {
+              "kind": "segment",
+              "t_ms": 38805,
+              "keys": [
+                "current_locale",
+                "results_recognition"
+              ],
+              "recognition_texts": []
+            }
+          ],
+          "segments": [],
+          "turn_index": 3,
+          "position": 1,
+          "round": 1,
+          "example_id": "demo-explanation",
+          "prompt": "A machine sorts numbers from smallest to largest. Explain what it does to the list seven, two, five.",
+          "expected_answer": "It puts two first, then five, then seven.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 5000,
+          "partials": [],
+          "alternatives": [],
+          "rms_peak": 10,
+          "repeats": 0,
+          "manual_intervention": false,
+          "status": "error",
+          "transcript": null,
+          "error_code": 7,
+          "error_name": "ERROR_NO_MATCH",
+          "playback_start_ms": 15057,
+          "playback_done_ms": 21705,
+          "listen_requested_ms": 30568,
+          "ready_for_speech_ms": 30698,
+          "beginning_of_speech_ms": 33792,
+          "end_of_speech_ms": 38805,
+          "final_ms": 38806,
+          "tts_request_ms": 15020,
+          "tts_speak_result": 0,
+          "playback_failed": false,
+          "thinking_started_ms": 22107,
+          "measured_thinking_ms": 8461,
+          "permission_at_capture": true,
+          "done_requested_ms": 38660,
+          "finish_requested_ms": 38660,
+          "finish_trigger": "operator_done",
+          "invalidated_before_cleanup_ms": 38806,
+          "terminal_token": 16,
+          "capture_ms": 8238,
+          "finalization_after_eos_ms": 1,
+          "playback_ms": 6648,
+          "measured_settle_ms": 8863,
+          "echo_suspected": false,
+          "operator_attestation": "spoke_answer",
+          "attested_epoch_ms": 1789487589095
+        }
+      ],
+      "lifecycle_events": [
+        {
+          "event": "on_pause",
+          "t_ms": 4274,
+          "speaking": true,
+          "listening": false,
+          "turn_index": 1
+        },
+        {
+          "event": "token_invalidated:on_pause",
+          "t_ms": 4274,
+          "speaking": true,
+          "listening": false,
+          "turn_index": 1
+        },
+        {
+          "event": "stop_audio_work_on_pause",
+          "t_ms": 4274,
+          "speaking": true,
+          "listening": false,
+          "turn_index": 1
+        },
+        {
+          "event": "token_invalidated:turn_complete",
+          "t_ms": 4284,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 1
+        },
+        {
+          "event": "stop_audio_work_turn_complete",
+          "t_ms": 4284,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 1
+        },
+        {
+          "event": "on_resume",
+          "t_ms": 4287,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "tts_stopped:turn-12",
+          "t_ms": 4288,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "audio_focus_change_-2",
+          "t_ms": 30618,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 3
+        },
+        {
+          "event": "audio_focus_loss_during_capture",
+          "t_ms": 30618,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 3
+        },
+        {
+          "event": "audio_focus_change_1",
+          "t_ms": 38716,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 3
+        },
+        {
+          "event": "token_invalidated:turn_complete",
+          "t_ms": 38806,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "stop_audio_work_turn_complete",
+          "t_ms": 38806,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "token_invalidated:scenario_end",
+          "t_ms": 41491,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "stop_audio_work_scenario_end",
+          "t_ms": 41491,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        }
+      ],
+      "stale_callbacks": [],
+      "audio_focus_request": 1,
+      "self_inflicted_focus_blips_ms": [
+        8099
+      ],
+      "finished_epoch_ms": 1789487589105,
+      "duration_ms": 41500,
+      "completed_turns": 2
+    },
+    {
+      "schema_version": 1,
+      "follow_up": "AV-040",
+      "capture_policy": "explicit_start_segmented_done_v2",
+      "segmented_session_requested": true,
+      "segmented_minimum_ms": 15000,
+      "interruption_rule": "lifecycle_audio_mode_unsolicited_tts_stop_v1",
+      "capture_limit_ms": 15000,
+      "finalization_limit_ms": 5000,
+      "automatic_rearms": 0,
+      "same_turn_retries": 0,
+      "scenario": "av040_pause5",
+      "title": "2. Think five seconds, then Start answer",
+      "operator_action": "SPEAK_ANSWER",
+      "operated_by": "human",
+      "voice_source": "human_microphone",
+      "started_epoch_ms": 1789487598611,
+      "environment": {
+        "fingerprint": "google\/sdk_gphone64_arm64\/emu64a:16\/BE2A.250530.026.D1\/13818094:user\/release-keys",
+        "api": 36,
+        "device": "emu64a",
+        "product": "sdk_gphone64_arm64",
+        "locale": "en-US",
+        "engine": "com.google.android.tts",
+        "engine_version": "googletts.google-speech-apk_20241125.02_p2.702443970",
+        "engine_version_code": 210526444,
+        "recognition_available": true,
+        "on_device_recognition_available": true,
+        "record_audio_granted": true,
+        "tts_language_availability": 1,
+        "recognition_services": [
+          "com.google.android.as\/com.google.android.apps.miphone.aiai.app.AiAiSpeechRecognitionService",
+          "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService"
+        ],
+        "voice": {
+          "name": "en-US-language",
+          "network_required": false,
+          "local_en_us_voice_count": 9
+        },
+        "audio_mode": 0,
+        "media_volume": 5,
+        "media_volume_max": 15,
+        "default_recognition_service": "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService",
+        "airplane_mode_on": false,
+        "has_validated_internet": true
+      },
+      "requested_settings": {
+        "settle_ms": 400,
+        "operator_thinking_ms": 5000,
+        "complete_silence_ms": 1200,
+        "possibly_complete_silence_ms": 900,
+        "minimum_length_ms": 15000,
+        "watchdog_ms": 30000,
+        "auto_cancel_ms": 0,
+        "second_recognizer": false,
+        "capture_during_playback": false
+      },
+      "turns": [
+        {
+          "av040_attempt": 11,
+          "token": 18,
+          "operator_actions": [
+            {
+              "action": "start_answer",
+              "t_ms": 23719
+            },
+            {
+              "action": "done",
+              "t_ms": 36102
+            }
+          ],
+          "result_events": [
+            {
+              "kind": "segment",
+              "t_ms": 28780,
+              "keys": [
+                "current_locale",
+                "results_recognition"
+              ],
+              "recognition_texts": []
+            },
+            {
+              "kind": "segment",
+              "t_ms": 30048,
+              "keys": [
+                "current_locale",
+                "results_recognition"
+              ],
+              "recognition_texts": []
+            },
+            {
+              "kind": "segment",
+              "t_ms": 30830,
+              "keys": [
+                "current_locale",
+                "results_recognition"
+              ],
+              "recognition_texts": []
+            },
+            {
+              "kind": "segment",
+              "t_ms": 32230,
+              "keys": [
+                "current_locale",
+                "results_recognition"
+              ],
+              "recognition_texts": []
+            },
+            {
+              "kind": "segment",
+              "t_ms": 33022,
+              "keys": [
+                "current_locale",
+                "results_recognition"
+              ],
+              "recognition_texts": []
+            },
+            {
+              "kind": "segment",
+              "t_ms": 34462,
+              "keys": [
+                "current_locale",
+                "results_recognition"
+              ],
+              "recognition_texts": []
+            },
+            {
+              "kind": "segment",
+              "t_ms": 35264,
+              "keys": [
+                "current_locale",
+                "results_recognition"
+              ],
+              "recognition_texts": []
+            },
+            {
+              "kind": "segment",
+              "t_ms": 36249,
+              "keys": [
+                "current_locale",
+                "results_recognition"
+              ],
+              "recognition_texts": []
+            }
+          ],
+          "segments": [],
+          "turn_index": 1,
+          "position": 0,
+          "round": 1,
+          "example_id": "demo-rules",
+          "prompt": "In a game, a token is valid only if it is blue and square. A token is blue and round. Is it valid, and why?",
+          "expected_answer": "No, round does not satisfy square.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 5000,
+          "partials": [],
+          "alternatives": [],
+          "rms_peak": 10,
+          "repeats": 0,
+          "manual_intervention": false,
+          "status": "error",
+          "transcript": null,
+          "error_code": 7,
+          "error_name": "ERROR_NO_MATCH",
+          "playback_start_ms": 114,
+          "playback_done_ms": 7491,
+          "listen_requested_ms": 23720,
+          "ready_for_speech_ms": 23929,
+          "beginning_of_speech_ms": 27042,
+          "end_of_speech_ms": 36233,
+          "final_ms": 36249,
+          "tts_request_ms": 78,
+          "tts_speak_result": 0,
+          "playback_failed": false,
+          "thinking_started_ms": 7893,
+          "measured_thinking_ms": 15826,
+          "permission_at_capture": true,
+          "done_requested_ms": 36102,
+          "finish_requested_ms": 36102,
+          "finish_trigger": "operator_done",
+          "invalidated_before_cleanup_ms": 36250,
+          "terminal_token": 19,
+          "capture_ms": 12529,
+          "finalization_after_eos_ms": 16,
+          "playback_ms": 7377,
+          "measured_settle_ms": 16229,
+          "echo_suspected": false,
+          "operator_attestation": "spoke_answer",
+          "attested_epoch_ms": 1789487660105
+        },
+        {
+          "av040_attempt": 12,
+          "token": 20,
+          "operator_actions": [
+            {
+              "action": "start_answer",
+              "t_ms": 82500
+            },
+            {
+              "action": "done",
+              "t_ms": 90367
+            }
+          ],
+          "result_events": [
+            {
+              "kind": "segment",
+              "t_ms": 87527,
+              "keys": [
+                "current_locale",
+                "results_recognition"
+              ],
+              "recognition_texts": []
+            },
+            {
+              "kind": "segment",
+              "t_ms": 88815,
+              "keys": [
+                "current_locale",
+                "results_recognition"
+              ],
+              "recognition_texts": []
+            },
+            {
+              "kind": "segment",
+              "t_ms": 89597,
+              "keys": [
+                "current_locale",
+                "results_recognition"
+              ],
+              "recognition_texts": []
+            },
+            {
+              "kind": "segment",
+              "t_ms": 90495,
+              "keys": [
+                "current_locale",
+                "results_recognition"
+              ],
+              "recognition_texts": []
+            }
+          ],
+          "segments": [],
+          "turn_index": 3,
+          "position": 1,
+          "round": 1,
+          "example_id": "demo-explanation",
+          "prompt": "A machine sorts numbers from smallest to largest. Explain what it does to the list seven, two, five.",
+          "expected_answer": "It puts two first, then five, then seven.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 5000,
+          "partials": [],
+          "alternatives": [],
+          "rms_peak": 10,
+          "repeats": 0,
+          "manual_intervention": false,
+          "status": "error",
+          "transcript": null,
+          "error_code": 7,
+          "error_name": "ERROR_NO_MATCH",
+          "playback_start_ms": 68734,
+          "playback_done_ms": 75348,
+          "listen_requested_ms": 82500,
+          "ready_for_speech_ms": 82694,
+          "beginning_of_speech_ms": 85808,
+          "end_of_speech_ms": 89582,
+          "final_ms": 90495,
+          "tts_request_ms": 68715,
+          "tts_speak_result": 0,
+          "playback_failed": false,
+          "thinking_started_ms": 75751,
+          "measured_thinking_ms": 6749,
+          "permission_at_capture": true,
+          "done_requested_ms": 90367,
+          "finish_requested_ms": 90367,
+          "finish_trigger": "operator_done",
+          "invalidated_before_cleanup_ms": 90496,
+          "terminal_token": 21,
+          "capture_ms": 7995,
+          "finalization_after_eos_ms": 913,
+          "playback_ms": 6614,
+          "measured_settle_ms": 7152,
+          "echo_suspected": false,
+          "operator_attestation": "spoke_answer",
+          "attested_epoch_ms": 1789487706127
+        }
+      ],
+      "lifecycle_events": [
+        {
+          "event": "audio_focus_change_-2",
+          "t_ms": 23797,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 1
+        },
+        {
+          "event": "audio_focus_loss_during_capture",
+          "t_ms": 23825,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 1
+        },
+        {
+          "event": "audio_focus_change_1",
+          "t_ms": 36179,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 1
+        },
+        {
+          "event": "token_invalidated:turn_complete",
+          "t_ms": 36249,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 1
+        },
+        {
+          "event": "stop_audio_work_turn_complete",
+          "t_ms": 36250,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 1
+        },
+        {
+          "event": "audio_focus_change_-2",
+          "t_ms": 82555,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 3
+        },
+        {
+          "event": "audio_focus_loss_during_capture",
+          "t_ms": 82559,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 3
+        },
+        {
+          "event": "audio_focus_change_1",
+          "t_ms": 90387,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 3
+        },
+        {
+          "event": "token_invalidated:turn_complete",
+          "t_ms": 90495,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "stop_audio_work_turn_complete",
+          "t_ms": 90496,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "token_invalidated:scenario_end",
+          "t_ms": 107518,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "stop_audio_work_scenario_end",
+          "t_ms": 107518,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "on_pause",
+          "t_ms": 135425,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "token_invalidated:on_pause",
+          "t_ms": 135425,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "stop_audio_work_on_pause",
+          "t_ms": 135425,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "on_resume",
+          "t_ms": 135429,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        }
+      ],
+      "stale_callbacks": [],
+      "audio_focus_request": 1,
+      "self_inflicted_focus_blips_ms": [
+        12354,
+        7830
+      ],
+      "finished_epoch_ms": 1789487706131,
+      "duration_ms": 107521,
+      "completed_turns": 2
+    },
+    {
+      "schema_version": 1,
+      "follow_up": "AV-040",
+      "capture_policy": "explicit_start_segmented_done_v2",
+      "segmented_session_requested": true,
+      "segmented_minimum_ms": 15000,
+      "interruption_rule": "lifecycle_audio_mode_unsolicited_tts_stop_v1",
+      "capture_limit_ms": 15000,
+      "finalization_limit_ms": 5000,
+      "automatic_rearms": 0,
+      "same_turn_retries": 0,
+      "scenario": "av040_call_playback",
+      "title": "Call during playback",
+      "operator_action": "SPEAK_ANSWER",
+      "operated_by": "human",
+      "voice_source": "human_microphone",
+      "started_epoch_ms": 1789487760306,
+      "environment": {
+        "fingerprint": "google\/sdk_gphone64_arm64\/emu64a:16\/BE2A.250530.026.D1\/13818094:user\/release-keys",
+        "api": 36,
+        "device": "emu64a",
+        "product": "sdk_gphone64_arm64",
+        "locale": "en-US",
+        "engine": "com.google.android.tts",
+        "engine_version": "googletts.google-speech-apk_20241125.02_p2.702443970",
+        "engine_version_code": 210526444,
+        "recognition_available": true,
+        "on_device_recognition_available": true,
+        "record_audio_granted": true,
+        "tts_language_availability": 1,
+        "recognition_services": [
+          "com.google.android.as\/com.google.android.apps.miphone.aiai.app.AiAiSpeechRecognitionService",
+          "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService"
+        ],
+        "voice": {
+          "name": "en-US-language",
+          "network_required": false,
+          "local_en_us_voice_count": 9
+        },
+        "audio_mode": 0,
+        "media_volume": 5,
+        "media_volume_max": 15,
+        "default_recognition_service": "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService",
+        "airplane_mode_on": false,
+        "has_validated_internet": true
+      },
+      "requested_settings": {
+        "settle_ms": 400,
+        "operator_thinking_ms": 0,
+        "complete_silence_ms": 1200,
+        "possibly_complete_silence_ms": 900,
+        "minimum_length_ms": 15000,
+        "watchdog_ms": 30000,
+        "auto_cancel_ms": 0,
+        "second_recognizer": false,
+        "capture_during_playback": false
+      },
+      "turns": [
+        {
+          "av040_attempt": 13,
+          "token": 24,
+          "operator_actions": [],
+          "result_events": [],
+          "segments": [],
+          "turn_index": 1,
+          "position": 0,
+          "round": 1,
+          "example_id": "demo-rules",
+          "prompt": "In a game, a token is valid only if it is blue and square. A token is blue and round. Is it valid, and why?",
+          "expected_answer": "No, round does not satisfy square.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 0,
+          "partials": [],
+          "alternatives": [],
+          "rms_peak": 0,
+          "repeats": 0,
+          "manual_intervention": false,
+          "status": "halted",
+          "transcript": null,
+          "error_code": null,
+          "error_name": null,
+          "playback_start_ms": 85,
+          "playback_done_ms": null,
+          "listen_requested_ms": null,
+          "ready_for_speech_ms": null,
+          "beginning_of_speech_ms": null,
+          "end_of_speech_ms": null,
+          "final_ms": 979,
+          "tts_request_ms": 79,
+          "tts_speak_result": 0,
+          "interruption_detected_ms": 975,
+          "interruption_phase": "playback",
+          "invalidated_before_cleanup_ms": 980,
+          "terminal_token": 26,
+          "detail": "external_audio_mode_1",
+          "echo_suspected": false,
+          "operator_attestation": "interrupted",
+          "attested_epoch_ms": 1789487770829
+        },
+        {
+          "av040_attempt": 14,
+          "token": 27,
+          "operator_actions": [],
+          "result_events": [],
+          "segments": [],
+          "turn_index": 3,
+          "position": 1,
+          "round": 1,
+          "example_id": "demo-explanation",
+          "prompt": "A machine sorts numbers from smallest to largest. Explain what it does to the list seven, two, five.",
+          "expected_answer": "It puts two first, then five, then seven.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 0,
+          "partials": [],
+          "alternatives": [],
+          "rms_peak": 0,
+          "repeats": 0,
+          "manual_intervention": false,
+          "status": "halted",
+          "transcript": null,
+          "error_code": null,
+          "error_name": null,
+          "playback_start_ms": 16950,
+          "playback_done_ms": null,
+          "listen_requested_ms": null,
+          "ready_for_speech_ms": null,
+          "beginning_of_speech_ms": null,
+          "end_of_speech_ms": null,
+          "final_ms": 17441,
+          "tts_request_ms": 16911,
+          "tts_speak_result": 0,
+          "interruption_detected_ms": 17436,
+          "interruption_phase": "playback",
+          "invalidated_before_cleanup_ms": 17441,
+          "terminal_token": 29,
+          "detail": "external_audio_mode_1",
+          "echo_suspected": false,
+          "operator_attestation": "interrupted",
+          "attested_epoch_ms": 1789487871595
+        }
+      ],
+      "lifecycle_events": [
+        {
+          "event": "audio_focus_change_-2",
+          "t_ms": 834,
+          "speaking": true,
+          "listening": false,
+          "turn_index": 1
+        },
+        {
+          "event": "audio_focus_loss_during_own_playback",
+          "t_ms": 850,
+          "speaking": true,
+          "listening": false,
+          "turn_index": 1
+        },
+        {
+          "event": "audio_mode_1",
+          "t_ms": 975,
+          "speaking": true,
+          "listening": false,
+          "turn_index": 1
+        },
+        {
+          "event": "token_invalidated:external_audio_mode_1",
+          "t_ms": 975,
+          "speaking": true,
+          "listening": false,
+          "turn_index": 1
+        },
+        {
+          "event": "stop_audio_work_external_audio_mode_1",
+          "t_ms": 976,
+          "speaking": true,
+          "listening": false,
+          "turn_index": 1
+        },
+        {
+          "event": "token_invalidated:turn_complete",
+          "t_ms": 979,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 1
+        },
+        {
+          "event": "stop_audio_work_turn_complete",
+          "t_ms": 980,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 1
+        },
+        {
+          "event": "tts_stopped:turn-24",
+          "t_ms": 1019,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "audio_mode_0",
+          "t_ms": 3459,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "audio_focus_change_1",
+          "t_ms": 3630,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "audio_focus_change_-2",
+          "t_ms": 17330,
+          "speaking": true,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "audio_focus_loss_during_own_playback",
+          "t_ms": 17332,
+          "speaking": true,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "audio_mode_1",
+          "t_ms": 17436,
+          "speaking": true,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "token_invalidated:external_audio_mode_1",
+          "t_ms": 17436,
+          "speaking": true,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "stop_audio_work_external_audio_mode_1",
+          "t_ms": 17436,
+          "speaking": true,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "token_invalidated:turn_complete",
+          "t_ms": 17441,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "stop_audio_work_turn_complete",
+          "t_ms": 17441,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "tts_stopped:turn-27",
+          "t_ms": 17485,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "audio_mode_0",
+          "t_ms": 20461,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "audio_focus_change_1",
+          "t_ms": 20463,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "token_invalidated:scenario_end",
+          "t_ms": 111292,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "stop_audio_work_scenario_end",
+          "t_ms": 111292,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "on_pause",
+          "t_ms": 139769,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "token_invalidated:on_pause",
+          "t_ms": 139769,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "stop_audio_work_on_pause",
+          "t_ms": 139769,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "on_resume",
+          "t_ms": 139770,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        }
+      ],
+      "stale_callbacks": [],
+      "audio_focus_request": 1,
+      "self_inflicted_focus_blips_ms": [
+        2781,
+        3131
+      ],
+      "finished_epoch_ms": 1789487871606,
+      "duration_ms": 111300,
+      "completed_turns": 2
+    },
+    {
+      "schema_version": 1,
+      "follow_up": "AV-040",
+      "capture_policy": "explicit_start_segmented_done_v2",
+      "segmented_session_requested": true,
+      "segmented_minimum_ms": 15000,
+      "interruption_rule": "lifecycle_audio_mode_unsolicited_tts_stop_v1",
+      "capture_limit_ms": 15000,
+      "finalization_limit_ms": 5000,
+      "automatic_rearms": 0,
+      "same_turn_retries": 0,
+      "scenario": "av040_call_capture",
+      "title": "Call during capture",
+      "operator_action": "SPEAK_ANSWER",
+      "operated_by": "human",
+      "voice_source": "human_microphone",
+      "started_epoch_ms": 1789487911555,
+      "environment": {
+        "fingerprint": "google\/sdk_gphone64_arm64\/emu64a:16\/BE2A.250530.026.D1\/13818094:user\/release-keys",
+        "api": 36,
+        "device": "emu64a",
+        "product": "sdk_gphone64_arm64",
+        "locale": "en-US",
+        "engine": "com.google.android.tts",
+        "engine_version": "googletts.google-speech-apk_20241125.02_p2.702443970",
+        "engine_version_code": 210526444,
+        "recognition_available": true,
+        "on_device_recognition_available": true,
+        "record_audio_granted": true,
+        "tts_language_availability": 1,
+        "recognition_services": [
+          "com.google.android.as\/com.google.android.apps.miphone.aiai.app.AiAiSpeechRecognitionService",
+          "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService"
+        ],
+        "voice": {
+          "name": "en-US-language",
+          "network_required": false,
+          "local_en_us_voice_count": 9
+        },
+        "audio_mode": 0,
+        "media_volume": 5,
+        "media_volume_max": 15,
+        "default_recognition_service": "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService",
+        "airplane_mode_on": false,
+        "has_validated_internet": true
+      },
+      "requested_settings": {
+        "settle_ms": 400,
+        "operator_thinking_ms": 0,
+        "complete_silence_ms": 1200,
+        "possibly_complete_silence_ms": 900,
+        "minimum_length_ms": 15000,
+        "watchdog_ms": 30000,
+        "auto_cancel_ms": 0,
+        "second_recognizer": false,
+        "capture_during_playback": false
+      },
+      "turns": [
+        {
+          "av040_attempt": 15,
+          "token": 32,
+          "operator_actions": [
+            {
+              "action": "start_answer",
+              "t_ms": 10683
+            },
+            {
+              "action": "done",
+              "t_ms": 18408
+            }
+          ],
+          "result_events": [
+            {
+              "kind": "partial",
+              "t_ms": 13786,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                ""
+              ]
+            },
+            {
+              "kind": "partial",
+              "t_ms": 14301,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                ""
+              ]
+            },
+            {
+              "kind": "partial",
+              "t_ms": 14550,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                ""
+              ]
+            },
+            {
+              "kind": "partial",
+              "t_ms": 14585,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                "no"
+              ]
+            },
+            {
+              "kind": "partial",
+              "t_ms": 14586,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                "no"
+              ]
+            },
+            {
+              "kind": "partial",
+              "t_ms": 14796,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                "no Brown"
+              ]
+            },
+            {
+              "kind": "partial",
+              "t_ms": 14935,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                "no Brown"
+              ]
+            },
+            {
+              "kind": "partial",
+              "t_ms": 15006,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                "no Brown does"
+              ]
+            },
+            {
+              "kind": "partial",
+              "t_ms": 15087,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                "no Brown does not"
+              ]
+            },
+            {
+              "kind": "partial",
+              "t_ms": 15468,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                "no Brown does not"
+              ]
+            },
+            {
+              "kind": "partial",
+              "t_ms": 15643,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                "no Brown does not satisfy"
+              ]
+            },
+            {
+              "kind": "segment",
+              "t_ms": 16036,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "confidence_scores"
+              ],
+              "recognition_texts": [
+                "no Brown does not satisfy Square",
+                "no Ron does not satisfy Square",
+                "no round does not satisfy Square"
+              ]
+            }
+          ],
+          "segments": [
+            {
+              "t_ms": 16036,
+              "text": "no Brown does not satisfy Square"
+            }
+          ],
+          "turn_index": 1,
+          "position": 0,
+          "round": 1,
+          "example_id": "demo-rules",
+          "prompt": "In a game, a token is valid only if it is blue and square. A token is blue and round. Is it valid, and why?",
+          "expected_answer": "No, round does not satisfy square.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 0,
+          "partials": [
+            {
+              "t_ms": 13786,
+              "text": ""
+            },
+            {
+              "t_ms": 14301,
+              "text": ""
+            },
+            {
+              "t_ms": 14550,
+              "text": ""
+            },
+            {
+              "t_ms": 14585,
+              "text": "no"
+            },
+            {
+              "t_ms": 14586,
+              "text": "no"
+            },
+            {
+              "t_ms": 14796,
+              "text": "no Brown"
+            },
+            {
+              "t_ms": 14936,
+              "text": "no Brown"
+            },
+            {
+              "t_ms": 15006,
+              "text": "no Brown does"
+            },
+            {
+              "t_ms": 15087,
+              "text": "no Brown does not"
+            },
+            {
+              "t_ms": 15468,
+              "text": "no Brown does not"
+            },
+            {
+              "t_ms": 15643,
+              "text": "no Brown does not satisfy"
+            }
+          ],
+          "alternatives": [],
+          "rms_peak": 10,
+          "repeats": 0,
+          "manual_intervention": false,
+          "status": "success",
+          "transcript": "no Brown does not satisfy Square",
+          "error_code": null,
+          "error_name": null,
+          "playback_start_ms": 86,
+          "playback_done_ms": 7496,
+          "listen_requested_ms": 10683,
+          "ready_for_speech_ms": 10866,
+          "beginning_of_speech_ms": 11442,
+          "end_of_speech_ms": 16017,
+          "final_ms": 18564,
+          "tts_request_ms": 68,
+          "tts_speak_result": 0,
+          "playback_failed": false,
+          "thinking_started_ms": 7900,
+          "measured_thinking_ms": 2783,
+          "permission_at_capture": true,
+          "done_requested_ms": 18408,
+          "finish_requested_ms": 18408,
+          "finish_trigger": "operator_done",
+          "invalidated_before_cleanup_ms": 18564,
+          "terminal_token": 33,
+          "capture_ms": 7881,
+          "finalization_after_eos_ms": 2547,
+          "playback_ms": 7410,
+          "measured_settle_ms": 3187,
+          "echo_suspected": false,
+          "operator_attestation": "spoke_answer",
+          "attested_epoch_ms": 1789487931940
+        },
+        {
+          "av040_attempt": 16,
+          "token": 34,
+          "operator_actions": [
+            {
+              "action": "start_answer",
+              "t_ms": 35317
+            },
+            {
+              "action": "done",
+              "t_ms": 43316
+            }
+          ],
+          "result_events": [
+            {
+              "kind": "segment",
+              "t_ms": 37563,
+              "keys": [
+                "current_locale",
+                "results_recognition"
+              ],
+              "recognition_texts": []
+            }
+          ],
+          "segments": [],
+          "turn_index": 3,
+          "position": 1,
+          "round": 1,
+          "example_id": "demo-explanation",
+          "prompt": "A machine sorts numbers from smallest to largest. Explain what it does to the list seven, two, five.",
+          "expected_answer": "It puts two first, then five, then seven.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 0,
+          "partials": [],
+          "alternatives": [],
+          "rms_peak": 10,
+          "repeats": 0,
+          "manual_intervention": false,
+          "status": "error",
+          "transcript": null,
+          "error_code": 7,
+          "error_name": "ERROR_NO_MATCH",
+          "playback_start_ms": 25986,
+          "playback_done_ms": 32608,
+          "listen_requested_ms": 35317,
+          "ready_for_speech_ms": 35464,
+          "beginning_of_speech_ms": 36400,
+          "end_of_speech_ms": 37513,
+          "final_ms": 43442,
+          "tts_request_ms": 25968,
+          "tts_speak_result": 0,
+          "playback_failed": false,
+          "thinking_started_ms": 33010,
+          "measured_thinking_ms": 2307,
+          "permission_at_capture": true,
+          "done_requested_ms": 43316,
+          "finish_requested_ms": 43316,
+          "finish_trigger": "operator_done",
+          "invalidated_before_cleanup_ms": 43442,
+          "terminal_token": 35,
+          "capture_ms": 8125,
+          "finalization_after_eos_ms": 5929,
+          "playback_ms": 6622,
+          "measured_settle_ms": 2709,
+          "echo_suspected": false,
+          "operator_attestation": "interrupted",
+          "attested_epoch_ms": 1789487959572
+        }
+      ],
+      "lifecycle_events": [
+        {
+          "event": "audio_focus_change_-2",
+          "t_ms": 10723,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 1
+        },
+        {
+          "event": "audio_focus_loss_during_capture",
+          "t_ms": 10725,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 1
+        },
+        {
+          "event": "audio_focus_change_1",
+          "t_ms": 18436,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 1
+        },
+        {
+          "event": "segmented_session_end",
+          "t_ms": 18564,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 1
+        },
+        {
+          "event": "token_invalidated:turn_complete",
+          "t_ms": 18564,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 1
+        },
+        {
+          "event": "stop_audio_work_turn_complete",
+          "t_ms": 18564,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 1
+        },
+        {
+          "event": "audio_focus_change_-2",
+          "t_ms": 35387,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 3
+        },
+        {
+          "event": "audio_focus_loss_during_capture",
+          "t_ms": 35388,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 3
+        },
+        {
+          "event": "audio_focus_change_1",
+          "t_ms": 43368,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 3
+        },
+        {
+          "event": "token_invalidated:turn_complete",
+          "t_ms": 43442,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "stop_audio_work_turn_complete",
+          "t_ms": 43442,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "token_invalidated:scenario_end",
+          "t_ms": 48017,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "stop_audio_work_scenario_end",
+          "t_ms": 48017,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "on_pause",
+          "t_ms": 85627,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "token_invalidated:on_pause",
+          "t_ms": 85627,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "stop_audio_work_on_pause",
+          "t_ms": 85627,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "on_resume",
+          "t_ms": 85632,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        }
+      ],
+      "stale_callbacks": [],
+      "audio_focus_request": 1,
+      "self_inflicted_focus_blips_ms": [
+        7712,
+        7988
+      ],
+      "finished_epoch_ms": 1789487959574,
+      "duration_ms": 48018,
+      "completed_turns": 2
+    },
+    {
+      "schema_version": 1,
+      "follow_up": "AV-040",
+      "capture_policy": "explicit_start_segmented_done_v2",
+      "segmented_session_requested": true,
+      "segmented_minimum_ms": 15000,
+      "interruption_rule": "lifecycle_audio_mode_unsolicited_tts_stop_v1",
+      "capture_limit_ms": 15000,
+      "finalization_limit_ms": 5000,
+      "automatic_rearms": 0,
+      "same_turn_retries": 0,
+      "scenario": "av040_home_playback",
+      "title": "home during playback",
+      "operator_action": "SPEAK_ANSWER",
+      "operated_by": "human",
+      "voice_source": "human_microphone",
+      "started_epoch_ms": 1789488027455,
+      "environment": {
+        "fingerprint": "google\/sdk_gphone64_arm64\/emu64a:16\/BE2A.250530.026.D1\/13818094:user\/release-keys",
+        "api": 36,
+        "device": "emu64a",
+        "product": "sdk_gphone64_arm64",
+        "locale": "en-US",
+        "engine": "com.google.android.tts",
+        "engine_version": "googletts.google-speech-apk_20241125.02_p2.702443970",
+        "engine_version_code": 210526444,
+        "recognition_available": true,
+        "on_device_recognition_available": true,
+        "record_audio_granted": true,
+        "tts_language_availability": 1,
+        "recognition_services": [
+          "com.google.android.as\/com.google.android.apps.miphone.aiai.app.AiAiSpeechRecognitionService",
+          "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService"
+        ],
+        "voice": {
+          "name": "en-US-language",
+          "network_required": false,
+          "local_en_us_voice_count": 9
+        },
+        "audio_mode": 0,
+        "media_volume": 5,
+        "media_volume_max": 15,
+        "default_recognition_service": "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService",
+        "airplane_mode_on": false,
+        "has_validated_internet": true
+      },
+      "requested_settings": {
+        "settle_ms": 400,
+        "operator_thinking_ms": 0,
+        "complete_silence_ms": 1200,
+        "possibly_complete_silence_ms": 900,
+        "minimum_length_ms": 15000,
+        "watchdog_ms": 30000,
+        "auto_cancel_ms": 0,
+        "second_recognizer": false,
+        "capture_during_playback": false
+      },
+      "turns": [
+        {
+          "av040_attempt": 17,
+          "token": 38,
+          "operator_actions": [],
+          "result_events": [],
+          "segments": [],
+          "turn_index": 3,
+          "position": 0,
+          "round": 1,
+          "example_id": "demo-explanation",
+          "prompt": "A machine sorts numbers from smallest to largest. Explain what it does to the list seven, two, five.",
+          "expected_answer": "It puts two first, then five, then seven.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 0,
+          "partials": [],
+          "alternatives": [],
+          "rms_peak": 0,
+          "repeats": 0,
+          "manual_intervention": false,
+          "status": "halted",
+          "transcript": null,
+          "error_code": null,
+          "error_name": null,
+          "playback_start_ms": 130,
+          "playback_done_ms": null,
+          "listen_requested_ms": null,
+          "ready_for_speech_ms": null,
+          "beginning_of_speech_ms": null,
+          "end_of_speech_ms": null,
+          "final_ms": 535,
+          "tts_request_ms": 105,
+          "tts_speak_result": 0,
+          "invalidated_before_cleanup_ms": 536,
+          "terminal_token": 40,
+          "detail": "left_foreground",
+          "echo_suspected": false,
+          "operator_attestation": "interrupted",
+          "attested_epoch_ms": 1789488090707
+        }
+      ],
+      "lifecycle_events": [
+        {
+          "event": "on_pause",
+          "t_ms": 516,
+          "speaking": true,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "token_invalidated:on_pause",
+          "t_ms": 516,
+          "speaking": true,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "stop_audio_work_on_pause",
+          "t_ms": 516,
+          "speaking": true,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "token_invalidated:turn_complete",
+          "t_ms": 535,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "stop_audio_work_turn_complete",
+          "t_ms": 536,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "tts_stopped:turn-38",
+          "t_ms": 558,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "on_resume",
+          "t_ms": 36185,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "token_invalidated:scenario_end",
+          "t_ms": 63254,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "stop_audio_work_scenario_end",
+          "t_ms": 63254,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "on_pause",
+          "t_ms": 88032,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "token_invalidated:on_pause",
+          "t_ms": 88032,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "stop_audio_work_on_pause",
+          "t_ms": 88033,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "on_resume",
+          "t_ms": 88037,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        }
+      ],
+      "stale_callbacks": [],
+      "audio_focus_request": 1,
+      "finished_epoch_ms": 1789488090712,
+      "duration_ms": 63257,
+      "completed_turns": 1
+    },
+    {
+      "schema_version": 1,
+      "follow_up": "AV-040",
+      "capture_policy": "explicit_start_segmented_done_v2",
+      "segmented_session_requested": true,
+      "segmented_minimum_ms": 15000,
+      "interruption_rule": "lifecycle_audio_mode_unsolicited_tts_stop_v1",
+      "capture_limit_ms": 15000,
+      "finalization_limit_ms": 5000,
+      "automatic_rearms": 0,
+      "same_turn_retries": 0,
+      "scenario": "av040_home_capture",
+      "title": "home during capture",
+      "operator_action": "SPEAK_ANSWER",
+      "operated_by": "human",
+      "voice_source": "human_microphone",
+      "started_epoch_ms": 1789488127494,
+      "environment": {
+        "fingerprint": "google\/sdk_gphone64_arm64\/emu64a:16\/BE2A.250530.026.D1\/13818094:user\/release-keys",
+        "api": 36,
+        "device": "emu64a",
+        "product": "sdk_gphone64_arm64",
+        "locale": "en-US",
+        "engine": "com.google.android.tts",
+        "engine_version": "googletts.google-speech-apk_20241125.02_p2.702443970",
+        "engine_version_code": 210526444,
+        "recognition_available": true,
+        "on_device_recognition_available": true,
+        "record_audio_granted": true,
+        "tts_language_availability": 1,
+        "recognition_services": [
+          "com.google.android.as\/com.google.android.apps.miphone.aiai.app.AiAiSpeechRecognitionService",
+          "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService"
+        ],
+        "voice": {
+          "name": "en-US-language",
+          "network_required": false,
+          "local_en_us_voice_count": 9
+        },
+        "audio_mode": 0,
+        "media_volume": 5,
+        "media_volume_max": 15,
+        "default_recognition_service": "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService",
+        "airplane_mode_on": false,
+        "has_validated_internet": true
+      },
+      "requested_settings": {
+        "settle_ms": 400,
+        "operator_thinking_ms": 0,
+        "complete_silence_ms": 1200,
+        "possibly_complete_silence_ms": 900,
+        "minimum_length_ms": 15000,
+        "watchdog_ms": 30000,
+        "auto_cancel_ms": 0,
+        "second_recognizer": false,
+        "capture_during_playback": false
+      },
+      "turns": [
+        {
+          "av040_attempt": 18,
+          "token": 43,
+          "operator_actions": [
+            {
+              "action": "start_answer",
+              "t_ms": 8411
+            }
+          ],
+          "result_events": [],
+          "segments": [],
+          "turn_index": 3,
+          "position": 0,
+          "round": 1,
+          "example_id": "demo-explanation",
+          "prompt": "A machine sorts numbers from smallest to largest. Explain what it does to the list seven, two, five.",
+          "expected_answer": "It puts two first, then five, then seven.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 0,
+          "partials": [],
+          "alternatives": [],
+          "rms_peak": 10,
+          "repeats": 0,
+          "manual_intervention": false,
+          "status": "halted",
+          "transcript": null,
+          "error_code": null,
+          "error_name": null,
+          "playback_start_ms": 77,
+          "playback_done_ms": 6724,
+          "listen_requested_ms": 8411,
+          "ready_for_speech_ms": 8603,
+          "beginning_of_speech_ms": null,
+          "end_of_speech_ms": null,
+          "final_ms": 9033,
+          "tts_request_ms": 61,
+          "tts_speak_result": 0,
+          "playback_failed": false,
+          "thinking_started_ms": 7126,
+          "measured_thinking_ms": 1285,
+          "permission_at_capture": true,
+          "invalidated_before_cleanup_ms": 9034,
+          "terminal_token": 45,
+          "detail": "left_foreground",
+          "capture_ms": 622,
+          "playback_ms": 6647,
+          "measured_settle_ms": 1687,
+          "echo_suspected": false,
+          "operator_attestation": "interrupted",
+          "attested_epoch_ms": 1789488142058
+        }
+      ],
+      "lifecycle_events": [
+        {
+          "event": "audio_focus_change_-2",
+          "t_ms": 8459,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 3
+        },
+        {
+          "event": "audio_focus_loss_during_capture",
+          "t_ms": 8461,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 3
+        },
+        {
+          "event": "on_pause",
+          "t_ms": 9021,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 3
+        },
+        {
+          "event": "token_invalidated:on_pause",
+          "t_ms": 9032,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 3
+        },
+        {
+          "event": "stop_audio_work_on_pause",
+          "t_ms": 9032,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 3
+        },
+        {
+          "event": "token_invalidated:turn_complete",
+          "t_ms": 9033,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "stop_audio_work_turn_complete",
+          "t_ms": 9034,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "audio_focus_change_1",
+          "t_ms": 9212,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "on_resume",
+          "t_ms": 12809,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "token_invalidated:scenario_end",
+          "t_ms": 14566,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "stop_audio_work_scenario_end",
+          "t_ms": 14566,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "on_pause",
+          "t_ms": 29912,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "token_invalidated:on_pause",
+          "t_ms": 29912,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "stop_audio_work_on_pause",
+          "t_ms": 29912,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "on_resume",
+          "t_ms": 29913,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        }
+      ],
+      "stale_callbacks": [
+        {
+          "callback": "onError:ERROR_CLIENT",
+          "t_ms": 9211,
+          "expected_token": 43,
+          "current_token": 45,
+          "reason": "invalidated_token",
+          "advanced_turn": false
+        }
+      ],
+      "audio_focus_request": 1,
+      "self_inflicted_focus_blips_ms": [
+        751
+      ],
+      "finished_epoch_ms": 1789488142061,
+      "duration_ms": 14568,
+      "completed_turns": 1
+    },
+    {
+      "schema_version": 1,
+      "follow_up": "AV-040",
+      "capture_policy": "explicit_start_segmented_done_v2",
+      "segmented_session_requested": true,
+      "segmented_minimum_ms": 15000,
+      "interruption_rule": "lifecycle_audio_mode_unsolicited_tts_stop_v1",
+      "capture_limit_ms": 15000,
+      "finalization_limit_ms": 5000,
+      "automatic_rearms": 0,
+      "same_turn_retries": 0,
+      "scenario": "av040_lock_playback",
+      "title": "lock during playback",
+      "operator_action": "SPEAK_ANSWER",
+      "operated_by": "human",
+      "voice_source": "human_microphone",
+      "started_epoch_ms": 1789488172358,
+      "environment": {
+        "fingerprint": "google\/sdk_gphone64_arm64\/emu64a:16\/BE2A.250530.026.D1\/13818094:user\/release-keys",
+        "api": 36,
+        "device": "emu64a",
+        "product": "sdk_gphone64_arm64",
+        "locale": "en-US",
+        "engine": "com.google.android.tts",
+        "engine_version": "googletts.google-speech-apk_20241125.02_p2.702443970",
+        "engine_version_code": 210526444,
+        "recognition_available": true,
+        "on_device_recognition_available": true,
+        "record_audio_granted": true,
+        "tts_language_availability": 1,
+        "recognition_services": [
+          "com.google.android.as\/com.google.android.apps.miphone.aiai.app.AiAiSpeechRecognitionService",
+          "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService"
+        ],
+        "voice": {
+          "name": "en-US-language",
+          "network_required": false,
+          "local_en_us_voice_count": 9
+        },
+        "audio_mode": 0,
+        "media_volume": 5,
+        "media_volume_max": 15,
+        "default_recognition_service": "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService",
+        "airplane_mode_on": false,
+        "has_validated_internet": true
+      },
+      "requested_settings": {
+        "settle_ms": 400,
+        "operator_thinking_ms": 0,
+        "complete_silence_ms": 1200,
+        "possibly_complete_silence_ms": 900,
+        "minimum_length_ms": 15000,
+        "watchdog_ms": 30000,
+        "auto_cancel_ms": 0,
+        "second_recognizer": false,
+        "capture_during_playback": false
+      },
+      "turns": [
+        {
+          "av040_attempt": 19,
+          "token": 48,
+          "operator_actions": [],
+          "result_events": [],
+          "segments": [],
+          "turn_index": 3,
+          "position": 0,
+          "round": 1,
+          "example_id": "demo-explanation",
+          "prompt": "A machine sorts numbers from smallest to largest. Explain what it does to the list seven, two, five.",
+          "expected_answer": "It puts two first, then five, then seven.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 0,
+          "partials": [],
+          "alternatives": [],
+          "rms_peak": 0,
+          "repeats": 0,
+          "manual_intervention": false,
+          "status": "halted",
+          "transcript": null,
+          "error_code": null,
+          "error_name": null,
+          "playback_start_ms": 102,
+          "playback_done_ms": null,
+          "listen_requested_ms": null,
+          "ready_for_speech_ms": null,
+          "beginning_of_speech_ms": null,
+          "end_of_speech_ms": null,
+          "final_ms": 1152,
+          "tts_request_ms": 76,
+          "tts_speak_result": 0,
+          "invalidated_before_cleanup_ms": 1152,
+          "terminal_token": 50,
+          "detail": "left_foreground",
+          "echo_suspected": false,
+          "operator_attestation": "interrupted",
+          "attested_epoch_ms": 1789488284905
+        }
+      ],
+      "lifecycle_events": [
+        {
+          "event": "on_pause",
+          "t_ms": 1130,
+          "speaking": true,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "token_invalidated:on_pause",
+          "t_ms": 1130,
+          "speaking": true,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "stop_audio_work_on_pause",
+          "t_ms": 1130,
+          "speaking": true,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "token_invalidated:turn_complete",
+          "t_ms": 1152,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "stop_audio_work_turn_complete",
+          "t_ms": 1152,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "tts_stopped:turn-48",
+          "t_ms": 1190,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "on_resume",
+          "t_ms": 103300,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "token_invalidated:scenario_end",
+          "t_ms": 112576,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "stop_audio_work_scenario_end",
+          "t_ms": 112576,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "on_pause",
+          "t_ms": 137602,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "token_invalidated:on_pause",
+          "t_ms": 137602,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "stop_audio_work_on_pause",
+          "t_ms": 137602,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "on_resume",
+          "t_ms": 137606,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        }
+      ],
+      "stale_callbacks": [],
+      "audio_focus_request": 1,
+      "finished_epoch_ms": 1789488284970,
+      "duration_ms": 112613,
+      "completed_turns": 1
+    },
+    {
+      "schema_version": 1,
+      "follow_up": "AV-040",
+      "capture_policy": "explicit_start_segmented_done_v2",
+      "segmented_session_requested": true,
+      "segmented_minimum_ms": 15000,
+      "interruption_rule": "lifecycle_audio_mode_unsolicited_tts_stop_v1",
+      "capture_limit_ms": 15000,
+      "finalization_limit_ms": 5000,
+      "automatic_rearms": 0,
+      "same_turn_retries": 0,
+      "scenario": "av040_lock_capture",
+      "title": "lock during capture",
+      "operator_action": "SPEAK_ANSWER",
+      "operated_by": "human",
+      "voice_source": "human_microphone",
+      "started_epoch_ms": 1789488328619,
+      "environment": {
+        "fingerprint": "google\/sdk_gphone64_arm64\/emu64a:16\/BE2A.250530.026.D1\/13818094:user\/release-keys",
+        "api": 36,
+        "device": "emu64a",
+        "product": "sdk_gphone64_arm64",
+        "locale": "en-US",
+        "engine": "com.google.android.tts",
+        "engine_version": "googletts.google-speech-apk_20241125.02_p2.702443970",
+        "engine_version_code": 210526444,
+        "recognition_available": true,
+        "on_device_recognition_available": true,
+        "record_audio_granted": true,
+        "tts_language_availability": 1,
+        "recognition_services": [
+          "com.google.android.as\/com.google.android.apps.miphone.aiai.app.AiAiSpeechRecognitionService",
+          "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService"
+        ],
+        "voice": {
+          "name": "en-US-language",
+          "network_required": false,
+          "local_en_us_voice_count": 9
+        },
+        "audio_mode": 0,
+        "media_volume": 5,
+        "media_volume_max": 15,
+        "default_recognition_service": "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService",
+        "airplane_mode_on": false,
+        "has_validated_internet": true
+      },
+      "requested_settings": {
+        "settle_ms": 400,
+        "operator_thinking_ms": 0,
+        "complete_silence_ms": 1200,
+        "possibly_complete_silence_ms": 900,
+        "minimum_length_ms": 15000,
+        "watchdog_ms": 30000,
+        "auto_cancel_ms": 0,
+        "second_recognizer": false,
+        "capture_during_playback": false
+      },
+      "turns": [
+        {
+          "av040_attempt": 20,
+          "token": 53,
+          "operator_actions": [
+            {
+              "action": "start_answer",
+              "t_ms": 9959
+            }
+          ],
+          "result_events": [],
+          "segments": [],
+          "turn_index": 3,
+          "position": 0,
+          "round": 1,
+          "example_id": "demo-explanation",
+          "prompt": "A machine sorts numbers from smallest to largest. Explain what it does to the list seven, two, five.",
+          "expected_answer": "It puts two first, then five, then seven.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 0,
+          "partials": [],
+          "alternatives": [],
+          "rms_peak": 4.36,
+          "repeats": 0,
+          "manual_intervention": false,
+          "status": "halted",
+          "transcript": null,
+          "error_code": null,
+          "error_name": null,
+          "playback_start_ms": 236,
+          "playback_done_ms": 6914,
+          "listen_requested_ms": 9959,
+          "ready_for_speech_ms": 10234,
+          "beginning_of_speech_ms": null,
+          "end_of_speech_ms": null,
+          "final_ms": 11387,
+          "tts_request_ms": 219,
+          "tts_speak_result": 0,
+          "playback_failed": false,
+          "thinking_started_ms": 7317,
+          "measured_thinking_ms": 2642,
+          "permission_at_capture": true,
+          "invalidated_before_cleanup_ms": 11387,
+          "terminal_token": 55,
+          "detail": "left_foreground",
+          "capture_ms": 1428,
+          "playback_ms": 6678,
+          "measured_settle_ms": 3045,
+          "echo_suspected": false,
+          "operator_attestation": "interrupted",
+          "attested_epoch_ms": 1789488365958
+        }
+      ],
+      "lifecycle_events": [
+        {
+          "event": "audio_focus_change_-2",
+          "t_ms": 10045,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 3
+        },
+        {
+          "event": "audio_focus_loss_during_capture",
+          "t_ms": 10045,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 3
+        },
+        {
+          "event": "on_pause",
+          "t_ms": 11387,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 3
+        },
+        {
+          "event": "token_invalidated:on_pause",
+          "t_ms": 11387,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 3
+        },
+        {
+          "event": "stop_audio_work_on_pause",
+          "t_ms": 11387,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 3
+        },
+        {
+          "event": "token_invalidated:turn_complete",
+          "t_ms": 11387,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "stop_audio_work_turn_complete",
+          "t_ms": 11387,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "audio_focus_change_1",
+          "t_ms": 11456,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "on_resume",
+          "t_ms": 33834,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "token_invalidated:scenario_end",
+          "t_ms": 37346,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "stop_audio_work_scenario_end",
+          "t_ms": 37346,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "on_pause",
+          "t_ms": 58016,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "token_invalidated:on_pause",
+          "t_ms": 58017,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "stop_audio_work_on_pause",
+          "t_ms": 58017,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "on_resume",
+          "t_ms": 58024,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        }
+      ],
+      "stale_callbacks": [
+        {
+          "callback": "onError:ERROR_CLIENT",
+          "t_ms": 11437,
+          "expected_token": 53,
+          "current_token": 55,
+          "reason": "invalidated_token",
+          "advanced_turn": false
+        }
+      ],
+      "audio_focus_request": 1,
+      "self_inflicted_focus_blips_ms": [
+        1413
+      ],
+      "finished_epoch_ms": 1789488365965,
+      "duration_ms": 37347,
+      "completed_turns": 1
+    },
+    {
+      "schema_version": 1,
+      "follow_up": "AV-040",
+      "capture_policy": "explicit_start_segmented_done_v2",
+      "segmented_session_requested": true,
+      "segmented_minimum_ms": 15000,
+      "interruption_rule": "lifecycle_audio_mode_unsolicited_tts_stop_v1",
+      "capture_limit_ms": 15000,
+      "finalization_limit_ms": 5000,
+      "automatic_rearms": 0,
+      "same_turn_retries": 0,
+      "scenario": "av040_cancel_playback",
+      "title": "cancel during playback",
+      "operator_action": "SPEAK_ANSWER",
+      "operated_by": "human",
+      "voice_source": "human_microphone",
+      "started_epoch_ms": 1789488412501,
+      "environment": {
+        "fingerprint": "google\/sdk_gphone64_arm64\/emu64a:16\/BE2A.250530.026.D1\/13818094:user\/release-keys",
+        "api": 36,
+        "device": "emu64a",
+        "product": "sdk_gphone64_arm64",
+        "locale": "en-US",
+        "engine": "com.google.android.tts",
+        "engine_version": "googletts.google-speech-apk_20241125.02_p2.702443970",
+        "engine_version_code": 210526444,
+        "recognition_available": true,
+        "on_device_recognition_available": true,
+        "record_audio_granted": true,
+        "tts_language_availability": 1,
+        "recognition_services": [
+          "com.google.android.as\/com.google.android.apps.miphone.aiai.app.AiAiSpeechRecognitionService",
+          "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService"
+        ],
+        "voice": {
+          "name": "en-US-language",
+          "network_required": false,
+          "local_en_us_voice_count": 9
+        },
+        "audio_mode": 0,
+        "media_volume": 5,
+        "media_volume_max": 15,
+        "default_recognition_service": "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService",
+        "airplane_mode_on": false,
+        "has_validated_internet": true
+      },
+      "requested_settings": {
+        "settle_ms": 400,
+        "operator_thinking_ms": 0,
+        "complete_silence_ms": 1200,
+        "possibly_complete_silence_ms": 900,
+        "minimum_length_ms": 15000,
+        "watchdog_ms": 30000,
+        "auto_cancel_ms": 0,
+        "second_recognizer": false,
+        "capture_during_playback": false
+      },
+      "turns": [
+        {
+          "av040_attempt": 21,
+          "token": 58,
+          "operator_actions": [
+            {
+              "action": "cancel",
+              "t_ms": 439
+            }
+          ],
+          "result_events": [],
+          "segments": [],
+          "turn_index": 3,
+          "position": 0,
+          "round": 1,
+          "example_id": "demo-explanation",
+          "prompt": "A machine sorts numbers from smallest to largest. Explain what it does to the list seven, two, five.",
+          "expected_answer": "It puts two first, then five, then seven.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 0,
+          "partials": [],
+          "alternatives": [],
+          "rms_peak": 0,
+          "repeats": 0,
+          "manual_intervention": true,
+          "status": "cancelled",
+          "transcript": null,
+          "error_code": null,
+          "error_name": null,
+          "playback_start_ms": 121,
+          "playback_done_ms": null,
+          "listen_requested_ms": null,
+          "ready_for_speech_ms": null,
+          "beginning_of_speech_ms": null,
+          "end_of_speech_ms": null,
+          "final_ms": 440,
+          "tts_request_ms": 106,
+          "tts_speak_result": 0,
+          "invalidated_before_cleanup_ms": 441,
+          "terminal_token": 60,
+          "detail": "operator_cancel",
+          "echo_suspected": false,
+          "operator_attestation": "interrupted",
+          "attested_epoch_ms": 1789488418133
+        }
+      ],
+      "lifecycle_events": [
+        {
+          "event": "operator_cancel",
+          "t_ms": 439,
+          "speaking": true,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "token_invalidated:operator_cancel",
+          "t_ms": 439,
+          "speaking": true,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "stop_audio_work_operator_cancel",
+          "t_ms": 439,
+          "speaking": true,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "token_invalidated:turn_complete",
+          "t_ms": 441,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "stop_audio_work_turn_complete",
+          "t_ms": 441,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "tts_stopped:turn-58",
+          "t_ms": 459,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "token_invalidated:scenario_end",
+          "t_ms": 5634,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "stop_audio_work_scenario_end",
+          "t_ms": 5634,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "on_pause",
+          "t_ms": 26516,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "token_invalidated:on_pause",
+          "t_ms": 26516,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "stop_audio_work_on_pause",
+          "t_ms": 26516,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "on_resume",
+          "t_ms": 26520,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        }
+      ],
+      "stale_callbacks": [],
+      "audio_focus_request": 1,
+      "finished_epoch_ms": 1789488418134,
+      "duration_ms": 5634,
+      "completed_turns": 1
+    },
+    {
+      "schema_version": 1,
+      "follow_up": "AV-040",
+      "capture_policy": "explicit_start_segmented_done_v2",
+      "segmented_session_requested": true,
+      "segmented_minimum_ms": 15000,
+      "interruption_rule": "lifecycle_audio_mode_unsolicited_tts_stop_v1",
+      "capture_limit_ms": 15000,
+      "finalization_limit_ms": 5000,
+      "automatic_rearms": 0,
+      "same_turn_retries": 0,
+      "scenario": "av040_cancel_capture",
+      "title": "cancel during capture",
+      "operator_action": "SPEAK_ANSWER",
+      "operated_by": "human",
+      "voice_source": "human_microphone",
+      "started_epoch_ms": 1789488468504,
+      "environment": {
+        "fingerprint": "google\/sdk_gphone64_arm64\/emu64a:16\/BE2A.250530.026.D1\/13818094:user\/release-keys",
+        "api": 36,
+        "device": "emu64a",
+        "product": "sdk_gphone64_arm64",
+        "locale": "en-US",
+        "engine": "com.google.android.tts",
+        "engine_version": "googletts.google-speech-apk_20241125.02_p2.702443970",
+        "engine_version_code": 210526444,
+        "recognition_available": true,
+        "on_device_recognition_available": true,
+        "record_audio_granted": true,
+        "tts_language_availability": 1,
+        "recognition_services": [
+          "com.google.android.as\/com.google.android.apps.miphone.aiai.app.AiAiSpeechRecognitionService",
+          "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService"
+        ],
+        "voice": {
+          "name": "en-US-language",
+          "network_required": false,
+          "local_en_us_voice_count": 9
+        },
+        "audio_mode": 0,
+        "media_volume": 5,
+        "media_volume_max": 15,
+        "default_recognition_service": "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService",
+        "airplane_mode_on": false,
+        "has_validated_internet": true
+      },
+      "requested_settings": {
+        "settle_ms": 400,
+        "operator_thinking_ms": 0,
+        "complete_silence_ms": 1200,
+        "possibly_complete_silence_ms": 900,
+        "minimum_length_ms": 15000,
+        "watchdog_ms": 30000,
+        "auto_cancel_ms": 0,
+        "second_recognizer": false,
+        "capture_during_playback": false
+      },
+      "turns": [
+        {
+          "av040_attempt": 22,
+          "token": 63,
+          "operator_actions": [
+            {
+              "action": "start_answer",
+              "t_ms": 8108
+            },
+            {
+              "action": "cancel",
+              "t_ms": 8530
+            }
+          ],
+          "result_events": [],
+          "segments": [],
+          "turn_index": 3,
+          "position": 0,
+          "round": 1,
+          "example_id": "demo-explanation",
+          "prompt": "A machine sorts numbers from smallest to largest. Explain what it does to the list seven, two, five.",
+          "expected_answer": "It puts two first, then five, then seven.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 0,
+          "partials": [],
+          "alternatives": [],
+          "rms_peak": 6.64,
+          "repeats": 0,
+          "manual_intervention": true,
+          "status": "cancelled",
+          "transcript": null,
+          "error_code": null,
+          "error_name": null,
+          "playback_start_ms": 156,
+          "playback_done_ms": 6806,
+          "listen_requested_ms": 8108,
+          "ready_for_speech_ms": 8179,
+          "beginning_of_speech_ms": null,
+          "end_of_speech_ms": null,
+          "final_ms": 8530,
+          "tts_request_ms": 123,
+          "tts_speak_result": 0,
+          "playback_failed": false,
+          "thinking_started_ms": 7208,
+          "measured_thinking_ms": 900,
+          "permission_at_capture": true,
+          "invalidated_before_cleanup_ms": 8530,
+          "terminal_token": 65,
+          "detail": "operator_cancel",
+          "capture_ms": 422,
+          "playback_ms": 6650,
+          "measured_settle_ms": 1302,
+          "echo_suspected": false,
+          "operator_attestation": "interrupted",
+          "attested_epoch_ms": 1789488479572
+        }
+      ],
+      "lifecycle_events": [
+        {
+          "event": "audio_focus_change_-2",
+          "t_ms": 8170,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 3
+        },
+        {
+          "event": "audio_focus_loss_during_capture",
+          "t_ms": 8171,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 3
+        },
+        {
+          "event": "operator_cancel",
+          "t_ms": 8530,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 3
+        },
+        {
+          "event": "token_invalidated:operator_cancel",
+          "t_ms": 8530,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 3
+        },
+        {
+          "event": "stop_audio_work_operator_cancel",
+          "t_ms": 8530,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 3
+        },
+        {
+          "event": "token_invalidated:turn_complete",
+          "t_ms": 8530,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "stop_audio_work_turn_complete",
+          "t_ms": 8530,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 3
+        },
+        {
+          "event": "audio_focus_change_1",
+          "t_ms": 8620,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "token_invalidated:scenario_end",
+          "t_ms": 11070,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "stop_audio_work_scenario_end",
+          "t_ms": 11070,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "on_pause",
+          "t_ms": 29611,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "token_invalidated:on_pause",
+          "t_ms": 29611,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "stop_audio_work_on_pause",
+          "t_ms": 29611,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "on_resume",
+          "t_ms": 29616,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        }
+      ],
+      "stale_callbacks": [
+        {
+          "callback": "onError:ERROR_CLIENT",
+          "t_ms": 8593,
+          "expected_token": 63,
+          "current_token": 65,
+          "reason": "invalidated_token",
+          "advanced_turn": false
+        }
+      ],
+      "audio_focus_request": 1,
+      "self_inflicted_focus_blips_ms": [
+        450
+      ],
+      "finished_epoch_ms": 1789488479574,
+      "duration_ms": 11071,
+      "completed_turns": 1
+    },
+    {
+      "schema_version": 1,
+      "follow_up": "AV-040",
+      "capture_policy": "explicit_start_segmented_done_v2",
+      "segmented_session_requested": true,
+      "segmented_minimum_ms": 15000,
+      "interruption_rule": "lifecycle_audio_mode_unsolicited_tts_stop_v1",
+      "capture_limit_ms": 15000,
+      "finalization_limit_ms": 5000,
+      "automatic_rearms": 0,
+      "same_turn_retries": 0,
+      "scenario": "av040_echo",
+      "title": "Audible prompt echo, stay silent",
+      "operator_action": "STAY_SILENT",
+      "operated_by": "human",
+      "voice_source": "human_microphone",
+      "started_epoch_ms": 1789488597744,
+      "environment": {
+        "fingerprint": "google\/sdk_gphone64_arm64\/emu64a:16\/BE2A.250530.026.D1\/13818094:user\/release-keys",
+        "api": 36,
+        "device": "emu64a",
+        "product": "sdk_gphone64_arm64",
+        "locale": "en-US",
+        "engine": "com.google.android.tts",
+        "engine_version": "googletts.google-speech-apk_20241125.02_p2.702443970",
+        "engine_version_code": 210526444,
+        "recognition_available": true,
+        "on_device_recognition_available": true,
+        "record_audio_granted": true,
+        "tts_language_availability": 1,
+        "recognition_services": [
+          "com.google.android.as\/com.google.android.apps.miphone.aiai.app.AiAiSpeechRecognitionService",
+          "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService"
+        ],
+        "voice": {
+          "name": "en-US-language",
+          "network_required": false,
+          "local_en_us_voice_count": 9
+        },
+        "audio_mode": 0,
+        "media_volume": 5,
+        "media_volume_max": 15,
+        "default_recognition_service": "com.google.android.tts\/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService",
+        "airplane_mode_on": false,
+        "has_validated_internet": true
+      },
+      "requested_settings": {
+        "settle_ms": 400,
+        "operator_thinking_ms": 0,
+        "complete_silence_ms": 1200,
+        "possibly_complete_silence_ms": 900,
+        "minimum_length_ms": 15000,
+        "watchdog_ms": 30000,
+        "auto_cancel_ms": 0,
+        "second_recognizer": false,
+        "capture_during_playback": false
+      },
+      "turns": [
+        {
+          "av040_attempt": 23,
+          "token": 68,
+          "operator_actions": [
+            {
+              "action": "done",
+              "t_ms": 10498
+            }
+          ],
+          "result_events": [
+            {
+              "kind": "partial",
+              "t_ms": 5452,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                ""
+              ]
+            },
+            {
+              "kind": "partial",
+              "t_ms": 5680,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                ""
+              ]
+            },
+            {
+              "kind": "segment",
+              "t_ms": 8794,
+              "keys": [
+                "current_locale",
+                "results_recognition"
+              ],
+              "recognition_texts": []
+            },
+            {
+              "kind": "partial",
+              "t_ms": 10674,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                ""
+              ]
+            },
+            {
+              "kind": "partial",
+              "t_ms": 10845,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "android.speech.extra.UNSTABLE_TEXT"
+              ],
+              "recognition_texts": [
+                ""
+              ]
+            },
+            {
+              "kind": "segment",
+              "t_ms": 10886,
+              "keys": [
+                "current_locale",
+                "results_recognition",
+                "confidence_scores"
+              ],
+              "recognition_texts": [
+                "how many",
+                "how many how many"
+              ]
+            }
+          ],
+          "segments": [
+            {
+              "t_ms": 10886,
+              "text": "how many"
+            }
+          ],
+          "turn_index": 0,
+          "position": 0,
+          "round": 1,
+          "example_id": "demo-reversal",
+          "prompt": "Reverse the sequence red, blue, green.",
+          "expected_answer": "Green, blue, red.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 0,
+          "partials": [
+            {
+              "t_ms": 5452,
+              "text": ""
+            },
+            {
+              "t_ms": 5680,
+              "text": ""
+            },
+            {
+              "t_ms": 10674,
+              "text": ""
+            },
+            {
+              "t_ms": 10845,
+              "text": ""
+            }
+          ],
+          "alternatives": [],
+          "rms_peak": 10,
+          "repeats": 0,
+          "manual_intervention": true,
+          "status": "success",
+          "transcript": "how many",
+          "error_code": null,
+          "error_name": null,
+          "playback_start_ms": 128,
+          "playback_done_ms": 2842,
+          "listen_requested_ms": 3243,
+          "ready_for_speech_ms": 3419,
+          "beginning_of_speech_ms": 4005,
+          "end_of_speech_ms": 8780,
+          "final_ms": 10887,
+          "tts_request_ms": 87,
+          "tts_speak_result": 0,
+          "playback_failed": false,
+          "permission_at_capture": true,
+          "done_requested_ms": 10498,
+          "finish_requested_ms": 10498,
+          "finish_trigger": "operator_done",
+          "invalidated_before_cleanup_ms": 10887,
+          "terminal_token": 69,
+          "capture_ms": 7644,
+          "finalization_after_eos_ms": 2107,
+          "playback_ms": 2714,
+          "measured_settle_ms": 401,
+          "echo_suspected": false,
+          "operator_attestation": "stayed_silent",
+          "attested_epoch_ms": 1789488614377
+        },
+        {
+          "av040_attempt": 24,
+          "token": 70,
+          "operator_actions": [
+            {
+              "action": "done",
+              "t_ms": 42916
+            }
+          ],
+          "result_events": [
+            {
+              "kind": "segment",
+              "t_ms": 33745,
+              "keys": [
+                "current_locale",
+                "results_recognition"
+              ],
+              "recognition_texts": []
+            },
+            {
+              "kind": "segment",
+              "t_ms": 35037,
+              "keys": [
+                "current_locale",
+                "results_recognition"
+              ],
+              "recognition_texts": []
+            },
+            {
+              "kind": "segment",
+              "t_ms": 35797,
+              "keys": [
+                "current_locale",
+                "results_recognition"
+              ],
+              "recognition_texts": []
+            },
+            {
+              "kind": "segment",
+              "t_ms": 37195,
+              "keys": [
+                "current_locale",
+                "results_recognition"
+              ],
+              "recognition_texts": []
+            },
+            {
+              "kind": "segment",
+              "t_ms": 37997,
+              "keys": [
+                "current_locale",
+                "results_recognition"
+              ],
+              "recognition_texts": []
+            },
+            {
+              "kind": "segment",
+              "t_ms": 39439,
+              "keys": [
+                "current_locale",
+                "results_recognition"
+              ],
+              "recognition_texts": []
+            },
+            {
+              "kind": "segment",
+              "t_ms": 40231,
+              "keys": [
+                "current_locale",
+                "results_recognition"
+              ],
+              "recognition_texts": []
+            },
+            {
+              "kind": "segment",
+              "t_ms": 41565,
+              "keys": [
+                "current_locale",
+                "results_recognition"
+              ],
+              "recognition_texts": []
+            }
+          ],
+          "segments": [],
+          "turn_index": 1,
+          "position": 1,
+          "round": 1,
+          "example_id": "demo-rules",
+          "prompt": "In a game, a token is valid only if it is blue and square. A token is blue and round. Is it valid, and why?",
+          "expected_answer": "No, round does not satisfy square.",
+          "settle_ms": 400,
+          "operator_thinking_ms": 0,
+          "partials": [],
+          "alternatives": [],
+          "rms_peak": 10,
+          "repeats": 0,
+          "manual_intervention": true,
+          "status": "error",
+          "transcript": null,
+          "error_code": 7,
+          "error_name": "ERROR_NO_MATCH",
+          "playback_start_ms": 20953,
+          "playback_done_ms": 28356,
+          "listen_requested_ms": 28759,
+          "ready_for_speech_ms": 28936,
+          "beginning_of_speech_ms": 32010,
+          "end_of_speech_ms": 41551,
+          "final_ms": 43048,
+          "tts_request_ms": 20936,
+          "tts_speak_result": 0,
+          "playback_failed": false,
+          "permission_at_capture": true,
+          "done_requested_ms": 42916,
+          "finish_requested_ms": 42916,
+          "finish_trigger": "operator_done",
+          "invalidated_before_cleanup_ms": 43048,
+          "terminal_token": 71,
+          "capture_ms": 14289,
+          "finalization_after_eos_ms": 1497,
+          "playback_ms": 7403,
+          "measured_settle_ms": 403,
+          "echo_suspected": false,
+          "operator_attestation": "stayed_silent",
+          "attested_epoch_ms": 1789488642592
+        }
+      ],
+      "lifecycle_events": [
+        {
+          "event": "audio_focus_change_-2",
+          "t_ms": 3265,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 0
+        },
+        {
+          "event": "audio_focus_loss_during_capture",
+          "t_ms": 3266,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 0
+        },
+        {
+          "event": "audio_focus_change_1",
+          "t_ms": 10515,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 0
+        },
+        {
+          "event": "segmented_session_end",
+          "t_ms": 10887,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 0
+        },
+        {
+          "event": "token_invalidated:turn_complete",
+          "t_ms": 10887,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 0
+        },
+        {
+          "event": "stop_audio_work_turn_complete",
+          "t_ms": 10887,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 0
+        },
+        {
+          "event": "audio_focus_change_-2",
+          "t_ms": 28786,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 1
+        },
+        {
+          "event": "audio_focus_loss_during_capture",
+          "t_ms": 28787,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 1
+        },
+        {
+          "event": "audio_focus_change_1",
+          "t_ms": 42945,
+          "speaking": false,
+          "listening": true,
+          "turn_index": 1
+        },
+        {
+          "event": "token_invalidated:turn_complete",
+          "t_ms": 43048,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 1
+        },
+        {
+          "event": "stop_audio_work_turn_complete",
+          "t_ms": 43048,
+          "speaking": false,
+          "listening": false,
+          "turn_index": 1
+        },
+        {
+          "event": "token_invalidated:scenario_end",
+          "t_ms": 44850,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        },
+        {
+          "event": "stop_audio_work_scenario_end",
+          "t_ms": 44850,
+          "speaking": false,
+          "listening": false,
+          "turn_index": null
+        }
+      ],
+      "stale_callbacks": [],
+      "audio_focus_request": 1,
+      "self_inflicted_focus_blips_ms": [
+        7249,
+        14159
+      ],
+      "finished_epoch_ms": 1789488642596,
+      "duration_ms": 44852,
+      "completed_turns": 2
+    }
+  ]
+}

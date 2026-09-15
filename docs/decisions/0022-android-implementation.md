@@ -437,9 +437,9 @@ flowchart LR
 
 ## Pending #45 inputs to #13 and #26
 
-[#45](https://github.com/BrockBadeaux14/AnkiVoice/issues/45) has not run. No human
-microphone transcript exists yet. The timing values proposed so far conflict with each
-other, and none is a validated default:
+At the time of this decision, [#45](https://github.com/BrockBadeaux14/AnkiVoice/issues/45)
+had not run and no human microphone transcript existed. The original proposals
+below were unresolved; the dated AV-040 addendum follows this historical rationale.
 
 | Setting | AV-005 proposal | AV-006 proposal | Standing |
 | --- | --- | --- | --- |
@@ -470,6 +470,36 @@ What a failed #45 result would mean:
   revisits the architecture. It would constrain Flutter equally, because Flutter
   reaches the same APIs only through Kotlin.
 
+### AV-040 follow-up: September 15, 2026
+
+[AV-040's completed bounded investigation](../testing/av040-live-microphone.md)
+reports **no-go** after 12 baseline and 28 follow-up turns (the owner explicitly
+authorized four beyond the original 24). Three human-attested transcripts were
+obtained, including a meaning-changing substitution; neither arithmetic answer
+was recognized. There was no valid audible, silent echo pair. These observations
+do not establish a usable live route across the four prompt types.
+
+The same interruption rule caught both playback calls and missed both capture
+calls. During capture the recognizer held exclusive recording focus; Android
+suppressed ringing, with no new audio-mode or activity-pause signal for the probe.
+Ordinary recognition focus losses also exceeded observed call losses. The earlier
+fallback of halting on unexplained focus loss is **not a validated usable policy**:
+halting on the normal initial capture handoff cancels normal work, while ignoring
+that handoff does not create a later signal for a call during capture.
+
+The experiment separated thinking from a 15-second active capture limit, with
+Done and a five-second finalization limit, zero automatic re-arms and zero
+same-turn retries. Measured Done-to-final callbacks were 116–389 ms; timeout expiry
+was not exercised. These are experimental limits, not production defaults.
+
+**#13/#26 remain blocked on their live-speech capability requirement.** Their next
+bounded decision must establish both usable human capture and an independently
+observable interruption signal. Home/lock/Cancel cleanup passed the recorded
+cases, but does not resolve the missed calls. This evidence requires revisiting
+the speech-route/interruption assumption; it does not change Kotlin, the framework
+rubric or component ownership. No alternative provider, permission design or API
+route was evaluated. #29's human integrated 30-turn acceptance is still required.
+
 ## Product constraints preserved
 
 - Dedicated VoiceQA note type only; foreground study only.
@@ -489,8 +519,8 @@ What a failed #45 result would mean:
 
 | Limitation | Owner |
 | --- | --- |
-| No human microphone transcript; recognition accuracy and real endpointing unmeasured | #45, then #13/#26; #29's 30-turn run |
-| Acoustic echo at audible playback volume unverified | #45 |
+| AV-040 obtained three human transcripts but no usable capture/interruption combination; 0/2 capture calls detected | Follow-up decision for #13/#26; #29's 30-turn run |
+| Acoustic echo at audible playback volume unverified after AV-040's protocol deviations | Follow-up decision for #13/#26, then #29 |
 | Free-route quota: 20 per minute, and 50 or 1,000 per day depending on credit tier; exact remaining count not exposed; upstream 429s possible | #17 enforces; #29 reports |
 | Grader accuracy is in-sample only (11/12) | #19 |
 | Physical speaker and microphone, Bluetooth, real phone calls | Unverified; #29's compatibility matrix must say so |

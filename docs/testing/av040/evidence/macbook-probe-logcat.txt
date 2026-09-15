@@ -1,0 +1,122 @@
+--------- beginning of main
+09-15 11:16:08.748  3440  3440 I AV005   : Preselected scenario "av040_pause2" from the launch intent.
+09-15 11:16:08.752  3440  3440 I AV005   : AV-005 suite ready. Pick a scenario and read its instructions before tapping Start.
+09-15 11:16:08.752  3440  3440 I AV005   : Operated by: investigator_adb
+09-15 11:16:08.763  3440  3440 I AV005   : Evidence is written to /storage/emulated/0/Android/data/org.ankivoice.av005/files
+09-15 11:16:10.310  3440  3440 I AV005   : Engine googletts.google-speech-apk_20241125.02_p2.702443970, voice en-US-language, recognition available true
+09-15 11:16:12.316  3440  3440 I AV005   : --- 1. Think two seconds, then Start answer (2 turns)
+09-15 11:16:12.355  3440  3440 I AV005   : MARK scenario=av040_pause2 event=lifecycle:token_invalidated:scenario_end t=66
+09-15 11:16:12.355  3440  3440 I AV005   : MARK scenario=av040_pause2 event=lifecycle:stop_audio_work_scenario_end t=66
+09-15 11:16:12.362  3440  3440 I AV005   : --- 1. Think two seconds, then Start answer complete (0 turns). Tap Save evidence.
+09-15 11:16:12.373  3440  3440 I AV005   : Saved /storage/emulated/0/Android/data/org.ankivoice.av005/files/av005-20260915-111612.json
+09-15 11:16:38.944  3588  3588 I AV005   : Preselected scenario "av040_pause2" from the launch intent.
+09-15 11:16:38.951  3588  3588 I AV005   : AV-005 suite ready. Pick a scenario and read its instructions before tapping Start.
+09-15 11:16:38.951  3588  3588 I AV005   : Operated by: human
+09-15 11:16:38.953  3588  3588 I AV005   : Evidence is written to /storage/emulated/0/Android/data/org.ankivoice.av005/files
+09-15 11:16:40.218  3588  3588 I AV005   : Engine googletts.google-speech-apk_20241125.02_p2.702443970, voice en-US-language, recognition available true
+09-15 11:16:53.559  3588  3588 I AV005   : --- 1. Think two seconds, then Start answer (2 turns)
+09-15 11:16:53.609  3588  3588 I AV005   : MARK scenario=av040_pause2 event=playback_request t=173
+09-15 11:16:53.829  3588  3588 I AV005   : MARK scenario=av040_pause2 event=playback_start t=394
+09-15 11:16:56.582  3588  3588 I AV005   : MARK scenario=av040_pause2 event=playback_done t=3147
+09-15 11:16:56.985  3588  3588 I AV005   : MARK scenario=av040_pause2 event=thinking_started t=3549
+09-15 11:17:02.021  3588  3588 I AV005   : MARK scenario=av040_pause2 event=listen_requested t=8585
+09-15 11:17:02.172  3588  3588 I AV005   : MARK scenario=av040_pause2 event=lifecycle:audio_focus_change_-2 t=8737
+09-15 11:17:02.174  3588  3588 I AV005   :   audio focus change: -2 (recorded, not acted on)
+09-15 11:17:02.174  3588  3588 I AV005   : MARK scenario=av040_pause2 event=lifecycle:audio_focus_loss_during_capture t=8739
+09-15 11:17:02.291  3588  3588 I AV005   : MARK scenario=av040_pause2 event=capture_ready t=8856
+09-15 11:17:04.009  3588  3588 I AV005   : MARK scenario=av040_pause2 event=speech_begin t=10574
+09-15 11:17:06.210  3588  3588 I AV005   : MARK scenario=av040_pause2 event=speech_end t=12774
+09-15 11:17:07.301  3588  3588 I AV005   : MARK scenario=av040_pause2 event=lifecycle:audio_focus_change_1 t=13866
+09-15 11:17:07.302  3588  3588 I AV005   :   audio focus change: 1 (recorded, not acted on)
+09-15 11:17:07.302  3588  3588 I AV005   :   audio focus regained after 5127ms
+09-15 11:17:07.384  3588  3588 I AV005   : MARK scenario=av040_pause2 event=lifecycle:segmented_session_end t=13948
+09-15 11:17:07.384  3588  3588 I AV005   : MARK scenario=av040_pause2 event=lifecycle:token_invalidated:turn_complete t=13949
+09-15 11:17:07.384  3588  3588 I AV005   : MARK scenario=av040_pause2 event=lifecycle:stop_audio_work_turn_complete t=13949
+09-15 11:17:07.387  3588  3588 I AV005   : MARK scenario=av040_pause2 event=turn_done t=13951
+09-15 11:17:07.388  3588  3588 I AV005   :   turn 0 success "green blue red"
+09-15 11:17:11.273  3588  3588 I AV005   :   attested: spoke_answer
+09-15 11:17:11.308  3588  3588 I AV005   : Saved /storage/emulated/0/Android/data/org.ankivoice.av005/files/av005-20260915-111711.json
+09-15 11:17:14.549  3588  3588 I AV005   : MARK scenario=av040_pause2 event=playback_request t=21114
+09-15 11:17:14.690  3588  3588 I AV005   : MARK scenario=av040_pause2 event=playback_start t=21255
+09-15 11:17:19.595  3588  3588 I AV005   : MARK scenario=av040_pause2 event=playback_done t=26160
+09-15 11:17:19.999  3588  3588 I AV005   : MARK scenario=av040_pause2 event=thinking_started t=26563
+09-15 11:17:23.033  3588  3588 I AV005   : MARK scenario=av040_pause2 event=listen_requested t=29597
+09-15 11:17:23.084  3588  3588 I AV005   : MARK scenario=av040_pause2 event=lifecycle:audio_focus_change_-2 t=29648
+09-15 11:17:23.085  3588  3588 I AV005   :   audio focus change: -2 (recorded, not acted on)
+09-15 11:17:23.086  3588  3588 I AV005   : MARK scenario=av040_pause2 event=lifecycle:audio_focus_loss_during_capture t=29650
+09-15 11:17:23.165  3588  3588 I AV005   : MARK scenario=av040_pause2 event=capture_ready t=29729
+09-15 11:17:26.338  3588  3588 I AV005   : MARK scenario=av040_pause2 event=speech_begin t=32902
+09-15 11:17:26.372  3588  3588 I AV005   : MARK scenario=av040_pause2 event=lifecycle:audio_focus_change_1 t=32937
+09-15 11:17:26.373  3588  3588 I AV005   :   audio focus change: 1 (recorded, not acted on)
+09-15 11:17:26.373  3588  3588 I AV005   :   audio focus regained after 3287ms
+09-15 11:17:26.432  3588  3588 I AV005   : MARK scenario=av040_pause2 event=lifecycle:token_invalidated:turn_complete t=32996
+09-15 11:17:26.432  3588  3588 I AV005   : MARK scenario=av040_pause2 event=lifecycle:stop_audio_work_turn_complete t=32996
+09-15 11:17:26.432  3588  3588 I AV005   : MARK scenario=av040_pause2 event=turn_done t=32996
+09-15 11:17:26.433  3588  3588 I AV005   :   turn 2 error ERROR_NO_MATCH
+09-15 11:17:29.121  3588  3588 I AV005   :   attested: spoke_answer
+09-15 11:17:29.121  3588  3588 I AV005   : MARK scenario=av040_pause2 event=lifecycle:token_invalidated:scenario_end t=35685
+09-15 11:17:29.121  3588  3588 I AV005   : MARK scenario=av040_pause2 event=lifecycle:stop_audio_work_scenario_end t=35685
+09-15 11:17:29.124  3588  3588 I AV005   : --- 1. Think two seconds, then Start answer complete (2 turns). Tap Save evidence.
+09-15 11:17:29.144  3588  3588 I AV005   : Saved /storage/emulated/0/Android/data/org.ankivoice.av005/files/av005-20260915-111729.json
+09-15 11:18:31.674  3588  3588 I AV005   : MARK scenario=av040_pause2 event=lifecycle:on_pause t=98239
+09-15 11:18:31.675  3588  3588 I AV005   : MARK scenario=av040_pause2 event=lifecycle:token_invalidated:on_pause t=98239
+09-15 11:18:31.675  3588  3588 I AV005   : MARK scenario=av040_pause2 event=lifecycle:stop_audio_work_on_pause t=98239
+09-15 11:18:31.680  3588  3588 I AV005   : Preselected scenario "av040_echo" from the launch intent.
+09-15 11:18:31.680  3588  3588 I AV005   : MARK scenario=av040_pause2 event=lifecycle:on_resume t=98245
+09-15 11:18:50.272  3588  3588 I AV005   : --- Audible prompt echo, stay silent (2 turns)
+09-15 11:18:50.279  3588  3588 I AV005   : MARK scenario=av040_echo event=playback_request t=135
+09-15 11:18:50.298  3588  3588 I AV005   : MARK scenario=av040_echo event=playback_start t=155
+09-15 11:18:53.055  3588  3588 I AV005   : MARK scenario=av040_echo event=playback_done t=2911
+09-15 11:18:53.459  3588  3588 I AV005   : MARK scenario=av040_echo event=listen_requested t=3315
+09-15 11:18:53.486  3588  3588 I AV005   : MARK scenario=av040_echo event=lifecycle:audio_focus_change_-2 t=3343
+09-15 11:18:53.487  3588  3588 I AV005   :   audio focus change: -2 (recorded, not acted on)
+09-15 11:18:53.487  3588  3588 I AV005   : MARK scenario=av040_echo event=lifecycle:audio_focus_loss_during_capture t=3343
+09-15 11:18:53.660  3588  3588 I AV005   : MARK scenario=av040_echo event=capture_ready t=3516
+09-15 11:18:54.285  3588  3588 I AV005   : MARK scenario=av040_echo event=speech_begin t=4141
+09-15 11:18:54.819  3588  3588 I AV005   : MARK scenario=av040_echo event=speech_end t=4676
+09-15 11:19:00.305  3588  3588 I AV005   : MARK scenario=av040_echo event=lifecycle:audio_focus_change_1 t=10162
+09-15 11:19:00.306  3588  3588 I AV005   :   audio focus change: 1 (recorded, not acted on)
+09-15 11:19:00.306  3588  3588 I AV005   :   audio focus regained after 6819ms
+09-15 11:19:00.399  3588  3588 I AV005   : MARK scenario=av040_echo event=lifecycle:token_invalidated:turn_complete t=10255
+09-15 11:19:00.399  3588  3588 I AV005   : MARK scenario=av040_echo event=lifecycle:stop_audio_work_turn_complete t=10256
+09-15 11:19:00.399  3588  3588 I AV005   : MARK scenario=av040_echo event=turn_done t=10256
+09-15 11:19:00.402  3588  3588 I AV005   :   turn 0 error ERROR_NO_MATCH
+09-15 11:19:13.688  3588  3588 I AV005   :   attested: spoke_answer
+09-15 11:19:13.730  3588  3588 I AV005   : Saved /storage/emulated/0/Android/data/org.ankivoice.av005/files/av005-20260915-111913.json
+09-15 11:19:20.839  3588  3588 I AV005   : MARK scenario=av040_echo event=playback_request t=30696
+09-15 11:19:21.010  3588  3588 I AV005   : MARK scenario=av040_echo event=playback_start t=30866
+09-15 11:19:28.436  3588  3588 I AV005   : MARK scenario=av040_echo event=playback_done t=38292
+09-15 11:19:28.840  3588  3588 I AV005   : MARK scenario=av040_echo event=listen_requested t=38696
+09-15 11:19:28.853  3588  3588 I AV005   : MARK scenario=av040_echo event=lifecycle:audio_focus_change_-2 t=38709
+09-15 11:19:28.854  3588  3588 I AV005   :   audio focus change: -2 (recorded, not acted on)
+09-15 11:19:28.854  3588  3588 I AV005   : MARK scenario=av040_echo event=lifecycle:audio_focus_loss_during_capture t=38711
+09-15 11:19:28.923  3588  3588 I AV005   : MARK scenario=av040_echo event=capture_ready t=38780
+09-15 11:19:32.072  3588  3588 I AV005   : MARK scenario=av040_echo event=speech_begin t=41928
+09-15 11:19:33.795  3588  3588 I AV005   : MARK scenario=av040_echo event=speech_end t=43651
+09-15 11:19:34.204  3588  3588 I AV005   : MARK scenario=av040_echo event=speech_begin t=44060
+09-15 11:19:35.082  3588  3588 I AV005   : MARK scenario=av040_echo event=speech_end t=44938
+09-15 11:19:35.218  3588  3588 I AV005   : MARK scenario=av040_echo event=speech_begin t=45074
+09-15 11:19:35.857  3588  3588 I AV005   : MARK scenario=av040_echo event=speech_end t=45713
+09-15 11:19:36.484  3588  3588 I AV005   : MARK scenario=av040_echo event=lifecycle:audio_focus_change_1 t=46341
+09-15 11:19:36.485  3588  3588 I AV005   :   audio focus change: 1 (recorded, not acted on)
+09-15 11:19:36.485  3588  3588 I AV005   :   audio focus regained after 7630ms
+09-15 11:19:36.543  3588  3588 I AV005   : MARK scenario=av040_echo event=speech_begin t=46400
+09-15 11:19:36.606  3588  3588 I AV005   : MARK scenario=av040_echo event=lifecycle:token_invalidated:turn_complete t=46462
+09-15 11:19:36.606  3588  3588 I AV005   : MARK scenario=av040_echo event=lifecycle:stop_audio_work_turn_complete t=46462
+09-15 11:19:36.606  3588  3588 I AV005   : MARK scenario=av040_echo event=turn_done t=46462
+09-15 11:19:36.606  3588  3588 I AV005   :   turn 1 error ERROR_NO_MATCH
+09-15 11:19:39.903  3588  3588 I AV005   :   attested: spoke_answer
+09-15 11:19:39.903  3588  3588 I AV005   : MARK scenario=av040_echo event=lifecycle:token_invalidated:scenario_end t=49759
+09-15 11:19:39.903  3588  3588 I AV005   : MARK scenario=av040_echo event=lifecycle:stop_audio_work_scenario_end t=49759
+09-15 11:19:39.906  3588  3588 I AV005   : --- Audible prompt echo, stay silent complete (2 turns). Tap Save evidence.
+09-15 11:19:39.913  3588  3588 I AV005   : Saved /storage/emulated/0/Android/data/org.ankivoice.av005/files/av005-20260915-111939.json
+09-15 11:21:17.302  4141  4141 I AV005   : Preselected scenario "av040_pause2" from the launch intent.
+09-15 11:21:17.307  4141  4141 I AV005   : AV-005 suite ready. Pick a scenario and read its instructions before tapping Start.
+09-15 11:21:17.307  4141  4141 I AV005   : Operated by: investigator_adb
+09-15 11:21:17.312  4141  4141 I AV005   : Evidence is written to /storage/emulated/0/Android/data/org.ankivoice.av005/files
+09-15 11:21:18.965  4141  4141 I AV005   : Engine googletts.google-speech-apk_20241125.02_p2.702443970, voice en-US-language, recognition available true
+09-15 11:22:08.978  4141  4141 I AV005   : --- 1. Think two seconds, then Start answer (2 turns)
+09-15 11:22:08.994  4141  4141 I AV005   : MARK scenario=av040_pause2 event=lifecycle:token_invalidated:scenario_end t=120
+09-15 11:22:08.994  4141  4141 I AV005   : MARK scenario=av040_pause2 event=lifecycle:stop_audio_work_scenario_end t=120
+09-15 11:22:08.999  4141  4141 I AV005   : --- 1. Think two seconds, then Start answer complete (0 turns). Tap Save evidence.
+09-15 11:22:09.016  4141  4141 I AV005   : Saved /storage/emulated/0/Android/data/org.ankivoice.av005/files/av005-20260915-112209.json

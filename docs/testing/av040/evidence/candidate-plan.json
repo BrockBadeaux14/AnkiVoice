@@ -1,0 +1,73 @@
+{
+  "recorded_at_utc": "2026-09-15T12:59:09.597757+00:00",
+  "phase": "candidate protocol, not a selected or validated production policy",
+  "baseline_attempts": 12,
+  "additional_attempt_limit": 24,
+  "candidate_limit": 2,
+  "interruption_rule_limit": 1,
+  "candidate": "explicit_start_done_v1",
+  "think": "No active recognizer while thinking; minimum waits 2s/5s. Start answer explicitly opens capture.",
+  "capture_default_ms": 15000,
+  "capture_max_ms": 15000,
+  "finalization_max_ms": 5000,
+  "automatic_rearms": 0,
+  "same_turn_retry_cap": 0,
+  "fallback": "Preserve the failed attempt; explicit separately counted follow-up only within the 24-attempt budget; no rating or review. A failed viable-route comparison may end with no-go.",
+  "interruption_rule": "Activity pause, telephony/communication audio-mode changes, or an unsolicited TTS stop invalidates the token before cleanup. Focus changes are observed, with no duration cutoff. This candidate is unvalidated.",
+  "planned_turns": {
+    "av040_pause2": [
+      0,
+      2
+    ],
+    "av040_pause5": [
+      1,
+      3
+    ],
+    "av040_finish": [
+      6,
+      7
+    ],
+    "av040_call_playback": [
+      1,
+      3
+    ],
+    "av040_call_capture": [
+      1,
+      3
+    ],
+    "av040_home_playback": [
+      3
+    ],
+    "av040_home_capture": [
+      3
+    ],
+    "av040_lock_playback": [
+      3
+    ],
+    "av040_lock_capture": [
+      3
+    ],
+    "av040_cancel_playback": [
+      3
+    ],
+    "av040_cancel_capture": [
+      3
+    ],
+    "av040_echo": [
+      0,
+      1
+    ]
+  },
+  "planned_total": 18,
+  "unallocated_max": 6,
+  "human_source": "Host default microphone; no injected audio. Investigator may trigger emulated external interruptions but never attest speech.",
+  "apk_sha256": "778e7bc9e9807d37b96d9fef66b7b22808a9e8fa87af236f8b2878189b58137c",
+  "pre_measurement_build_history": [
+    {
+      "changed_at_utc": "2026-09-15T15:37:39.502050+00:00",
+      "previous_apk_sha256": "f2388159caa576626e052d8bfa28315ea7200f8e1aca80842cd1e98acf4c0844",
+      "apk_sha256": "778e7bc9e9807d37b96d9fef66b7b22808a9e8fa87af236f8b2878189b58137c",
+      "reason": "Disable scenario Start and enable Cancel during each explicitly resumed playback; prevents a second Start from replacing an active run. No follow-up turns had begun."
+    }
+  ]
+}
