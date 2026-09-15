@@ -28,3 +28,11 @@ with your own voice, which is the one thing the recorded matrix could not supply
 See [AV-006: Speech and grading providers](docs/decisions/0006-speech-and-grading-providers.md)
 for the measured native speech/OpenRouter comparison, free-only provider decision,
 fallback requirements, and reproducible evidence.
+
+See [AV-007: Integration contracts and review lifecycle](docs/contracts/av007-session-contracts.md)
+for the five session contracts, the card-identity and capability rules bound to AV-004's
+measurements, and the five-state review lifecycle. The
+[scripted transcripts](docs/contracts/av007/transcripts.md) show the in-memory fakes
+driving every state and failure mode with no emulator and no network, including
+explicit spoken/touch confirmation, transcript edits, stale callbacks and manual
+self-grading fallback.
