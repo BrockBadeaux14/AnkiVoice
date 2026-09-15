@@ -97,7 +97,7 @@ flowchart TD
 
 | Module | Kind | Contents now | Owner of what comes next |
 | --- | --- | --- | --- |
-| `:core` | Kotlin/JVM, no Android plugin or dependency | The AV-007 contract port in `org.ankivoice.core.contracts`; the fakes in its `testFixtures` source set | #14, #13, #25, #16/#18, #15, #20 |
+| `:core` | Kotlin/JVM, no Android plugin or dependency | The AV-007 contract port in `org.ankivoice.core.contracts`; AV-015's rule-based grading in `org.ankivoice.core.grading`; the fakes in its `testFixtures` source set | #14, #13, #25, #18, #15, #20 |
 | `:ankidroid` | Android library | Access preflight; `decks` reads and verified `selected_deck` updates | #25, #10 |
 | `:speech` | Android library | A marker object; no platform calls | #26 |
 | `:provider` | Android library | A marker object; no platform calls or network access | #17, #18 |
@@ -203,6 +203,58 @@ are unchanged.
 One non-semantic difference: the specification's CardProvider failure table lists
 `nullCursor` fourth, while the binding declares it last. The Kotlin enum follows the
 binding's order, so the drift guard can compare lists in order.
+
+## Rule-based grading
+
+- Issue: [#16 — AV-015: Implement rule-based grading and rating policy](https://github.com/BrockBadeaux14/AnkiVoice/issues/16).
+
+`RuleGrader.grade(context)` in `org.ankivoice.core.grading` is a pure, deterministic
+policy over the `GradingContext`. It returns `GradingResult(correct, reason)`, which the
+existing mapping turns into a proposed Good, or `null`. A null means there is no
+rule-based label and no proposed rating. The caller then asks the AI grader (#18) if one
+is available, and otherwise the learner for an explicit self-grade. When the rules match,
+no AI grading request is sent for that transcript revision.
+
+The rules never conclude `incorrect`, `partial` or `uncertain`, and never propose Again,
+Hard or Easy. Every result is a suggestion that needs the learner's confirmation, which
+#14 and #25 enforce. The rules do not read the prompt or RequiredConcepts; concept
+coverage belongs to #18.
+
+| Step | Rule |
+| --- | --- |
+| Normalization | Applied to the transcript, ReferenceAnswer and each AcceptedAnswers line: NFKC, full case folding, punctuation removed, whitespace collapsed and trimmed. There is no stemming, synonym table, stop-word removal or reordering. |
+| Exact match | The normalized transcript equals the ReferenceAnswer or a nonblank AcceptedAnswers line. The reason names the reference answer or accepted answer *n*, numbered by its line. |
+| Fuzzy match | Tried only without an exact match. The word lists are the same length and differ in one word. That word has at least five letters on both sides, is alphabetic, and is one slip apart: one inserted, deleted or substituted letter, or two adjacent letters swapped. The reason names both words. |
+| Protected words | A fuzzy match never touches digits (a fuzzy word must be alphabetic) or a word in `NUMBER_WORDS`, `NEGATIONS` or `UNITS`. Any word ending in `n't` counts as a negation. |
+| Anything else | `null`, including an empty or punctuation-only transcript. |
+
+Exact matches win over fuzzy ones. Within each step, the reference answer is tried first,
+then the accepted answers in order.
+
+Some punctuation choices are more conservative than plain removal, and the tests cover
+each one:
+
+- **Apostrophes.** An apostrophe between two word characters is kept and written as `'`,
+  so "isn’t" and "isn't" agree. Any other apostrophe is removed.
+- **Numbers.** Punctuation between two digits is kept, so "3.5" never matches "35" or
+  "3 5".
+- **Unit signs.** `%`, `‰`, `‱` and the prime signs are units, although Unicode classes
+  them as punctuation. They are kept, so "50" never matches "50%".
+- **Separators.** Every other punctuation mark becomes a space, so "green,blue" and
+  "green blue" agree.
+
+Known limitation: one slip can join two different words, such as "round" and "sound".
+That is accepted because the result is a labelled suggestion that always needs
+confirmation.
+
+`RuleGraderTest` covers normalization, the exact and fuzzy positives, and the near-miss
+negatives, including a one-letter slip on every protected word of five or more letters.
+`VoiceQAFixtureGradingTest` runs every expected case in
+[`fixtures/voiceqa/note-type.json`](../fixtures/voiceqa/note-type.json), read from that
+file. The `:core` test task passes the file's path and declares it as an input, so a
+fixture edit reruns the test. Two of the nine cases match: "Green, blue, red." and
+"Five.". The other seven get no label, and no case marked `incorrect` or `partial` is
+ever labelled.
 
 ## Drift guard
 

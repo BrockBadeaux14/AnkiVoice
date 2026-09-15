@@ -54,3 +54,8 @@ See [AV-023: Mobile shell and permission onboarding](docs/testing/av023/results.
 for the Compose shell, deck selection, debug sample-session controls, private settings,
 and the pinned-emulator evidence. The [runbook](docs/testing/av023/runbook.md) reproduces
 the onboarding and lifecycle checks without submitting any reviews.
+
+See [AV-015: Rule-based grading](android/README.md#rule-based-grading) for the on-device
+policy. It suggests Good only on an exact normalized match or a one-letter slip in a long
+word that is not a number, negation or unit. Otherwise it defers to the AI grader or an
+explicit self-grade.
