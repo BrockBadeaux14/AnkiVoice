@@ -1,0 +1,61 @@
+# AV-007 vocabulary for the Kotlin port (AV-041), in specification spelling.
+# Generated from tools/av007_contracts.py by tools/av041_manifest.py; do not edit.
+# Regenerate with: python tools/av041_manifest.py --write
+contract CardProvider capabilities nextCard readCard
+contract SpeechOutput speak cancel
+contract SpeechInput listen cancel
+contract Grader grade cancel
+contract ReviewWriter commit
+failure CardProvider accessDenied
+failure CardProvider apiDisabled
+failure CardProvider packageUnavailable
+failure CardProvider deckMissing
+failure CardProvider cardNotFound
+failure CardProvider collectionChanged
+failure CardProvider unsupportedNoteType
+failure CardProvider malformedCard
+failure CardProvider nullCursor
+failure SpeechOutput engineUnavailable
+failure SpeechOutput languageUnsupported
+failure SpeechOutput audioFocusLost
+failure SpeechOutput playbackInterrupted
+failure SpeechInput permissionDenied
+failure SpeechInput recognizerUnavailable
+failure SpeechInput recognizerError
+failure SpeechInput noSpeechDetected
+failure SpeechInput listenTimeout
+failure SpeechInput networkUnavailable
+failure SpeechInput quotaExhausted
+failure SpeechInput noMatch
+failure SpeechInput earlyClosure
+failure SpeechInput lowConfidence
+failure Grader quotaExhausted
+failure Grader providerError
+failure Grader graderTimeout
+failure Grader unparsableResponse
+failure Grader outputTruncated
+failure ReviewWriter ratingRejected
+failure ReviewWriter invalidReviewTime
+failure ReviewWriter staleIdentity
+failure ReviewWriter precommitReadFailed
+failure ReviewWriter writeRejected
+failure ReviewWriter confirmationRequired
+seam ReviewTransport answerCard
+capability permittedRatings 1,2,3,4
+capability maxReviewTimeMs 60000
+capability supportsPostWriteVerification true
+capability supportsSkip false
+capability supportsProgrammaticUndo false
+capability supportsRevlogQuery false
+capability supportsTransactions false
+capability supportsIdempotencyKey false
+capability supportsAtomicCompareAndWrite false
+reviewState pending nonterminal
+reviewState submitting nonterminal
+reviewState confirmed terminal
+reviewState failed terminal
+reviewState outcome-unknown terminal
+gradeLabel correct 3
+gradeLabel partial none
+gradeLabel incorrect 1
+gradeLabel uncertain none
