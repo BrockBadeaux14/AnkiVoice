@@ -492,8 +492,9 @@ Done and a five-second finalization limit, zero automatic re-arms and zero
 same-turn retries. Measured Done-to-final callbacks were 116–389 ms; timeout expiry
 was not exercised. These are experimental limits, not production defaults.
 
-**#13/#26 remain blocked on their live-speech capability requirement.** Their next
-bounded decision must establish both usable human capture and an independently
+**#13/#26 remain blocked on their live-speech capability requirement.**
+[#51 — AV-042](https://github.com/BrockBadeaux14/AnkiVoice/issues/51) tracks the next
+bounded decision, which must establish both usable human capture and an independently
 observable interruption signal. Home/lock/Cancel cleanup passed the recorded
 cases, but does not resolve the missed calls. This evidence requires revisiting
 the speech-route/interruption assumption; it does not change Kotlin, the framework

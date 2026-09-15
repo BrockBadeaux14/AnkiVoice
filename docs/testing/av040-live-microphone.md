@@ -1,6 +1,7 @@
 # AV-040: Live microphone capture and foreground interruptions
 
 - Issue: [#45](https://github.com/BrockBadeaux14/AnkiVoice/issues/45).
+- Review: [PR #50](https://github.com/BrockBadeaux14/AnkiVoice/pull/50).
 - **No-go. The bounded investigation is complete; the live route is not approved.**
 - Branch: `codex/av040-live-microphone-interruptions`.
 - Investigated September 15, 2026. #5/#6 were closed and their merged changes were
@@ -234,6 +235,11 @@ was disabled and the test probe/AVD stopped; MacBook defaults and the separate
 `Medium_Phone` AVD were left in place.
 
 ## Evidence, limits and handoff
+
+The remaining speech blockers are tracked together in
+[#51 — AV-042](https://github.com/BrockBadeaux14/AnkiVoice/issues/51). Its proposed
+test budget is separate from this exhausted investigation. #13/#26 require an
+accepted viable result from that follow-up and completion of #24 before Ready.
 
 The [runbook](av040/runbook.md) explains controls, extraction and validation.
 [Operator attestations](av040/evidence/operator-attestation.json) retain corrections

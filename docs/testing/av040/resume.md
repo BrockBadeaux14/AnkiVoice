@@ -5,6 +5,9 @@ instructions are superseded by this checkpoint; they do not authorize more trial
 
 - Issue: [#45 — AV-040: Validate live microphone capture and foreground interruptions](https://github.com/BrockBadeaux14/AnkiVoice/issues/45).
 - Branch: `codex/av040-live-microphone-interruptions`.
+- Review: [PR #50](https://github.com/BrockBadeaux14/AnkiVoice/pull/50).
+- Remaining speech blockers: [#51 — AV-042](https://github.com/BrockBadeaux14/AnkiVoice/issues/51),
+  tracked in Backlog; no follow-up implementation or microphone trials started.
 - Base: `96caf9467a8e2f3259d0f3e9ee6af76e62ae3822`.
 - Implementation and evidence are on the branch above. Inspect `git status` and
   preserve any later user changes before editing. The user subsequently authorized
