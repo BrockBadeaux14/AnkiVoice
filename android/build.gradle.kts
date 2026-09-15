@@ -15,6 +15,10 @@ val allowedProjectDependencies = mapOf(
     ":provider" to setOf(":core"),
     ":app" to setOf(":core", ":ankidroid", ":speech", ":provider"),
 )
+// AV-020 (#17): :provider is the app's only network route, and no module asks for phone state.
+val networkPermission = "android.permission.INTERNET"
+val forbiddenPermission = "android.permission.READ_PHONE_STATE"
+val networkModule = ":provider"
 val androidPlugins = listOf("com.android.application", "com.android.library")
 val androidGroups = listOf("android", "androidx", "com.android", "com.google.android")
 // The :core fakes may reach debug builds and tests, never a release build.
@@ -42,6 +46,17 @@ val boundaryViolations: List<String> = buildList {
                 add("$path puts a ${dependency.path} feature variant on '$configuration', which a release build can see")
             }
         }
+    }
+    for ((path, module) in modules) {
+        val manifest = module.file("src/main/AndroidManifest.xml")
+        val declared = if (manifest.isFile) manifest.readText() else ""
+        if (declared.contains(networkPermission) != (path == networkModule)) {
+            add(
+                if (path == networkModule) "$networkModule must declare $networkPermission; it is the app's only network route"
+                else "$path declares $networkPermission; only $networkModule may",
+            )
+        }
+        if (declared.contains(forbiddenPermission)) add("$path declares $forbiddenPermission, which AV-020 forbids")
     }
     modules[":core"]?.let { core ->
         androidPlugins.filter { core.pluginManager.hasPlugin(it) }

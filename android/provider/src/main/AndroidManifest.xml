@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  AV-020 (#17): :provider is the app's only network route, so the INTERNET permission is
+  declared here and merges into :app. No phone-state permission is added.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET" />
+</manifest>

@@ -92,7 +92,12 @@ def main():
         assert manifest.find('uses-sdk').attrib[NS + 'targetSdkVersion'] == '35'
         perms = {n.attrib[NS + 'name'] for n in manifest.findall('uses-permission')}
         assert {'android.permission.RECORD_AUDIO', 'com.ichi2.anki.permission.READ_WRITE_DATABASE'} <= perms
-        assert not {'android.permission.INTERNET', 'android.permission.READ_PHONE_STATE'} & perms
+        # This checks AV-023's retained evidence build, which predates AV-020 (#17). That
+        # card gives :provider the app's only network route, so a rebuilt APK now carries
+        # INTERNET; android/build.gradle.kts fails the build if any other module declares
+        # it. READ_PHONE_STATE stays forbidden everywhere, then and now.
+        assert 'android.permission.INTERNET' not in perms, 'the retained AV-023 build predates AV-020'
+        assert 'android.permission.READ_PHONE_STATE' not in perms
         assert manifest.find("queries/provider").attrib[NS + 'authorities'] == 'com.ichi2.anki.flashcards'
     suites = load('jvm-tests.json')
     assert sum(int(s['tests']) for s in suites) == 90
