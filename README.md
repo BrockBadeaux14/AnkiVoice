@@ -41,3 +41,7 @@ See [AV-022: Android implementation](docs/decisions/0022-android-implementation.
 for the scored Kotlin-versus-Flutter decision, the pinned build/support baseline,
 component ownership across the five AV-007 contracts, and the implementation
 breakdown for the Android cards.
+
+See [AV-041: Android build](android/README.md) for the `android/` Gradle build, its
+pins and five modules, and the Kotlin port of the AV-007 contract types and fakes. That
+page also covers the drift guard that keeps the port in step with the Python binding.
