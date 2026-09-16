@@ -112,5 +112,6 @@ explicit learner confirmation reaches the writer. Its 53-scenario conformance su
 ported from the Python binding and held to it by a drift guard. The
 [runbook](docs/testing/av013/runbook.md) separates the offline suite from the live check
 on the pinned AVD, and [results](docs/testing/av013/results.md) records what has and has
-not been verified. AV-025's absorbed live speech check passed; the session's guarded
-write after a spoken answer and explicit confirmation remains outstanding.
+not been verified. Both live criteria passed on September 16, 2026: AV-025's absorbed
+speech check, and one spoken answer carried through explicit confirmation to a verified
+guarded write.

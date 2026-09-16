@@ -1,15 +1,16 @@
 {
-  "recordedAtUtc": "2026-09-16T05:22:09.813261+00:00",
+  "recordedAtUtc": "2026-09-16T12:58:00+00:00",
   "appForceStopped": true,
   "hostMicrophoneForwarding": "disabled",
   "hostOutput": 53,
-  "cardStateUnchanged": true,
-  "reviewHistoryUnchanged": true,
-  "newReviews": 0,
-  "fixtureReset": "Not needed: all native cards and review history exactly match the imported pristine baseline.",
+  "cardStateUnchanged": false,
+  "reviewHistoryUnchanged": false,
+  "newReviews": 1,
+  "fixtureReset": "Not performed: the disposable collection deliberately retains attempt 12's single review as criterion 8 evidence. Reset before reusing it.",
   "preparedDeckId": 1789534470372,
   "preparedCardId": 1789534470381,
   "criterion9": "complete",
-  "criterion8": "pending live session transcript acceptance and rating confirmation",
-  "lastAttempt": "11 timed out before operator Play prompt; no capture opened"
+  "criterion8": "complete",
+  "lastAttempt": "12 confirmed one guarded write on card 1789534470381; reps 0 -> 1",
+  "postWriteComparison": "12-session-write-verified.json"
 }

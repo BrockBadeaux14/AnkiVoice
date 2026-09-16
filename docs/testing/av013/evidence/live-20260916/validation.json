@@ -1,19 +1,29 @@
 {
   "integrityChecksPassed": true,
   "allAttemptsMatchRawInstrumentation": true,
-  "attemptsRetained": 11,
+  "attemptsRetained": 12,
   "criterion9Passed": true,
-  "criterion8Passed": false,
+  "criterion8Passed": true,
   "successfulPhrases": {
     "green blue red": 625,
     "five": 672
   },
   "sessionRawTranscript": {
     "text": "five blocks",
-    "doneToFinalMs": 681,
+    "doneToFinalMs": 659,
     "confidence": "absent",
-    "outcome": "paused on lowConfidence"
+    "outcome": "paused on lowConfidence, then operator-accepted and confirmed"
   },
-  "newReviews": 0,
-  "reasonCriterion8Pending": "Updated harness transcript acceptance and rating-confirmation path awaits live operator completion; attempt 11 timed out before capture."
+  "newReviews": 1,
+  "criterion8Evidence": {
+    "attempt": 12,
+    "outcome": "confirmed",
+    "acknowledgement": 1,
+    "repsBefore": 0,
+    "repsAfter": 1,
+    "otherCardsChanged": [],
+    "notesUnchanged": true,
+    "submittedTimeMs": 47582,
+    "storedTimeMs": 47583
+  }
 }

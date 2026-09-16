@@ -1,14 +1,21 @@
-# AV-013: Session implemented; live transport check passed
+# AV-013: Session implemented; live verification complete
 
 Issue [#14 — Build the deterministic session state machine](https://github.com/BrockBadeaux14/AnkiVoice/issues/14).
 Branch `codex/av-013-session-state-machine`.
 
 `ReviewSession` is ported to `:core`, its 53-scenario conformance suite passes, and the
-drift guard is in place. **Live criterion 9 passed on September 16, 2026 UTC:**
-operator-confirmed “green blue red” (625 ms), “five” (672 ms), explicit Cancel and
-permission-denied all have production-route evidence. **Criterion 8 remains in progress.**
-A session turn recognized “five blocks” (681 ms) but paused on absent confidence.
-No review has yet been written.
+drift guard is in place. **Both live criteria passed on September 16, 2026 UTC.**
+
+**Criterion 9:** operator-confirmed “green blue red” (625 ms), “five” (672 ms), explicit
+Cancel and permission-denied all have production-route evidence, so `doneToFinalMs` is
+now measured for the shipped transport rather than AV-042's probe.
+
+**Criterion 8:** attempt 12 carried a spoken answer through to a guarded write. The
+recognizer returned “five blocks” (659 ms) with absent confidence, the session paused as
+AV-012 specifies, the operator accepted the transcript and then confirmed Good (3) by
+touch, and the writer read back a consistent one-review transition. An independent
+database comparison found exactly one new revlog row on the target card and nothing else
+changed.
 
 ## Live verification — September 16, 2026 UTC
 
@@ -34,6 +41,7 @@ audible at that level. Input gain was 84%.
 | 9 | five-diagnostic | five | `{"kind":"transcript","text":"five","confidence":"absent","token":"OperationToken(sessionId=av013-five-09, turn=1, sequence=1)"}` | 672 | transcript; 0 |
 | 10 | session-interactive | five blocks | `{"kind":"transcript","text":"five blocks","confidence":"absent","token":"OperationToken(sessionId=av013-session-10/answer, turn=1, sequence=1)"}` | 681 | paused; 0 |
 | 11 | session-interactive | five blocks | No capture: no operator start before timeout | — | no capture; 0 |
+| 12 | session-interactive | five blocks | `{"kind":"transcript","text":"five blocks","confidence":"absent","token":"OperationToken(sessionId=av013-live/answer, turn=1, sequence=1)"}` | 659 | **confirmed write; 1** |
 
 The recognizer's result does not establish what was spoken. For attempt 5 the operator reported: “I heard the prompt but did not see anything. Try
 again.” That confirms audibility, not whether the phrase was spoken. The interactive
@@ -54,7 +62,7 @@ Live execution exposed several harness gaps, corrected only in the test APK:
   and rejects pre-capture `confirmRating`. Interactive mode takes a direct Confirm touch;
   the terminal alternative waits for a challenge-bound confirmation file. The
   [device rejection check](evidence/live-20260916/confirmation-before-capture-rejected.txt)
-  passed. A successful post-capture confirmation/write is still untested.
+  passed, and attempt 12 then exercised the successful post-capture path end to end.
 - The original timed harness had no visible controls. `LiveVerificationUi` supplies
   Play prompt, Start answer, Done/Cancel and two independent unchecked attestations.
 - The pinned recognizer returned absent confidence even for correct text. Attempt 10
@@ -79,7 +87,27 @@ returned that card and all four permitted ratings. The no-match session wrote no
 [an independent database comparison](evidence/live-20260916/08-unchanged-collection.json)
 confirmed unchanged card state and review history. Attempt 10 also stopped before grading
 or a review proposal. Attempt 11 used the revised harness but timed out waiting for Play prompt; no capture
-opened. Criterion 8 awaits the operator's live completion.
+opened.
+
+Attempt 12 completed the criterion. Its recorded turn is
+`start → offer_card → ask → start_answer → paused(lowConfidence) → correct_transcript
+revision 2 → grade(correct, exact match) → propose rating 3 → confirm(touch) →
+commit(confirmed) → advance`. The write was acknowledged with `updateCount` 1 and verified
+by read-back; the session announced “Saved rating 3.” and returned to `idle`.
+[The raw result](evidence/live-20260916/12-session-result.json) and
+[an independent database comparison](evidence/live-20260916/12-session-write-verified.json)
+agree: reps 0 → 1 on card `1789534470381`, one new revlog row with ease 3, no other card
+touched, notes unchanged, integrity `ok`.
+
+Two details are recorded rather than smoothed over. The accepted transcript is
+`user-corrected`, not a confident recognition: the operator supplied the acceptance
+through AV-012's existing path and the raw capture stays `absent`. And the submitted
+47,582 ms was stored as 47,583 ms — a one-millisecond difference introduced by AnkiDroid,
+below the deck's 60,000 ms cap and unrelated to the structural invariants the writer
+actually verifies.
+
+After attempt 12 the disposable collection intentionally holds one review, so it no
+longer matches the pristine baseline; that divergence is the evidence, not a defect.
 
 Microphone forwarding and host output were restored at the first pause, recorded in
 [the initial cleanup](evidence/live-20260916/initial-pause-cleanup.json); forwarding was enabled again
@@ -177,13 +205,21 @@ were corrected to the behavior the binding actually specifies.
 
 ## Remaining verification and limits
 
-- **Criterion 8 remains open.** No spoken session turn has reached explicit confirmation
-  and a guarded write on the device. The disposable fixture and updated harness are ready.
+- **Criterion 8 passed, once.** One spoken turn reached a guarded, verified write. One
+  turn is not a reliability estimate, and nothing here says the next turn will succeed.
+  The 30-turn acceptance run stays in
+  [#29](https://github.com/BrockBadeaux14/AnkiVoice/issues/29).
 - **Criterion 9 passed.** Both required phrases now have operator-confirmed correct
   production transcripts. Cancel and permission-denied passed live. All no-matches remain
   in the ledger and do not count as recognition successes.
-- **The session harness reached no-match and low-confidence recovery on the device.**
-  The live proposal, explicit rating confirmation and guarded commit remain to be verified.
+- **The confirmed turn required a manual transcript acceptance.** The pinned recognizer
+  reported absent confidence even for correct text, so no spoken answer on this route is
+  directly gradable: AV-012 keeps it, shows it, and makes the learner accept it. That is
+  the specified policy, but it means the hands-free path is unproven, and a route that
+  reported usable confidence has never been exercised.
+- **Recognition was unreliable across the session.** Of six operator-attested spoken
+  turns (6, 7, 8, 9, 10, 12), four returned the expected transcript and two returned
+  `noMatch` code 7. That count is an observation from twelve attempts, not a measurement.
 - **Recognition quality is not simulated and cannot be.** Every offline test uses scripted
   transcripts. A green suite says the session handles a transcript correctly, never that a
   transcript is correct.
@@ -206,12 +242,19 @@ the ones that come back wrong.
 
 ## Next
 
-Resume criterion 8 with the interactive session harness (the last waiting screen timed
-out). Enable `adb -s emulator-5588 emu avd hostmicon`, use disposable deck
-`1789534470372` while this same-day fixture remains valid, then follow [the runbook](runbook.md): speak the real answer,
-explicitly accept its transcript if confidence is absent, then separately confirm the
-actual proposed rating. Verify exactly one added native review and reset the disposable
-fixture. Criterion 9 is complete; every failed and successful attempt remains recorded.
+Both live criteria are met and every attempt, failed and successful, remains recorded.
+The disposable collection deliberately retains attempt 12's single review; reset it from
+[the fixtures runbook](../voiceqa-fixtures.md) before reusing it.
+
+Two findings belong to other cards rather than to this one:
+
+- **Absent recognizer confidence** on the pinned route. The session behaves as AV-012
+  specifies, but every spoken answer needs a manual acceptance. Whether the route can
+  supply usable confidence is a `:speech` question —
+  [#26](https://github.com/BrockBadeaux14/AnkiVoice/issues/26) or a follow-up, not a
+  change here.
+- **Recognition reliability**, which [#29](https://github.com/BrockBadeaux14/AnkiVoice/issues/29)
+  measures over 30 turns.
 
 No production speech, answer-policy, session or writer behavior was changed for these
 checks. The broader study-flow UI, reliability run and interruption matrix remain outside

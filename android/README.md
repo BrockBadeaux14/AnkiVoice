@@ -755,5 +755,7 @@ when a gradable transcript exists, because a fault never supplies one.
 
 The offline suite proves the turn's ordering and guards, not that a turn works on a
 device. The live check is [the AV-013 runbook](../docs/testing/av013/runbook.md), which
-has discharged AV-025's absorbed live verification. The session's spoken-answer-to-write
-criterion remains open; [results](../docs/testing/av013/results.md) records every attempt.
+has discharged AV-025's absorbed live verification and carried one spoken answer through
+to a verified guarded write. One turn is not a reliability estimate, and the pinned
+recognizer reported absent confidence throughout, so every spoken answer needed a manual
+acceptance; [results](../docs/testing/av013/results.md) records every attempt.
