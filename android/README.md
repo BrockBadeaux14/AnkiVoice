@@ -100,12 +100,14 @@ flowchart TD
 | `:core` | Kotlin/JVM, no Android plugin or dependency | The AV-007 contract port in `org.ankivoice.core.contracts`; AV-015's rule-based grading in `org.ankivoice.core.grading`; the fakes in its `testFixtures` source set | #14, #13, #25, #18, #15, #20 |
 | `:ankidroid` | Android library | Access preflight; `decks` reads and verified `selected_deck` updates | #25, #10 |
 | `:speech` | Android library | A marker object; no platform calls | #26 |
-| `:provider` | Android library | A marker object; no platform calls or network access | #17, #18 |
+| `:provider` | Android library | AV-020's credential store, free-route guard, durable quota ledger, content-free diagnostics and the one HTTPS seam | #18 |
 | `:app` | Android application | Single-activity shell, onboarding, private settings, lifecycle delivery and debug sample session | #27, #17 |
 
 `checkModuleBoundaries` fails the build when:
 
 - a module depends on a project AV-022 does not allow;
+- a module other than `:provider` declares `android.permission.INTERNET`, `:provider`
+  stops declaring it, or any module declares `android.permission.READ_PHONE_STATE`;
 - `:app` stops depending on all four other modules;
 - `:core` applies an Android plugin or declares an `android*`, `androidx*` or
   `com.google.android*` dependency;
@@ -255,6 +257,49 @@ file. The `:core` test task passes the file's path and declares it as an input, 
 fixture edit reruns the test. Two of the nine cases match: "Green, blue, red." and
 "Five.". The other seven get no label, and no case marked `incorrect` or `partial` is
 ever labelled.
+
+## Provider credentials, usage controls and diagnostics
+
+- Issue: [#17 — AV-020: Add provider credentials, usage controls and useful diagnostics](https://github.com/BrockBadeaux14/AnkiVoice/issues/17).
+- Decision: [AV-006: Speech and grading providers](../docs/decisions/0006-speech-and-grading-providers.md).
+- Evidence: [AV-020 runbook](../docs/testing/av020/runbook.md) and
+  [`tools/av020-qa/validate.py`](../tools/av020-qa/validate.py).
+
+`:provider` implements the free-only grading route. It is the app's **only** network
+route: it alone declares `android.permission.INTERNET`, and `checkModuleBoundaries` fails
+the build if that moves. No phone-state permission exists anywhere. Nothing here decides
+a grade: #18 owns the grading instruction, the reply's content and the label policy, and
+`:provider` carries the request and the reply text.
+
+| Part | What it does |
+| --- | --- |
+| `KeystoreCredentialStore` | The key is entered at runtime, wrapped by a non-exportable Android Keystore AES/GCM key, and held in app-private storage. It is in no `BuildConfig` field, resource, asset or log, and the UI only ever reports *that* a key is saved. It can be replaced or cleared. |
+| `FreeRoute` | AV-006's ported guard. `liquid/lfm-2.5-2.6b:free` through `liquid/fp8`, `allow_fallbacks=false`, zero maximum prompt/completion/request prices, temperature 0, JSON object output, a 1,024-token cap, and no tools, plugins, search or router. Before each session it checks the pinned endpoint for zero prices; changed, nonzero or unknown prices refuse the route. A reply served by another model or provider, or without a verified zero cost, is refused too. |
+| `HttpsUrlTransport` | HTTPS only, and a 3xx is a refusal: the pinned endpoint cannot be moved by a reply. The key travels in the Authorization header and nowhere else. |
+| `QuotaLedger` | Durable, append-only, flushed to the filesystem **before** dispatch, so a timeout or process death still consumes the allowance. At most 30 requests per session and a configurable daily limit, default 50 per UTC day, settable only between 0 and 1,000. A 402, a 429, an unverified cost or a refused route stops grading for the rest of the UTC day. Nothing retries automatically. |
+| `Diagnostics` | Timings, failure names, request and reservation counts, and the reported cost. Every detail passes through `CredentialPolicy.redact`. Keeping transcripts and card text for #29's report is an explicit opt-in, off by default and clearable. No `:provider` API accepts audio bytes, which a test enforces. |
+| `GradingProvider` | Ties them together. A missing key, an unacknowledged disclosure, a guard refusal, an exhausted allowance, a 401/403, a 402/429, a timeout or a provider error each becomes a #7 `Grader` failure (`quotaExhausted`, `providerError`, `graderTimeout`, `outputTruncated`, `unparsableResponse`) or unavailable grading. None is ever a rating; self-grading always remains. |
+
+`:app` adds the screens to AV-023's shell and its private settings store: credential
+entry, the retention disclosure, the allowance with its configurable daily limit, and the
+diagnostics card. The disclosure lists what is sent (the answer text, Prompt,
+ReferenceAnswer, RequiredConcepts, AcceptedAnswers), what is never sent (audio, Extra,
+card or note IDs, collection data) and the limits AV-006 recorded, and grading stays off
+until it is acknowledged. Replacing the key re-arms it. The wrapped key and the ledger are
+excluded from backup and device transfer by
+[`data_extraction_rules.xml`](app/src/main/res/xml/data_extraction_rules.xml), on top of
+`allowBackup="false"`.
+
+The tests make no live provider call, in CI or locally: `:provider` drives the whole path
+through a fake transport. What a JVM test cannot show — one real request over the live
+route — is the runbook's recorded smoke run on the pinned macOS ARM64 AVD, which uses the
+owner's own key and is counted in the ledger. That run is **not yet recorded**.
+
+AV-023's evidence check in [`tools/av023-qa/validate.py`](../tools/av023-qa/validate.py)
+asserted that no APK carried `INTERNET`. It now says explicitly that it is checking
+AV-023's retained evidence build, which predates this card; the rule that replaces it for
+current builds is the module-boundary check above. `READ_PHONE_STATE` stays forbidden in
+both.
 
 ## Drift guard
 

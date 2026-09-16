@@ -55,6 +55,11 @@ for the Compose shell, deck selection, debug sample-session controls, private se
 and the pinned-emulator evidence. The [runbook](docs/testing/av023/runbook.md) reproduces
 the onboarding and lifecycle checks without submitting any reviews.
 
+See [AV-020: Provider credentials, usage controls and diagnostics](android/README.md#provider-credentials-usage-controls-and-diagnostics)
+for the Keystore-wrapped runtime credential, the free-only route guard, the durable quota
+ledger, the retention disclosure and the content-free diagnostics. Its
+[runbook](docs/testing/av020/runbook.md) records the one live smoke request.
+
 See [AV-015: Rule-based grading](android/README.md#rule-based-grading) for the on-device
 policy. It suggests Good only on an exact normalized match or a one-letter slip in a long
 word that is not a number, negation or unit. Otherwise it defers to the AI grader or an
