@@ -239,6 +239,79 @@ After writing a note type it is read back through `models` and its templates and
 with the fixture; a mismatch is reported as incomplete, naming what differs. The
 [AV-039 results](../docs/testing/av039/results.md) record the confirmed provider route and
 the pinned-emulator evidence.
+## Answer boundaries and transcript policy
+
+- Issue: [#13 — AV-012: Integrate transcription and answer boundaries](https://github.com/BrockBadeaux14/AnkiVoice/issues/13).
+- Evidence: [AV-042 result and implementation handoff](../docs/testing/av042/results.md#implementation-handoff),
+  [AV-006 native speech](../docs/decisions/0006-speech-and-grading-providers.md).
+
+`AnswerTurn` in `org.ankivoice.core.answer` is one card's answer policy above #7's
+`SpeechInput` contract. It owns *when* capture may run and *what* the transcript
+currently is. #26 owns the recognizer, the capture stream, platform callbacks and
+cleanup; #14 owns session orchestration; #15/#27 own voice commands. Nothing here plays
+audio, reads a card or writes a review, and there is no second speech implementation and
+no cloud STT candidate.
+
+The limits are AV-042's selected MVP values. They are engineering bounds, not optimized
+or validated recall durations — no measurement says 15 seconds is long enough to recall
+an answer.
+
+| Limit | Value | Rule |
+| --- | --- | --- |
+| Thinking time | unbounded | Outside active capture. After Prompt playback settles the turn waits for an explicit Start answer, and no budget is consumed meanwhile. |
+| Answer window | 15,000 ms | The default **and** the maximum active capture, from Start answer on a monotonic clock. |
+| Finalization | 5,000 ms | A separate deadline from Done or window expiry, inclusive of #26's 500 ms of trailing silence. Its expiry is a timeout, not an answer. |
+| Attempt lifetime | 20,000 ms | The two in sequence. The three clocks — window, attempt, finalization — stay distinct and are queried separately. |
+| Automatic re-arms | 0 | No re-arm, no retry loop and no extra recognizer attempt inside one window. An explicit Try again opens a fresh bounded window with a new attempt and revision. |
+
+### The six answer states
+
+`partial`, `final`, `user-corrected`, `cancelled`, `timed-out` and `failed` are separate
+and none stands in for another. `Answer.gradable` is true only for a `user-corrected`
+transcript or a `final` the adapter classified as sufficiently confident, so **partial
+text never starts grading**. Everything else returns the card with `recovery` listing the
+explicit learner actions — Try again, typed correction, self-grade — all reachable by
+touch.
+
+Confidence is a policy classification #26 supplies, not an invented numeric threshold.
+Absent confidence is **unknown: not zero and not certainty**. The text is kept and shown
+(`needsLearnerReview`), and it is the learner accepting or editing it who makes it
+gradable. `ERROR_NO_MATCH` stays `noMatch`, an undiagnosed no-result; it never becomes
+`noSpeechDetected`, a network fault or a wrong answer. An empty final is the same. No
+failure, cancellation, expiry or timeout ever becomes Again or an inferred wrong answer.
+
+Window expiry stops the microphone and starts finalization; on its own it produces **no
+answer**, so a window that runs out mid-speech preserves the card rather than finalizing
+the learner's recall. A Done that arrives after the window already ran out is recorded as
+the expiry it actually was.
+
+### Revisions and stale results
+
+Every settled answer, every typed correction and every Try again raises
+`transcriptRevision`. A callback for another attempt, for a settled turn, or from before
+Start answer is discarded into `ignored`, so a delayed transcript can never replace the
+current answer. Deadlines are applied before the payload, so a final that arrives after
+the finalization deadline is a timeout rather than an answer.
+
+`bind(reply, source, permittedRatings)` is #18's `bindSuggestion` against the current
+revision, so an edit or a retry invalidates the previous grading suggestion and a grade
+for a superseded revision becomes `TurnGrading.Superseded` — discarded, not displayed.
+The same revision is compared by `ReviewIntent.hasConfirmation`, so an edit invalidates a
+pending confirmation too. **A final transcript alone never submits a review.**
+`retries`, `corrections` and `recognitions` are counted separately, so #29's run can
+report manual interventions apart from raw recognition success.
+
+`AnswerBoundariesTest` drives the whole policy through the `:core` fakes with a
+`FakeClock`: early recognizer closure, a two-minute think before Start answer, window
+expiry mid-answer, finalization timeout, late and duplicate callbacks, Done, Cancel, Try
+again, edit-after-suggestion, and every bounded `SpeechInput` failure. The AV-006
+recognition failures are replayed as fixtures — the missed "Five." and "Six.", the
+`it puts you first then five then seven` substitution and the preserved negations — so a
+transcript-handling regression is visible without live audio.
+`tests/test_av012_answers.py` fails if those fixtures stop matching the recorded AV-006
+evidence, if the limits drift from the accepted handoff, or if any text-rewriting call
+appears in the policy.
+
 ## Rule-based grading
 
 - Issue: [#16 — AV-015: Implement rule-based grading and rating policy](https://github.com/BrockBadeaux14/AnkiVoice/issues/16).
