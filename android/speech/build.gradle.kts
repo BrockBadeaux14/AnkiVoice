@@ -19,4 +19,12 @@ android {
 
 dependencies {
     implementation(project(":core"))
+    // AV-025's transport rules are verified against a fake platform on the JVM, so the
+    // ordering, deadline and stale-callback cases need no emulator.
+    testImplementation(testFixtures(project(":core")))
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
 }
+
+tasks.withType<Test>().configureEach { useJUnitPlatform() }

@@ -97,3 +97,10 @@ emulator evidence. The shell checks real deck readiness without submitting revie
 See [AV-010: Card eligibility and bounded skipping](docs/testing/av010/results.md)
 for VoiceQA and language validation, visible rejection reasons, and read-only
 queue traversal that stops after five consecutive unstudiable cards.
+
+See [AV-025: Mobile speech and audio routing](android/README.md#speech-transport) for the
+speech transport: the pinned TTS and recognizer route, the app-owned microphone pipe, the
+playback-to-capture ordering, and the cancellation and failure rules behind both AV-007
+speech contracts. Its [runbook](docs/testing/av025/runbook.md) separates the offline rule
+checks from the live check on the pinned AVD, and
+[results](docs/testing/av025/results.md) records what has and has not been verified.

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  AV-025 (#26): :speech owns the microphone, so RECORD_AUDIO is declared here and merges
+  into :app. It is the only permission this route needs. AV-020 forbids READ_PHONE_STATE,
+  and the AV-040/AV-042 interruption work that would have wanted it stays deferred to #32.
+
+  The queries entry is required for package visibility: without it the pinned TTS engine
+  and its recognition service cannot be resolved on the pinned API level.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <queries>
+        <package android:name="com.google.android.tts" />
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
+    </queries>
+</manifest>

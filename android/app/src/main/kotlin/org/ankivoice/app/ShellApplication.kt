@@ -11,6 +11,8 @@ import org.ankivoice.core.contracts.ForegroundEventPort
 import org.ankivoice.provider.Diagnostics
 import org.ankivoice.provider.ProviderModule
 import org.ankivoice.provider.QuotaLedger
+import org.ankivoice.speech.AndroidSpeechPlatform
+import org.ankivoice.speech.SpeechReadiness
 
 /** Process-owned composition root; retains the shell through Activity recreation. */
 class ShellApplication : Application() {
@@ -26,9 +28,18 @@ class ShellApplication : Application() {
         // write can never run against the collection at the same time.
         val platform = AndroidAccessPlatform(this)
         val worker = Executors.newSingleThreadExecutor()
+        // AV-025: the speech half of the support matrix. Resolving the engine can block, so
+        // it runs on a worker of its own rather than delaying every AnkiDroid call.
+        val speechReadiness = SpeechReadiness(AndroidSpeechPlatform(this))
+        val speechWorker = Executors.newSingleThreadExecutor()
+        val settingsStore = PrivateShellSettings(this)
         controller = ShellController(
-            AnkiDroidAccess(platform, worker, mainExecutor),
-            PrivateShellSettings(this),
+            SpeechAwareAccess(
+                AnkiDroidAccess(platform, worker, mainExecutor),
+                speechWorker,
+                mainExecutor,
+            ) { speechReadiness.check(settingsStore.language) },
+            settingsStore,
             AnkiDroidProvisioning(platform, worker, mainExecutor),
             worker, mainExecutor,
             { deckId -> AnkiDroidCardProvider(platform, deckId, worker, mainExecutor) },
