@@ -24,14 +24,17 @@ import org.ankivoice.ankidroid.AndroidAccessPlatform
 import org.ankivoice.ankidroid.ProvisioningReport
 import org.ankivoice.ankidroid.ProvisioningStatus
 import org.ankivoice.ankidroid.ProvisioningStep
+import org.ankivoice.core.commands.VoiceCommand
 import org.ankivoice.core.contracts.*
 
 class MainActivity : ComponentActivity() {
     private val root get() = application as ShellApplication
     private val controller get() = root.controller
     private val provider get() = root.provider
+    private val commands get() = root.commands
     private var screen by mutableStateOf(ShellState())
     private var providerScreen by mutableStateOf(ProviderState())
+    private var commandScreen by mutableStateOf(CommandState())
     private val requestPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
         controller.refresh()
     }
@@ -46,13 +49,19 @@ class MainActivity : ComponentActivity() {
         controller.observer = { screen = it }
         providerScreen = provider.state
         provider.observer = { providerScreen = it }
+        commandScreen = commands.state
+        commands.observer = { commandScreen = it }
         setContent {
             MaterialTheme(colorScheme = lightColorScheme(
                 primary = Color(0xFF14695F), onPrimary = Color.White,
                 background = Color(0xFFF6F8F6), surface = Color(0xFFF6F8F6),
                 surfaceContainer = Color(0xFFEAF0EA),
             )) {
-                ShellScreen(screen, providerScreen, controller, provider, ::correctAccess, ::openAppSettings)
+                ShellScreen(
+                    screen, providerScreen, commandScreen,
+                    controller, provider, commands,
+                    ::correctAccess, ::openAppSettings,
+                )
             }
         }
     }
@@ -75,6 +84,7 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         controller.observer = null
         provider.observer = null
+        commands.observer = null
         super.onDestroy()
     }
 
@@ -104,8 +114,10 @@ class MainActivity : ComponentActivity() {
 private fun ShellScreen(
     state: ShellState,
     providerState: ProviderState,
+    commandState: CommandState,
     controller: ShellController,
     provider: ProviderController,
+    commands: CommandController,
     correctAccess: (FailureMode) -> Unit,
     openAppSettings: () -> Unit,
 ) {
@@ -169,6 +181,8 @@ private fun ShellScreen(
                 }
             }
 
+            CommandCard(commandState, commands, state.selectedDeckId != null)
+
             ProviderSettingsCard(providerState, provider)
             if (providerState.keyPresent && !providerState.disclosureAcknowledged) {
                 DisclosureCard(providerState, provider)
@@ -221,6 +235,103 @@ private fun UnknownOutcomeCard(state: ShellState, controller: ShellController) {
             }
         }
     }
+}
+
+/**
+ * AV-014's debug-grade command surface.
+ *
+ * Every command in the vocabulary has a control here, so none of them is voice-only, and
+ * **no control on this card submits a review**. It deliberately shows no card text, no
+ * transcript and no grade: the readable study surface is
+ * [#27](https://github.com/BrockBadeaux14/AnkiVoice/issues/27)'s, and this one exists to
+ * exercise the commands and to verify them on the pinned AVD.
+ */
+@Composable
+private fun CommandCard(state: CommandState, commands: CommandController, deckSelected: Boolean) {
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text("Voice commands (debug)", style = MaterialTheme.typography.titleLarge)
+            Text(
+                "Debug controls for voice commands. Nothing here submits a review, and the " +
+                    "readable study screen is still to come.",
+            )
+            if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
+
+            val status = if (state.running) {
+                "Session ${state.sessionState} · ${state.context.specName} context" +
+                    (state.answerPhase?.let { " · answer $it" } ?: "") +
+                    (state.cardId?.let { " · card $it" } ?: "")
+            } else {
+                "No session open"
+            }
+            Text(status, style = MaterialTheme.typography.titleMedium)
+            if (state.capturing) {
+                Text(
+                    "The microphone is capturing your answer. Command words spoken now are part " +
+                        "of the answer, not commands.",
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
+            state.notice?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
+            state.failure?.let {
+                Text(it.mode.specName, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.error)
+            }
+
+            // The four controls that reach each command context. #27 replaces them.
+            Text("Turn controls", style = MaterialTheme.typography.labelLarge)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(onClick = commands::start, enabled = !state.busy && !state.running && deckSelected) {
+                    Text("Start session")
+                }
+                OutlinedButton(onClick = commands::ask, enabled = !state.busy && state.running) { Text("Play prompt") }
+                OutlinedButton(onClick = commands::startAnswer, enabled = !state.busy && state.running) {
+                    Text("Start answer")
+                }
+                OutlinedButton(onClick = commands::finishAnswer, enabled = !state.busy && state.capturing) {
+                    Text("Done")
+                }
+                TextButton(onClick = commands::stop, enabled = !state.busy && state.running) { Text("Close session") }
+            }
+            if (!deckSelected) Text("Choose a study deck above to open a session.")
+
+            Text("Commands", style = MaterialTheme.typography.labelLarge)
+            Text(
+                if (state.spokenAvailable.isEmpty()) {
+                    "No command can be spoken right now. Every command still has a button."
+                } else {
+                    "Say one of: ${state.spokenAvailable.joinToString(", ") { it.specName }}."
+                },
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Button(
+                onClick = commands::listenForCommand,
+                enabled = !state.busy && state.spokenAvailable.isNotEmpty(),
+            ) { Text("Speak a command") }
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                VoiceCommand.entries.forEach { command ->
+                    OutlinedButton(
+                        onClick = { commands.run(command) },
+                        enabled = !state.busy && command in state.available,
+                    ) { Text(commandLabel(command)) }
+                }
+            }
+        }
+    }
+}
+
+private fun commandLabel(command: VoiceCommand): String = when (command) {
+    VoiceCommand.REPEAT -> "Repeat"
+    VoiceCommand.REVEAL -> "Show answer"
+    VoiceCommand.PAUSE -> "Pause"
+    VoiceCommand.RESUME -> "Resume"
+    VoiceCommand.FINISH_SESSION -> "Finish session"
+    VoiceCommand.SKIP -> "Skip"
+    VoiceCommand.RATE_AGAIN -> "Again"
+    VoiceCommand.RATE_HARD -> "Hard"
+    VoiceCommand.RATE_GOOD -> "Good"
+    VoiceCommand.RATE_EASY -> "Easy"
+    VoiceCommand.CONFIRM -> "Confirm"
+    VoiceCommand.CHANGE -> "Change"
 }
 
 /**

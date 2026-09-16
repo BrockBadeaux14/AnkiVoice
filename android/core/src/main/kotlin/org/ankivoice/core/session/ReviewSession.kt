@@ -448,6 +448,37 @@ class ReviewSession(
         return propose(rating)
     }
 
+    /**
+     * AV-014's repeat: speak the Prompt again, and nothing else.
+     *
+     * It reuses the transient playback path [reveal] already owns and adds no state. It is
+     * refused while an attempt is in flight, because AV-025 forbids playing into an open
+     * microphone; AV-014's context rule already keeps a spoken repeat out of that window.
+     */
+    fun replayQuestion(): SessionResult<Utterance> {
+        confine("replayQuestion")
+        check(
+            state == SessionState.LISTENING || state == SessionState.RETRYING ||
+                state == SessionState.GRADING || state == SessionState.PROPOSING,
+        ) { "Repeat needs an open card outside the answer window, not ${state.specName}" }
+        val turn = answerTurn
+        check(turn == null || (turn.phase != AnswerPhase.CAPTURING && turn.phase != AnswerPhase.FINALIZING)) {
+            "Repeat cannot play into an open microphone"
+        }
+        val open = requireCard()
+        check(playbackToken == null) { "Cancel or complete the current playback before repeating" }
+        val utterance = questionUtterance(open, language)
+        revealReturnState = state
+        val token = nextToken()
+        playbackToken = token
+        enter(SessionState.REVEALING)
+        log("repeat", open.fields.prompt)
+        val completion = finishPlayback(speechOutput.speak(token, utterance))
+        if (completion is SessionResult.Halted) return completion
+        halt?.takeIf { halted }?.let { return SessionResult.Halted(it) }
+        return SessionResult.Produced(utterance)
+    }
+
     /** Speak the ReferenceAnswer, or the Extra. Never before an answer exists. */
     fun reveal(includeExtra: Boolean = false): SessionResult<Utterance> {
         confine("reveal")
@@ -612,6 +643,43 @@ class ReviewSession(
         }
         val detail = "halted without a write; no non-mutating skip operation exists"
         return if (exitSession) stop("skip_requested", detail) else pause("skip_requested", detail)
+    }
+
+    /**
+     * AV-014's pause: an explicit learner pause, or a command-recognition fault routed
+     * into one. The card is kept and nothing is written, rated, buried or suspended.
+     *
+     * An attempt in flight is settled as AV-012 `cancelled`, so the microphone stops
+     * through #26's contract and whatever partial text the recognizer had never becomes an
+     * answer. The way back out is [resume], which discards the turn and re-queries.
+     */
+    fun requestPause(cause: Failure? = null): Halt {
+        confine("requestPause")
+        check(!halted && state != SessionState.COMMITTING && state != SessionState.COMMITTED) {
+            "Pause is only available in an active turn before submission, not ${state.specName}"
+        }
+        val turn = answerTurn
+        if (state == SessionState.LISTENING && turn != null &&
+            (turn.phase == AnswerPhase.CAPTURING || turn.phase == AnswerPhase.FINALIZING)
+        ) {
+            captureValid = false
+            val cancelled = turn.cancel()
+            answer = cancelled
+            transcriptRevision = cancelled.transcriptRevision
+            log("pause_capture", "attempt ${cancelled.attempt} cancelled; partial text is not an answer")
+        }
+        lastFailure = cause
+        return pause(
+            cause?.mode?.specName ?: LEARNER_PAUSED,
+            cause?.detail?.ifEmpty { null } ?: "the learner paused; the card is kept and nothing was written",
+        )
+    }
+
+    /** AV-014's finish session. Halts without a write; never rate, bury or suspend. */
+    fun finishSession(): Halt {
+        confine("finishSession")
+        check(state != SessionState.COMMITTING) { "The single write is in flight" }
+        return stop(SESSION_FINISHED, "the learner finished the session; nothing was written")
     }
 
     /** Correction is pre-commit only. Hand off to AnkiDroid's native Undo. */
@@ -833,6 +901,10 @@ class ReviewSession(
 
     private companion object {
         const val CANCELLED_ANSWER = "answer_cancelled"
+
+        /** AV-014's halt reasons. Neither one writes, rates, buries or suspends anything. */
+        const val LEARNER_PAUSED = "learner_paused"
+        const val SESSION_FINISHED = "session_finished"
     }
 }
 

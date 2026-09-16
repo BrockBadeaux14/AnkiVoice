@@ -1,0 +1,17 @@
+{
+  "recordedOn": "2026-09-16",
+  "avd": "AnkiVoice_AV005",
+  "serial": "emulator-5588",
+  "androidRelease": "16",
+  "sdkInt": "36",
+  "model": "sdk_gphone64_arm64",
+  "ankiDroidVersion": "2.24.1",
+  "appVersion": "0.1.0",
+  "deck": {
+    "id": 1789580769973,
+    "name": "AV002 Baseline"
+  },
+  "collectionReset": "collection.anki2 from tools/voiceqa_fixtures.py build, baseline profile, pushed to /sdcard/AnkiDroid/",
+  "host": "26.6.2 arm64",
+  "java": "openjdk version \"26.0.2.1\" 2026-08-18"
+}

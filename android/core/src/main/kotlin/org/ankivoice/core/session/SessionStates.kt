@@ -57,8 +57,9 @@ enum class SessionState(
     GRADING("grading", BindingSessionState.GRADING),
 
     /**
-     * Reveal or elaboration playback is in flight. Transient: the session returns to the
-     * state reveal was requested from, which is why the binding has no separate state.
+     * Reveal, elaboration or AV-014 repeated-question playback is in flight. Transient:
+     * the session returns to the state the playback was requested from, which is why the
+     * binding has no separate state.
      */
     REVEALING("revealing", null),
 
