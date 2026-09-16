@@ -1,0 +1,3593 @@
+{
+  "schema_version": 1,
+  "issue": 51,
+  "attempt_cap": 30,
+  "turns": [
+    {
+      "id": 1,
+      "case": "diagnostic",
+      "corpus_index": 0,
+      "expected_answer": "Green, blue, red.",
+      "example_id": "demo-reversal",
+      "started_epoch_ms": 1789521754609,
+      "status": "diagnostic_complete",
+      "events": [
+        {
+          "elapsed_ms": 2,
+          "event": "reserved",
+          "value": 1,
+          "phase": "PLAYBACK"
+        },
+        {
+          "elapsed_ms": 10,
+          "event": "focus_request",
+          "value": 1,
+          "phase": "PLAYBACK"
+        },
+        {
+          "elapsed_ms": 18,
+          "event": "capture_start",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 63,
+          "event": "recorder_started",
+          "value": {
+            "session": 81,
+            "state": 3
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 73,
+          "event": "capture_route",
+          "value": {
+            "id": 8,
+            "type": 15,
+            "name": "sdk_gphone64_arm64"
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 77,
+          "event": "capture_route",
+          "value": {
+            "id": 8,
+            "type": 15,
+            "name": "sdk_gphone64_arm64"
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 79,
+          "event": "recording_configuration",
+          "value": {
+            "silenced": false,
+            "session": 81,
+            "source": 1
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 324,
+          "event": "pcm_level",
+          "value": {
+            "samples": 3840,
+            "nonzero": 258,
+            "rms": 0.518411033833193,
+            "peak": 2
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 599,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 271,
+            "rms": 0.5104673575038106,
+            "peak": 2
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 854,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 1113,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 1366,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 1638,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 1895,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 2150,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 2407,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 2680,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 2935,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 3190,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 3447,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 3722,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 3985,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 4253,
+          "event": "pcm_level",
+          "value": {
+            "samples": 2560,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 4527,
+          "event": "pcm_level",
+          "value": {
+            "samples": 6080,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 4790,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4480,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 5050,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 5322,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 5574,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 5831,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 6088,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 6360,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 6615,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 6874,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 7127,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 7398,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 7655,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 7913,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8166,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8439,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8697,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8951,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9206,
+          "event": "pcm_level",
+          "value": {
+            "samples": 3840,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9478,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4480,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9736,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9991,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10347,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10598,
+          "event": "pcm_level",
+          "value": {
+            "samples": 5440,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10854,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 11113,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 11367,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 11639,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 11895,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 12151,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 12407,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 12680,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 12935,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 13190,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 13449,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 13720,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 13975,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 14232,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 14487,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 14760,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 15015,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 15018,
+          "event": "capture_deadline",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 15020,
+          "event": "finish_requested",
+          "value": "capture_limit",
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 15044,
+          "event": "closing",
+          "value": "diagnostic_complete",
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 15077,
+          "event": "cleanup_complete",
+          "value": {
+            "recording": false,
+            "recorder_released": true,
+            "recognizer_released": true,
+            "player_released": true,
+            "pipe_closed": true
+          },
+          "phase": "CLOSED"
+        }
+      ],
+      "thinking_ms": 0,
+      "capture_limit_ms": 15000,
+      "finalization_limit_ms": 5000,
+      "audio_source": "live_microphone",
+      "automated": true,
+      "finish_ms": 15023,
+      "transcript": null,
+      "ended_ms": 15053
+    },
+    {
+      "id": 2,
+      "case": "call_capture",
+      "corpus_index": 1,
+      "expected_answer": "No, round does not satisfy square.",
+      "example_id": "demo-rules",
+      "started_epoch_ms": 1789521815773,
+      "status": "recognizer_error_7",
+      "events": [
+        {
+          "elapsed_ms": 5,
+          "event": "reserved",
+          "value": 1,
+          "phase": "PLAYBACK"
+        },
+        {
+          "elapsed_ms": 15,
+          "event": "focus_request",
+          "value": 1,
+          "phase": "PLAYBACK"
+        },
+        {
+          "elapsed_ms": 528,
+          "event": "playback_started",
+          "value": null,
+          "phase": "PLAYBACK"
+        },
+        {
+          "elapsed_ms": 8010,
+          "event": "playback_done",
+          "value": null,
+          "phase": "PLAYBACK"
+        },
+        {
+          "elapsed_ms": 8426,
+          "event": "capture_start",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8452,
+          "event": "recognizer_start",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8463,
+          "event": "recorder_started",
+          "value": {
+            "session": 129,
+            "state": 3
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8477,
+          "event": "capture_route",
+          "value": {
+            "id": 8,
+            "type": 15,
+            "name": "sdk_gphone64_arm64"
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8544,
+          "event": "capture_route",
+          "value": {
+            "id": 8,
+            "type": 15,
+            "name": "sdk_gphone64_arm64"
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8564,
+          "event": "recording_configuration",
+          "value": {
+            "silenced": false,
+            "session": 129,
+            "source": 1
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8690,
+          "event": "recognizer_ready",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8735,
+          "event": "pcm_level",
+          "value": {
+            "samples": 3840,
+            "nonzero": 1573,
+            "rms": 328.63331222846233,
+            "peak": 2033
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9003,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 3772,
+            "rms": 534.7290965814085,
+            "peak": 1740
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9255,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4151,
+            "rms": 573.9480454659906,
+            "peak": 2170
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9381,
+          "event": "speech_begin",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9518,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4153,
+            "rms": 463.6764108107158,
+            "peak": 1907
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9796,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4480,
+            "nonzero": 4478,
+            "rms": 460.4714194442474,
+            "peak": 1371
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9808,
+          "event": "speech_end",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9813,
+          "event": "segment",
+          "value": "",
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9815,
+          "event": "speech_begin",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10055,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4157,
+            "rms": 497.4345255523972,
+            "peak": 1411
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10301,
+          "event": "speech_end",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10305,
+          "event": "segment",
+          "value": "",
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10324,
+          "event": "speech_begin",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10342,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 2432,
+            "rms": 393.6199312031654,
+            "peak": 1335
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10568,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 256,
+            "rms": 115.2487078602686,
+            "peak": 839
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10839,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 11085,
+          "event": "speech_end",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 11088,
+          "event": "segment",
+          "value": "",
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 11095,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 11351,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 11607,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 11879,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 12135,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 12404,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 12679,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4480,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 12935,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 13191,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 13447,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 13719,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 13977,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 14232,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 14487,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 14759,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 15016,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 15275,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 15528,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 15800,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 16055,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 16312,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 16568,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 16840,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 17095,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 17352,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 17609,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 17881,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 18135,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 18391,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 18648,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 18919,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 19175,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 19432,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 19687,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 19960,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 20216,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 20473,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 20728,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 21002,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 21256,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 21511,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 21767,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 22040,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 22296,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 22551,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 22809,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 23080,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 23337,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 23471,
+          "event": "capture_deadline",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 23474,
+          "event": "finish_requested",
+          "value": "capture_limit",
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 23492,
+          "event": "audio_pipe_closed",
+          "value": null,
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 23558,
+          "event": "recognizer_error",
+          "value": 7,
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 23566,
+          "event": "closing",
+          "value": "recognizer_error_7",
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 23600,
+          "event": "cleanup_complete",
+          "value": {
+            "recording": false,
+            "recorder_released": true,
+            "recognizer_released": true,
+            "player_released": true,
+            "pipe_closed": true
+          },
+          "phase": "CLOSED"
+        }
+      ],
+      "thinking_ms": 0,
+      "capture_limit_ms": 15000,
+      "finalization_limit_ms": 5000,
+      "audio_source": "live_microphone",
+      "automated": true,
+      "finish_ms": 23476,
+      "transcript": null,
+      "ended_ms": 23593
+    },
+    {
+      "id": 3,
+      "case": "spoken",
+      "corpus_index": 2,
+      "expected_answer": "Five.",
+      "example_id": "demo-arithmetic",
+      "started_epoch_ms": 1789522101831,
+      "status": "recognizer_error_7",
+      "events": [
+        {
+          "elapsed_ms": 16,
+          "event": "reserved",
+          "value": 1,
+          "phase": "PLAYBACK"
+        },
+        {
+          "elapsed_ms": 33,
+          "event": "focus_request",
+          "value": 1,
+          "phase": "PLAYBACK"
+        },
+        {
+          "elapsed_ms": 631,
+          "event": "playback_started",
+          "value": null,
+          "phase": "PLAYBACK"
+        },
+        {
+          "elapsed_ms": 5667,
+          "event": "playback_done",
+          "value": null,
+          "phase": "PLAYBACK"
+        },
+        {
+          "elapsed_ms": 9440,
+          "event": "capture_start",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9502,
+          "event": "recognizer_start",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9515,
+          "event": "recorder_started",
+          "value": {
+            "session": 177,
+            "state": 3
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9630,
+          "event": "capture_route",
+          "value": {
+            "id": 8,
+            "type": 15,
+            "name": "sdk_gphone64_arm64"
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9667,
+          "event": "capture_route",
+          "value": {
+            "id": 8,
+            "type": 15,
+            "name": "sdk_gphone64_arm64"
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9683,
+          "event": "recording_configuration",
+          "value": {
+            "silenced": false,
+            "session": 177,
+            "source": 1
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9720,
+          "event": "recognizer_ready",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9833,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 1413,
+            "rms": 99.93155710669794,
+            "peak": 922
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10085,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4080,
+            "rms": 566.1179271599894,
+            "peak": 2048
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10157,
+          "event": "speech_begin",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10342,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4152,
+            "rms": 510.4756506473606,
+            "peak": 1736
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10598,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4157,
+            "rms": 448.744678027152,
+            "peak": 1314
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10871,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4159,
+            "rms": 548.4030474056888,
+            "peak": 2123
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10956,
+          "event": "speech_end",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10959,
+          "event": "segment",
+          "value": "",
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10983,
+          "event": "speech_begin",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 11125,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4149,
+            "rms": 423.9593208896707,
+            "peak": 1661
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 11381,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4147,
+            "rms": 4066.8494120023483,
+            "peak": 30869
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 11638,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4160,
+            "rms": 8204.001874114898,
+            "peak": 28982
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 11910,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4158,
+            "rms": 1004.6627373727886,
+            "peak": 5838
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 12165,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4150,
+            "rms": 584.7713113161943,
+            "peak": 1971
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 12422,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4150,
+            "rms": 608.1392238829856,
+            "peak": 1851
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 12495,
+          "event": "speech_end",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 12502,
+          "event": "segment",
+          "value": "",
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 12508,
+          "event": "speech_begin",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 12678,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4156,
+            "rms": 672.3321643225856,
+            "peak": 1797
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 12949,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4156,
+            "rms": 542.9061504727625,
+            "peak": 1564
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 13001,
+          "event": "finish_requested",
+          "value": "explicit_done",
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 13042,
+          "event": "audio_pipe_closed",
+          "value": null,
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 13067,
+          "event": "recognizer_error",
+          "value": 7,
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 13081,
+          "event": "closing",
+          "value": "recognizer_error_7",
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 13098,
+          "event": "cleanup_complete",
+          "value": {
+            "recording": false,
+            "recorder_released": true,
+            "recognizer_released": true,
+            "player_released": true,
+            "pipe_closed": true
+          },
+          "phase": "CLOSED"
+        },
+        {
+          "elapsed_ms": 53413,
+          "event": "operator_attestation",
+          "value": "operator_spoke_expected",
+          "phase": "CLOSED"
+        }
+      ],
+      "thinking_ms": 0,
+      "capture_limit_ms": 15000,
+      "finalization_limit_ms": 5000,
+      "audio_source": "live_microphone",
+      "automated": false,
+      "finish_ms": 13008,
+      "transcript": null,
+      "ended_ms": 13091,
+      "operator_spoke_expected": true
+    },
+    {
+      "id": 4,
+      "case": "spoken",
+      "corpus_index": 0,
+      "expected_answer": "Green, blue, red.",
+      "example_id": "demo-reversal",
+      "started_epoch_ms": 1789522227050,
+      "status": "transcript",
+      "events": [
+        {
+          "elapsed_ms": 17,
+          "event": "reserved",
+          "value": 1,
+          "phase": "PLAYBACK"
+        },
+        {
+          "elapsed_ms": 33,
+          "event": "focus_request",
+          "value": 1,
+          "phase": "PLAYBACK"
+        },
+        {
+          "elapsed_ms": 389,
+          "event": "playback_started",
+          "value": null,
+          "phase": "PLAYBACK"
+        },
+        {
+          "elapsed_ms": 3248,
+          "event": "playback_done",
+          "value": null,
+          "phase": "PLAYBACK"
+        },
+        {
+          "elapsed_ms": 8204,
+          "event": "capture_start",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8262,
+          "event": "recognizer_start",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8291,
+          "event": "recorder_started",
+          "value": {
+            "session": 209,
+            "state": 3
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8376,
+          "event": "capture_route",
+          "value": {
+            "id": 8,
+            "type": 15,
+            "name": "sdk_gphone64_arm64"
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8387,
+          "event": "capture_route",
+          "value": {
+            "id": 8,
+            "type": 15,
+            "name": "sdk_gphone64_arm64"
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8398,
+          "event": "recording_configuration",
+          "value": {
+            "silenced": false,
+            "session": 209,
+            "source": 1
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8421,
+          "event": "recognizer_ready",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8556,
+          "event": "pcm_level",
+          "value": {
+            "samples": 3840,
+            "nonzero": 1511,
+            "rms": 150.10326740419967,
+            "peak": 1625
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8830,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4053,
+            "rms": 522.5865674055278,
+            "peak": 1525
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8876,
+          "event": "speech_begin",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9082,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4155,
+            "rms": 824.6785797241064,
+            "peak": 3154
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9338,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4156,
+            "rms": 761.474652969739,
+            "peak": 2055
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9594,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4152,
+            "rms": 729.7982760996883,
+            "peak": 2104
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9867,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4157,
+            "rms": 776.3885358851238,
+            "peak": 2699
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10123,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4160,
+            "rms": 11680.862744074748,
+            "peak": 32767
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10378,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4159,
+            "rms": 10437.477584936778,
+            "peak": 28470
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10635,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4159,
+            "rms": 11638.00489045646,
+            "peak": 32767
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10705,
+          "event": "segment",
+          "value": "",
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10843,
+          "event": "speech_begin",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10907,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4160,
+            "rms": 14058.81364187844,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 11163,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4158,
+            "rms": 3866.72766056281,
+            "peak": 24198
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 11419,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4159,
+            "rms": 11608.98494875347,
+            "peak": 32767
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 11674,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4154,
+            "rms": 801.9222051277312,
+            "peak": 5202
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 11739,
+          "event": "partial",
+          "value": "You",
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 11869,
+          "event": "partial",
+          "value": "You red",
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 11946,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4155,
+            "rms": 577.0269932694124,
+            "peak": 1742
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 12170,
+          "event": "speech_end",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 12176,
+          "event": "segment",
+          "value": "You red",
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 12188,
+          "event": "speech_begin",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 12203,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4146,
+            "rms": 606.4000617214425,
+            "peak": 2039
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 12458,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4151,
+            "rms": 532.770947680434,
+            "peak": 2643
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 12514,
+          "event": "finish_requested",
+          "value": "explicit_done",
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 12922,
+          "event": "speech_end",
+          "value": null,
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 12947,
+          "event": "segment",
+          "value": "",
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 13077,
+          "event": "audio_pipe_closed",
+          "value": null,
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 13098,
+          "event": "raw_final",
+          "value": " You red ",
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 13103,
+          "event": "closing",
+          "value": "transcript",
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 13113,
+          "event": "cleanup_complete",
+          "value": {
+            "recording": false,
+            "recorder_released": true,
+            "recognizer_released": true,
+            "player_released": true,
+            "pipe_closed": true
+          },
+          "phase": "CLOSED"
+        }
+      ],
+      "thinking_ms": 0,
+      "capture_limit_ms": 15000,
+      "finalization_limit_ms": 5000,
+      "audio_source": "live_microphone",
+      "automated": false,
+      "finish_ms": 12537,
+      "transcript": " You red ",
+      "ended_ms": 13109
+    },
+    {
+      "id": 5,
+      "case": "spoken",
+      "corpus_index": 0,
+      "expected_answer": "Green, blue, red.",
+      "example_id": "demo-reversal",
+      "started_epoch_ms": 1789522313098,
+      "status": "recognizer_error_7",
+      "events": [
+        {
+          "elapsed_ms": 35,
+          "event": "reserved",
+          "value": 3,
+          "phase": "PLAYBACK"
+        },
+        {
+          "elapsed_ms": 51,
+          "event": "focus_request",
+          "value": 1,
+          "phase": "PLAYBACK"
+        },
+        {
+          "elapsed_ms": 182,
+          "event": "playback_started",
+          "value": null,
+          "phase": "PLAYBACK"
+        },
+        {
+          "elapsed_ms": 3032,
+          "event": "playback_done",
+          "value": null,
+          "phase": "PLAYBACK"
+        },
+        {
+          "elapsed_ms": 6767,
+          "event": "capture_start",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 6826,
+          "event": "recognizer_start",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 6854,
+          "event": "recorder_started",
+          "value": {
+            "session": 225,
+            "state": 3
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 6876,
+          "event": "recording_configuration",
+          "value": {
+            "silenced": false,
+            "session": 225,
+            "source": 1
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 6883,
+          "event": "capture_route",
+          "value": {
+            "id": 8,
+            "type": 15,
+            "name": "sdk_gphone64_arm64"
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 6891,
+          "event": "capture_route",
+          "value": {
+            "id": 8,
+            "type": 15,
+            "name": "sdk_gphone64_arm64"
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 6916,
+          "event": "recognizer_ready",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 7124,
+          "event": "pcm_level",
+          "value": {
+            "samples": 3520,
+            "nonzero": 3503,
+            "rms": 23192.59811646909,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 7401,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4480,
+            "nonzero": 4460,
+            "rms": 23155.752828439538,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 7665,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4141,
+            "rms": 23207.709967908668,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 7920,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4141,
+            "rms": 23152.97570403084,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8185,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4141,
+            "rms": 23206.61284514548,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8442,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4140,
+            "rms": 23154.332254227993,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8698,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4141,
+            "rms": 23206.024481299737,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8962,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4141,
+            "rms": 23154.744740850467,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9218,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4141,
+            "rms": 23204.771208347018,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9484,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4141,
+            "rms": 23156.049953802154,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9740,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4141,
+            "rms": 23203.420755033,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10001,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4141,
+            "rms": 23157.44986454351,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10265,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4141,
+            "rms": 23201.97772455031,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10523,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4141,
+            "rms": 23158.939683659835,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10779,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4141,
+            "rms": 23200.44780176978,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 11043,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4141,
+            "rms": 23160.512549785035,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 11301,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4141,
+            "rms": 23198.838884017157,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 11599,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4140,
+            "rms": 23162.245333934596,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 11613,
+          "event": "finish_requested",
+          "value": "explicit_done",
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 12146,
+          "event": "audio_pipe_closed",
+          "value": null,
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 12156,
+          "event": "segment",
+          "value": "",
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 12167,
+          "event": "recognizer_error",
+          "value": 7,
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 12178,
+          "event": "closing",
+          "value": "recognizer_error_7",
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 12197,
+          "event": "cleanup_complete",
+          "value": {
+            "recording": false,
+            "recorder_released": true,
+            "recognizer_released": true,
+            "player_released": true,
+            "pipe_closed": true
+          },
+          "phase": "CLOSED"
+        }
+      ],
+      "thinking_ms": 0,
+      "capture_limit_ms": 15000,
+      "finalization_limit_ms": 5000,
+      "audio_source": "live_microphone",
+      "automated": false,
+      "finish_ms": 11621,
+      "transcript": null,
+      "ended_ms": 12191
+    },
+    {
+      "id": 6,
+      "case": "spoken",
+      "corpus_index": 0,
+      "expected_answer": "Green, blue, red.",
+      "example_id": "demo-reversal",
+      "started_epoch_ms": 1789522347243,
+      "status": "recognizer_error_7",
+      "events": [
+        {
+          "elapsed_ms": 24,
+          "event": "reserved",
+          "value": 5,
+          "phase": "PLAYBACK"
+        },
+        {
+          "elapsed_ms": 44,
+          "event": "focus_request",
+          "value": 1,
+          "phase": "PLAYBACK"
+        },
+        {
+          "elapsed_ms": 147,
+          "event": "playback_started",
+          "value": null,
+          "phase": "PLAYBACK"
+        },
+        {
+          "elapsed_ms": 2976,
+          "event": "playback_done",
+          "value": null,
+          "phase": "PLAYBACK"
+        },
+        {
+          "elapsed_ms": 5134,
+          "event": "capture_start",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 5170,
+          "event": "recognizer_start",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 5185,
+          "event": "recorder_started",
+          "value": {
+            "session": 241,
+            "state": 3
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 5206,
+          "event": "capture_route",
+          "value": {
+            "id": 8,
+            "type": 15,
+            "name": "sdk_gphone64_arm64"
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 5228,
+          "event": "capture_route",
+          "value": {
+            "id": 8,
+            "type": 15,
+            "name": "sdk_gphone64_arm64"
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 5232,
+          "event": "recording_configuration",
+          "value": {
+            "silenced": false,
+            "session": 241,
+            "source": 1
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 5256,
+          "event": "recognizer_ready",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 5456,
+          "event": "pcm_level",
+          "value": {
+            "samples": 3840,
+            "nonzero": 3822,
+            "rms": 23193.665492474945,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 5717,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4141,
+            "rms": 23151.929144267913,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 5974,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4141,
+            "rms": 23207.709967908668,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 6232,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4141,
+            "rms": 23152.97570403084,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 6498,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4141,
+            "rms": 23206.61284514548,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 6754,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4140,
+            "rms": 23154.332254227993,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 7018,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4141,
+            "rms": 23206.024481299737,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 7274,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4141,
+            "rms": 23154.744740850467,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 7533,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4141,
+            "rms": 23204.771208347018,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 7797,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4141,
+            "rms": 23156.049953802154,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8052,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4141,
+            "rms": 23203.420755033,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8316,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4141,
+            "rms": 23157.44986454351,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8574,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4141,
+            "rms": 23201.97772455031,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8844,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4141,
+            "rms": 23158.939683659835,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9117,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4480,
+            "nonzero": 4459,
+            "rms": 23182.45788910997,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9374,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4141,
+            "rms": 23196.723284455005,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9633,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4141,
+            "rms": 23162.58664938751,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9892,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4141,
+            "rms": 23198.42467244647,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10046,
+          "event": "finish_requested",
+          "value": "explicit_done",
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 10605,
+          "event": "audio_pipe_closed",
+          "value": null,
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 10627,
+          "event": "segment",
+          "value": "",
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 10634,
+          "event": "recognizer_error",
+          "value": 7,
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 10640,
+          "event": "closing",
+          "value": "recognizer_error_7",
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 10653,
+          "event": "cleanup_complete",
+          "value": {
+            "recording": false,
+            "recorder_released": true,
+            "recognizer_released": true,
+            "player_released": true,
+            "pipe_closed": true
+          },
+          "phase": "CLOSED"
+        }
+      ],
+      "thinking_ms": 0,
+      "capture_limit_ms": 15000,
+      "finalization_limit_ms": 5000,
+      "audio_source": "live_microphone",
+      "automated": false,
+      "finish_ms": 10053,
+      "transcript": null,
+      "ended_ms": 10648
+    },
+    {
+      "id": 7,
+      "case": "spoken",
+      "corpus_index": 0,
+      "expected_answer": "Green, blue, red.",
+      "example_id": "demo-reversal",
+      "started_epoch_ms": 1789522634451,
+      "status": "transcript",
+      "events": [
+        {
+          "elapsed_ms": 8,
+          "event": "reserved",
+          "value": 1,
+          "phase": "PLAYBACK"
+        },
+        {
+          "elapsed_ms": 49,
+          "event": "focus_request",
+          "value": 1,
+          "phase": "PLAYBACK"
+        },
+        {
+          "elapsed_ms": 572,
+          "event": "playback_started",
+          "value": null,
+          "phase": "PLAYBACK"
+        },
+        {
+          "elapsed_ms": 3501,
+          "event": "playback_done",
+          "value": null,
+          "phase": "PLAYBACK"
+        },
+        {
+          "elapsed_ms": 5757,
+          "event": "capture_start",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 5799,
+          "event": "recognizer_start",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 5839,
+          "event": "recorder_started",
+          "value": {
+            "session": 73,
+            "state": 3
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 5929,
+          "event": "capture_route",
+          "value": {
+            "id": 8,
+            "type": 15,
+            "name": "sdk_gphone64_arm64"
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 5955,
+          "event": "capture_route",
+          "value": {
+            "id": 8,
+            "type": 15,
+            "name": "sdk_gphone64_arm64"
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 5964,
+          "event": "recording_configuration",
+          "value": {
+            "silenced": false,
+            "session": 73,
+            "source": 1
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 6153,
+          "event": "recognizer_ready",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 6187,
+          "event": "pcm_level",
+          "value": {
+            "samples": 5120,
+            "nonzero": 2328,
+            "rms": 283.230089492183,
+            "peak": 1733
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 6449,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4156,
+            "rms": 828.9101281084513,
+            "peak": 2966
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 6705,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4154,
+            "rms": 957.8339704269451,
+            "peak": 2878
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 6962,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4156,
+            "rms": 933.2008201202339,
+            "peak": 2697
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 7217,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4158,
+            "rms": 1025.8949005015086,
+            "peak": 3722
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 7489,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4157,
+            "rms": 923.3377495584242,
+            "peak": 2354
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 7745,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4156,
+            "rms": 1083.1244955389654,
+            "peak": 3025
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8001,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4159,
+            "rms": 9019.152902749409,
+            "peak": 32767
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8157,
+          "event": "speech_begin",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8257,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4159,
+            "rms": 14173.53720886419,
+            "peak": 32767
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8529,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4160,
+            "rms": 8004.480193553506,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8786,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4160,
+            "rms": 17812.965152752447,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9042,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4155,
+            "rms": 2272.9794046665847,
+            "peak": 10707
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9297,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4160,
+            "rms": 13265.058996287955,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9569,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4157,
+            "rms": 1715.8136123728143,
+            "peak": 12699
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9825,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 3900,
+            "rms": 1001.9140468181582,
+            "peak": 2865
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10081,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4156,
+            "rms": 893.766568700644,
+            "peak": 2703
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10338,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4159,
+            "rms": 977.4550613071682,
+            "peak": 3019
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10397,
+          "event": "speech_end",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10405,
+          "event": "segment",
+          "value": "green blue red",
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10609,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4160,
+            "rms": 981.1550671863162,
+            "peak": 2949
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10865,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4158,
+            "rms": 963.7189655035091,
+            "peak": 2786
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10981,
+          "event": "finish_requested",
+          "value": "explicit_done",
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 11555,
+          "event": "audio_pipe_closed",
+          "value": null,
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 11671,
+          "event": "raw_final",
+          "value": "green blue red",
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 11676,
+          "event": "closing",
+          "value": "transcript",
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 11698,
+          "event": "cleanup_complete",
+          "value": {
+            "recording": false,
+            "recorder_released": true,
+            "recognizer_released": true,
+            "player_released": true,
+            "pipe_closed": true
+          },
+          "phase": "CLOSED"
+        }
+      ],
+      "thinking_ms": 0,
+      "capture_limit_ms": 15000,
+      "finalization_limit_ms": 5000,
+      "audio_source": "live_microphone",
+      "automated": false,
+      "prefer_offline": false,
+      "post_done_silence_ms": 500,
+      "finish_ms": 11019,
+      "transcript": "green blue red",
+      "ended_ms": 11680
+    },
+    {
+      "id": 8,
+      "case": "spoken",
+      "corpus_index": 2,
+      "expected_answer": "Five.",
+      "example_id": "demo-arithmetic",
+      "started_epoch_ms": 1789522729608,
+      "status": "transcript",
+      "events": [
+        {
+          "elapsed_ms": 53,
+          "event": "reserved",
+          "value": 1,
+          "phase": "PLAYBACK"
+        },
+        {
+          "elapsed_ms": 78,
+          "event": "focus_request",
+          "value": 1,
+          "phase": "PLAYBACK"
+        },
+        {
+          "elapsed_ms": 425,
+          "event": "playback_started",
+          "value": null,
+          "phase": "PLAYBACK"
+        },
+        {
+          "elapsed_ms": 5430,
+          "event": "playback_done",
+          "value": null,
+          "phase": "PLAYBACK"
+        },
+        {
+          "elapsed_ms": 8154,
+          "event": "capture_start",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8192,
+          "event": "recognizer_start",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8225,
+          "event": "recorder_started",
+          "value": {
+            "session": 105,
+            "state": 3
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8247,
+          "event": "capture_route",
+          "value": {
+            "id": 8,
+            "type": 15,
+            "name": "sdk_gphone64_arm64"
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8325,
+          "event": "capture_route",
+          "value": {
+            "id": 8,
+            "type": 15,
+            "name": "sdk_gphone64_arm64"
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8354,
+          "event": "recording_configuration",
+          "value": {
+            "silenced": false,
+            "session": 105,
+            "source": 1
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8375,
+          "event": "recognizer_ready",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8522,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 1631,
+            "rms": 258.5856315539474,
+            "peak": 1753
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 8779,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4087,
+            "rms": 893.4700428934799,
+            "peak": 4412
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9035,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4159,
+            "rms": 1013.4871560037726,
+            "peak": 3335
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9290,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4157,
+            "rms": 984.3631601241563,
+            "peak": 2892
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9562,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4155,
+            "rms": 868.4079716863852,
+            "peak": 2529
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9819,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4158,
+            "rms": 14163.926605926654,
+            "peak": 32768
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 9903,
+          "event": "speech_begin",
+          "value": null,
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10074,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4160,
+            "rms": 10504.315039899171,
+            "peak": 32767
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10330,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4158,
+            "rms": 1232.4562225998131,
+            "peak": 4322
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10603,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4159,
+            "rms": 1265.8803720518595,
+            "peak": 4466
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 10859,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4156,
+            "rms": 1125.0706591058045,
+            "peak": 3774
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 11114,
+          "event": "pcm_level",
+          "value": {
+            "samples": 4160,
+            "nonzero": 4159,
+            "rms": 899.0747629240424,
+            "peak": 2422
+          },
+          "phase": "CAPTURE"
+        },
+        {
+          "elapsed_ms": 11194,
+          "event": "finish_requested",
+          "value": "explicit_done",
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 11404,
+          "event": "speech_end",
+          "value": null,
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 11452,
+          "event": "segment",
+          "value": "five",
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 11733,
+          "event": "audio_pipe_closed",
+          "value": null,
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 11881,
+          "event": "raw_final",
+          "value": "five",
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 11898,
+          "event": "closing",
+          "value": "transcript",
+          "phase": "FINALIZING"
+        },
+        {
+          "elapsed_ms": 11907,
+          "event": "cleanup_complete",
+          "value": {
+            "recording": false,
+            "recorder_released": true,
+            "recognizer_released": true,
+            "player_released": true,
+            "pipe_closed": true
+          },
+          "phase": "CLOSED"
+        }
+      ],
+      "thinking_ms": 0,
+      "capture_limit_ms": 15000,
+      "finalization_limit_ms": 5000,
+      "audio_source": "live_microphone",
+      "automated": false,
+      "prefer_offline": false,
+      "post_done_silence_ms": 500,
+      "finish_ms": 11202,
+      "transcript": "five",
+      "ended_ms": 11905
+    }
+  ],
+  "fingerprint": "google\/sdk_gphone64_arm64\/emu64a:16\/BE2A.250530.026.D1\/13818094:user\/release-keys",
+  "api": 36,
+  "engine": "com.google.android.tts",
+  "service": "com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService",
+  "engine_version": "googletts.google-speech-apk_20241125.02_p2.702443970",
+  "capture_approach": "AudioRecord_MIC_PCM16_16k_to_segmented_recognizer_pipe",
+  "permission_design": "RECORD_AUDIO only",
+  "voice": "en-US-language"
+}

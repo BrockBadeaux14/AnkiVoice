@@ -1,0 +1,45 @@
+{
+  "python_suite": {
+    "command": ".venv/bin/python -m unittest discover -s tests",
+    "tests": 200,
+    "passed": true
+  },
+  "probe_build": {
+    "command": "bash tools/av042-probe/build.sh",
+    "passed": true,
+    "measured_build_log": "probe-build-final.txt"
+  },
+  "java_guard_checks": {
+    "checks": 21,
+    "passed": true,
+    "audio_turns": 0
+  },
+  "historical_integrity": true,
+  "live_voice": {
+    "scope": "human voice input only, per owner instruction",
+    "integrity_passed": true,
+    "failures": [],
+    "human_voice_verified": true,
+    "turns_used": 8,
+    "verified_transcripts": [
+      {
+        "attempt": 7,
+        "spoken_test_phrase": "Green, blue, red.",
+        "transcript": "green blue red",
+        "operator_confirmation": "user reply to live test instructions",
+        "done_to_final_ms": 690
+      },
+      {
+        "attempt": 8,
+        "spoken_test_phrase": "Five.",
+        "transcript": "five",
+        "operator_confirmation": "user reply to live test instructions",
+        "done_to_final_ms": 687
+      }
+    ],
+    "interruption_requirements": "deferred by owner; no passing claim",
+    "platform": "MacBook microphone \u2192 API 36 ARM64 emulator \u2192 pinned native recognizer",
+    "production_app_integration": "outside this disposable #51 investigation"
+  },
+  "git_diff_check": "Source and documentation pass. Verbatim Android/emulator dumps are excluded because their original whitespace is preserved."
+}

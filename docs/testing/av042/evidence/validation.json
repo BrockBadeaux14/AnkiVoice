@@ -1,0 +1,31 @@
+{
+  "scope": "historical diagnostics before the owner narrowed acceptance",
+  "integrity_passed": true,
+  "checks": 167,
+  "failures": [],
+  "verdict": "no-go",
+  "turns_used": 2,
+  "budget_remaining_but_stopped": 28,
+  "human_attested_transcripts": 0,
+  "controlled_capture_calls_detected": 0,
+  "controlled_capture_calls_observed": 1,
+  "unblocks_13_26": false,
+  "metrics": [
+    {
+      "id": 1,
+      "case": "diagnostic",
+      "status": "diagnostic_complete",
+      "total_samples_in_reported_blocks": 238720,
+      "nonzero_samples": 529,
+      "peak": 2
+    },
+    {
+      "id": 2,
+      "case": "call_capture",
+      "status": "recognizer_error_7",
+      "total_samples_in_reported_blocks": 237440,
+      "nonzero_samples": 24972,
+      "peak": 2170
+    }
+  ]
+}
