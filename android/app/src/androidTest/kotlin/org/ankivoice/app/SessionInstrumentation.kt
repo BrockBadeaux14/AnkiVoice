@@ -8,6 +8,7 @@ import android.os.SystemClock
 import java.io.File
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import java.util.UUID
 import org.ankivoice.ankidroid.AndroidAccessPlatform
 import org.ankivoice.ankidroid.AnkiDroidCardProvider
 import org.ankivoice.ankidroid.AnkiDroidReviewTransport
@@ -42,15 +43,16 @@ import org.json.JSONObject
  * disposable AV-002 collection.
  *
  * The operator speaks the answer. Nothing here fabricates a transcript, and nothing
- * confirms on the learner's behalf: the explicit confirmation is an instrumentation
- * argument the operator supplies after hearing the prompt and saying the answer, and
- * without it the session refuses to submit. Every attempted turn is recorded, including
+ * confirms on the learner's behalf: the operator sees the actual transcript and proposal
+ * before confirming by touch, or by a matching fresh challenge in terminal mode.
+ * Without it the session refuses to submit. Every attempted turn is recorded, including
  * the ones that come back wrong.
  *
  * Reproduce with docs/testing/av013/runbook.md.
  */
 class SessionInstrumentation : Instrumentation() {
     private lateinit var args: Bundle
+    private var ui: LiveVerificationUi? = null
 
     override fun onCreate(arguments: Bundle) {
         super.onCreate(arguments)
@@ -68,6 +70,10 @@ class SessionInstrumentation : Instrumentation() {
                 "The live check runs on the pinned emulator only"
             }
             check(args.getString("confirm") == "AV013_LIVE_SESSION") { "Explicit confirmation required" }
+            check(!args.containsKey("confirmRating")) {
+                "Use awaitConfirmation and confirm the published transcript/proposal after capture"
+            }
+            if (args.getString("interactive") == "true") ui = LiveVerificationUi(this)
 
             val platform = AndroidAccessPlatform(targetContext)
             val deckId = checkNotNull(args.getString("deck")) { "A disposable AV-002 deck is required" }.toLong()
@@ -79,7 +85,8 @@ class SessionInstrumentation : Instrumentation() {
             if (deck != null) check(deck.name.startsWith("AV002")) { "Refusing a deck that is not disposable" }
 
             val speechPlatform = AndroidSpeechPlatform(targetContext)
-            val speech = SpeechTransport(speechPlatform)
+            val diagnostics = if (args.getString("diagnose") == "true") CaptureDiagnostics(speechPlatform) else null
+            val speech = SpeechTransport(diagnostics ?: speechPlatform)
             transport = speech
             val language = args.getString("language") ?: SpeechPins.LANGUAGE
             // The capability preflight the shell runs before offering to study.
@@ -110,16 +117,36 @@ class SessionInstrumentation : Instrumentation() {
             output.put("expectedPhrase", args.getString("expect"))
             output.put("permittedRatings", JSONArray(card.permittedRatings))
 
+            ui?.let {
+                check(it.choose("Ready for the session check", card.fields.prompt, "Play prompt") == "Play prompt") {
+                    "No operator start; no capture opened"
+                }
+                it.show("Listen to the prompt", card.fields.prompt)
+            }
+
             val asked = session.ask()
             output.put("playback", if (asked is SessionResult.Produced) "completed" else describe(asked))
             if (asked !is SessionResult.Produced) return report(output, session)
 
-            // The explicit Start answer. The operator is told to speak only after this.
+            ui?.let {
+                check(it.choose("Ready to answer", "Say: ${args.getString("expect") ?: "your answer"}",
+                    "Start answer") == "Start answer") { "No operator Start answer; no capture opened" }
+            }
             val token = session.startAnswer()
             val pending = capture.submit<CaptureEvent> { speech.listen(token, session.language) }
-            SystemClock.sleep(args.getString("speakMs")?.toLong() ?: 6_000L)
+            val speakMs = args.getString("speakMs")?.toLong() ?: 6_000L
+            val action = ui?.let {
+                it.show("Opening microphone", "Wait one second…")
+                SystemClock.sleep(1_000)
+                it.choose("Speak now", "${args.getString("expect") ?: "Say your answer"}\n\nTap Done when finished. This window ends automatically after ${speakMs / 1_000} seconds.",
+                    "Done", "Cancel", timeoutMs = speakMs)
+            } ?: run {
+                if (ui == null) SystemClock.sleep(speakMs)
+                null
+            }
+            output.put("operatorAction", action ?: if (ui != null) "window-expired" else "timed-harness")
 
-            if (args.getString("mode") == "cancel") {
+            if (args.getString("mode") == "cancel" || action == "Cancel") {
                 // An explicit Cancel during capture: the card is kept and nothing is inferred.
                 val halt = session.cancelAnswer()
                 output.put("cancelledCapture", describe(pending.get(30, TimeUnit.SECONDS)))
@@ -134,13 +161,40 @@ class SessionInstrumentation : Instrumentation() {
             val event = pending.get(30, TimeUnit.SECONDS)
             output.put("doneToFinalMs", SystemClock.elapsedRealtime() - doneAt)
             output.put("capture", describe(event))
+            diagnostics?.let { output.put("microphoneDiagnostics", it.save(File(targetContext.filesDir, "av013-input.pcm"))) }
             output.put("lastPartial", speech.lastPartial)
             output.put("staleCallbacks", speech.staleCallbackLog().size)
+            ui?.let {
+                val result = when (event) {
+                    is CaptureEvent.Transcript -> "Transcript: ${event.text}"
+                    is CaptureEvent.Failed -> "Capture failed: ${event.failure}"
+                }
+                sendStatus(1, Bundle().apply { putString("av013Capture", output.toString()) })
+                output.put("operatorAttestation", it.attest(result, args.getString("expect") ?: "the answer"))
+            }
 
             val accepted = session.acceptCapture(event)
             output.put("answer", describe(accepted))
-            if (accepted !is SessionResult.Produced) return report(output, session)
-            output.put("transcript", accepted.value.text)
+            val answer = if (accepted is SessionResult.Produced) {
+                accepted.value
+            } else if (accepted is SessionResult.Halted && accepted.halt.reason == "lowConfidence" &&
+                event is CaptureEvent.Transcript && ui != null
+            ) {
+                val action = ui!!.choose("Review the transcript",
+                    "${event.text}\n\nThe recognizer supplied no usable confidence. Check the text before grading. Accepting it does not confirm a rating.",
+                    "Use this transcript", "Stop without writing")
+                output.put("transcriptReviewAction", action)
+                if (action != "Use this transcript") return report(output, session)
+                // AV-012 explicitly supports learner acceptance through this correction path.
+                // Keep raw capture/confidence above; do not relabel it as confident recognition.
+                session.correctTranscript(event.text).also {
+                    output.put("acceptedTranscript", describeValue(it))
+                    output.put("acceptedTranscriptRevision", it.transcriptRevision)
+                }
+            } else {
+                return report(output, session)
+            }
+            output.put("transcript", answer.text)
 
             val graded = session.grade()
             val suggestion = graded.valueOrNull
@@ -153,8 +207,9 @@ class SessionInstrumentation : Instrumentation() {
             check(opened is ProposalOutcome.Proposed) { "The rating was refused: $opened" }
             output.put("proposedRating", proposal)
 
-            // The learner's explicit confirmation. Its absence is what refuses the write.
-            if (args.getString("confirmRating") != proposal.toString()) {
+            // Confirm the actual proposal, after capture, without starting another turn.
+            // A fresh challenge prevents an old file from confirming a later attempt.
+            if (!awaitConfirmation(output, proposal)) {
                 output.put("confirmed", false)
                 output.put("note", "no explicit confirmation for rating $proposal; nothing was written")
                 return report(output, session)
@@ -198,6 +253,47 @@ class SessionInstrumentation : Instrumentation() {
             runCatching { transport?.releaseAll() }
             worker.shutdownNow()
             capture.shutdownNow()
+        }
+    }
+
+    private fun awaitConfirmation(output: JSONObject, rating: Int): Boolean {
+        ui?.let {
+            val name = mapOf(1 to "Again", 2 to "Hard", 3 to "Good", 4 to "Easy").getValue(rating)
+            val action = it.choose("Confirm this review",
+                "Transcript: ${output.optString("transcript")}\n\nProposed rating: $name ($rating)\n${output.optString("suggestion")}\n\nCard: ${output.optLong("cardId")}\n\nConfirm writes one review to the disposable AV002 collection.",
+                "Confirm $name ($rating)", "Do not write")
+            output.put("confirmationSource", "operator-touch")
+            output.put("confirmationAction", action)
+            return action == "Confirm $name ($rating)"
+        }
+        if (args.getString("awaitConfirmation") != "true") return false
+        val response = File(targetContext.filesDir, "av013-confirmation.json")
+        response.delete()
+        val challenge = UUID.randomUUID().toString()
+        val pending = JSONObject(output.toString())
+            .put("confirmationChallenge", challenge)
+            .put("awaitingConfirmation", true)
+        val pendingFile = File(targetContext.filesDir, "av013-pending.json")
+        pendingFile.writeText(pending.toString(2))
+        sendStatus(1, Bundle().apply { putString("av013Pending", pending.toString()) })
+        try {
+            val deadline = SystemClock.elapsedRealtime() + 300_000L
+            while (SystemClock.elapsedRealtime() < deadline) {
+                if (response.exists()) {
+                    val reply = JSONObject(response.readText())
+                    val matches = reply.optString("challenge") == challenge &&
+                        reply.optInt("rating", -1) == rating
+                    output.put("confirmationChallenge", challenge)
+                    output.put("confirmationMatched", matches)
+                    return matches
+                }
+                SystemClock.sleep(100)
+            }
+            output.put("confirmationTimedOut", true)
+            return false
+        } finally {
+            pendingFile.delete()
+            response.delete()
         }
     }
 
@@ -251,7 +347,11 @@ class SessionInstrumentation : Instrumentation() {
             output.put("sessionState", it.state.specName)
             output.put("events", it.transcriptText())
         }
-        val passed = !output.has("error")
+        val completed = !output.has("error")
+        val cancelled = args.getString("mode") == "cancel" || output.optString("operatorAction") == "Cancel"
+        val passed = completed && if (cancelled) output.optBoolean("wroteNothing") else
+            output.optJSONObject("outcome")?.optString("state") == ReviewState.CONFIRMED.specName
+        output.put("completed", completed)
         output.put("passed", passed)
         File(targetContext.filesDir, "av013-result.json").writeText(output.toString(2))
         finish(

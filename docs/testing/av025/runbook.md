@@ -26,44 +26,55 @@ evidence that speech is transcribed correctly.
 
 Prerequisites, all from AV-042's accepted configuration:
 
-- The pinned AVD, restarted after host audio setup. A stale boot is the condition that
+- The pinned `AnkiVoice_AV005` AVD on port 5588, cold-booted with audio enabled
+  as in [AV-042](../av042/runbook.md#start-with-a-healthy-emulator-microphone),
+  restarted after host audio setup. A stale boot is the condition that
   made the goldfish HAL substitute a 220 Hz tone for the microphone in AV-040/AV-042.
 - Host microphone forwarding enabled, host output near 60% and guest media volume 9/15.
   The prompt was inaudible below that in AV-042 attempts 3 and 4.
 - `com.google.android.tts` present at the pinned version with the `en-US-language` local
   voice, and `RECORD_AUDIO` granted.
 
-Install and run one turn:
+Install and confirm that `SpeechInstrumentation` appears in
+`adb -s emulator-5588 shell pm list instrumentation`, then run one turn:
 
 ```sh
 cd android
 ./gradlew :app:installDebug :app:installDebugAndroidTest
-adb -s emulator-5584 shell am instrument -w \
-  -e confirm AV025_LIVE_SPEECH \
-  -e prompt "Name the three colors." -e expect "green blue red" -e speakMs 6000 \
+adb -s emulator-5588 shell am instrument -w \
+  -e confirm AV025_LIVE_SPEECH -e interactive true \
+  -e prompt '"Name the three colors."' -e expect '"green blue red"' -e speakMs 12000 \
   org.ankivoice.test/org.ankivoice.app.SpeechInstrumentation
 ```
 
-The harness plays the prompt through the pinned voice, settles, opens capture on its own
-explicit Start answer, waits `speakMs` for you to speak, then sends Done and records the
-returned event with its Done-to-final duration.
+The interactive harness shows a foreground test screen. Tap **Play prompt**, then
+**Start answer** after playback. Wait for **Speak now**, speak the phrase, and tap
+**Done**. The window also ends automatically after `speakMs` plus the one-second
+microphone-opening cue, within the transport's 15-second backstop. The result screen
+shows the actual transcript or failure. Its separate prompt-audible and phrase-spoken
+checkboxes start unchecked; only the operator may attest, then tap **Save result**.
+Each screen waits at most five minutes. No timeout is an attestation or a confirmation.
+
+Omit `interactive` for the original timed harness, which has no visible controls.
+Keep the nested quotes around multiword ADB extras so the remote shell receives each
+phrase as one argument.
 
 **Speak only after the prompt finishes.** Capture does not open during playback, so
 anything said over the prompt is not recorded.
 
-Run the same command with `-e prompt "What is two plus three?" -e expect "five"` for the
+Run the same command with `-e prompt '"What is two plus three?"' -e expect five` for the
 second AV-042 phrase, then the two control paths:
 
 ```sh
 # Explicit Cancel mid-capture: expect a failure, no transcript.
-adb -s emulator-5584 shell am instrument -w -e confirm AV025_LIVE_SPEECH \
+adb -s emulator-5588 shell am instrument -w -e confirm AV025_LIVE_SPEECH \
   -e mode cancel org.ankivoice.test/org.ankivoice.app.SpeechInstrumentation
 
 # Permission denied: revoke first, expect SpeechInput.permissionDenied.
-adb -s emulator-5584 shell pm revoke org.ankivoice android.permission.RECORD_AUDIO
-adb -s emulator-5584 shell am instrument -w -e confirm AV025_LIVE_SPEECH \
+adb -s emulator-5588 shell pm revoke org.ankivoice android.permission.RECORD_AUDIO
+adb -s emulator-5588 shell am instrument -w -e confirm AV025_LIVE_SPEECH \
   -e mode permission org.ankivoice.test/org.ankivoice.app.SpeechInstrumentation
-adb -s emulator-5584 shell pm grant org.ankivoice android.permission.RECORD_AUDIO
+adb -s emulator-5588 shell pm grant org.ankivoice android.permission.RECORD_AUDIO
 ```
 
 ## Recording the result

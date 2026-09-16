@@ -1,0 +1,2 @@
+INSTRUMENTATION_RESULT: av025={"engine":"com.google.android.tts","service":"com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService","preferOffline":false,"microphonePermission":true,"expectedPhrase":"green blue red","playback":"completed","doneToFinalMs":837,"capture":{"kind":"failed","failure":"SpeechInput.noMatch: code 7","token":"OperationToken(sessionId=av013-colors-05, turn=1, sequence=1)"},"staleCallbacks":0}
+INSTRUMENTATION_CODE: 0

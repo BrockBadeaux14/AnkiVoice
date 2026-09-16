@@ -1,0 +1,2 @@
+INSTRUMENTATION_RESULT: av025={"engine":"com.google.android.tts","service":"com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService","preferOffline":false,"microphonePermission":true,"playback":"completed","capture":{"kind":"failed","failure":"SpeechInput.recognizerError: cancelled","token":"OperationToken(sessionId=av013-cancel-04, turn=1, sequence=1)"},"staleCallbacks":0}
+INSTRUMENTATION_CODE: 0

@@ -3,6 +3,7 @@ package org.ankivoice.app
 import android.app.Instrumentation
 import android.os.Bundle
 import android.os.SystemClock
+import java.io.File
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import org.ankivoice.core.contracts.CaptureEvent
@@ -39,7 +40,8 @@ class SpeechInstrumentation : Instrumentation() {
         val output = JSONObject()
         val worker = Executors.newSingleThreadExecutor()
         val platform = AndroidSpeechPlatform(targetContext)
-        val transport = SpeechTransport(platform)
+        val diagnostics = if (args.getString("diagnose") == "true") CaptureDiagnostics(platform) else null
+        val transport = SpeechTransport(diagnostics ?: platform)
         try {
             check(args.getString("confirm") == "AV025_LIVE_SPEECH") { "Explicit confirmation required" }
             val token = OperationToken(args.getString("session") ?: "av025", 1, 1)
@@ -61,6 +63,14 @@ class SpeechInstrumentation : Instrumentation() {
                 return
             }
 
+            val ui = if (args.getString("interactive") == "true") LiveVerificationUi(this) else null
+            if (ui != null) {
+                check(ui.choose("Ready for the speech check", prompt, "Play prompt") == "Play prompt") {
+                    "No operator start; no capture opened"
+                }
+                ui.show("Listen to the prompt", prompt)
+            }
+
             val playback = transport.speak(token, Utterance(UtterancePurpose.QUESTION, prompt, language))
             output.put("playback", when (playback) {
                 is PlaybackResult.Completed -> "completed"
@@ -71,12 +81,25 @@ class SpeechInstrumentation : Instrumentation() {
                 return
             }
 
-            // The explicit Start answer. The operator is told to speak only after this.
+            if (ui != null) {
+                check(ui.choose("Ready to answer", "Say: ${args.getString("expect") ?: "your answer"}\n\nTap Start answer when ready.",
+                    "Start answer") == "Start answer") { "No operator Start answer; no capture opened" }
+            }
+            // In interactive mode, this is the operator's actual Start answer touch.
             val capture = worker.submit<CaptureEvent> { transport.listen(token, language) }
             val speakMs = args.getString("speakMs")?.toLong() ?: 6_000L
-            SystemClock.sleep(speakMs)
+            val action = if (ui != null) {
+                ui.show("Opening microphone", "Wait one second…")
+                SystemClock.sleep(1_000)
+                ui.choose("Speak now", "${args.getString("expect") ?: "Say your answer"}\n\nTap Done when finished. This window ends automatically after ${speakMs / 1_000} seconds.",
+                    "Done", "Cancel", timeoutMs = speakMs)
+            } else {
+                SystemClock.sleep(speakMs)
+                null
+            }
+            output.put("operatorAction", action ?: if (ui != null) "window-expired" else "timed-harness")
 
-            if (mode == "cancel") {
+            if (mode == "cancel" || action == "Cancel") {
                 transport.cancel(token)
                 output.put("capture", describe(capture.get(30, TimeUnit.SECONDS)))
                 output.put("staleCallbacks", transport.staleCallbackLog().size)
@@ -89,8 +112,17 @@ class SpeechInstrumentation : Instrumentation() {
             val event = capture.get(30, TimeUnit.SECONDS)
             output.put("doneToFinalMs", SystemClock.elapsedRealtime() - doneAt)
             output.put("capture", describe(event))
+            diagnostics?.let { output.put("microphoneDiagnostics", it.save(File(targetContext.filesDir, "av025-input.pcm"))) }
             output.put("lastPartial", transport.lastPartial)
             output.put("staleCallbacks", transport.staleCallbackLog().size)
+            ui?.let {
+                val result = when (event) {
+                    is CaptureEvent.Transcript -> "Transcript: ${event.text}"
+                    is CaptureEvent.Failed -> "Capture failed: ${event.failure}"
+                }
+                sendStatus(1, Bundle().apply { putString("av025Capture", output.toString()) })
+                output.put("operatorAttestation", it.attest(result, args.getString("expect") ?: "the answer"))
+            }
         } catch (e: Exception) {
             output.put("error", e.toString())
         } finally {

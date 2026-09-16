@@ -1,0 +1,2 @@
+INSTRUMENTATION_RESULT: result={"capabilities":{"maxReviewTimeMs":60000,"permittedRatings":[1,2,3,4]},"next":{"cardId":1789534470381,"noteId":1789534470381,"deckId":1789534470372,"ordinal":0,"model":"VoiceQA","permittedRatings":[1,2,3,4],"state":{"reps":0,"type":0,"queue":0,"due":1,"interval":0}},"passed":true}
+INSTRUMENTATION_CODE: -1

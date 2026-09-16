@@ -1,0 +1,20 @@
+{
+  "microphonePermission": true,
+  "readiness": "ready",
+  "offered": {
+    "cardId": 1789534470381,
+    "model": "VoiceQA",
+    "reps": 0
+  },
+  "cardId": 1789534470381,
+  "expectedPhrase": "five blocks",
+  "permittedRatings": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "error": "java.lang.IllegalStateException: No operator start; no capture opened",
+  "completed": false,
+  "passed": false
+}

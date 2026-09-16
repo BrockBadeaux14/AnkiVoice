@@ -50,6 +50,14 @@ Prerequisites, all from AV-042's accepted configuration:
   refuses a deck whose name does not start with `AV002`, but that check is a backstop, not
   a substitute for using a throwaway collection.
 
+Use the AV-042 speech AVD, `AnkiVoice_AV005`, cold-booted with audio on port 5588
+(`emulator-5588`). The older AV-024 adapter AVD on port 5584 was booted with
+`-no-audio` and is not the live speech configuration. Install pinned AnkiDroid
+2.24.1 on the speech AVD, grant database access, and import the disposable fixture
+there. Check `adb -s emulator-5588 shell pm list instrumentation` after installation:
+`ReviewInstrumentation`, `SpeechInstrumentation` and `SessionInstrumentation` must
+all appear. A successful APK build alone does not prove those entries survived packaging.
+
 ### 2a. The transport, through AV-025's harness
 
 Run [AV-025's live section](../av025/runbook.md#2-live-the-pinned-avd) in full: both
@@ -61,19 +69,54 @@ Record `doneToFinalMs` for each successful turn.
 ```sh
 cd android
 ./gradlew :app:installDebug :app:installDebugAndroidTest
-adb -s emulator-5584 shell am instrument -w \
+adb -s emulator-5588 shell am instrument -w \
   -e confirm AV013_LIVE_SESSION \
   -e deck <AV002_DECK_ID> \
-  -e expect "five blocks" -e speakMs 6000 \
-  -e confirmRating 3 \
+  -e expect '"five blocks"' -e speakMs 12000 \
+  -e interactive true \
   org.ankivoice.test/org.ankivoice.app.SessionInstrumentation
-adb -s emulator-5584 shell run-as org.ankivoice cat files/av013-result.json
 ```
 
-The harness offers the next VoiceQA card, plays its Prompt through the pinned voice,
-settles, opens capture on an explicit Start answer, waits `speakMs` for you to speak,
-sends Done, grades with AV-015's rules, proposes, and submits **only** if `confirmRating`
-matches the proposed rating. Omit `confirmRating` to watch the session refuse to write.
+The harness offers the next VoiceQA card and shows its Prompt. Tap **Play prompt**,
+then **Start answer**; wait for **Speak now**, say the answer, and tap **Done**.
+The result screen has independent, initially unchecked prompt-audible and phrase-spoken
+attestations. Only the operator may check them and tap **Save result**.
+If the recognizer's confidence is absent or low, the session pauses. The next screen
+offers **Use this transcript** for the actual recognized text or **Stop without writing**.
+Acceptance calls the existing `correctTranscript` policy, creates a new revision, and
+is recorded as a manual intervention with unchanged raw capture/confidence. It does not
+confirm a rating. A no-match or recognition failure cannot use this path.
+The next screen shows the actual transcript, card ID and proposed rating. Only the
+operator's **Confirm** touch submits the review; **Do not write**, absence or timeout
+does not confirm. Each operator screen waits at most five minutes.
+
+The noninteractive alternative uses `-e awaitConfirmation true` instead of
+`-e interactive true`. It plays and captures on a timer, then publishes a fresh
+challenge with the actual transcript and proposed rating. While instrumentation waits,
+read that proposal in another terminal:
+
+```sh
+adb -s emulator-5588 shell run-as org.ankivoice cat files/av013-pending.json
+```
+
+Show the operator the transcript, card ID and `proposedRating`. Only after the operator
+explicitly confirms that proposal, write a JSON response with its fresh
+`confirmationChallenge` and rating, then atomically rename it into place:
+
+```sh
+printf '%s' '{"challenge":"<confirmationChallenge>","rating":3}' | \
+  adb -s emulator-5588 shell run-as org.ankivoice sh -c \
+  '"cat > files/av013-confirmation.tmp && mv files/av013-confirmation.tmp files/av013-confirmation.json"'
+```
+
+Use the actual confirmed rating, not the example `3`. A missing, expired or mismatched
+confirmation writes nothing. `confirmRating` supplied before capture is rejected.
+Omit both `awaitConfirmation` and `interactive` for a run that stops without writing.
+When instrumentation finishes, save `files/av013-result.json` before another run:
+
+```sh
+adb -s emulator-5588 shell run-as org.ankivoice cat files/av013-result.json
+```
 
 - **Speak only after the prompt finishes.** Capture does not open during playback.
 - If the rules match nothing, the suggestion is `uncertain` and proposes no rating; pass
@@ -81,7 +124,7 @@ matches the proposed rating. Omit `confirmRating` to watch the session refuse to
 - The explicit Cancel path at the session level:
 
 ```sh
-adb -s emulator-5584 shell am instrument -w -e confirm AV013_LIVE_SESSION \
+adb -s emulator-5588 shell am instrument -w -e confirm AV013_LIVE_SESSION \
   -e deck <AV002_DECK_ID> -e mode cancel \
   org.ankivoice.test/org.ankivoice.app.SessionInstrumentation
 ```

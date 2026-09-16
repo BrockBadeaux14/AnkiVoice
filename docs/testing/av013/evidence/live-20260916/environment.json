@@ -1,0 +1,47 @@
+{
+  "recordedAtUtc": "2026-09-16T04:59:16.378493+00:00",
+  "sourceHead": "04c757860ca6127d3a67c074db8361bb6258422f",
+  "branch": "codex/av-013-session-state-machine",
+  "avd": "AnkiVoice_AV005\nOK",
+  "serial": "emulator-5588",
+  "fingerprint": "google/sdk_gphone64_arm64/emu64a:16/BE2A.250530.026.D1/13818094:user/release-keys",
+  "timezone": "America/Chicago",
+  "ttsVersion": [
+    "versionCode=210526444 minSdk=26 targetSdk=35",
+    "versionName=googletts.google-speech-apk_20241125.02_p2.702443970"
+  ],
+  "instrumentation": "instrumentation:org.ankivoice.test/org.ankivoice.app.SpeechInstrumentation (target=org.ankivoice)\ninstrumentation:org.ankivoice.test/org.ankivoice.app.ReviewInstrumentation (target=org.ankivoice)\ninstrumentation:org.ankivoice.test/org.ankivoice.app.SessionInstrumentation (target=org.ankivoice)",
+  "hostVolume": "output volume:60, input volume:84, alert volume:100, output muted:false",
+  "sha256": {
+    "android/app/build/outputs/apk/debug/app-debug.apk": "61ea4ce8c517914ecf3e2da4f97e980f74782f16a37dd7efb7fdfa2f7248f30b",
+    "android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk": "246cca821980945cde6d22a556bf89dcdfc6bb3ed39e1ae13478b7a8dd3c9ef8",
+    "build/av004/AnkiDroid-2.24.1-arm64-v8a.apk": "3012692ca67b856b287430715f99ca6150e471588326f6c8c45f27bbe895afbf",
+    "build/av013/live-20260916/isolated/collection.colpkg": "28c02c7809d46270dc0a0f11f0171c061461b39e66d008fb6add8c8b60b86c30"
+  },
+  "fixture": "AV002 Baseline, only fixture::new eligible; fresh empty AnkiDroid before import",
+  "offline": {
+    "coreTests": 235,
+    "speechTests": 52,
+    "failures": 0,
+    "pythonDriftTests": 9
+  },
+  "attempt06TestApkSha256": "f38f198ace96bdfe4f12d2876852ea300e89d78a12279cce1f28f25417c7edd3",
+  "interactiveTestApkSha256": "dd16db62e79d37f268ac46cb54c4f4144d32dc8cfefad51338efd9cb4b841b2c",
+  "interactiveSetup": {
+    "hostMicrophoneForwarding": "enabled",
+    "hostOutput": 53,
+    "guestMedia": "9/15",
+    "change": "foreground test UI with operator Play prompt, Start answer, Done and independent attestations"
+  },
+  "diagnosticTestApkSha256": "cda24860762d8106771c5dbf108c119da575c401509da9977fbbb915b04d639e",
+  "finalTestApkSha256": "e698f62a39c9f75c3ae77ecd371152b45bf467d964318dda4d21931cdd09d177",
+  "finalHarnessSources": {
+    "android/app/src/androidTest/kotlin/org/ankivoice/app/SpeechInstrumentation.kt": "76593f58a723df48ee83bab5508bee434a4a9998933eed2b8658b48753b87209",
+    "android/app/src/androidTest/kotlin/org/ankivoice/app/CaptureDiagnostics.kt": "b4bf3282c50a3bca6ce0044fb271361db99d6d3cf88dc0d2c1a699066575ed49",
+    "android/app/src/androidTest/kotlin/org/ankivoice/app/SessionInstrumentation.kt": "fa5ad8db775420c7c7b99e0b4c3f622a9ed36384130b7b64ce85afdcc743971e",
+    "android/app/src/androidTest/kotlin/org/ankivoice/app/ReviewInstrumentation.kt": "83f2f515924bbfcd83b6515d7f4138dec4f055ca5b91f5eb6957fe2a6a377c27",
+    "android/app/src/androidTest/kotlin/org/ankivoice/app/LiveVerificationUi.kt": "513e0bdda66ffad88eb2168379e71d004a2d042b5d3499f502419bdf70dbfb6a"
+  },
+  "attempt10TestApkSha256": "63cc667fcbaa959fbaa7624147a3639c9e8de381fab292b43b672d4920cf2f5d",
+  "sourceAfterFinalBuild": "Documentation-only KDoc update to SessionInstrumentation; executable code unchanged."
+}

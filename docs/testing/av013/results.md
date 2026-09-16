@@ -1,17 +1,99 @@
-# AV-013: The session state machine is implemented; its live check is not yet run
+# AV-013: Session implemented; live transport check passed
 
 Issue [#14 — Build the deterministic session state machine](https://github.com/BrockBadeaux14/AnkiVoice/issues/14).
 Branch `codex/av-013-session-state-machine`.
 
-**Result: `ReviewSession` is ported to `:core`, the 53-scenario conformance suite passes
-as JVM tests, and the drift guard is in place. The live verification on the pinned AVD —
-this card's last acceptance criterion, including AV-025's absorbed check — has not been
-performed.** That run needs a person speaking into a running emulator, so it could not be
-produced from the implementation session. Until it exists, no real speech has passed
-through the shipped `:speech` transport and no turn has run end to end on a device.
+`ReviewSession` is ported to `:core`, its 53-scenario conformance suite passes, and the
+drift guard is in place. **Live criterion 9 passed on September 16, 2026 UTC:**
+operator-confirmed “green blue red” (625 ms), “five” (672 ms), explicit Cancel and
+permission-denied all have production-route evidence. **Criterion 8 remains in progress.**
+A session turn recognized “five blocks” (681 ms) but paused on absent confidence.
+No review has yet been written.
 
-The offline evidence below says the state machine orders, guards and classifies a turn
-correctly. It never says the turn works on a device.
+## Live verification — September 16, 2026 UTC
+
+[Environment and APK hashes](evidence/live-20260916/environment.json),
+[all-attempt ledger](evidence/live-20260916/ledger.json), and
+[disposable collection baseline](evidence/live-20260916/session-baseline.json).
+The AVD is AV-042's `AnkiVoice_AV005`, cold-booted with audio on port 5588.
+Android fingerprint, speech-service version, built-in host input/output and guest media
+9/15 match the accepted configuration. Host output was 60% for attempts 1–5, then
+restored to 53% before the interactive checks; the operator confirmed their prompts
+audible at that level. Input gain was 84%.
+
+| # | Mode | Phrase requested | `capture` returned verbatim | `doneToFinalMs` | Outcome / reviews written |
+| --- | --- | --- | --- | --- | --- |
+| 1 | permission | — | No capture: missing instrumentation registration | — | no capture; 0 |
+| 2 | cancel | — | No capture: missing instrumentation registration | — | no capture; 0 |
+| 3 | permission | — | `{"kind":"failed","failure":"SpeechInput.permissionDenied: RECORD_AUDIO not granted","token":"OperationToken(sessionId=av013-permission-03, turn=1, sequence=1)"}` | — | expected failure; 0 |
+| 4 | cancel | — | `{"kind":"failed","failure":"SpeechInput.recognizerError: cancelled","token":"OperationToken(sessionId=av013-cancel-04, turn=1, sequence=1)"}` | — | expected failure; 0 |
+| 5 | colors | green blue red | `{"kind":"failed","failure":"SpeechInput.noMatch: code 7","token":"OperationToken(sessionId=av013-colors-05, turn=1, sequence=1)"}` | 837 | failed; 0 |
+| 6 | colors-interactive | green blue red | `{"kind":"transcript","text":"green blue red","confidence":"absent","token":"OperationToken(sessionId=av013-colors-06, turn=1, sequence=1)"}` | 625 | transcript; 0 |
+| 7 | five-interactive | five | `{"kind":"failed","failure":"SpeechInput.noMatch: code 7","token":"OperationToken(sessionId=av013-five-07, turn=1, sequence=1)"}` | 685 | failed; 0 |
+| 8 | session-interactive | five blocks | `{"kind":"failed","failure":"SpeechInput.noMatch: code 7","token":"OperationToken(sessionId=av013-session-08/answer, turn=1, sequence=1)"}` | 681 | paused; 0 |
+| 9 | five-diagnostic | five | `{"kind":"transcript","text":"five","confidence":"absent","token":"OperationToken(sessionId=av013-five-09, turn=1, sequence=1)"}` | 672 | transcript; 0 |
+| 10 | session-interactive | five blocks | `{"kind":"transcript","text":"five blocks","confidence":"absent","token":"OperationToken(sessionId=av013-session-10/answer, turn=1, sequence=1)"}` | 681 | paused; 0 |
+| 11 | session-interactive | five blocks | No capture: no operator start before timeout | — | no capture; 0 |
+
+The recognizer's result does not establish what was spoken. For attempt 5 the operator reported: “I heard the prompt but did not see anything. Try
+again.” That confirms audibility, not whether the phrase was spoken. The interactive
+checks record independent, initially unchecked audibility and spoken-phrase attestations.
+Attempts 6 and 9 were operator-confirmed correct transcripts; attempt 7 was an
+operator-confirmed spoken phrase that nevertheless returned no-match.
+Audio logs reported repeated late reads with inserted silence; that is a diagnostic
+observation, not a proven cause or evidence of the historical 220 Hz fallback.
+Full diagnostic logs stay under ignored `build/av013/live-20260916/`.
+
+Live execution exposed several harness gaps, corrected only in the test APK:
+
+- AGP replaced the first instrumentation entry with the configured default runner,
+  removing `SpeechInstrumentation`. Declaring `ReviewInstrumentation` first preserves
+  all three; the packaged manifest and installed components were checked.
+- `confirmRating` was supplied before the answer existed. The session harness now
+  shows the actual transcript and proposed rating, requires a fresh operator confirmation,
+  and rejects pre-capture `confirmRating`. Interactive mode takes a direct Confirm touch;
+  the terminal alternative waits for a challenge-bound confirmation file. The
+  [device rejection check](evidence/live-20260916/confirmation-before-capture-rejected.txt)
+  passed. A successful post-capture confirmation/write is still untested.
+- The original timed harness had no visible controls. `LiveVerificationUi` supplies
+  Play prompt, Start answer, Done/Cancel and two independent unchecked attestations.
+- The pinned recognizer returned absent confidence even for correct text. Attempt 10
+  correctly paused, but the harness had not exposed the existing `correctTranscript`
+  acceptance path. It now offers **Use this transcript** before grading, then a separate
+  rating confirmation. No-match cannot enter that path; raw confidence stays absent.
+- The old session `passed` flag meant only “no harness exception”; attempt 8 therefore
+  retained `passed:true` even though it paused on no-match. The updated harness records
+  `completed` separately and requires a confirmed commit for a passing normal session turn.
+
+The optional diagnostic observer copies actual MIC frames without altering them.
+Attempt 9 contains 4.4 seconds of microphone input and 3,682 clipped samples out of
+70,400; it still returned the correct phrase. This observation does not explain earlier
+no-matches or establish reliability. [PCM analysis](evidence/live-20260916/09-pcm-analysis.json).
+
+The fresh AnkiDroid 2.24.1 installation contained no cards or reviews before import.
+The imported AV-002 fixture has eight synthetic cards, seven suspended, and 11 seeded
+history rows. The eligible card `1789534470381` asks about three red and two blue blocks,
+expects “five blocks,” and initially has zero reviews. Its baseline was copied before
+any session turn. A [read-only provider preflight](evidence/live-20260916/session-card-preflight.txt)
+returned that card and all four permitted ratings. The no-match session wrote nothing;
+[an independent database comparison](evidence/live-20260916/08-unchanged-collection.json)
+confirmed unchanged card state and review history. Attempt 10 also stopped before grading
+or a review proposal. Attempt 11 used the revised harness but timed out waiting for Play prompt; no capture
+opened. Criterion 8 awaits the operator's live completion.
+
+Microphone forwarding and host output were restored at the first pause, recorded in
+[the initial cleanup](evidence/live-20260916/initial-pause-cleanup.json); forwarding was enabled again
+for interactive checks. At the final pause it was disabled again and the app force-stopped.
+A final native database comparison found all cards and review history exactly equal to
+the pristine baseline, so no fixture reset was necessary. See [final cleanup](evidence/live-20260916/cleanup.json)
+and [evidence validation](evidence/live-20260916/validation.json). Raw PCM and complete
+diagnostic logs stay in ignored `build/`.
+
+Current validation: **235 core tests, 52 speech tests, zero failures; nine Python drift
+tests pass; module boundaries and both debug APK builds pass.** The earlier implementation
+counts below are historical. Evidence: [Gradle](evidence/live-20260916/gradle.txt),
+[final harness rebuild](evidence/live-20260916/transcript-review-build.txt),
+[Python](evidence/live-20260916/python-tests.txt).
 
 ## What was implemented
 
@@ -93,19 +175,15 @@ asserted that a competing *native* write counted against this caller, and one ex
 advisory suggestion to survive a proposal, which the binding also clears. Both assertions
 were corrected to the behavior the binding actually specifies.
 
-## What was **not** verified
+## Remaining verification and limits
 
-- **The live run on the pinned AVD has not happened**, so this card's last two acceptance
-  criteria are open. No turn has gone from a spoken answer through explicit confirmation to
-  a guarded write on a device.
-- **AV-025's absorbed live check is still outstanding.** No real speech has passed through
-  the shipped `:speech` transport; `doneToFinalMs` remains unmeasured for it (AV-042's
-  690 ms and 687 ms belong to the disposable probe); and the Cancel and permission-denied
-  paths are covered offline only. Nothing in this card changed that, and nothing here
-  claims otherwise.
-- **The harness for the run exists but has never executed.** `SessionInstrumentation`
-  compiles, is registered and is exercised by nothing but the compiler. The first live run
-  may find defects in it.
+- **Criterion 8 remains open.** No spoken session turn has reached explicit confirmation
+  and a guarded write on the device. The disposable fixture and updated harness are ready.
+- **Criterion 9 passed.** Both required phrases now have operator-confirmed correct
+  production transcripts. Cancel and permission-denied passed live. All no-matches remain
+  in the ledger and do not count as recognition successes.
+- **The session harness reached no-match and low-confidence recovery on the device.**
+  The live proposal, explicit rating confirmation and guarded commit remain to be verified.
 - **Recognition quality is not simulated and cannot be.** Every offline test uses scripted
   transcripts. A green suite says the session handles a transcript correctly, never that a
   transcript is correct.
@@ -128,11 +206,13 @@ the ones that come back wrong.
 
 ## Next
 
-The live section of the runbook is the remaining work on this card. Run it on the pinned
-AVD, record every turn and its `doneToFinalMs` in the table the runbook provides, and
-update [AV-025's results](../av025/results.md) once the absorbed check has actually run.
+Resume criterion 8 with the interactive session harness (the last waiting screen timed
+out). Enable `adb -s emulator-5588 emu avd hostmicon`, use disposable deck
+`1789534470372` while this same-day fixture remains valid, then follow [the runbook](runbook.md): speak the real answer,
+explicitly accept its transcript if confidence is absent, then separately confirm the
+actual proposed rating. Verify exactly one added native review and reset the disposable
+fixture. Criterion 9 is complete; every failed and successful attempt remains recorded.
 
-Per the issue's recorded consequence: **a failure in the live run is a finding against
-`:speech`, not against the state machine.** Reopen
-[#26](https://github.com/BrockBadeaux14/AnkiVoice/issues/26) or open a follow-up rather
-than repairing the transport here.
+No production speech, answer-policy, session or writer behavior was changed for these
+checks. The broader study-flow UI, reliability run and interruption matrix remain outside
+this verification.

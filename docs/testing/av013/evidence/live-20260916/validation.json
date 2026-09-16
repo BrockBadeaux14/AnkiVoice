@@ -1,0 +1,19 @@
+{
+  "integrityChecksPassed": true,
+  "allAttemptsMatchRawInstrumentation": true,
+  "attemptsRetained": 11,
+  "criterion9Passed": true,
+  "criterion8Passed": false,
+  "successfulPhrases": {
+    "green blue red": 625,
+    "five": 672
+  },
+  "sessionRawTranscript": {
+    "text": "five blocks",
+    "doneToFinalMs": 681,
+    "confidence": "absent",
+    "outcome": "paused on lowConfidence"
+  },
+  "newReviews": 0,
+  "reasonCriterion8Pending": "Updated harness transcript acceptance and rating-confirmation path awaits live operator completion; attempt 11 timed out before capture."
+}

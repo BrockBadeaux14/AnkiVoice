@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  AGP generates the instrumentation entry for the runner named in defaultConfig, which is
-  AV-024's. AV-025's live speech harness and AV-013's live session harness are further
-  entry points, so they are declared here and selected explicitly by component on the
-  `am instrument` command line.
+  AGP rewrites the first instrumentation entry to the defaultConfig runner. Keep AV-024's
+  default runner first, then the two additional live entry points, so packaging preserves
+  all three components selected explicitly by `am instrument`.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <instrumentation
+        android:name="org.ankivoice.app.ReviewInstrumentation"
+        android:targetPackage="org.ankivoice" />
 
     <instrumentation
         android:name="org.ankivoice.app.SpeechInstrumentation"

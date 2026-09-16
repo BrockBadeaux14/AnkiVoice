@@ -1,0 +1,2 @@
+INSTRUMENTATION_RESULT: av013={"error":"java.lang.IllegalStateException: Use awaitConfirmation and confirm the published transcript\/proposal after capture","passed":false}
+INSTRUMENTATION_CODE: 0
