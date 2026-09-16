@@ -17,7 +17,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from configuration import CORPUS, EVIDENCE  # noqa: E402
+from configuration import CORPUS, EVIDENCE, ROOT  # noqa: E402
 
 LABELS = ("correct", "partial", "incorrect")
 
@@ -74,7 +74,7 @@ def main():
         "spoken": spoken,
         "attested": result.get("attestation"),
         "source": f"AV-017 live capture on the pinned AVD, slot {args.slot}",
-        "evidence": str(Path(args.evidence).relative_to(CORPUS.parents[1]) / "captures.jsonl"),
+        "evidence": str(Path(args.evidence).resolve().relative_to(ROOT) / "captures.jsonl"),
         "utc": entry["utc"],
         "done_to_final_ms": result.get("doneToFinalMs"),
         "confidence": result.get("confidence"),

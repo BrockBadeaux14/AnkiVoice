@@ -665,14 +665,30 @@
       "category": "stt-mistake",
       "fixture_card": "future",
       "example_id": "demo-explanation",
-      "answer": null,
-      "label": null,
-      "label_rationale": null,
+      "answer": "it puts two first then",
+      "label": "partial",
+      "label_rationale": "The recognizer dropped everything after the first 'then'. The transcript names only the first element of the required order and dangles, contradicting nothing; it is the same content as the authored 'It puts two first.' and is labeled the same way.",
       "provenance": {
-        "kind": "live-pending",
-        "spoken_target": "It puts two first, then five, then seven",
-        "slot": "stt-live-6",
-        "note": "Filled only by a genuine misrecognition captured on the pinned AVD through the #13 + #26 path. Synthetic corruption is not an acceptable substitute."
+        "kind": "live",
+        "spoken": "It puts two first, then five, then seven",
+        "attested": {
+          "promptAudible": true,
+          "spokeExpectedPhrase": true,
+          "source": "operator-touch"
+        },
+        "source": "AV-017 live capture on the pinned AVD, slot stt-live-6",
+        "evidence": "docs/testing/av017/evidence/live-20260916/captures.jsonl",
+        "utc": "2026-09-16T21:33:58Z",
+        "done_to_final_ms": 680,
+        "confidence": "absent",
+        "microphone": {
+          "verdict": "live",
+          "samples": 88640,
+          "peak": 18343,
+          "rms": 1936.1,
+          "zero_fraction": 0.4262,
+          "dominant_hz": 860
+        }
       }
     },
     {
@@ -681,14 +697,30 @@
       "category": "stt-mistake",
       "fixture_card": "mature",
       "example_id": "demo-explanation",
-      "answer": null,
-      "label": null,
-      "label_rationale": null,
+      "answer": "257",
+      "label": "partial",
+      "label_rationale": "The recognizer collapsed three spoken number words into the digit string '257'. Read as digits it carries the right values in the right order; read as one number it expresses no ordering at all, and a reader cannot tell which. It contradicts nothing, so it is partial rather than incorrect. This is a judgement and is recorded as one.",
       "provenance": {
-        "kind": "live-pending",
-        "spoken_target": "Two five seven",
-        "slot": "stt-live-7",
-        "note": "Filled only by a genuine misrecognition captured on the pinned AVD through the #13 + #26 path. Synthetic corruption is not an acceptable substitute."
+        "kind": "live",
+        "spoken": "Two five seven",
+        "attested": {
+          "promptAudible": true,
+          "spokeExpectedPhrase": true,
+          "source": "operator-touch"
+        },
+        "source": "AV-017 live capture on the pinned AVD, slot stt-live-7",
+        "evidence": "docs/testing/av017/evidence/live-20260916/captures.jsonl",
+        "utc": "2026-09-16T21:30:29Z",
+        "done_to_final_ms": 625,
+        "confidence": "absent",
+        "microphone": {
+          "verdict": "live",
+          "samples": 67520,
+          "peak": 27067,
+          "rms": 2697.0,
+          "zero_fraction": 0.0404,
+          "dominant_hz": 397
+        }
       }
     },
     {

@@ -57,6 +57,13 @@ def pending_slots():
 
 def capture(slot, device, speak_ms, diagnose=True):
     """Run one capture and return the harness's JSON, whatever it says."""
+    # A run that crashes before recording leaves the previous attempt's PCM in place, and
+    # classifying that would attribute the last attempt's microphone to this one.
+    subprocess.run(
+        [microphone.adb(), "-s", device, "shell", "run-as", "org.ankivoice", "rm", "-f", "files/av017-input.pcm"],
+        capture_output=True,
+        timeout=60,
+    )
     command = [
         microphone.adb(), "-s", device, "shell", "am", "instrument", "-w",
         "-e", "confirm", CONFIRMATION,
