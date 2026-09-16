@@ -102,12 +102,12 @@ flowchart TD
 | --- | --- | --- | --- |
 | `:core` | Kotlin/JVM, no Android plugin or dependency | The AV-007 contract port in `org.ankivoice.core.contracts`; the fakes in its `testFixtures` source set | #14, #13, #25, #16/#18, #15, #20 |
 | `:ankidroid` | Android library | Access preflight; `decks` reads and verified `selected_deck` updates; AV-039 VoiceQA provisioning with read-back | #25 |
-| `:speech` | Android library | A marker object; no platform calls | #26 |
+| `:speech` | Android library | AV-025's speech transport: the pinned TTS/recognizer route, the app-owned microphone pipe, and the ordering, cancellation and failure rules behind both AV-007 speech contracts | #13 |
 | `:provider` | Android library | A marker object; no platform calls or network access | #17, #18 |
 | `:app` | Android application | Single-activity shell, onboarding, the VoiceQA setup action and its full-sync disclosure, private settings, lifecycle delivery and debug sample session | #27, #17 |
 | `:core` | Kotlin/JVM, no Android plugin or dependency | The AV-007 contract port in `org.ankivoice.core.contracts`; AV-015's rule-based grading in `org.ankivoice.core.grading`; the fakes in its `testFixtures` source set | #14, #13, #25, #18, #15, #20 |
 | `:ankidroid` | Android library | Access preflight; `decks` reads and verified `selected_deck` updates | #25, #10 |
-| `:speech` | Android library | A marker object; no platform calls | #26 |
+| `:speech` | Android library | AV-025's speech transport: the pinned TTS/recognizer route, the app-owned microphone pipe, and the ordering, cancellation and failure rules behind both AV-007 speech contracts | #13 |
 | `:provider` | Android library | AV-020's credential store, free-route guard, durable quota ledger, content-free diagnostics and the one HTTPS seam | #18 |
 | `:app` | Android application | Single-activity shell, onboarding, private settings, lifecycle delivery and debug sample session | #27, #17 |
 
@@ -506,3 +506,73 @@ the count. Exhaustion and provider failures remain distinct. All existing
 utterance and grading-context builders are reused. See the
 [AV-010 results and validation](../docs/testing/av010/results.md), including the
 pinned API evidence and runtime limitations.
+
+## Speech transport
+
+AV-025 (#26) fills `:speech` with the route AV-042 proved live, behind AV-007's
+`SpeechOutput` and `SpeechInput`. `SpeechModule.create` returns one `SpeechTransport`
+per session; it is both contracts, so #13 holds a single object.
+
+`AndroidSpeechPlatform` is the only class that touches `TextToSpeech`,
+`SpeechRecognizer` and `AudioRecord`. Everything that decides an outcome lives in
+`SpeechTransport` and is verified on the JVM against `FakeSpeechPlatform`, so the
+ordering, deadline and stale-callback rules need no emulator.
+
+### The pinned route
+
+`SpeechPins` holds the values accepted with PR #57. Changing one invalidates the live
+evidence behind it, so change this file and the [AV-042 handoff](../docs/testing/av042/results.md#implementation-handoff)
+together.
+
+| Element | Pinned value |
+| --- | --- |
+| Engine | `com.google.android.tts`, local voice `en-US-language`, configurable rate |
+| Recognition | `GoogleTTSRecognitionService`, `en-US`, `EXTRA_PREFER_OFFLINE=false` |
+| Capture | App-owned `MIC` `AudioRecord`, mono PCM16 at 16 kHz, streamed through `EXTRA_AUDIO_SOURCE` |
+| Segment end | Closing the pipe's write end |
+| Settle | At least 400 ms after playback, before capture may open |
+| Done | Stop the microphone, emit 500 ms of trailing silence, close the pipe |
+| Finalization | A final or failure within 5,000 ms of Done, inclusive of that silence |
+| Permission | `RECORD_AUDIO` only |
+
+`EXTRA_PREFER_OFFLINE` is `false` deliberately: AV-042's first probe set it to `true`
+and produced no-match on every attempt.
+
+### Ordering and ownership
+
+Playback completes, the settle interval opens, and capture opens **only** when #13 calls
+`listen` — that call *is* the explicit Start answer. Capture never opens during playback,
+at most one capture is active, and the transport never re-arms after a result. Thinking
+time, the answer window, the transcript and every retry decision stay with #13.
+
+`finishAnswer` is Done. It stops the microphone, lets the pump append the trailing
+silence and close the pipe, then starts the finalization deadline. It is not a verdict
+about the answer. `answerWindowMs` exists only as a backstop for a stop that never
+arrives; reaching it behaves exactly like Done, so an in-flight final is still delivered.
+
+The transport receives an `Utterance` and never a `ScheduledCard`, so Extra has no path
+into question audio through this module and the Prompt-only rule stays in
+`core/contracts/Utterances.kt`.
+
+### Failures
+
+Every platform condition maps onto AV-007's `SpeechOutput`/`SpeechInput` taxonomy, which
+is not extended here. Where several conditions share one mode, the `Failure` detail
+carries the distinction — `SpeechTransport`'s constants are the spellings.
+
+`ERROR_NO_MATCH` stays an undiagnosed no-result; an empty final is reported separately by
+detail. Absent recognizer confidence is `ABSENT`, never zero and never certainty. No
+failure writes a review, infers a rating or substitutes another provider — there is no
+second speech implementation and no cloud STT candidate in this module.
+
+Cancel and `releaseAll` invalidate the generation before cleanup runs, so callbacks
+already in flight are recorded as stale and dropped. Each capture delivers exactly one
+event.
+
+### What this does not establish
+
+The offline suite proves the transport's rules, not recognition quality. Live evidence
+comes only from [the AV-025 runbook](../docs/testing/av025/runbook.md) on the pinned AVD.
+Backgrounding, screen lock, audio-route changes, Bluetooth and real calls are out of
+scope here and remain with #32; AV-040 recorded that no interruption signal reaches the
+app while the recognizer holds the microphone, and nothing in this module changes that.
