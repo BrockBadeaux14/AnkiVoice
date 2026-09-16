@@ -36,6 +36,10 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+    // AV-015's fixture test reads the VoiceQA examples from the repository, not a copy.
+    val voiceqaNoteType = layout.projectDirectory.file("../../fixtures/voiceqa/note-type.json")
+    inputs.file(voiceqaNoteType).withPropertyName("voiceqaNoteType").withPathSensitivity(PathSensitivity.NONE)
+    systemProperty("ankivoice.voiceqaNoteType", voiceqaNoteType.asFile.absolutePath)
     testLogging {
         events("failed")
         exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL

@@ -60,3 +60,13 @@ for the explicit setup action, the reuse/refuse and demo-content policy, the con
 AnkiDroid 2.24.1 provider route, and the pinned-emulator evidence that no review was
 added or altered. The [runbook](docs/testing/av039/runbook.md) reproduces every
 provisioning scenario on a disposable collection.
+
+See [AV-020: Provider credentials, usage controls and diagnostics](android/README.md#provider-credentials-usage-controls-and-diagnostics)
+for the Keystore-wrapped runtime credential, the free-only route guard, the durable quota
+ledger, the retention disclosure and the content-free diagnostics. Its
+[runbook](docs/testing/av020/runbook.md) records the one live smoke request.
+
+See [AV-015: Rule-based grading](android/README.md#rule-based-grading) for the on-device
+policy. It suggests Good only on an exact normalized match or a one-letter slip in a long
+word that is not a number, negation or unit. Otherwise it defers to the AI grader or an
+explicit self-grade.

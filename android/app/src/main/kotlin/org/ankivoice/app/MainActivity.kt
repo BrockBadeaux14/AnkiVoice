@@ -29,7 +29,9 @@ import org.ankivoice.core.contracts.*
 class MainActivity : ComponentActivity() {
     private val root get() = application as ShellApplication
     private val controller get() = root.controller
+    private val provider get() = root.provider
     private var screen by mutableStateOf(ShellState())
+    private var providerScreen by mutableStateOf(ProviderState())
     private val requestPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
         controller.refresh()
     }
@@ -42,13 +44,15 @@ class MainActivity : ComponentActivity() {
         )
         screen = controller.state
         controller.observer = { screen = it }
+        providerScreen = provider.state
+        provider.observer = { providerScreen = it }
         setContent {
             MaterialTheme(colorScheme = lightColorScheme(
                 primary = Color(0xFF14695F), onPrimary = Color.White,
                 background = Color(0xFFF6F8F6), surface = Color(0xFFF6F8F6),
                 surfaceContainer = Color(0xFFEAF0EA),
             )) {
-                ShellScreen(screen, controller, ::correctAccess, ::openAppSettings)
+                ShellScreen(screen, providerScreen, controller, provider, ::correctAccess, ::openAppSettings)
             }
         }
     }
@@ -70,6 +74,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         controller.observer = null
+        provider.observer = null
         super.onDestroy()
     }
 
@@ -98,7 +103,9 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun ShellScreen(
     state: ShellState,
+    providerState: ProviderState,
     controller: ShellController,
+    provider: ProviderController,
     correctAccess: (FailureMode) -> Unit,
     openAppSettings: () -> Unit,
 ) {
@@ -155,6 +162,13 @@ private fun ShellScreen(
                     }
                 }
             }
+
+            ProviderSettingsCard(providerState, provider)
+            if (providerState.keyPresent && !providerState.disclosureAcknowledged) {
+                DisclosureCard(providerState, provider)
+            }
+            QuotaCard(providerState, provider)
+            DiagnosticsCard(providerState, provider)
 
             var language by rememberSaveable(state.language) { mutableStateOf(state.language) }
             OutlinedTextField(

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  AV-020 (#17): the wrapped OpenRouter key and the durable quota ledger never leave this
+  device. The app also sets allowBackup="false"; these rules additionally exclude the two
+  files from device-to-device transfer, where allowBackup does not apply.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="sharedpref" path="provider.xml" />
+        <exclude domain="file" path="av020-quota-ledger.jsonl" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="provider.xml" />
+        <exclude domain="file" path="av020-quota-ledger.jsonl" />
+    </device-transfer>
+</data-extraction-rules>
