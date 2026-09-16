@@ -947,12 +947,16 @@ this one.
 The 48 JVM tests prove the vocabulary, the context rule and the guards against the fakes;
 they say nothing about recognition quality.
 
-The live layer splits in two, and only one half has run.
-[The unattended sweep](../docs/testing/av014/results.md) passed on September 16, 2026: all
-twelve commands ran by touch on the pinned AVD against a real AnkiDroid collection, the
-context rule held with AV-012's window open, and the card came back byte-identical with no
-write recorded. **No command has been verified by voice on a device** — that needs a person
-speaking into the AVD, and section 3 of
-[the runbook](../docs/testing/av014/runbook.md) is the outstanding work. One unattended run
-is not a reliability estimate either; the 30-turn acceptance run stays in
+Both live layers ran on September 16, 2026, and
+[results](../docs/testing/av014/results.md) records them. All twelve commands ran by touch
+on the pinned AVD against a real AnkiDroid collection; ten of the eleven spoken commands
+were recognized by voice; no review was written in any session.
+
+What that does **not** show: `reveal` never got an attempt free of an emulator audio fault,
+and **no guarded command has been observed executing by voice**, because confidence is
+always absent on this route — they were matched and then refused, which is correct but
+leaves the spoken path to a rating, a reveal, a skip or a confirmation dependent on the
+touch control. `RecognizerBridge.onEndOfSegmentedSession` in `:speech` discards confidence
+unconditionally, which is an AV-025 (#26) question rather than an AV-014 one. One session
+per command is not a recognition-accuracy estimate, and the 30-turn acceptance run stays in
 [#29](https://github.com/BrockBadeaux14/AnkiVoice/issues/29).

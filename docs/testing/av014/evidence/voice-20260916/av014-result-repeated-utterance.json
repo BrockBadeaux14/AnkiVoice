@@ -1,0 +1,303 @@
+{
+  "mode": "interactive",
+  "microphonePermission": true,
+  "cardId": 1789580769983,
+  "before": {
+    "reps": 1,
+    "cardType": 1,
+    "queue": 1,
+    "due": 1789580709,
+    "intervalDays": 0
+  },
+  "permittedRatings": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "contextRule": {
+    "phrase": "repeat the experiment",
+    "action": "Start answer",
+    "contextDuringWindow": "answer",
+    "windowOpen": true,
+    "spokenCommandsOffered": [],
+    "parsed": {
+      "kind": "answer-text",
+      "text": "repeat the experiment",
+      "notice": "That was heard as part of your answer, not as a command."
+    },
+    "keptVerbatim": true,
+    "commandCapture": {
+      "kind": "refused",
+      "reason": "in-answer-window",
+      "notice": "The microphone is capturing your answer. Tap Done first, or use the on-screen controls."
+    },
+    "captureEvent": {
+      "kind": "transcript",
+      "text": "repeat the experiment  repeat the experiment",
+      "confidence": "absent"
+    },
+    "capture": {
+      "kind": "halted",
+      "reason": "lowConfidence",
+      "detail": "learner correction or retry required"
+    },
+    "transcript": "repeat the experiment  repeat the experiment",
+    "answerStatus": "final",
+    "confidence": "absent",
+    "sessionState": "paused"
+  },
+  "voice": [
+    {
+      "command": "repeat",
+      "language": "en-US",
+      "context": "command",
+      "offered": true,
+      "position": {
+        "positionedAs": "listening"
+      },
+      "outcome": {
+        "kind": "refused",
+        "reason": "recognition-failed",
+        "notice": "The command was not heard (noMatch). Study is paused and the card is kept. Use the on-screen controls to continue."
+      },
+      "sessionState": "paused"
+    },
+    {
+      "command": "reveal",
+      "language": "en-US",
+      "context": "command",
+      "offered": true,
+      "position": {
+        "typedCorrection": "Green, blue, red.",
+        "positionedAs": "grading"
+      },
+      "outcome": {
+        "kind": "refused",
+        "reason": "not-a-command",
+        "notice": "\"reveal  reveal\" is not a command. Say it again, or use the on-screen controls."
+      },
+      "sessionState": "grading"
+    },
+    {
+      "command": "pause",
+      "language": "en-US",
+      "context": "command",
+      "offered": true,
+      "position": {
+        "positionedAs": "grading"
+      },
+      "outcome": {
+        "kind": "refused",
+        "reason": "not-a-command",
+        "notice": "\"pause  pause\" is not a command. Say it again, or use the on-screen controls."
+      },
+      "sessionState": "grading"
+    },
+    {
+      "command": "finish-session",
+      "language": "en-US",
+      "context": "command",
+      "offered": true,
+      "position": {
+        "positionedAs": "grading"
+      },
+      "outcome": {
+        "kind": "refused",
+        "reason": "not-a-command",
+        "notice": "\"finish session finish session\" is not a command. Say it again, or use the on-screen controls."
+      },
+      "sessionState": "grading"
+    },
+    {
+      "command": "skip",
+      "language": "en-US",
+      "context": "command",
+      "offered": true,
+      "position": {
+        "positionedAs": "grading"
+      },
+      "outcome": {
+        "kind": "refused",
+        "reason": "not-a-command",
+        "notice": "\"skip  skip\" is not a command. Say it again, or use the on-screen controls."
+      },
+      "sessionState": "grading"
+    },
+    {
+      "command": "rate-again",
+      "language": "en-US",
+      "context": "command",
+      "offered": true,
+      "position": {
+        "positionedAs": "grading"
+      },
+      "outcome": {
+        "kind": "refused",
+        "reason": "recognition-failed",
+        "notice": "The command was not heard (noMatch). Study is paused and the card is kept. Use the on-screen controls to continue."
+      },
+      "sessionState": "paused"
+    },
+    {
+      "command": "rate-hard",
+      "language": "en-US",
+      "context": "command",
+      "offered": true,
+      "position": {
+        "typedCorrection": "Green, blue, red.",
+        "positionedAs": "grading"
+      },
+      "outcome": {
+        "kind": "refused",
+        "command": "rate-hard",
+        "reason": "low-confidence",
+        "notice": "That sounded like rate-hard, but not clearly enough to run it (confidence absent). Say it again, or tap it."
+      },
+      "sessionState": "grading"
+    },
+    {
+      "command": "rate-good",
+      "language": "en-US",
+      "context": "command",
+      "offered": true,
+      "position": {
+        "positionedAs": "grading"
+      },
+      "outcome": {
+        "kind": "refused",
+        "reason": "not-a-command",
+        "notice": "\"great good\" is not a command. Say it again, or use the on-screen controls."
+      },
+      "sessionState": "grading"
+    },
+    {
+      "command": "rate-easy",
+      "language": "en-US",
+      "context": "command",
+      "offered": true,
+      "position": {
+        "positionedAs": "grading"
+      },
+      "outcome": {
+        "kind": "refused",
+        "command": "rate-easy",
+        "reason": "low-confidence",
+        "notice": "That sounded like rate-easy, but not clearly enough to run it (confidence absent). Say it again, or tap it."
+      },
+      "sessionState": "grading"
+    },
+    {
+      "command": "confirm",
+      "language": "en-US",
+      "context": "confirmation",
+      "offered": true,
+      "position": {
+        "positionedAs": "proposing"
+      },
+      "outcome": {
+        "kind": "refused",
+        "command": "confirm",
+        "reason": "low-confidence",
+        "notice": "That sounded like confirm, but not clearly enough to run it (confidence absent). Say it again, or tap it."
+      },
+      "sessionState": "proposing"
+    },
+    {
+      "command": "change",
+      "language": "en-US",
+      "context": "confirmation",
+      "offered": true,
+      "position": {
+        "positionedAs": "proposing"
+      },
+      "outcome": {
+        "kind": "executed",
+        "command": "change",
+        "source": "spoken",
+        "notice": "The pending rating was not submitted. Say or tap Again, Hard, Good or Easy to replace it."
+      },
+      "sessionState": "proposing"
+    }
+  ],
+  "touch": [
+    {
+      "command": "skip",
+      "context": "confirmation",
+      "offered": true,
+      "outcome": {
+        "kind": "executed",
+        "command": "skip",
+        "source": "touch",
+        "notice": "Skipped. AnkiDroid offers no skip that leaves scheduling alone, so this card was left exactly as it was: nothing was rated, buried, suspended or reordered. Tap Resume for the next card."
+      },
+      "sessionState": "paused"
+    },
+    {
+      "command": "resume",
+      "context": "command",
+      "offered": true,
+      "outcome": {
+        "kind": "executed",
+        "command": "resume",
+        "source": "touch",
+        "notice": "Resumed. The previous attempt was discarded and the card was read again from the collection, because a paused snapshot may have been overtaken by AnkiDroid or a sync. The next card is ready."
+      },
+      "sessionState": "asking"
+    },
+    {
+      "command": "pause",
+      "context": "command",
+      "offered": true,
+      "outcome": {
+        "kind": "executed",
+        "command": "pause",
+        "source": "touch",
+        "notice": "Paused. The microphone is released and the card is kept. Nothing was written."
+      },
+      "sessionState": "paused"
+    },
+    {
+      "command": "resume",
+      "context": "command",
+      "offered": true,
+      "outcome": {
+        "kind": "executed",
+        "command": "resume",
+        "source": "touch",
+        "notice": "Resumed. The previous attempt was discarded and the card was read again from the collection, because a paused snapshot may have been overtaken by AnkiDroid or a sync. The next card is ready."
+      },
+      "sessionState": "asking"
+    },
+    {
+      "step": "card",
+      "cardId": 1789580769983
+    },
+    {
+      "command": "finish-session",
+      "context": "command",
+      "offered": true,
+      "outcome": {
+        "kind": "executed",
+        "command": "finish-session",
+        "source": "touch",
+        "notice": "Session finished. No review was written."
+      },
+      "sessionState": "stopped"
+    }
+  ],
+  "after": {
+    "reps": 1,
+    "cardType": 1,
+    "queue": 1,
+    "due": 1789580709,
+    "intervalDays": 0
+  },
+  "stateUnchanged": true,
+  "sessionState": "stopped",
+  "events": "  start             language en-US\n  offer_card        card 1789580769983, ratings [1, 2, 3, 4]\n  ask               Reverse the sequence red, blue, green.\n  start_answer      attempt 1\n  paused            lowConfidence: learner correction or retry required\n  resume            learner resolved the cause; re-querying\n  offer_card        card 1789580769983, ratings [1, 2, 3, 4]\n  ask               Reverse the sequence red, blue, green.\n  paused            noMatch: code 7\n  resume            learner resolved the cause; re-querying\n  offer_card        card 1789580769983, ratings [1, 2, 3, 4]\n  ask               Reverse the sequence red, blue, green.\n  start_answer      attempt 1\n  correct_transcript revision 1: Green, blue, red.\n  grade             correct: Exact match with the reference answer.\n  grade             correct: Exact match with the reference answer.\n  paused            noMatch: code 7\n  resume            learner resolved the cause; re-querying\n  offer_card        card 1789580769983, ratings [1, 2, 3, 4]\n  ask               Reverse the sequence red, blue, green.\n  start_answer      attempt 1\n  correct_transcript revision 1: Green, blue, red.\n  grade             correct: Exact match with the reference answer.\n  grade             correct: Exact match with the reference answer.\n  grade             correct: Exact match with the reference answer.\n  grade             correct: Exact match with the reference answer.\n  propose           rating 1, 53950 ms\n  paused            skip_requested: halted without a write; no non-mutating skip operation exists\n  resume            learner resolved the cause; re-querying\n  offer_card        card 1789580769983, ratings [1, 2, 3, 4]\n  ask               Reverse the sequence red, blue, green.\n  paused            learner_paused: the learner paused; the card is kept and nothing was written\n  resume            learner resolved the cause; re-querying\n  offer_card        card 1789580769983, ratings [1, 2, 3, 4]\n  ask               Reverse the sequence red, blue, green.\n  stopped           session_finished: the learner finished the session; nothing was written",
+  "writes": [],
+  "wroteNothing": true,
+  "completed": true,
+  "passed": true
+}

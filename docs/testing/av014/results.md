@@ -3,9 +3,9 @@
 Issue [#15 — Add voice commands and safe navigation](https://github.com/BrockBadeaux14/AnkiVoice/issues/15).
 Reproduce with [the runbook](runbook.md).
 
-**Status: the offline layer and the unattended live layer passed on September 16, 2026.
-The operator voice sweep has not been run.** It needs a person speaking into the AVD, and
-nothing here attests on an operator's behalf.
+**Status: all three layers ran on September 16, 2026.** Ten of the eleven spoken commands
+were recognized on the pinned AVD; `reveal` has not yet had an attempt free of an emulator
+audio fault. No review was written in any run.
 
 ## What ran
 
@@ -13,7 +13,7 @@ nothing here attests on an operator's behalf.
 | --- | --- | --- |
 | Offline: vocabulary, context rule, guards | **Passed** — 48 JVM tests, 12 Python guards | `:core:test`, `:app:testDebugUnitTest`, `tests/test_av014_commands.py` |
 | Unattended live: every command by touch, on the pinned AVD | **Passed** — no review written | [`evidence/touch-20260916/`](evidence/touch-20260916/) |
-| Operator live: every command by **voice** | **Not run** | — |
+| Operator live: every command by **voice** | **10 of 11 recognized**, `reveal` outstanding | [`evidence/voice-20260916/`](evidence/voice-20260916/) |
 
 ## Offline
 
@@ -89,6 +89,72 @@ which is what the card's decision 2 predicted.
 
 `writes: []`, `wroteNothing: true`, `stateUnchanged: true`, `passed: true`. The card was
 re-read from the provider, not compared against the snapshot held in memory.
+
+## Operator voice sweep, September 16, 2026
+
+Three sessions on the same AVD, all with `writes: []` and `stateUnchanged: true`. Every
+attempt is kept, including the confounded first run and the environment faults.
+
+### What each command did
+
+| Command | Guarded | Recognized on the AVD | Outcome when recognized |
+| --- | --- | --- | --- |
+| `repeat` | no | yes | **executed** |
+| `pause` | no | yes | **executed** |
+| `change` | no | yes | **executed** |
+| `reveal` | yes | **not yet** | — |
+| `skip` | yes | yes | refused, `low-confidence` |
+| `finish-session` | yes | yes | refused, `low-confidence` |
+| `rate-again` | yes | yes | refused, `low-confidence` |
+| `rate-hard` | yes | yes | refused, `low-confidence` |
+| `rate-good` | yes | yes (as `"good"`) | refused, `low-confidence` |
+| `rate-easy` | yes | yes | refused, `low-confidence` |
+| `confirm` | yes | yes | refused, `low-confidence` |
+
+**All three unguarded commands executed by voice. Every guarded command that the recognizer
+matched was refused by the confidence gate and by nothing else** — the vocabulary resolved,
+and criterion 7's rule is what stopped it. That is the designed behaviour measured on a
+device rather than predicted.
+
+The context rule held live on a real capture: `contextDuringWindow` was `answer`, no spoken
+command was offered there, the phrase came back verbatim, and a command capture was refused
+`in-answer-window`.
+
+### Why confidence is always absent
+
+Not a property of the engine. `RecognizerBridge.onEndOfSegmentedSession` in
+[`AndroidSpeechPlatform.kt`](../../../android/speech/src/main/kotlin/org/ankivoice/speech/AndroidSpeechPlatform.kt)
+passes `null` confidence unconditionally, while `onResults` reads `confidence(results)`.
+The pinned route always sets `EXTRA_SEGMENTED_SESSION`, so every recognition on it reports
+`ABSENT` regardless of what the engine supplied per segment. Whether the engine supplies
+per-segment scores at all is **untested**. This is an AV-025 (#26) question, not an AV-014
+one, and it is recorded here rather than acted on.
+
+### Findings about the vocabulary
+
+- `"rate good"` and `"rate easy"` were misheard as `"great good"` and `"great easy"` on
+  separate attempts. The bare forms `"good"` and `"easy"` are already unambiguous phrases
+  and matched on the first try. The `rate X` forms are the weaker ones on this route.
+- Saying a command **twice** produces `"pause  pause"`, which correctly fails
+  whole-utterance matching and is refused as `not-a-command`. That is the parser working,
+  not a defect; the first session is kept as evidence of it.
+
+### Environment faults, recorded as such
+
+Two sessions logged, on the host:
+
+```
+coreaudio: Could not initialize record
+coreaudio: Reason: kAudioHardwareIllegalOperationError
+Failed to create voice `virtio-snd-mic0'
+```
+
+The emulator's audio backend failed to open the macOS input device; no microphone opened
+and no prompt played. Both occurrences coincide with a `reveal` attempt, which is why that
+command has no clean measurement. This is the same family as AV-042's `pcm_prepare`
+failures and is **an environment fault, not a command result**. The emulator was also
+launched initially without `-allow-host-audio`, which zeroes the microphone outright and
+produced an all-`noMatch` session; see the runbook's microphone section.
 
 ## What this does not establish
 

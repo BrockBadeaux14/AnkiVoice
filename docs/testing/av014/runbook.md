@@ -35,7 +35,10 @@ evidence that a spoken command is transcribed correctly, and none of them touche
 
 Prerequisites, all from AV-042's accepted configuration:
 
-- The pinned AVD, `AnkiVoice_AV005`, cold-booted with audio on port 5588.
+- The pinned AVD, `AnkiVoice_AV005`, cold-booted on port 5588 **with `-allow-host-audio`**.
+  Without that flag the emulator zeroes the microphone, every capture returns `noMatch`,
+  and nothing about the command layer is being tested. See
+  [Microphone](#microphone-the-flag-that-is-easy-to-miss) below.
 - Pinned AnkiDroid 2.24.1 with database access granted and `RECORD_AUDIO` granted.
 - A **disposable** AV-002 collection with at least one due VoiceQA card, generated and
   reset as [the fixtures runbook](../voiceqa-fixtures.md) describes. Back it up first.
@@ -106,6 +109,39 @@ ordinary answer; it must be graded as answer text, not executed.
 
 Each operator screen waits at most five minutes. Absence and timeout are never a
 confirmation and never an attestation.
+
+## Microphone: the flag that is easy to miss
+
+The emulator zeroes the guest microphone unless it is launched with `-allow-host-audio`.
+Its own help says so: *"Allows sending of audio from audio input devices. Otherwise, zeroes
+out audio."* Launch it explicitly:
+
+```bash
+~/Library/Android/sdk/emulator/emulator -avd AnkiVoice_AV005 -port 5588 -allow-host-audio -no-snapshot -no-boot-anim
+```
+
+The Extended Controls → Microphone → *Virtual microphone uses host audio input* toggle is
+the runtime equivalent. It defaults to off and does not persist across boots, so prefer the
+flag. macOS will also ask for microphone permission for the launching app the first time;
+if it was denied, grant it in System Settings → Privacy & Security → Microphone.
+
+Confirm the microphone before spending an operator session on it. This records five seconds
+with nobody speaking and needs no interaction:
+
+```bash
+adb -s emulator-5588 shell am instrument -w -e confirm AV025_LIVE_SPEECH -e diagnose true -e speakMs 5000 -e prompt Testing org.ankivoice.test/org.ankivoice.app.SpeechInstrumentation
+```
+
+Read `microphoneDiagnostics` in the result. Values are PCM16, so full scale is 32,768:
+
+| `peak` / `rms` | Meaning |
+| --- | --- |
+| `peak` under ~20, roughly half the samples exactly zero | **Zeroed.** `-allow-host-audio` is missing, or macOS denied the microphone |
+| Steady non-zero `rms` with a clean periodic waveform | The 220 Hz goldfish tone AV-040/AV-042 diagnosed. Cold-boot after host audio setup |
+| `rms` in the hundreds or more, varying with room noise | The microphone is live; a `noMatch` after this is a recognition result worth recording |
+
+An all-`noMatch` sweep with a zeroed microphone tests nothing about the command layer.
+**Do not record it as a command result** — fix the microphone and re-run.
 
 ## Recording the result
 
