@@ -1,0 +1,73 @@
+# AV-007 conformance scenarios for the Kotlin session port (AV-013),
+# in specification spelling. Generated from tools/av007_scenarios.py by
+# tools/av013_scenarios.py; do not edit.
+# Regenerate with: python tools/av013_scenarios.py --write
+named confirmed-commit
+named precommit-correction
+named stale-identity-rejection
+named capped-review-time
+named ambiguous-acknowledgement
+named rating-out-of-range
+named queue-exhausted-versus-null-cursor
+named skip-request
+named native-undo-handoff
+named unconfirmed-write-variants
+named single-active-reviewer
+named grader-unavailable
+named microphone-denied
+named question-answer-separation
+named corrected-transcript-and-stale-grade
+named absent-confirmation
+named spoken-confirmation
+named early-closure-and-touch-fallback
+named playback-and-capture-interruption
+failure CardProvider accessDenied
+failure CardProvider apiDisabled
+failure CardProvider packageUnavailable
+failure CardProvider deckMissing
+failure CardProvider cardNotFound
+failure CardProvider collectionChanged
+failure CardProvider unsupportedNoteType
+failure CardProvider malformedCard
+failure CardProvider nullCursor
+failure SpeechOutput engineUnavailable
+failure SpeechOutput languageUnsupported
+failure SpeechOutput audioFocusLost
+failure SpeechOutput playbackInterrupted
+failure SpeechInput permissionDenied
+failure SpeechInput recognizerUnavailable
+failure SpeechInput recognizerError
+failure SpeechInput noSpeechDetected
+failure SpeechInput listenTimeout
+failure SpeechInput networkUnavailable
+failure SpeechInput quotaExhausted
+failure SpeechInput noMatch
+failure SpeechInput earlyClosure
+failure SpeechInput lowConfidence
+failure Grader quotaExhausted
+failure Grader providerError
+failure Grader graderTimeout
+failure Grader unparsableResponse
+failure Grader outputTruncated
+failure ReviewWriter ratingRejected
+failure ReviewWriter invalidReviewTime
+failure ReviewWriter staleIdentity
+failure ReviewWriter precommitReadFailed
+failure ReviewWriter writeRejected
+failure ReviewWriter confirmationRequired
+sessionState idle
+sessionState asking
+sessionState listening
+sessionState grading
+sessionState proposing
+sessionState committing
+sessionState committed
+sessionState paused
+sessionState stopped
+sessionState exhausted
+interruption app_switch
+interruption process_resume
+interruption sync
+interruption concurrent_modification
+interruption lock
+interruption external_audio

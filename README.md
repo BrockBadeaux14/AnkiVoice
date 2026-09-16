@@ -104,3 +104,12 @@ playback-to-capture ordering, and the cancellation and failure rules behind both
 speech contracts. Its [runbook](docs/testing/av025/runbook.md) separates the offline rule
 checks from the live check on the pinned AVD, and
 [results](docs/testing/av025/results.md) records what has and has not been verified.
+
+See [AV-013: Session state machine](android/README.md#session-state-machine) for the
+deterministic turn loop: the explicit states, the token rules that reject late callbacks,
+the invalidate-then-clean-up teardown, main-thread confinement, and the rule that only an
+explicit learner confirmation reaches the writer. Its 53-scenario conformance suite is
+ported from the Python binding and held to it by a drift guard. The
+[runbook](docs/testing/av013/runbook.md) separates the offline suite from the live check
+on the pinned AVD, and [results](docs/testing/av013/results.md) records what has and has
+not been verified — the live run, including AV-025's absorbed check, is still outstanding.

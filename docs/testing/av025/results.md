@@ -13,6 +13,16 @@ AV-042 proved the *route* live through a disposable probe. This card moves that 
 `:speech`. Those are not the same artifact, and the probe's evidence does not transfer to
 this code.
 
+**Ownership of the outstanding live check moved to
+[#14 (AV-013)](https://github.com/BrockBadeaux14/AnkiVoice/issues/14)** by owner decision
+on September 16, 2026, when #26 was closed as completed. The check itself is unchanged —
+both AV-042 phrases, one explicit Cancel during capture, one permission-denied start, and
+`doneToFinalMs` recorded per successful turn — and it is **still outstanding**. Run it from
+[AV-013's runbook](../av013/runbook.md#2-live-the-pinned-avd), which drives AV-025's own
+live section, and record the measurements in
+[AV-013's results](../av013/results.md). Update this page's *Next* section once that run
+has actually happened.
+
 ## What was implemented
 
 `:speech` was a marker object. It now holds AV-025's transport behind AV-007's
@@ -102,7 +112,10 @@ that come back wrong.
 
 ## Next
 
-The live section of the runbook is the remaining work on this card. Run it on the pinned
+The live section of the runbook is the remaining work, and it now belongs to
+[#14 (AV-013)](https://github.com/BrockBadeaux14/AnkiVoice/issues/14). Run it on the pinned
 AVD with the two AV-042 phrases plus the Cancel and permission-denied paths, record each
-turn and its Done-to-final duration here, and only then is the card's verification bar
-met.
+turn and its Done-to-final duration in [AV-013's results](../av013/results.md), and only
+then is this card's verification bar met. **As of the AV-013 implementation it has not been
+run**, so nothing on this page may be read as evidence that the shipped transport
+transcribes real speech.
