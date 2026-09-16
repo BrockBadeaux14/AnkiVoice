@@ -24,7 +24,7 @@ jobs:
       - name: Install the pinned Android SDK packages
         run: '"$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "platforms;android-36" "build-tools;36.0.0"'
       - run: ./gradlew --console=plain checkModuleBoundaries :core:test assembleDebug
-      - run: ./gradlew --console=plain :ankidroid:testDebugUnitTest :app:testDebugUnitTest :app:assembleRelease :app:lintDebug
+      - run: ./gradlew --console=plain :ankidroid:testDebugUnitTest :provider:testDebugUnitTest :app:testDebugUnitTest :app:assembleRelease :app:lintDebug
       - if: failure()
         uses: actions/upload-artifact@v7
         with:

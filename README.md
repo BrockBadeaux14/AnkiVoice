@@ -81,6 +81,11 @@ policy. It suggests Good only on an exact normalized match or a one-letter slip 
 word that is not a number, negation or unit. Otherwise it defers to the AI grader or an
 explicit self-grade.
 
+See [AV-016: Semantic grading and optional rubrics](android/README.md#semantic-grading-and-optional-rubrics)
+for the policy layer between those rules and the free route: the pinned AV-006 instruction,
+the strict two-key reply schema, the 20-second deadline with one quota-consuming retry, and
+the binding of every suggestion to the transcript revision that produced it.
+
 See [AV-024: AnkiDroid adapter and review safeguards](docs/testing/av024/results.md)
 for the real scheduled-card provider, single-shot guarded writer, and per-rating
 emulator evidence. The shell checks real deck readiness without submitting reviews.
