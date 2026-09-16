@@ -184,6 +184,14 @@ export OPENROUTER_API_KEY=...     # you type this; it is never written down
   -Pav017.dailyLimit=200
 ```
 
+**If the run reports `costNotVerified` and every AI answer is ungraded with "served by
+Liquid, not the pinned provider":** that is the shipped route guard comparing the reply's
+provider *name* with the pinned endpoint *tag*, recorded in [results.md](results.md) as a
+finding for #17. It is not an evaluation failure and must not be worked around here —
+neither by loosening `FreeRoute.replyCheck` on this branch nor by editing a transcript.
+Correct it in #17, which changes the frozen configuration, then record a fresh pass in a
+new evidence directory.
+
 **Quota.** The run reserves one request per answer the rules do not match, through the
 shipped `QuotaLedger`, into `av017-quota-ledger-record.jsonl` in the evidence directory.
 The harness opens a fresh grading session every 14 requests so it stays inside the shipped

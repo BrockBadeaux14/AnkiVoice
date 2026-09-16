@@ -5,15 +5,21 @@ Branch `codex/av-017-advisory-grading-eval`. September 16, 2026, America/Chicago
 Reproduce with [the runbook](runbook.md).
 
 **Status: the corpus, the harness, the rubric and the discipline are complete and
-reproducible. The measurement is not.** The rule path is measured in full over the 57
-answers that are complete. The AI path has not been run, and **4 of the required 6 live
-STT misrecognitions are in hand** after 62 live attempts across three sessions; the owner
-stopped capture there on September 16, 2026, so **this run is reported as incomplete
-rather than passed**. That is AV-017's own rule, computed by `score.py` rather than
-asserted here.
+reproducible, and both graded paths have been run over the 57 answers that are complete.
+The measurement is nevertheless incomplete, for two reasons stated plainly:**
 
-This card gates nothing. It defines no target error rate, authorises no automatic
-acceptance, and changed neither grader.
+1. **4 of the required 6 live STT misrecognitions are in hand** after 62 live attempts
+   across three sessions; the owner stopped capture there on September 16, 2026.
+2. **The AI path produced no label.** The one recorded live pass was refused by the
+   shipped free-route guard on its first reply — the route reports its provider as
+   `Liquid` and the guard expects the endpoint tag `liquid/fp8` — after which the shipped
+   ledger stopped the day. The AI path is therefore measured at **100% abstention**, which
+   is the truthful behaviour of the shipped build and a finding against the route guard
+   (#17), not a measurement of grading quality.
+
+`score.py` computes the incomplete verdict itself. This card gates nothing. It defines no
+target error rate, authorises no automatic acceptance, and changed neither grader — nor
+the route guard, which is #17's.
 
 ## What is complete
 
@@ -22,13 +28,13 @@ acceptance, and changed neither grader.
 | 60-answer labeled corpus, split fixed in the file | **Complete** — [`fixtures/grading/av017-corpus.json`](../../../fixtures/grading/av017-corpus.json) |
 | Human label + written rationale per answer, before any grader ran | **Complete** for all 57 filled answers |
 | Offline harness over the shipped graders, no emulator | **Complete** — `GradingEvaluationTest`, 3 modes |
-| Record/replay reproducibility | **Complete** — 5 round-trip tests, no network |
+| Record/replay reproducibility | **Complete** — 5 round-trip tests, and the live pass replays with zero differences |
 | Scoring rubric and rate definitions | **Complete** — `tools/av017-qa/score.py` |
-| Frozen-configuration and held-out discipline, enforced | **Complete** — `score.py` refuses to score held-out unfrozen |
-| Quota accounting through AV-020's ledger | **Complete** — wired; 0 reservations so far, because the AI path has not run |
+| Frozen-configuration and held-out discipline, enforced | **Complete** — frozen `4b093a06dd10`, held-out scored once per freeze |
+| Quota accounting through AV-020's ledger | **Complete** — 1 reservation, daily limit raised explicitly to 200 |
 | Rule-path measurement | **Complete** over 57 answers |
+| AI-path measurement | **Run; refused by the shipped guard** — 100% abstention, 0 labels |
 | **6 live STT misrecognitions** | **Not met — 4 captured** in 62 attempts; owner stopped at 4 |
-| **AI-path measurement** | **Not run** — needs one recorded pass with an OpenRouter key |
 
 ## The corpus
 
@@ -86,8 +92,7 @@ is a truncation after the first "then"; it names only the first element of the r
 order and is labeled exactly as the authored "It puts two first." is. **`no route does not
 satisfy Square`** still answers no and gives not satisfying square as the reason, so both
 required concepts are present and it is labeled correct — a strict reader could call the
-reason unintelligible, and the AI path's verdict on it is one of the things worth reading
-when that path runs. `no … in both conditions are required` is a harmless garble of the
+reason unintelligible. `no … in both conditions are required` is a harmless garble of the
 reference answer and is labeled correct.
 
 The remaining 3 slots — `t3` (new, arithmetic), `h1` (suspended, arithmetic) and `h2`
@@ -114,7 +119,8 @@ that produced it, so an instruction, route or corpus change **fails the replay**
 of quietly re-scoring against stale evidence. Five round-trip tests prove record → replay
 equality, the refusal, unexhausted transcripts, that a recorded timeout replays as a
 timeout, and that the transcript carries a request digest rather than the request or the
-key.
+key. The recorded live pass below, replayed with no network, reproduces all 57 answers
+with **zero differences** in source, outcome, label, reason, rating or failure.
 
 `tests/test_av017_evaluation.py` adds 22 static guards: the corpus table, the split
 discipline, the STT sourcing rule, that no evaluation source can reach a writer, that the
@@ -122,29 +128,37 @@ live capture builds no card provider, that the harness decides no label or ratin
 own, that requests-per-session times #18's retry fits inside the shipped 30-request
 session cap, and that the scorer defines no threshold.
 
-## Measurement: the rule path
+## Measurement
 
-57 of 60 answers scored (19 tuning, 38 held-out). Configuration `4b093a06dd10`, frozen
-before the held-out answers were scored and recorded in
-[`held-out-runs.jsonl`](evidence/rule-only-20260916-3/held-out-runs.jsonl). Two earlier
-interim runs — `d502cd71abdf` over 53 answers and `d2df08447ce5` over 55, each before a
-live capture changed the corpus hash — are kept in
+57 of 60 answers scored (19 tuning, 38 held-out). Configuration `4b093a06dd10` — the
+corpus plus the six shipped sources that decide a label — frozen before the held-out
+answers were scored, and recorded in
+[`held-out-runs.jsonl`](evidence/ai-20260916/held-out-runs.jsonl). Both paths were
+measured in one recorded pass on September 16, 2026; since this card adjusts nothing,
+there was nothing to tune between inspecting the 20 and scoring the 40, and the held-out
+answers were scored exactly once against this freeze. Three earlier rule-only interim
+runs, one per corpus revision, are kept in
 [their](evidence/rule-only-20260916/held-out-runs.jsonl)
-[own](evidence/rule-only-20260916-2/held-out-runs.jsonl) directories, as the card
-requires of every held-out run.
+[own](evidence/rule-only-20260916-2/held-out-runs.jsonl)
+[directories](evidence/rule-only-20260916-3/held-out-runs.jsonl), as the card requires of
+every held-out run.
 
 | Split | Path | n | False acceptance | False rejection | Abstention | p50 | p95 |
 | --- | --- | ---: | --- | --- | --- | ---: | ---: |
-| Tuning | rule-only | 2 | 0 / 0 (n/a) | 0 / 2 (0.0) | 0 / 2 (0.0) | 0.041 ms | 0.234 ms |
-| Tuning | AI | — | **not run** | — | — | — | — |
-| Held-out | rule-only | 5 | 0 / 0 (n/a) | 0 / 5 (0.0) | 0 / 5 (0.0) | 0.046 ms | 0.085 ms |
-| Held-out | AI | — | **not run** | — | — | — | — |
+| Tuning | rule-only | 2 | 0 / 0 (n/a) | 0 / 2 (0.0) | 0 / 2 (0.0) | 0.122 ms | 0.842 ms |
+| Tuning | AI | 17 | 0 / 9 (0.0) | 0 / 4 (0.0) | **17 / 17 (1.0)** | 0.162 ms | 1,593 ms |
+| Held-out | rule-only | 5 | 0 / 0 (n/a) | 0 / 5 (0.0) | 0 / 5 (0.0) | 0.086 ms | 0.187 ms |
+| Held-out | AI | 33 | 0 / 16 (0.0) | 0 / 9 (0.0) | **33 / 33 (1.0)** | 0.151 ms | 0.476 ms |
 
-A denominator of 0 is reported as `n/a`, never as a rate of 0: **no answer labeled
-incorrect ever reached a rule match**, so the rule path's false-acceptance rate is
-undefined on this corpus rather than measured at zero. That is the honest reading.
+Read the AI rows carefully. The false-acceptance and false-rejection rates are 0 **only
+because nothing was proposed**: every AI-path answer abstained, so the learner would have
+self-graded all 50. And 49 of the 50 AI-path "latencies" are the shipped provider refusing
+locally in a fraction of a millisecond; the one request that reached the network took
+**1,577 ms**, which is the single grading latency this run measured. A denominator of 0 on
+the rule path is reported as `n/a`, never as a rate of 0: no answer labeled incorrect ever
+reached a rule match.
 
-### What the rule path actually did
+### What the rule path did
 
 **It fired on 7 of 57 answers (12%) and left 50 (88%) to the AI grader or an explicit
 self-grade.** Every one of the 7 was an exact normalized match, and every one was
@@ -160,14 +174,12 @@ human-labeled correct:
 | `av017-correct-short-h4` | held-out | Exact match with accepted answer 2 |
 | `av017-correct-short-h5` | held-out | Exact match with accepted answer 1 |
 
-None of the four live STT answers reached a rule. Three observations, recorded rather
-than acted on:
+Three observations, recorded rather than acted on:
 
 - **The one-letter fuzzy rule was reached in shape once and declined by design.**
   `av017-stt-mistake-h4` differs from the reference answer at exactly one of twelve words
   (`in` for `and`), which is the shape the rule accepts — but both words are shorter than
-  `MIN_FUZZY_LETTERS`, so it returned null and the answer fell through to the AI path.
-  That is the documented policy working. No answer in the corpus matches the rule's full
+  `MIN_FUZZY_LETTERS`, so it returned null. No answer in the corpus matches the rule's full
   shape, so its accepting behaviour remains **untested**, not clean.
 - **`av017-correct-short-h2`** ("Green blue red") matched *the reference answer*, not the
   accepted answer it was authored against, because normalization removes the reference
@@ -175,6 +187,54 @@ than acted on:
   target the author did not expect.
 - Rule-path latency is local computation on the JVM at microsecond resolution. It is not
   a device measurement and says nothing about an Android runtime.
+
+### What the AI path did, and the finding against the route guard
+
+One recorded pass, [`evidence/ai-20260916/`](evidence/ai-20260916/), `OPENROUTER_API_KEY`
+exported by the operator and never written anywhere; `validate.py` confirms nothing
+key-shaped is in the evidence.
+
+The pre-session price check **passed**: the endpoints listing named
+`Liquid | liquid/lfm-2.5-2.6b-20260811:free` with tag `liquid/fp8`, provider name
+`Liquid`, and zero prompt and completion prices. The first grading request,
+`av017-paraphrase-t1`, was reserved, dispatched and answered in 1,577 ms by model
+`liquid/lfm-2.5-2.6b:free` at a reported cost of 0, `finish_reason: stop`, with content
+
+```json
+{"label": "correct", "reason": "The learner correctly reverses the sequence to 'green, blue, red', satisfying all three required concepts: green first, blue second, and red last."}
+```
+
+— a well-formed two-key reply whose label agrees with the human label. **It never became a
+suggestion.** The reply's `provider` field is the string `Liquid`, and
+[`FreeRoute.replyCheck`](../../../android/provider/src/main/kotlin/org/ankivoice/provider/FreeRoute.kt)
+compares it with the pinned `PROVIDER`, which is the endpoint *tag* `liquid/fp8`:
+
+```kotlin
+if (provider != null && provider != PROVIDER) return RouteCheck.Refused("served by $provider, not the pinned provider")
+```
+
+The shipped provider therefore recorded `costNotVerified`, stopped the ledger for the UTC
+day with `COST_NOT_VERIFIED`, and refused the remaining 49 requests before dispatch —
+which is exactly what #17 designed it to do when a reply is not verifiably the pinned
+provider's. That design is not wrong; the comparison is comparing two different fields of
+OpenRouter's schema.
+
+**This is not new to this run.** AV-006's recorded grading evidence,
+[`openrouter-grade-b.json`](../av006/evidence/openrouter-grade-b.json) and its pass-2
+twin, carries `provider: "Liquid"` on all 24 attempts, so the reply field has read
+`Liquid` since the route was chosen. No AV-020 evidence directory exists in this
+checkout, so whether the shipped guard ever passed a real reply is not recorded here.
+As shipped, **AI grading refuses on the first reply of every session and is off for the
+rest of the day**; the learner self-grades. That is safe — nothing is proposed, nothing
+is written — but the feature is inert, and #18's grading quality cannot be measured until
+it is corrected.
+
+This belongs to **#17 (AV-020)**, which owns the route guard, with #6 (AV-006) as the
+source of the pinned values. It was not corrected here: AV-017 changes neither grader,
+and loosening a cost-verification guard is not a decision for an evaluation card. The
+correction would change `FreeRoute.kt`, which is part of the frozen configuration, so the
+AI path will need a **new freeze, a new evidence directory and a new recorded pass**
+afterwards; this run stays in the ledger as the measurement of the build as it was.
 
 ## Live STT capture, September 16, 2026
 
@@ -259,8 +319,8 @@ project's code.
 **What was done about it.** The per-attempt PCM preflight in `capture.py` is exact but
 costs an open, so session 3's driver read the fault from the emulator's own log instead
 and cold-booted the AVD proactively after every two captures: 45 attempts cost 23 cold
-boots and the operator was asked to speak into a dead microphone twice rather than
-nine times. The runbook records both the budget and the procedure.
+boots and the operator was asked to speak into a dead microphone twice rather than nine
+times. The runbook records both the budget and the procedure.
 
 ### Finding: the 6-live-misrecognition criterion is costly on this route
 
@@ -309,24 +369,21 @@ Changing an acceptance criterion is the owner's call and was not made here.
 
 ## Quota
 
-Zero reservations consumed. The AI path has not run, so nothing was spent, and the
-ledger — the shipped `QuotaLedger`, writing
-`av017-quota-ledger-rule-only.jsonl` — records `reservedTotal: 0`.
-
-When the live pass runs it will reserve one request per answer the rules do not match,
-which on the current corpus is **50 of 57** — exactly the default 50-per-UTC-day limit,
-with no headroom for #18's retries. The harness opens a fresh grading session every 14
-requests so it stays inside the shipped 30-request session cap **rather than raising
-it**. The daily limit is the decision to record when the pass runs: raise
-`-Pav017.dailyLimit` explicitly or spread the run across two UTC days, and say which.
-Free route only; no paid fallback.
+The recorded pass ran with the daily limit **raised explicitly to 200** (`-Pav017.dailyLimit=200`)
+rather than spread across UTC days, because 50 requests plus #18's retries could not fit
+the default 50. It consumed **1 reservation** of the 200, and 1 of the 30-request session
+cap, before the guard's `COST_NOT_VERIFIED` stop ended the day; the shipped
+[`av017-quota-ledger-record.jsonl`](evidence/ai-20260916/av017-quota-ledger-record.jsonl)
+holds exactly those two entries. Free route only; no paid fallback; nothing raised a cap
+to make a request succeed. The rule-only interim runs consumed nothing.
 
 ## What this does not establish
 
-- **Nothing about the AI path.** It has not been run. The report shows it as `not-run`,
-  which is deliberately distinct from an abstention and is never scored as one.
-- **Nothing about grading quality overall.** The rule path carries 12% of this corpus; the
-  88% that matters most is unmeasured.
+- **Nothing about AI grading quality.** The one reply that reached the validator would
+  have been a correct suggestion; one reply is an anecdote. Until #17's guard is corrected
+  the path cannot be measured on this route.
+- **Nothing about grading quality overall.** The rule path carries 12% of this corpus and
+  proposes only on exact matches; the 88% that matters most abstained.
 - **Nothing about recognition reliability.** Forty-seven clean captures on one host in one
   afternoon are a planning estimate, not a rate for the route.
 - 40 held-out answers over 8 synthetic cards in English on one emulator is a small sample
@@ -341,14 +398,16 @@ Free route only; no paid fallback.
 
 [The runbook](runbook.md) separates the four layers. Layer 1 runs anywhere and is what CI
 runs. Layers 2 and 3 need the pinned AVD and your own credential respectively, and layer 4
-replays layer 3 offline.
+replays layer 3 offline — `evidence/ai-20260916/transcript.jsonl` replays today with no
+network and no key.
 
 ## Next
 
-1. Run one recorded AI pass on this corpus and score the held-out answers once against a
-   fresh frozen configuration, in a new evidence directory.
-2. Decide the criterion question above; the three open slots stay `live-pending` until it
-   is decided or captured.
+1. **#17:** correct the reply-side provider check in `FreeRoute.replyCheck` — the reply
+   carries the provider *name*, the pin is the endpoint *tag* — then freeze anew and record
+   one more pass; the harness, corpus and scoring need no change.
+2. Decide the STT criterion question above; the three open slots stay `live-pending` until
+   it is decided or captured.
 
-All three interim runs are kept in their ledgers rather than discarded, as the card
+All four held-out runs are kept in their ledgers rather than discarded, as the card
 requires of every held-out run.
