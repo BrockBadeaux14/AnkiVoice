@@ -109,6 +109,9 @@ result**, and `capture.py` records it as one. It never fills a corpus slot.
 
 ### Capture
 
+The tools find `adb` on `PATH`, then under `ANDROID_HOME`, `ANDROID_SDK_ROOT` or the
+default `~/Library/Android/sdk`; a shell without the SDK on `PATH` is fine.
+
 ```sh
 .venv/bin/python tools/av017-qa/capture.py --list
 .venv/bin/python tools/av017-qa/capture.py --slot stt-live-1 --evidence docs/testing/av017/evidence/<run>

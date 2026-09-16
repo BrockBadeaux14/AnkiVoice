@@ -58,7 +58,7 @@ def pending_slots():
 def capture(slot, device, speak_ms, diagnose=True):
     """Run one capture and return the harness's JSON, whatever it says."""
     command = [
-        "adb", "-s", device, "shell", "am", "instrument", "-w",
+        microphone.adb(), "-s", device, "shell", "am", "instrument", "-w",
         "-e", "confirm", CONFIRMATION,
         "-e", "slot", slot["slot"],
         "-e", "answerId", slot["answer_id"],

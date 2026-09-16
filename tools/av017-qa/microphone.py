@@ -11,6 +11,9 @@ fault is recorded as one instead of being reported as a recognition failure.
 Values are mono PCM16, so full scale is 32,768. No network, no device state.
 """
 import math
+import os
+from pathlib import Path
+import shutil
 import struct
 import subprocess
 
@@ -22,6 +25,25 @@ LIVE = "live"
 FALLBACK_TONE = "goldfish-220hz-tone"
 ZEROED = "zeroed"
 EMPTY = "no-samples"
+
+
+def adb():
+    """The platform-tools adb, from PATH, ANDROID_HOME, ANDROID_SDK_ROOT or the default SDK.
+
+    The operator's shell need not have the SDK on PATH; Android Studio installs it without
+    doing so on macOS, and the evidence host is exactly that setup.
+    """
+    found = shutil.which("adb")
+    if found:
+        return found
+    roots = [os.environ.get("ANDROID_HOME"), os.environ.get("ANDROID_SDK_ROOT"),
+             str(Path.home() / "Library" / "Android" / "sdk")]
+    for root in roots:
+        if root and (Path(root) / "platform-tools" / "adb").is_file():
+            return str(Path(root) / "platform-tools" / "adb")
+    raise SystemExit(
+        "adb not found: add platform-tools to PATH, or set ANDROID_HOME to the Android SDK."
+    )
 
 
 def analyse(raw):
@@ -68,7 +90,7 @@ def analyse(raw):
 def read_device_pcm(device, path):
     """The app-private PCM the capture copied, or None when there is none to read."""
     finished = subprocess.run(
-        ["adb", "-s", device, "exec-out", "run-as", "org.ankivoice", "cat", path],
+        [adb(), "-s", device, "exec-out", "run-as", "org.ankivoice", "cat", path],
         capture_output=True,
         timeout=120,
     )
@@ -84,7 +106,7 @@ def preflight(device, speak_ms=5000):
     """
     subprocess.run(
         [
-            "adb", "-s", device, "shell", "am", "instrument", "-w",
+            adb(), "-s", device, "shell", "am", "instrument", "-w",
             "-e", "confirm", "AV025_LIVE_SPEECH",
             "-e", "diagnose", "true",
             "-e", "speakMs", str(speak_ms),
