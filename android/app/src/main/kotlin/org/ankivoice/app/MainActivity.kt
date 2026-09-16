@@ -21,6 +21,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.ankivoice.ankidroid.AndroidAccessPlatform
+import org.ankivoice.ankidroid.ProvisioningReport
+import org.ankivoice.ankidroid.ProvisioningStatus
+import org.ankivoice.ankidroid.ProvisioningStep
 import org.ankivoice.core.contracts.*
 
 class MainActivity : ComponentActivity() {
@@ -123,6 +126,10 @@ private fun ShellScreen(
                 Text("AnkiDroid connected · Microphone allowed", color = MaterialTheme.colorScheme.primary)
             }
 
+            // Always offered: provisioning reports its own failure by name rather than
+            // disappearing, and a denied microphone does not stop it.
+            SetupCard(state, controller)
+
             if (failure == null || failure.mode == CardProviderFailure.DECK_MISSING) {
                 Card(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -175,6 +182,101 @@ private fun ShellScreen(
             TextButton(onClick = controller::refresh, enabled = !state.checking) { Text("Check access again") }
         }
     }
+}
+
+/**
+ * AV-039's explicit setup action. Nothing here writes on its own: the action inspects the
+ * collection, and a write happens only after [FullSyncDisclosure] is accepted.
+ */
+@Composable
+private fun SetupCard(state: ShellState, controller: ShellController) {
+    val report = state.setup
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text("VoiceQA note type", style = MaterialTheme.typography.titleLarge)
+            Text(
+                "Voice study needs a note type named VoiceQA. Setup installs it when it is " +
+                    "missing and adds a VoiceQA Demo deck with four sample notes. It never " +
+                    "changes another note type, and it never submits a review.",
+            )
+            if (state.setupBusy) LinearProgressIndicator(Modifier.fillMaxWidth())
+            SetupSummary(report)
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Button(
+                    onClick = if (report == null || !report.workRemains) controller::checkSetup
+                    else controller::startSetup,
+                    enabled = !state.setupBusy,
+                ) { Text(if (report != null && report.workRemains) "Set up VoiceQA" else "Check setup") }
+                if (report != null && report.workRemains) {
+                    TextButton(onClick = controller::checkSetup, enabled = !state.setupBusy) { Text("Check again") }
+                }
+            }
+        }
+    }
+    if (state.disclosing) {
+        FullSyncDisclosure(state.setup, controller::confirmSetup, controller::declineSetup)
+    }
+}
+
+@Composable
+private fun SetupSummary(report: ProvisioningReport?) {
+    if (report == null) {
+        Text("Setup has not checked your collection yet.", style = MaterialTheme.typography.bodyMedium)
+        return
+    }
+    val (headline, detail) = when (val status = report.status) {
+        ProvisioningStatus.Complete -> setupComplete(report) to emptyList()
+        ProvisioningStatus.Declined ->
+            "Setup cancelled. Nothing in your collection was changed." to emptyList()
+        is ProvisioningStatus.Incomplete -> "Setup is not finished." to status.reasons
+        is ProvisioningStatus.Conflict -> "A different VoiceQA note type is in the way." to status.differences
+        is ProvisioningStatus.Failed ->
+            "AnkiDroid did not answer, so nothing was changed." to listOf(status.failure.mode.specName)
+    }
+    val conflicted = report.status is ProvisioningStatus.Conflict || report.status is ProvisioningStatus.Failed
+    Text(
+        headline,
+        style = MaterialTheme.typography.titleMedium,
+        color = if (conflicted) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+    )
+    detail.forEach { Text("• $it", style = MaterialTheme.typography.bodyMedium) }
+}
+
+private fun setupComplete(report: ProvisioningReport): String {
+    val noteType = if (report.noteType == ProvisioningStep.CREATED) "VoiceQA installed"
+    else "VoiceQA already installed"
+    val demo = when (report.demoNotes) {
+        ProvisioningStep.CREATED -> "${report.notesAdded} sample notes added to VoiceQA Demo"
+        ProvisioningStep.SKIPPED -> "VoiceQA Demo already exists, so sample notes were skipped"
+        else -> "no demo content was needed"
+    }
+    return "$noteType · $demo."
+}
+
+/**
+ * Adding a note type makes AnkiDroid's next sync a one-way full sync. The learner is told
+ * that before the first write, and declining leaves the collection unchanged.
+ */
+@Composable
+private fun FullSyncDisclosure(report: ProvisioningReport?, confirm: () -> Unit, decline: () -> Unit) {
+    val reasons = (report?.status as? ProvisioningStatus.Incomplete)?.reasons.orEmpty()
+    AlertDialog(
+        onDismissRequest = decline,
+        title = { Text("Setup will change your collection") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                reasons.forEach { Text("• $it") }
+                Text(
+                    "Adding a note type forces AnkiDroid's next sync to be a one-way full sync: " +
+                        "it uploads this device's collection and replaces the AnkiWeb copy. Sync " +
+                        "in AnkiDroid first if that copy is newer than this device.",
+                )
+                Text("Existing note types, decks and reviews are not changed.")
+            }
+        },
+        confirmButton = { Button(onClick = confirm) { Text("Install VoiceQA") } },
+        dismissButton = { TextButton(onClick = decline) { Text("Not now") } },
+    )
 }
 
 @Composable

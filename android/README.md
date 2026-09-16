@@ -9,7 +9,10 @@ This is the Gradle build and the Kotlin copy of the AV-007 contracts that every 
 card builds on. AV-023 (#24) adds the Compose shell, AnkiDroid access preflight and deck
 selection, permission onboarding, app-private settings, and a debug sample-session
 preview. See the [AV-023 results](../docs/testing/av023/results.md) and
-[runbook](../docs/testing/av023/runbook.md). Real card access, speech, network access and
+[runbook](../docs/testing/av023/runbook.md). AV-039 (#10) adds VoiceQA note type
+provisioning behind an explicit setup action: see the
+[AV-039 results](../docs/testing/av039/results.md) and
+[runbook](../docs/testing/av039/runbook.md). Real card access, speech, network access and
 ReviewSession integration belong to #25, #26, #17 and #14.
 
 ## Build
@@ -34,7 +37,7 @@ On Windows, run `gradlew.bat` with the same arguments.
 | `checkModuleBoundaries` | The module graph follows AV-022 (see [Modules](#modules)). It also runs as part of `check`. |
 | `:core:test` | The contract-level JVM tests and the Kotlin half of the drift guard. |
 | `assembleDebug` | All five modules compile, and `:app` produces `app/build/outputs/apk/debug/app-debug.apk`. |
-| `:ankidroid:testDebugUnitTest :app:testDebugUnitTest` | Access classification, deck selection, session cancellation and lifecycle regression tests for AV-023. |
+| `:ankidroid:testDebugUnitTest :app:testDebugUnitTest` | AV-023's access classification, deck selection, session cancellation and lifecycle regression tests, and AV-039's provisioning outcomes and note type loader. |
 | `:app:assembleRelease :app:lintDebug` | Release compilation without fakes; Android lint. |
 
 [`.github/workflows/android.yml`](../.github/workflows/android.yml) runs both commands on
@@ -97,6 +100,11 @@ flowchart TD
 
 | Module | Kind | Contents now | Owner of what comes next |
 | --- | --- | --- | --- |
+| `:core` | Kotlin/JVM, no Android plugin or dependency | The AV-007 contract port in `org.ankivoice.core.contracts`; the fakes in its `testFixtures` source set | #14, #13, #25, #16/#18, #15, #20 |
+| `:ankidroid` | Android library | Access preflight; `decks` reads and verified `selected_deck` updates; AV-039 VoiceQA provisioning with read-back | #25 |
+| `:speech` | Android library | A marker object; no platform calls | #26 |
+| `:provider` | Android library | A marker object; no platform calls or network access | #17, #18 |
+| `:app` | Android application | Single-activity shell, onboarding, the VoiceQA setup action and its full-sync disclosure, private settings, lifecycle delivery and debug sample session | #27, #17 |
 | `:core` | Kotlin/JVM, no Android plugin or dependency | The AV-007 contract port in `org.ankivoice.core.contracts`; AV-015's rule-based grading in `org.ankivoice.core.grading`; the fakes in its `testFixtures` source set | #14, #13, #25, #18, #15, #20 |
 | `:ankidroid` | Android library | Access preflight; `decks` reads and verified `selected_deck` updates | #25, #10 |
 | `:speech` | Android library | A marker object; no platform calls | #26 |
@@ -206,6 +214,31 @@ One non-semantic difference: the specification's CardProvider failure table list
 `nullCursor` fourth, while the binding declares it last. The Kotlin enum follows the
 binding's order, so the drift guard can compare lists in order.
 
+## VoiceQA provisioning
+
+`:ankidroid` owns AV-039 (#10). `AnkiDroidProvisioning` installs the VoiceQA note type
+when it is missing, reuses it when its ordered field names match the fixture, and stops
+with a named conflict when they do not. `:app` supplies the explicit setup action and the
+full-sync disclosure; nothing provisions on its own.
+
+| Type | What it is |
+| --- | --- |
+| `VoiceQaNoteType` | The installable specification: name, ordered fields, CSS, one template, the demo deck and its four sample notes |
+| `ProvisioningPlatform` | The resolver seam, extending AV-023's `AccessPlatform` with `models`, `models/<id>/templates`, `decks`, `notes`, `notes/<id>/cards` and the card move |
+| `ProvisioningStatus` | `Complete`, `Declined`, `Incomplete(reasons)`, `Conflict(differences)` or `Failed(failure)` |
+| `ProvisioningReport` | The status plus how far the run got: a `ProvisioningStep` per item and the number of sample notes added |
+| `Provisioner` | `inspect`, which never writes, and `provision(fullSyncAccepted)`, which writes nothing without it |
+
+`AnkiDroidProvisioning` and `AnkiDroidAccess` share one serial worker in `:app`'s
+composition root, so a deck read and a collection write never overlap. Provisioning's
+only writes are a `models` insert with its template update, a `decks` insert, `notes`
+inserts, and a move of the cards that run just created. It reports failures with AV-007's
+names: `packageUnavailable`, `apiDisabled`, `accessDenied` and `nullCursor`.
+
+After writing a note type it is read back through `models` and its templates and compared
+with the fixture; a mismatch is reported as incomplete, naming what differs. The
+[AV-039 results](../docs/testing/av039/results.md) record the confirmed provider route and
+the pinned-emulator evidence.
 ## Rule-based grading
 
 - Issue: [#16 — AV-015: Implement rule-based grading and rating policy](https://github.com/BrockBadeaux14/AnkiVoice/issues/16).
@@ -327,6 +360,25 @@ python -m unittest tests.test_av041_android -v
 cd android && ./gradlew :core:test
 ```
 
+AV-039 uses the same shape for the note type itself.
+[`tools/av039_note_type.py`](../tools/av039_note_type.py) derives
+[`ankidroid/src/main/resources/av039/voiceqa-note-type.properties`](ankidroid/src/main/resources/av039/voiceqa-note-type.properties)
+from [`fixtures/voiceqa/note-type.json`](../fixtures/voiceqa/note-type.json). The app
+cannot read that JSON directly: `org.json` is stubbed in JVM unit tests and AV-022's pins
+add no JSON library, so the derived resource is read with `java.util.Properties`, which
+both the host JVM and Android supply. `tests/test_av039_note_type.py` fails if the
+checked-in copy is stale or escapes a value a properties parser would not return
+unchanged; `VoiceQaNoteTypeTest` fails if the Kotlin loader disagrees with the resource,
+or if the resource is not packaged where the app looks for it.
+
+After an intentional change to `fixtures/voiceqa/note-type.json`:
+
+```sh
+python tools/av039_note_type.py --write
+python -m unittest tests.test_av039_note_type -v
+cd android && ./gradlew :ankidroid:testDebugUnitTest
+```
+
 ## What this does not establish
 
 - AV-041's original validation built the debug APK without launching it. AV-023 now
@@ -337,3 +389,7 @@ cd android && ./gradlew :core:test
   Any device or emulator evidence in later cards still needs the pinned host.
 - The fakes are not a scheduler. They cannot prove timing, threading or Android lifecycle
   behaviour.
+- AV-039's provider route is confirmed on the pinned emulator with AnkiDroid 2.24.1 only.
+  No sync was performed, so the full-sync consequence the disclosure states is Anki's
+  documented schema rule rather than something this build observed. See the
+  [AV-039 limits](../docs/testing/av039/results.md#what-this-does-not-establish).

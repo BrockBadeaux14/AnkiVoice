@@ -1,0 +1,76 @@
+{
+  "notetypes": {
+    "1789514819284": {
+      "name": "Basic",
+      "fields": [
+        "Front",
+        "Back"
+      ],
+      "templates": [
+        "Card 1"
+      ]
+    },
+    "1789514819285": {
+      "name": "Basic (and reversed card)",
+      "fields": [
+        "Front",
+        "Back"
+      ],
+      "templates": [
+        "Card 1",
+        "Card 2"
+      ]
+    },
+    "1789514819286": {
+      "name": "Basic (optional reversed card)",
+      "fields": [
+        "Front",
+        "Back",
+        "Add Reverse"
+      ],
+      "templates": [
+        "Card 1",
+        "Card 2"
+      ]
+    },
+    "1789514819287": {
+      "name": "Basic (type in the answer)",
+      "fields": [
+        "Front",
+        "Back"
+      ],
+      "templates": [
+        "Card 1"
+      ]
+    },
+    "1789514819288": {
+      "name": "Cloze",
+      "fields": [
+        "Text",
+        "Back Extra"
+      ],
+      "templates": [
+        "Cloze"
+      ]
+    },
+    "1789514819289": {
+      "name": "Image Occlusion",
+      "fields": [
+        "Occlusion",
+        "Image",
+        "Header",
+        "Back Extra",
+        "Comments"
+      ],
+      "templates": [
+        "Image Occlusion"
+      ]
+    }
+  },
+  "decks": {
+    "1": "Default"
+  },
+  "notes": [],
+  "cards": [],
+  "revlog": []
+}

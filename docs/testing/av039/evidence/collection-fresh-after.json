@@ -1,0 +1,193 @@
+{
+  "notetypes": {
+    "1789514819284": {
+      "name": "Basic",
+      "fields": [
+        "Front",
+        "Back"
+      ],
+      "templates": [
+        "Card 1"
+      ]
+    },
+    "1789514819285": {
+      "name": "Basic (and reversed card)",
+      "fields": [
+        "Front",
+        "Back"
+      ],
+      "templates": [
+        "Card 1",
+        "Card 2"
+      ]
+    },
+    "1789514819286": {
+      "name": "Basic (optional reversed card)",
+      "fields": [
+        "Front",
+        "Back",
+        "Add Reverse"
+      ],
+      "templates": [
+        "Card 1",
+        "Card 2"
+      ]
+    },
+    "1789514819287": {
+      "name": "Basic (type in the answer)",
+      "fields": [
+        "Front",
+        "Back"
+      ],
+      "templates": [
+        "Card 1"
+      ]
+    },
+    "1789514819288": {
+      "name": "Cloze",
+      "fields": [
+        "Text",
+        "Back Extra"
+      ],
+      "templates": [
+        "Cloze"
+      ]
+    },
+    "1789514819289": {
+      "name": "Image Occlusion",
+      "fields": [
+        "Occlusion",
+        "Image",
+        "Header",
+        "Back Extra",
+        "Comments"
+      ],
+      "templates": [
+        "Image Occlusion"
+      ]
+    },
+    "1789515114665": {
+      "name": "VoiceQA",
+      "fields": [
+        "Prompt",
+        "ReferenceAnswer",
+        "RequiredConcepts",
+        "AcceptedAnswers",
+        "Language",
+        "Extra"
+      ],
+      "templates": [
+        "Voice recall"
+      ]
+    }
+  },
+  "decks": {
+    "1": "Default",
+    "1789515114641": "VoiceQA Demo"
+  },
+  "notes": [
+    {
+      "id": 1789515114746,
+      "notetype": "VoiceQA",
+      "tags": "ankivoice-demo demo-reversal",
+      "fields": [
+        "Reverse the sequence red, blue, green.",
+        "Green, blue, red.",
+        "Green first\nBlue second\nRed last",
+        "Green blue red",
+        "en-US",
+        "Reversing changes the order, not the items."
+      ]
+    },
+    {
+      "id": 1789515114794,
+      "notetype": "VoiceQA",
+      "tags": "ankivoice-demo demo-rules",
+      "fields": [
+        "In a game, a token is valid only if it is blue and square. A token is blue and round. Is it valid, and why?",
+        "No. It is blue but not square, and both conditions are required.",
+        "It is not valid\nIt fails the square requirement",
+        "No, because it is round instead of square.",
+        "en-US",
+        "Meeting just one required condition is insufficient."
+      ]
+    },
+    {
+      "id": 1789515114829,
+      "notetype": "VoiceQA",
+      "tags": "ankivoice-demo demo-arithmetic",
+      "fields": [
+        "A box has three red blocks and two blue blocks. How many blocks are there in total?",
+        "Five blocks.",
+        "Five",
+        "Five\n5\nThere are five blocks",
+        "en-US",
+        "Three plus two equals five."
+      ]
+    },
+    {
+      "id": 1789515114861,
+      "notetype": "VoiceQA",
+      "tags": "ankivoice-demo demo-explanation",
+      "fields": [
+        "A machine sorts numbers from smallest to largest. Explain what it does to the list seven, two, five.",
+        "It returns two, five, seven, ordering the numbers from smallest to largest.",
+        "The resulting order is two, five, seven",
+        "Two five seven",
+        "en-US",
+        "The values stay the same; only their order changes."
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "id": 1789515114746,
+      "note": 1789515114746,
+      "deck": "VoiceQA Demo",
+      "ord": 0,
+      "type": 0,
+      "queue": 0,
+      "due": 1,
+      "ivl": 0,
+      "reps": 0,
+      "lapses": 0
+    },
+    {
+      "id": 1789515114794,
+      "note": 1789515114794,
+      "deck": "VoiceQA Demo",
+      "ord": 0,
+      "type": 0,
+      "queue": 0,
+      "due": 2,
+      "ivl": 0,
+      "reps": 0,
+      "lapses": 0
+    },
+    {
+      "id": 1789515114829,
+      "note": 1789515114829,
+      "deck": "VoiceQA Demo",
+      "ord": 0,
+      "type": 0,
+      "queue": 0,
+      "due": 3,
+      "ivl": 0,
+      "reps": 0,
+      "lapses": 0
+    },
+    {
+      "id": 1789515114861,
+      "note": 1789515114861,
+      "deck": "VoiceQA Demo",
+      "ord": 0,
+      "type": 0,
+      "queue": 0,
+      "due": 4,
+      "ivl": 0,
+      "reps": 0,
+      "lapses": 0
+    }
+  ],
+  "revlog": []
+}

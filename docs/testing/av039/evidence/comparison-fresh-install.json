@@ -1,0 +1,24 @@
+{
+  "notetypes_added": [
+    "VoiceQA"
+  ],
+  "notetypes_changed": [],
+  "decks_added": [
+    "VoiceQA Demo"
+  ],
+  "decks_renamed": [],
+  "notes_added": [
+    "Reverse the sequence red, blue, green.",
+    "In a game, a token is valid only if it is blue and square. A",
+    "A box has three red blocks and two blue blocks. How many blo",
+    "A machine sorts numbers from smallest to largest. Explain wh"
+  ],
+  "notes_changed": [],
+  "cards_before": 0,
+  "cards_after": 4,
+  "existing_cards_changed": [],
+  "reviews_before": 0,
+  "reviews_after": 0,
+  "reviews_changed": false,
+  "reviews_added_or_altered": false
+}
