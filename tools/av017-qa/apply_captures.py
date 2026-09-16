@@ -65,7 +65,9 @@ def main():
     if answer["provenance"]["kind"] != "live-pending":
         raise SystemExit(f"{args.slot} is already filled from {answer['provenance']['kind']}")
 
-    spoken = answer["provenance"]["spoken_target"]
+    # What the operator was asked to say and attested to, as the capture recorded it; the
+    # slot's planned phrase is a fallback for records that predate --say.
+    spoken = result.get("expectedPhrase") or answer["provenance"]["spoken_target"]
     answer["answer"] = result["transcript"]
     answer["label"] = args.label
     answer["label_rationale"] = args.rationale

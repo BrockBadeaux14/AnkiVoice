@@ -95,6 +95,8 @@ def main():
     parser.add_argument("--list", action="store_true")
     parser.add_argument("--no-diagnose", action="store_true", help="skip the raw PCM copy")
     parser.add_argument("--no-preflight", action="store_true", help="skip the microphone check")
+    parser.add_argument("--say", help="the phrase to speak for this attempt, if not the slot's planned one; "
+                        "it must still be an answer to the slot's card, and it is recorded verbatim")
     args = parser.parse_args()
 
     slots = pending_slots()
@@ -108,6 +110,8 @@ def main():
     selected = next((s for s in slots if s["slot"] == args.slot), None)
     if selected is None:
         raise SystemExit(f"{args.slot} is not a live-pending slot; --list shows the ones that are")
+    if args.say:
+        selected = dict(selected, speak=args.say, planned_speak=selected["speak"])
 
     args.evidence.mkdir(parents=True, exist_ok=True)
 

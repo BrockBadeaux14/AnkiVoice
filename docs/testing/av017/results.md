@@ -5,11 +5,12 @@ Branch `codex/av-017-advisory-grading-eval`. September 16, 2026, America/Chicago
 Reproduce with [the runbook](runbook.md).
 
 **Status: the corpus, the harness, the rubric and the discipline are complete and
-reproducible. The measurement is not.** The rule path is measured in full over the 55
-answers that are complete. The AI path has not been run, and 5 of the 9 STT-mistake
-answers are still awaiting live capture — 2 of the required 6 live misrecognitions are in
-hand — so **this run is reported as incomplete rather than passed**. That is AV-017's own
-rule, computed by `score.py` rather than asserted here.
+reproducible. The measurement is not.** The rule path is measured in full over the 57
+answers that are complete. The AI path has not been run, and **4 of the required 6 live
+STT misrecognitions are in hand** after 62 live attempts across three sessions; the owner
+stopped capture there on September 16, 2026, so **this run is reported as incomplete
+rather than passed**. That is AV-017's own rule, computed by `score.py` rather than
+asserted here.
 
 This card gates nothing. It defines no target error rate, authorises no automatic
 acceptance, and changed neither grader.
@@ -19,14 +20,14 @@ acceptance, and changed neither grader.
 | Deliverable | Status |
 | --- | --- |
 | 60-answer labeled corpus, split fixed in the file | **Complete** — [`fixtures/grading/av017-corpus.json`](../../../fixtures/grading/av017-corpus.json) |
-| Human label + written rationale per answer, before any grader ran | **Complete** for all 55 filled answers |
+| Human label + written rationale per answer, before any grader ran | **Complete** for all 57 filled answers |
 | Offline harness over the shipped graders, no emulator | **Complete** — `GradingEvaluationTest`, 3 modes |
 | Record/replay reproducibility | **Complete** — 5 round-trip tests, no network |
 | Scoring rubric and rate definitions | **Complete** — `tools/av017-qa/score.py` |
 | Frozen-configuration and held-out discipline, enforced | **Complete** — `score.py` refuses to score held-out unfrozen |
 | Quota accounting through AV-020's ledger | **Complete** — wired; 0 reservations so far, because the AI path has not run |
-| Rule-path measurement | **Complete** over 55 answers |
-| **6 live STT misrecognitions** | **Not met — 2 captured**, 17 attempts. See below |
+| Rule-path measurement | **Complete** over 57 answers |
+| **6 live STT misrecognitions** | **Not met — 4 captured** in 62 attempts; owner stopped at 4 |
 | **AI-path measurement** | **Not run** — needs one recorded pass with an OpenRouter key |
 
 ## The corpus
@@ -60,31 +61,39 @@ each with a one-sentence rationale recorded beside it in the corpus file.
 An STT-mistake answer is labeled **for what the transcript says, not what the speaker
 meant**. The graders receive text, so the text is what is judged.
 
-### STT sourcing: 4 of 9 filled, 2 of them live
+### STT sourcing: 6 of 9 filled, 4 of them live
 
 | Answer | Split | Spoken | Recognizer returned | Label | Source |
 | --- | --- | --- | --- | --- | --- |
 | `av017-stt-mistake-t1` | tuning | "It puts two first, then five, then seven." | `it puts you first then five then seven` | partial | [AV-006 `native-stt-online-remainder.json`](../av006/evidence/native-stt-online-remainder.json) |
 | `av017-stt-mistake-t2` | tuning | "Green, blue, red." | `You red` | incorrect | [AV-042 attempt 4](../av042/results.md) |
-| `av017-stt-mistake-h5` | held-out | "It puts two first, then five, then seven" | `it puts two first then` | partial | **live**, [attempt 16](evidence/live-20260916/captures.jsonl) |
-| `av017-stt-mistake-h6` | held-out | "Two five seven" | `257` | partial | **live**, [attempt 12](evidence/live-20260916/captures.jsonl) |
+| `av017-stt-mistake-h3` | held-out | "No, round does not satisfy square" | `no route does not satisfy Square` | correct | **live**, session 3 attempt 24 |
+| `av017-stt-mistake-h4` | held-out | "No, it is blue but not square, and both conditions are required" | `no it is blue but not Square in both conditions are required` | correct | **live**, session 3 attempt 20 |
+| `av017-stt-mistake-h5` | held-out | "It puts two first, then five, then seven" | `it puts two first then` | partial | **live**, session 2 attempt 16 |
+| `av017-stt-mistake-h6` | held-out | "Two five seven" | `257` | partial | **live**, session 2 attempt 12 |
 
-The two reused recordings are placed in the **tuning** split: the card keeps AV-006's
-results as regression context only, and putting previously inspected output in the
-held-out 40 would make it held-out evidence in name alone. `validate.py` fails if a
-`recorded` answer ever appears in the held-out split.
+All live rows are in [`captures.jsonl`](evidence/live-20260916/captures.jsonl). The two
+reused recordings are placed in the **tuning** split: the card keeps AV-006's results as
+regression context only, and putting previously inspected output in the held-out 40 would
+make it held-out evidence in name alone. `validate.py` fails if a `recorded` answer ever
+appears in the held-out split.
 
-Two of the labels are judgements and are recorded as such. **`257`** is the recognizer
+Three of the labels are judgements and are recorded as such. **`257`** is the recognizer
 collapsing three spoken number words into a digit string: read as digits it carries the
-right values in the right order, read as one number it expresses no ordering at all, and a
-reader cannot tell which. It contradicts nothing, so it is labeled partial rather than
-incorrect. **`it puts two first then`** is a truncation after the first "then"; it names
-only the first element of the required order and is labeled exactly as the authored
-"It puts two first." is.
+right values in the right order, read as one number it expresses no ordering at all. It
+contradicts nothing, so it is partial rather than incorrect. **`it puts two first then`**
+is a truncation after the first "then"; it names only the first element of the required
+order and is labeled exactly as the authored "It puts two first." is. **`no route does not
+satisfy Square`** still answers no and gives not satisfying square as the reason, so both
+required concepts are present and it is labeled correct — a strict reader could call the
+reason unintelligible, and the AI path's verdict on it is one of the things worth reading
+when that path runs. `no … in both conditions are required` is a harmless garble of the
+reference answer and is labeled correct.
 
-The remaining 5 slots are `live-pending`: they carry no text and no label, and the harness
-skips them rather than filling them. **Synthetic character-level corruption was not used
-for any of the nine**, which the Python guard enforces structurally.
+The remaining 3 slots — `t3` (new, arithmetic), `h1` (suspended, arithmetic) and `h2`
+(buried-sibling, reversal) — are `live-pending`: they carry no text and no label, and the
+harness skips them rather than filling them. **Synthetic character-level corruption was
+not used for any of the nine**, which the Python guard enforces structurally.
 
 ## The harness
 
@@ -115,19 +124,20 @@ session cap, and that the scorer defines no threshold.
 
 ## Measurement: the rule path
 
-55 of 60 answers scored (19 tuning, 36 held-out). Configuration `d2df08447ce5`, frozen
+57 of 60 answers scored (19 tuning, 38 held-out). Configuration `4b093a06dd10`, frozen
 before the held-out answers were scored and recorded in
-[`held-out-runs.jsonl`](evidence/rule-only-20260916-2/held-out-runs.jsonl). An earlier
-interim run against `d502cd71abdf` (53 answers, before the two live captures changed the
-corpus hash) is kept in
-[its own directory](evidence/rule-only-20260916/held-out-runs.jsonl), as the card
+[`held-out-runs.jsonl`](evidence/rule-only-20260916-3/held-out-runs.jsonl). Two earlier
+interim runs — `d502cd71abdf` over 53 answers and `d2df08447ce5` over 55, each before a
+live capture changed the corpus hash — are kept in
+[their](evidence/rule-only-20260916/held-out-runs.jsonl)
+[own](evidence/rule-only-20260916-2/held-out-runs.jsonl) directories, as the card
 requires of every held-out run.
 
 | Split | Path | n | False acceptance | False rejection | Abstention | p50 | p95 |
 | --- | --- | ---: | --- | --- | --- | ---: | ---: |
-| Tuning | rule-only | 2 | 0 / 0 (n/a) | 0 / 2 (0.0) | 0 / 2 (0.0) | 0.114 ms | 0.630 ms |
+| Tuning | rule-only | 2 | 0 / 0 (n/a) | 0 / 2 (0.0) | 0 / 2 (0.0) | 0.041 ms | 0.234 ms |
 | Tuning | AI | — | **not run** | — | — | — | — |
-| Held-out | rule-only | 5 | 0 / 0 (n/a) | 0 / 5 (0.0) | 0 / 5 (0.0) | 0.050 ms | 0.066 ms |
+| Held-out | rule-only | 5 | 0 / 0 (n/a) | 0 / 5 (0.0) | 0 / 5 (0.0) | 0.046 ms | 0.085 ms |
 | Held-out | AI | — | **not run** | — | — | — | — |
 
 A denominator of 0 is reported as `n/a`, never as a rate of 0: **no answer labeled
@@ -136,7 +146,7 @@ undefined on this corpus rather than measured at zero. That is the honest readin
 
 ### What the rule path actually did
 
-**It fired on 7 of 55 answers (13%) and left 48 (87%) to the AI grader or an explicit
+**It fired on 7 of 57 answers (12%) and left 50 (88%) to the AI grader or an explicit
 self-grade.** Every one of the 7 was an exact normalized match, and every one was
 human-labeled correct:
 
@@ -150,69 +160,67 @@ human-labeled correct:
 | `av017-correct-short-h4` | held-out | Exact match with accepted answer 2 |
 | `av017-correct-short-h5` | held-out | Exact match with accepted answer 1 |
 
-Neither live STT answer reached a rule: `257` is one word against a three-word target and
-`it puts two first then` matches nothing, so both fell through to the (unrun) AI path.
+None of the four live STT answers reached a rule. Three observations, recorded rather
+than acted on:
 
-Two observations, recorded rather than acted on:
-
-- **The one-letter fuzzy rule never fired.** Not one answer in the corpus differs from a
-  target by a single slip in a long word — the four real misrecognitions in hand are a
-  substitution of a number word, a dropped phrase, a truncation and a digit collapse, none
-  of which is the shape the fuzzy rule accepts. Its behaviour on this corpus is therefore
-  **untested**, not clean.
+- **The one-letter fuzzy rule was reached in shape once and declined by design.**
+  `av017-stt-mistake-h4` differs from the reference answer at exactly one of twelve words
+  (`in` for `and`), which is the shape the rule accepts — but both words are shorter than
+  `MIN_FUZZY_LETTERS`, so it returned null and the answer fell through to the AI path.
+  That is the documented policy working. No answer in the corpus matches the rule's full
+  shape, so its accepting behaviour remains **untested**, not clean.
 - **`av017-correct-short-h2`** ("Green blue red") matched *the reference answer*, not the
   accepted answer it was authored against, because normalization removes the reference
   answer's punctuation. Correct behaviour; recorded because the reason string names a
   target the author did not expect.
-
-Rule-path latency is local computation on the JVM at microsecond resolution. It is not a
-device measurement and says nothing about an Android runtime.
+- Rule-path latency is local computation on the JVM at microsecond resolution. It is not
+  a device measurement and says nothing about an Android runtime.
 
 ## Live STT capture, September 16, 2026
 
 Pinned AVD `AnkiVoice_AV005` on `emulator-5588`, API 36, fingerprint
 `google/sdk_gphone64_arm64/emu64a:16/BE2A.250530.026.D1/13818094:user/release-keys`,
-launched with `-allow-host-audio`. Captures drive one bounded answer turn through the
-shipped **#13 + #26** path — AV-012's `AnswerTurn` over AV-025's `SpeechTransport`. The
-harness constructs no card provider and no writer, so **no collection was opened, read or
-written at any point**; there was nothing to back up or reset.
+emulator 37.1.11.0, launched with `-allow-host-audio`. Captures drive one bounded answer
+turn through the shipped **#13 + #26** path — AV-012's `AnswerTurn` over AV-025's
+`SpeechTransport`. The harness constructs no card provider and no writer, so **no
+collection was opened, read or written at any point**; there was nothing to back up or
+reset.
 
-Two sessions, 17 attempts, all in
-[`captures.jsonl`](evidence/live-20260916/captures.jsonl), including the ones that
-produced nothing. The operator attested "prompt audible" and "I said the expected phrase"
-on every attempt that reached the attestation screen.
+Three sessions, 62 attempts, all in
+[`captures.jsonl`](evidence/live-20260916/captures.jsonl) in order, including the ones
+that produced nothing. Every phrase spoken was an accepted answer or the reference answer
+of the slot's card, at the operator's normal pace; nothing was read badly on purpose.
 
-**Session 1, 21:01–21:07 UTC** — before the microphone preflight existed:
+| Session | Attempts | Clean captures | Misrecognitions | Environment faults | Other |
+| --- | ---: | ---: | ---: | ---: | --- |
+| 1 (records 1–8) | 8 | 1 | 0 | 6 | 1 operator cancel |
+| 2 (records 9–17) | 9 | 8 | 2 | 1 (a colliding second invocation crashed the process) | — |
+| 3 (records 18–62) | 45 | 38 | 2 | 2 | 4 `noMatch` (all on the bare word "Five"), 1 first-screen timeout |
+| **Total** | **62** | **47** | **4** | **9** | |
 
-| # | Slot | Operator action | Result | Microphone |
-| ---: | --- | --- | --- | --- |
-| 1 | `stt-live-1` | Cancel | `cancelled`, no transcript | not captured |
-| 2 | `stt-live-1` | Done | `there are five blocks`, 678 ms | **live** (rms 1,275) |
-| 3–8 | `stt-live-2` … `stt-live-7` | Done | `noMatch` code 7, 629–667 ms | **220 Hz tone** (rms 23,179–23,181) |
+Two of session 3's clean captures (attempts 8 and 18, the long reversal paraphrase) came
+back with text that differs from the phrase, and the operator **did not attest** to having
+said the phrase; the tool refused both, as it must — a misspoken phrase is not a
+recognizer error. They are in the ledger and count as nothing.
 
-**Session 2, 21:28–21:34 UTC** — with the preflight, three cold boots, every capture on a
-live microphone:
+Every clean capture reported confidence `absent` and a Done-to-final time between 620 and
+902 ms, consistent with AV-013's measured band. On this route, every one of them would
+have needed the learner's explicit acceptance before grading.
 
-| # | Slot | Spoken | Result | ms | Microphone |
-| ---: | --- | --- | --- | ---: | --- |
-| 9 | `stt-live-6` | — | **process crashed** before the first screen; no capture | — | stale file — see below |
-| 10 | `stt-live-6` | It puts two first, then five, then seven | `it puts two first then five then seven` — correct | 647 | live (rms 2,979) |
-| 11 | `stt-live-3` | Green, blue, red | `green blue red` — correct | 661 | live (rms 3,561) |
-| 12 | `stt-live-7` | Two five seven | **`257` — misrecognition** | 625 | live (rms 2,697) |
-| 13 | `stt-live-2` | Five blocks | `five blocks` — correct | 646 | live (rms 1,692) |
-| 14 | `stt-live-4` | No, round does not satisfy square | `no round does not satisfy Square` — correct | 660 | live (rms 3,029) |
-| 15 | `stt-live-5` | It is not valid because it is not square | `it is not valid because it is not Square` — correct | 652 | live (rms 2,727) |
-| 16 | `stt-live-6` | It puts two first, then five, then seven | **`it puts two first then` — truncated** | 680 | live (rms 1,936) |
-| 17 | `stt-live-3` | Green, blue, red | `green blue red` — correct | 664 | live (rms 2,126) |
+**A capture on a dead microphone is an environment fault, not a recognition result**, and
+none of the nine is recorded as a failure of the pinned route. Session 1's six were the
+operator speaking into the 220 Hz tone before any microphone check existed; that effort
+was lost to the host, and `capture.py` now refuses to capture when the microphone does not
+read live. Session 3 spent its whole budget on captures instead (see below) and still met
+the tone twice, on the second open of a fresh boot.
 
-Every `doneToFinalMs` in session 2 sits in 625–680 ms, inside AV-013's measured band, and
-confidence came back `absent` throughout, as AV-013 and AV-014 both recorded for this
-route: every one of these transcripts would have needed the learner's explicit acceptance
-before grading.
+### The audio failure, diagnosed
 
-**Attempts 3–8 are environment faults, not recognition results.** Their captured PCM is a
-full-scale 220 Hz sine — the goldfish HAL's generated tone, matching AV-040 and AV-042's
-diagnosis to within 2 parts in 23,000 — and the host log shows the cause:
+The owner asked why the microphone dies after a capture. It is the emulator's host audio
+backend, and it is not fixable from this side of the seam.
+
+**What happens.** Each time the guest opens the microphone the emulator creates a host
+input voice. After a small number of opens the backend logs
 
 ```
 coreaudio: Could not initialize record
@@ -221,24 +229,44 @@ coreaudio: Reason: kAudioHardwareIllegalOperationError
 Failed to create voice `virtio-snd-mic0'
 ```
 
-AV-014's runbook is explicit that an all-`noMatch` sweep on a dead microphone is not a
-result, so **none of the six is recorded as a recognition failure of the pinned route**.
-The operator did speak into all six; that effort was lost to the host, which is why
-`capture.py` now runs an unattended five-second check first and **refuses to capture**
-when the microphone does not read live. Session 2 hit the tone three more times, at
-attempts 2, 4 and 7, and lost nothing to it: the preflight caught it and the AVD was
-cold-booted each time. The host device survives one to three captures per boot.
+and the guest receives a generated full-scale 220 Hz sine — the goldfish HAL's fallback,
+the same one AV-040 and AV-042 diagnosed — for the rest of that boot.
 
-**Attempt 9** is a second `capture.py` invocation that collided with the batch's own,
-crashing the target process before its first screen. It captured nothing. Its microphone
-reading is the *previous* attempt's tone, left on the device by attempt 8; `capture.py`
-now clears that file before every run so a crashed attempt reads as `no-samples` rather
-than inheriting a verdict. Recorded as the environment fault it is.
+**How often.** An unattended re-open test, ten opens per boot with nobody speaking:
+
+| Gap between opens | Live opens before failure |
+| ---: | ---: |
+| 1 s | 2 |
+| 8 s | 4 |
+| 30 s | 3 |
+
+The budget does not depend on the gap, so no settle delay helps. Across the attended
+sessions it ranged from **1 to 6** opens per boot.
+
+**Where.** In `audio/coreaudio.c` of `platform/external/qemu` (branch `emu-master-dev`),
+`coreaudio_init_base` calls `AudioObjectAddPropertyListener` on the input device for every
+voice it creates, to follow sample-rate changes; the two log lines above are its
+`coreaudio_logerr2` on that call failing. `coreaudio_fini_base` stops the device, destroys
+the IOProc and marks the device unknown — and **never calls
+`AudioObjectRemovePropertyListener`**; the string does not occur in the file. Every open
+therefore leaks a listener whose client pointer is a voice struct the emulator then frees,
+and a later registration fails. Our transport releases the microphone correctly and the
+guest HAL behaves; the default input device is the built-in microphone, so device
+switching is not involved. `-audio <backend>` accepts any value silently and surfaced no
+alternative backend. The fix is a teardown change in the emulator, which is not this
+project's code.
+
+**What was done about it.** The per-attempt PCM preflight in `capture.py` is exact but
+costs an open, so session 3's driver read the fault from the emulator's own log instead
+and cold-booted the AVD proactively after every two captures: 45 attempts cost 23 cold
+boots and the operator was asked to speak into a dead microphone twice rather than
+nine times. The runbook records both the budget and the procedure.
 
 ### Finding: the 6-live-misrecognition criterion is costly on this route
 
 Recorded as evidence for the owner, not acted on. This card's acceptance criteria are
-unchanged.
+unchanged; the owner chose on September 16, 2026 to stop capture at 4 and report the run
+incomplete.
 
 A misrecognition is the recognizer returning **wrong words**. A correct transcript is not
 one, and `noMatch` — an empty result — is not one either. Pooling every attested spoken
@@ -250,27 +278,32 @@ capture this project has recorded on a live microphone:
 | AV-013 live run | 4 | 0 |
 | AV-042 probe | 3 | 1 — "green blue red" → "You red" |
 | AV-017 session 1 | 1 | 0 |
-| AV-017 session 2 | 8 | 2 — `257`, truncation |
-| **Pooled** | **26** | **4 (15.4%)** |
+| AV-017 session 2 | 8 | 2 — `257`, a truncation |
+| AV-017 session 3 | 36 | 2 — `route` for "round", `in` for "and" |
+| **Pooled** | **62** | **6 (9.7%)** |
 
-At that rate the four still needed take roughly **26 more successful captures** in
-expectation, at one to three captures per cold boot of the host audio device — a session
-on the order of an hour or two, with a long tail. The criterion is not unreasonable in
-principle; it is what makes the STT category real evidence rather than invention, and
-session 2 shows that the mistakes it produces are exactly the interesting ones (a digit
-collapse and a truncation, neither of which the fuzzy rule or a synthetic corruption would
-have supplied). But it is the one thing standing between this card and a complete
-measurement, and it is operator time rather than engineering.
+The rate is not uniform across cards. The two arithmetic phrasings and "green blue red"
+produced **zero** misrecognitions in more than forty attempts between them — the three
+slots still open are exactly those cards — while the longer rules and sorting sentences
+produced all four. At the pooled rate the two answers still needed take roughly twenty
+more clean captures, at one to three per cold boot; on the cards actually open it is
+plausibly far more.
+
+The criterion is not unreasonable in principle. It is what makes the STT category real
+evidence rather than invention, and the four mistakes it produced are exactly the
+interesting ones — a digit collapse, a truncation, and two single-word substitutions,
+none of which the fuzzy rule or a synthetic corruption would have supplied. But on this
+route it is bounded by operator time and an emulator defect, not by engineering.
 
 Options for the owner, in the order they seem worth considering:
 
-1. **Run it.** One more dedicated capture session, budgeting for ~26 successful captures
-   and ~10 cold boots. The runbook and the preflight make it mechanical.
-2. **Lower the live floor** from 6 to 2, the number in hand, and say so in the report.
-   That leaves the held-out STT category at two answers.
-3. **Widen what counts.** `noMatch` is currently not a misrecognition. It is the commonest
-   degradation on this route and trivially available — but it produces no text to grade,
-   so it tests AV-012's failure path, not grading.
+1. **Accept 4 live plus 2 recorded for this card** and say so in the report, keeping the
+   three open slots `live-pending` for a later session on a fixed emulator.
+2. **Redefine the open slots' cards.** The criterion is per-corpus, not per-card; moving
+   the three open slots to the sorting and rules cards would fill them in a fraction of the
+   attempts, at the cost of the STT category no longer covering all four cards.
+3. **Run another session** once the emulator's audio teardown is fixed upstream or a
+   different host is available, where the per-boot budget is not the limiting cost.
 
 Changing an acceptance criterion is the owner's call and was not made here.
 
@@ -281,21 +314,21 @@ ledger — the shipped `QuotaLedger`, writing
 `av017-quota-ledger-rule-only.jsonl` — records `reservedTotal: 0`.
 
 When the live pass runs it will reserve one request per answer the rules do not match,
-which on the current corpus is **48 of 55**. The harness opens a fresh grading session
-every 14 requests so it stays inside the shipped 30-request session cap **rather than
-raising it**. The daily limit is the decision to record: 48 requests fits the default
-50-per-UTC-day limit only if at most two of them retry, so either spread the run across
-two UTC days or raise `-Pav017.dailyLimit` explicitly, and record which was done. Free
-route only; no paid fallback.
+which on the current corpus is **50 of 57** — exactly the default 50-per-UTC-day limit,
+with no headroom for #18's retries. The harness opens a fresh grading session every 14
+requests so it stays inside the shipped 30-request session cap **rather than raising
+it**. The daily limit is the decision to record when the pass runs: raise
+`-Pav017.dailyLimit` explicitly or spread the run across two UTC days, and say which.
+Free route only; no paid fallback.
 
 ## What this does not establish
 
 - **Nothing about the AI path.** It has not been run. The report shows it as `not-run`,
   which is deliberately distinct from an abstention and is never scored as one.
-- **Nothing about grading quality overall.** The rule path carries 13% of this corpus; the
-  87% that matters most is unmeasured.
-- **Nothing about recognition reliability.** Nine clean captures are not a rate for the
-  route; the 15.4% above is a planning estimate pooled across four cards' evidence.
+- **Nothing about grading quality overall.** The rule path carries 12% of this corpus; the
+  88% that matters most is unmeasured.
+- **Nothing about recognition reliability.** Forty-seven clean captures on one host in one
+  afternoon are a planning estimate, not a rate for the route.
 - 40 held-out answers over 8 synthetic cards in English on one emulator is a small sample
   and would establish nothing about physical devices, other languages or real decks even
   when complete.
@@ -312,10 +345,10 @@ replays layer 3 offline.
 
 ## Next
 
-1. Capture the remaining 5 STT slots, or decide the criterion question above.
-2. Run one recorded AI pass and score the held-out 40 once against a fresh frozen
-   configuration, in a new evidence directory — the corpus hash changes again when the
-   STT slots are filled, so neither current freeze will apply to it.
+1. Run one recorded AI pass on this corpus and score the held-out answers once against a
+   fresh frozen configuration, in a new evidence directory.
+2. Decide the criterion question above; the three open slots stay `live-pending` until it
+   is decided or captured.
 
-Both interim runs are kept in their ledgers rather than discarded, as the card requires of
-every held-out run.
+All three interim runs are kept in their ledgers rather than discarded, as the card
+requires of every held-out run.

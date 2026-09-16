@@ -98,11 +98,34 @@ the microphone reads live. Values are PCM16, full scale 32,768:
 | `peak` under ~20, half the samples exactly zero | `zeroed` | `-allow-host-audio` is missing, or macOS denied the input device |
 | Varying `rms` with real silence gaps | `live` | Capture away |
 
-The remedy is a cold boot. On the AV-017 evidence host the device also failed **mid
-session**, after two or three successful captures, logging
-`coreaudio: Could not initialize record` / `kAudioHardwareIllegalOperationError` /
-`Failed to create voice 'virtio-snd-mic0'`. Expect to cold-boot between captures, and
-watch the macOS microphone indicator: when it does not light, the host device did not open.
+The remedy is a cold boot, and you will need one **every two to four microphone opens**.
+Measured on the AV-017 evidence host with an unattended re-open test: 2 live opens at a
+1-second gap, 4 at 8 seconds, 3 at 30 seconds — the budget does not depend on how long you
+wait, so no settle delay helps. The emulator logs the fault as
+
+```
+coreaudio: Could not initialize record
+coreaudio: Could not set audio format change listener
+coreaudio: Reason: kAudioHardwareIllegalOperationError
+Failed to create voice `virtio-snd-mic0'
+```
+
+and never recovers within that boot. The cause is in the emulator's coreaudio backend
+(`audio/coreaudio.c` in `platform/external/qemu`): `coreaudio_init_base` registers a
+sample-rate-change listener on the input device for every voice it opens, and
+`coreaudio_fini_base` never removes it, so each capture leaks a listener whose client
+pointer is a voice the emulator then frees. The failing call on a later open is that
+registration. Our transport releases the microphone correctly and the guest HAL is
+behaving; nothing on the app side of the seam can fix this. Emulator 37.1.11.0.
+
+**Every open counts, including `capture.py`'s own five-second preflight.** For an
+attended session, prefer to launch the emulator with its output captured to a file, run
+`capture.py --no-preflight`, treat a `Failed to create voice` line in that file as the
+fault, and cold-boot proactively after every two captures — that spends the whole budget
+on the operator's speech and never asks them to speak into the attempt that would have
+failed. The PCM preflight stays the default because it needs no access to the emulator's
+log and is exact. Watch the macOS microphone indicator too: when it does not light, the
+host device did not open.
 
 A capture taken on a dead microphone is an **environment fault, not a recognition
 result**, and `capture.py` records it as one. It never fills a corpus slot.

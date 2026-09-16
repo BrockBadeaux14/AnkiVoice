@@ -633,14 +633,30 @@
       "category": "stt-mistake",
       "fixture_card": "relearning",
       "example_id": "demo-rules",
-      "answer": null,
-      "label": null,
-      "label_rationale": null,
+      "answer": "no route does not satisfy Square",
+      "label": "correct",
+      "label_rationale": "The recognizer turned 'round' into 'route'. The transcript still answers no and gives not satisfying square as the reason, so both required concepts are expressed; the garbled subject is noise rather than a contradicting claim. This is a judgement — a strict reader could call the reason unintelligible — and is recorded as one.",
       "provenance": {
-        "kind": "live-pending",
-        "spoken_target": "No, round does not satisfy square",
-        "slot": "stt-live-4",
-        "note": "Filled only by a genuine misrecognition captured on the pinned AVD through the #13 + #26 path. Synthetic corruption is not an acceptable substitute."
+        "kind": "live",
+        "spoken": "No, round does not satisfy square",
+        "attested": {
+          "promptAudible": true,
+          "spokeExpectedPhrase": true,
+          "source": "operator-touch"
+        },
+        "source": "AV-017 live capture on the pinned AVD, slot stt-live-4",
+        "evidence": "docs/testing/av017/evidence/live-20260916/captures.jsonl",
+        "utc": "2026-09-16T22:12:37Z",
+        "done_to_final_ms": 641,
+        "confidence": "absent",
+        "microphone": {
+          "verdict": "live",
+          "samples": 86400,
+          "peak": 15298,
+          "rms": 2087.7,
+          "zero_fraction": 0.0322,
+          "dominant_hz": 238
+        }
       }
     },
     {
@@ -649,14 +665,30 @@
       "category": "stt-mistake",
       "fixture_card": "buried-manual",
       "example_id": "demo-rules",
-      "answer": null,
-      "label": null,
-      "label_rationale": null,
+      "answer": "no it is blue but not Square in both conditions are required",
+      "label": "correct",
+      "label_rationale": "The recognizer turned 'and' into 'in', so the second clause is ungrammatical, but the transcript still says no, that it is blue but not square, and that both conditions are required: both required concepts are expressed and nothing contradicts the key. A harmless misrecognition, labeled for what it says.",
       "provenance": {
-        "kind": "live-pending",
-        "spoken_target": "It is not valid because it is not square",
-        "slot": "stt-live-5",
-        "note": "Filled only by a genuine misrecognition captured on the pinned AVD through the #13 + #26 path. Synthetic corruption is not an acceptable substitute."
+        "kind": "live",
+        "spoken": "No, it is blue but not square, and both conditions are required",
+        "attested": {
+          "promptAudible": true,
+          "spokeExpectedPhrase": true,
+          "source": "operator-touch"
+        },
+        "source": "AV-017 live capture on the pinned AVD, slot stt-live-5",
+        "evidence": "docs/testing/av017/evidence/live-20260916/captures.jsonl",
+        "utc": "2026-09-16T22:10:13Z",
+        "done_to_final_ms": 722,
+        "confidence": "absent",
+        "microphone": {
+          "verdict": "live",
+          "samples": 122560,
+          "peak": 21874,
+          "rms": 2781.1,
+          "zero_fraction": 0.0224,
+          "dominant_hz": 472
+        }
       }
     },
     {
