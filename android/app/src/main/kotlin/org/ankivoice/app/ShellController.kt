@@ -10,6 +10,9 @@ import org.ankivoice.ankidroid.ProvisioningReport
 import org.ankivoice.ankidroid.ProvisioningStep
 import org.ankivoice.ankidroid.Provisioner
 import org.ankivoice.core.contracts.*
+import org.ankivoice.core.eligibility.CardOffer
+import org.ankivoice.core.eligibility.Eligibility
+import org.ankivoice.core.eligibility.offerNextCard
 
 internal interface ShellSettings {
     var selectedDeckId: Long?
@@ -24,6 +27,8 @@ internal sealed interface PreviewStatus {
     data class Paused(val failure: Failure? = null) : PreviewStatus
     data object Stopped : PreviewStatus
     data object Unavailable : PreviewStatus
+    /** Five consecutive ineligible cards; not [Exhausted] and not a transport pause. */
+    data object IneligibleLimit : PreviewStatus
 }
 
 internal data class ShellState(
@@ -38,6 +43,8 @@ internal data class ShellState(
     val setupBusy: Boolean = false,
     /** True while the full-sync disclosure is waiting for the learner's answer. */
     val disclosing: Boolean = false,
+    val skipped: List<Eligibility.Ineligible> = emptyList(),
+    val skipSummary: String? = null,
 )
 
 /**
@@ -88,7 +95,7 @@ internal class ShellController(
         if (!foreground || state.checking) return
         val token = ++generation
         selecting = true
-        publish(state.copy(checking = true, status = PreviewStatus.Idle))
+        publish(state.copy(checking = true, status = PreviewStatus.Idle, skipped = emptyList(), skipSummary = null))
         access.select(deckId) { result ->
             if (token != generation || !foreground) return@select
             selecting = false
@@ -154,7 +161,7 @@ internal class ShellController(
         if (!foreground || state.checking || state.selectedDeckId == null) return
         val token = ++generation
         val deckId = state.selectedDeckId
-        publish(state.copy(checking = true, status = PreviewStatus.Starting))
+        publish(state.copy(checking = true, status = PreviewStatus.Starting, skipped = emptyList(), skipSummary = null))
         access.inspect(deckId) { result ->
             if (token != generation || !foreground) return@inspect
             finishStart(result, deckId, token)
@@ -176,23 +183,34 @@ internal class ShellController(
         val operation = OperationToken(sessionId, token.toInt(), token.toInt())
         worker.execute {
             val provider = cardProvider(requireNotNull(deckId))
-            val status = if (provider == null) PreviewStatus.Unavailable else {
+            val preview = if (provider == null) StartPreview(PreviewStatus.Unavailable) else {
                 when (val capabilities = provider.capabilities()) {
-                    is Failure -> PreviewStatus.Paused(capabilities)
-                    is Capabilities -> when (val card = provider.nextCard()) {
-                        is Failure -> PreviewStatus.Paused(card)
-                        is ScheduledCard -> PreviewStatus.CardReady
-                        QueueExhausted -> PreviewStatus.Exhausted
+                    is Failure -> StartPreview(PreviewStatus.Paused(capabilities))
+                    is Capabilities -> when (val offer = offerNextCard(provider, snapshot.language)) {
+                        is CardOffer.Ready -> StartPreview(PreviewStatus.CardReady, offer.skipped)
+                        is CardOffer.Exhausted -> StartPreview(PreviewStatus.Exhausted, offer.skipped)
+                        is CardOffer.Stopped -> StartPreview(PreviewStatus.IneligibleLimit, offer.skipped, offer.summary)
+                        is CardOffer.Paused -> StartPreview(PreviewStatus.Paused(offer.failure), offer.skipped)
                     }
                 }
             }
-            val reply = CardReadReply(operation, status)
+            val reply = CardReadReply(operation, preview)
             delivery.execute {
                 if (reply.token == operation && token == generation && foreground)
-                    publish(snapshot.copy(status = reply.result))
+                    publish(snapshot.copy(
+                        status = reply.result.status,
+                        skipped = reply.result.skipped,
+                        skipSummary = reply.result.skipSummary,
+                    ))
             }
         }
     }
+
+    private data class StartPreview(
+        val status: PreviewStatus,
+        val skipped: List<Eligibility.Ineligible> = emptyList(),
+        val skipSummary: String? = null,
+    )
 
     fun stop() {
         ++generation

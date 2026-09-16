@@ -420,3 +420,18 @@ Card ready or Queue exhausted for the selected deck; no review writer is exposed
 by the shell. This supersedes the historical AV-041/023 fake-preview and release
 unavailability descriptions above. See the [AV-024 results](../docs/testing/av024/results.md)
 and [runbook](../docs/testing/av024/runbook.md) for validation and limits.
+
+## Card eligibility and bounded skipping
+
+AV-010 (#11) adds `core/eligibility` and the shell's rejection report. The pure
+classifier validates the VoiceQA schema, required fields, card template and BCP 47
+Language syntax. Each rejection identifies the card and the field or note type to
+fix, with an `ANNOUNCEMENT` utterance ready for the speech layer.
+
+The adapter reads progressively larger scheduled prefixes and excludes rejected
+candidates only in memory. It preserves scheduler order and writes nothing. Five
+consecutive rejections stop the preview with a reason summary; a valid card resets
+the count. Exhaustion and provider failures remain distinct. All existing
+utterance and grading-context builders are reused. See the
+[AV-010 results and validation](../docs/testing/av010/results.md), including the
+pinned API evidence and runtime limitations.

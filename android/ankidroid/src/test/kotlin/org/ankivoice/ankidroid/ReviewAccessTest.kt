@@ -24,7 +24,7 @@ class ReviewAccessTest {
         override fun queryDecks() = decks
         override fun querySelectedDeck() = decks
         override fun updateSelectedDeck(deckId: Long) = error("not used")
-        override fun querySchedule(deckId: Long): List<QueueCard>? {
+        override fun querySchedule(deckId: Long, limit: Int): List<QueueCard>? {
             if (throwSecurity) throw SecurityException()
             return queue
         }

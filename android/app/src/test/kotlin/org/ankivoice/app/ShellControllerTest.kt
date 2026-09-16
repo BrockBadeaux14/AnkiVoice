@@ -2,6 +2,8 @@ package org.ankivoice.app
 
 import org.ankivoice.ankidroid.*
 import org.ankivoice.core.contracts.*
+import org.ankivoice.core.eligibility.CONSECUTIVE_INELIGIBLE_LIMIT
+import org.ankivoice.core.eligibility.IneligibleReason
 import org.ankivoice.core.fakes.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -34,6 +36,10 @@ class ShellControllerTest {
     private val provisioner = Provisioning()
     private val settings = Settings()
     private val provider = FakeCardProvider(demoCollection())
+    private fun rejected(id: Long = 999, model: String = "Basic"): ScheduledCard {
+        val card = provider.collection.scheduled(provider.collection.order.first())
+        return card.copy(identity = card.identity.copy(cardId = id, noteId = id, model = model))
+    }
     private var creations = 0
     private val controller = ShellController(access, settings, provisioner) { creations++; provider }
 
@@ -64,9 +70,72 @@ class ShellControllerTest {
     }
     @Test fun `card failure is named and paused`() {
         ready()
-        provider.nextCardScript.add(Failure(CardProviderFailure.MALFORMED_CARD))
+        provider.nextCardScript.add(Failure(CardProviderFailure.ACCESS_DENIED))
         controller.start(); access.deliver()
-        assertEquals(CardProviderFailure.MALFORMED_CARD, (controller.state.status as PreviewStatus.Paused).failure?.mode)
+        assertEquals(CardProviderFailure.ACCESS_DENIED, (controller.state.status as PreviewStatus.Paused).failure?.mode)
+    }
+    @Test fun `an ineligible card is skipped in text and the next card is offered without a review`() {
+        ready()
+        provider.nextCardScript.add(rejected())
+        controller.start(); access.deliver()
+        assertEquals(PreviewStatus.CardReady, controller.state.status)
+        assertEquals(1, controller.state.skipped.size)
+        assertEquals(IneligibleReason.UNSUPPORTED_NOTE_TYPE, controller.state.skipped.single().reason)
+        assertTrue(controller.state.skipped.single().announcement.text.contains("AnkiDroid"))
+        assertTrue(provider.collection.reviews.isEmpty())
+    }
+    @Test fun `five consecutive ineligible cards stop with a summary rather than exhaustion`() {
+        ready()
+        repeat(CONSECUTIVE_INELIGIBLE_LIMIT) {
+            provider.nextCardScript.add(rejected(1000L + it, VOICEQA_MODEL).let { card ->
+                card.copy(fields = card.fields.copy(referenceAnswer = ""))
+            })
+        }
+        controller.start(); access.deliver()
+        assertEquals(PreviewStatus.IneligibleLimit, controller.state.status)
+        assertEquals(5, controller.state.skipped.size)
+        assertTrue(controller.state.skipSummary.orEmpty().contains("5"), controller.state.skipSummary)
+        assertTrue(provider.collection.reviews.isEmpty())
+    }
+    @Test fun `queue exhaustion after a skip stays exhausted`() {
+        ready()
+        provider.nextCardScript.add(rejected())
+        provider.nextCardScript.add(QueueExhausted)
+        controller.start(); access.deliver()
+        assertEquals(PreviewStatus.Exhausted, controller.state.status)
+        assertEquals(1, controller.state.skipped.size)
+        assertNull(controller.state.skipSummary)
+    }
+    @Test fun `a new start clears the previous rejection summary`() {
+        ready()
+        repeat(5) { provider.nextCardScript.add(rejected(1000L + it)) }
+        controller.start(); access.deliver()
+        assertEquals(PreviewStatus.IneligibleLimit, controller.state.status)
+        controller.start()
+        assertTrue(controller.state.skipped.isEmpty())
+        assertNull(controller.state.skipSummary)
+        access.deliver()
+        assertEquals(PreviewStatus.CardReady, controller.state.status)
+    }
+    @Test fun `deck selection clears rejection messages for the previous deck`() {
+        ready(); provider.nextCardScript.add(rejected())
+        controller.start(); access.deliver()
+        assertEquals(1, controller.state.skipped.size)
+        controller.selectDeck(8)
+        assertTrue(controller.state.skipped.isEmpty())
+        assertNull(controller.state.skipSummary)
+        access.deliver(AccessSnapshot(listOf(Deck(8, "Other"))))
+    }
+    @Test fun `late rejection summary cannot replace a stopped session`() {
+        val work = ArrayDeque<Runnable>(); val deliveries = ArrayDeque<Runnable>()
+        val shell = ShellController(access, settings, provisioner,
+            java.util.concurrent.Executor { work.add(it) }, java.util.concurrent.Executor { deliveries.add(it) }) { provider }
+        shell.onForegroundEvent(ForegroundEvent.RESUME); access.deliver()
+        repeat(5) { provider.nextCardScript.add(rejected(1000L + it)) }
+        shell.start(); access.deliver(); work.removeFirst().run()
+        shell.stop(); deliveries.removeFirst().run()
+        assertEquals(PreviewStatus.Stopped, shell.state.status)
+        assertTrue(shell.state.skipped.isEmpty()); assertNull(shell.state.skipSummary)
     }
     @Test fun `every preflight failure prevents provider creation`() {
         val modes = listOf(CardProviderFailure.PACKAGE_UNAVAILABLE, CardProviderFailure.API_DISABLED,

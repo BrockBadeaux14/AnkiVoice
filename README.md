@@ -84,3 +84,7 @@ explicit self-grade.
 See [AV-024: AnkiDroid adapter and review safeguards](docs/testing/av024/results.md)
 for the real scheduled-card provider, single-shot guarded writer, and per-rating
 emulator evidence. The shell checks real deck readiness without submitting reviews.
+
+See [AV-010: Card eligibility and bounded skipping](docs/testing/av010/results.md)
+for VoiceQA and language validation, visible rejection reasons, and read-only
+queue traversal that stops after five consecutive unstudiable cards.
