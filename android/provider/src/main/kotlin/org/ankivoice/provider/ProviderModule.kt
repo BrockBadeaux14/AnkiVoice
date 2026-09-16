@@ -8,8 +8,9 @@ import java.io.File
  *
  * AV-022 gives this module the app's only network route (#17), and it is the only module
  * declaring `android.permission.INTERNET`. It holds the Keystore credential store, the
- * free-route guard, the durable quota ledger and the content-free diagnostics. #18 adds
- * the grading instruction and reply validation on top of [GradingProvider.request].
+ * free-route guard, the durable quota ledger and the content-free diagnostics. #18's
+ * [SemanticGrader] adds the grading instruction, the reply validation and the label
+ * policy on top of [GradingProvider.request].
  */
 object ProviderModule {
     /** App-private, and excluded from backup and device transfer with the credential. */

@@ -32,8 +32,11 @@ sealed interface SessionStart {
 }
 
 sealed interface ProviderOutcome {
-    /** The reply text, carried verbatim. #18 validates and labels it. */
-    data class Content(val text: String) : ProviderOutcome
+    /**
+     * The reply text, carried verbatim, with the provider's own `finish_reason`. #18
+     * validates and labels the text, and rejects output that did not terminate.
+     */
+    data class Content(val text: String, val finishReason: String? = null) : ProviderOutcome
 
     data class Failed(val failure: Failure) : ProviderOutcome
 }
@@ -57,6 +60,12 @@ class GradingProvider internal constructor(
 ) {
     /** Set by a 401/403 or a guard refusal; grading stays off until the next session. */
     private var blocked: GradingUnavailable? = null
+
+    /**
+     * Why grading is off for the rest of this session, or null. Terminal: #18 reads it to
+     * know that a failure must not be retried.
+     */
+    val unavailableCause: GradingUnavailable? get() = blocked
 
     /**
      * Checked before a session starts: a key, an acknowledged disclosure, remaining
@@ -86,9 +95,15 @@ class GradingProvider internal constructor(
 
     /**
      * One grading request. The allowance is reserved on disk before dispatch, so a
-     * timeout or process death still consumes it.
+     * timeout or process death still consumes it. [timeoutMs] is the caller's deadline
+     * for this attempt; #18 pins a shorter one than the route's default.
      */
-    fun request(sessionId: String, system: String, user: String): ProviderOutcome {
+    fun request(
+        sessionId: String,
+        system: String,
+        user: String,
+        timeoutMs: Int = FreeRoute.TIMEOUT_MS,
+    ): ProviderOutcome {
         blocked?.let { return unavailableOutcome(it) }
         val key = credentials.read()
         if (key == null || !CredentialPolicy.valid(key)) return unavailableOutcome(GradingUnavailable.NO_KEY)
@@ -102,7 +117,7 @@ class GradingProvider internal constructor(
         }
         val body = Json.write(FreeRoute.payload(system, user))
         val started = elapsed()
-        val result = transport.post(FreeRoute.completionsUrl, key, body, FreeRoute.TIMEOUT_MS)
+        val result = transport.post(FreeRoute.completionsUrl, key, body, timeoutMs)
         val took = millisSince(started)
         return when (result) {
             HttpResult.Timeout -> {
@@ -169,7 +184,7 @@ class GradingProvider internal constructor(
                 ProviderOutcome.Failed(Failure(GraderFailure.PROVIDER_ERROR, "The provider returned no content."))
             }
             // The text is carried, not read: #18 validates it and owns the label policy.
-            else -> ProviderOutcome.Content(content)
+            else -> ProviderOutcome.Content(content, finish)
         }
     }
 

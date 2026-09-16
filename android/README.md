@@ -334,6 +334,71 @@ AV-023's retained evidence build, which predates this card; the rule that replac
 current builds is the module-boundary check above. `READ_PHONE_STATE` stays forbidden in
 both.
 
+## Semantic grading and optional rubrics
+
+- Issue: [#18 — AV-016: Add structured semantic grading and optional rubrics](https://github.com/BrockBadeaux14/AnkiVoice/issues/18).
+- Decision: [AV-006: Speech and grading providers](../docs/decisions/0006-speech-and-grading-providers.md).
+
+`SemanticGrader` in `:provider` is the policy layer between #16's rules and #17's
+transport. It implements the AV-007 `Grader` contract: `grade(request)` returns a
+`GradingReply` bound to the request that produced it, and `cancel(request)` withdraws one.
+`suggest(request, permittedRatings)` is the same work mapped to what one turn may offer.
+
+**Rules first.** `RuleGrader.grade` runs on the current transcript revision. A rule match
+sends no request and reserves no quota, and rule and AI labels are never merged: an AI
+label only ever applies to a transcript the rules could not match.
+
+| Step | Policy |
+| --- | --- |
+| Request | Built from the closed `GradingContext` alone: Prompt, ReferenceAnswer, RequiredConcepts, AcceptedAnswers, language, then `learner_answer` last. Extra, card and note identifiers, deck names and the key are structurally absent rather than filtered out. |
+| Instruction | AV-006's pass-2 text verbatim, then one rubric sentence: with RequiredConcepts every listed concept must be present; without them the answer is graded against ReferenceAnswer and AcceptedAnswers. No deck edit and no new note field is needed. |
+| Decoding | #17's pinned route unchanged: `liquid/lfm-2.5-2.6b:free` through `liquid/fp8`, temperature 0, JSON object output, a 1,024-token cap. |
+| Reply | Accepted only as exactly `{"label", "reason"}` with one of the four labels and a nonblank reason. Empty, malformed, truncated, non-terminating, extra-field, unknown-field and trailing-content replies are rejected. A rejected reply is not a grade: it never becomes `incorrect` or `uncertain`. |
+| Deadline | 20 seconds per attempt, against AV-006's 12.253-second observed maximum. |
+| Retry | Exactly one, automatic, only on a timeout or an invalid reply. |
+| Mapping | The existing `GradeLabel.automaticProposal`: `correct` proposes Good, `incorrect` proposes Again, `partial` and `uncertain` propose nothing. A proposal outside the card's `permittedRatings` is dropped, never substituted. |
+| Failure | Any `GradingUnavailable` cause or `Grader` failure keeps the card and falls back to an explicit self-grade. Nothing writes a review, and no failure switches to a paid or alternative provider. |
+
+**Card text and transcripts are content, never instructions.** They travel as JSON string
+values, so nothing in them can close the envelope or add a field, and the reply schema is
+closed, so nothing in them can become a label either. `SemanticGraderTest` covers card
+text and a transcript that both try to force `correct`.
+
+### The retry and what it costs
+
+The retry is a change to #17's stated policy that retries are the caller's explicit
+choice. Its consequences were accepted on the card before it was implemented:
+
+- It **reserves from the ledger like any other request**. It is not exempt from the
+  30-request session cap or the daily limit, and a retry the allowance refuses is not
+  attempted — the turn falls back to self-grading.
+- Worst-case learner-visible latency for one graded turn is about **40 seconds**, and a
+  fully AI-graded session can exhaust the session cap in **15 turns**. #29's 30-turn run
+  must expect self-grading to carry part of the run; that is accepted, not a defect.
+- It never fires on a well-formed grade, a 401/403, a route refusal or a quota stop, all
+  of which are terminal for the turn or the session. `GradingProvider.unavailableCause`
+  holds that state, and the grader reads it rather than guessing from a message.
+- It re-sends the **same transcript revision**. If the transcript changed while the first
+  attempt was in flight the attempt is abandoned, not retried.
+
+### Suggestions are bound to a revision
+
+`GradingSuggestion` in `:core` carries the `GradingRequest` that produced it, so a label
+always names the transcript revision it graded. Editing or retrying the transcript raises
+the revision, `appliesTo` turns false, and a reply for the older revision binds to
+`TurnGrading.Superseded`: discarded rather than displayed. The same revision is compared
+by `ReviewIntent.hasConfirmation`, so an edit invalidates a pending confirmation too.
+Every proposal still needs explicit learner confirmation (#21); nothing here submits a
+review, and turn orchestration (#14) and evaluation (#19) stay where they are.
+
+`SemanticGraderTest` drives the whole path through a fake transport: rule-matched
+transcripts, each of the four labels, the eleven rejected reply shapes, adversarial card
+text and transcripts, timeout-then-successful-retry, timeout-then-timeout, a retry the
+allowance refuses, terminal 401/402/429 and route refusals, a transcript edited
+mid-flight, a stale reply after a new revision, and a withdrawn request. No live call is
+made, in CI or locally. What a JVM test cannot show is the live route, which is #17's
+recorded smoke run; #29 owns integrated acceptance.
+
 ## Drift guard
 
 [`tools/av041_manifest.py`](../tools/av041_manifest.py) derives
@@ -370,6 +435,12 @@ both the host JVM and Android supply. `tests/test_av039_note_type.py` fails if t
 checked-in copy is stale or escapes a value a properties parser would not return
 unchanged; `VoiceQaNoteTypeTest` fails if the Kotlin loader disagrees with the resource,
 or if the resource is not packaged where the app looks for it.
+
+AV-016 pins AV-006's grading instruction the same way, without a generated file:
+`tests/test_av016_grading.py` parses `tools/av006_providers.py` and fails if
+`GradingInstruction.PINNED` drifts from the measured pass-2 text, or if the deadline, the
+single retry or the route's decoding settings move. It parses rather than imports that
+script, which needs POSIX `fcntl`, so it runs on any host.
 
 After an intentional change to `fixtures/voiceqa/note-type.json`:
 
