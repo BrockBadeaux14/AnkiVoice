@@ -33,6 +33,11 @@ class ShellApplication : Application() {
         val speechReadiness = SpeechReadiness(AndroidSpeechPlatform(this))
         val speechWorker = Executors.newSingleThreadExecutor()
         val settingsStore = PrivateShellSettings(this)
+        // AV-018: the journal's own I/O worker. Journal reads, appends and pruning never
+        // run on the main thread, and never share the collection's serial worker either,
+        // so a flush cannot delay a deck read.
+        val journalWorker = Executors.newSingleThreadExecutor()
+        val journal = JournalAccess(JournalModule.journal(filesDir), journalWorker, mainExecutor)
         controller = ShellController(
             SpeechAwareAccess(
                 AnkiDroidAccess(platform, worker, mainExecutor),
@@ -42,8 +47,8 @@ class ShellApplication : Application() {
             settingsStore,
             AnkiDroidProvisioning(platform, worker, mainExecutor),
             worker, mainExecutor,
-            { deckId -> AnkiDroidCardProvider(platform, deckId, worker, mainExecutor) },
-        )
+            journal,
+        ) { deckId -> AnkiDroidCardProvider(platform, deckId, worker, mainExecutor) }
         // AV-020: :provider owns the only network route. Its work never runs on the main thread.
         val settings = PrivateProviderSettings(this)
         val diagnostics = Diagnostics()

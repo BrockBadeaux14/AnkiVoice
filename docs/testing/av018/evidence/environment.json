@@ -1,0 +1,10 @@
+{
+  "avd": "AnkiVoice_AV005",
+  "fingerprint": "google/sdk_gphone64_arm64/emu64a:16/BE2A.250530.026.D1/13818094:user/release-keys",
+  "sdk": "36",
+  "ankidroid": "2.24.1",
+  "deck": "AV002 Baseline",
+  "appApkSha256": "45634a330e3790911615ff06650efa39a2a736773c515a2fc9e8a9cf22f2522e",
+  "testApkSha256": "c48e597f0e70ab7b4a56b26ef60afc72ab12ee13babe6c33ab70a6aece89fe12",
+  "capturedUtc": "2026-09-16T14:04:14Z"
+}

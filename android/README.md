@@ -105,11 +105,11 @@ flowchart TD
 | `:speech` | Android library | AV-025's speech transport: the pinned TTS/recognizer route, the app-owned microphone pipe, and the ordering, cancellation and failure rules behind both AV-007 speech contracts | #13 |
 | `:provider` | Android library | A marker object; no platform calls or network access | #17, #18 |
 | `:app` | Android application | Single-activity shell, onboarding, the VoiceQA setup action and its full-sync disclosure, private settings, lifecycle delivery and debug sample session | #27, #17 |
-| `:core` | Kotlin/JVM, no Android plugin or dependency | The AV-007 contract port in `org.ankivoice.core.contracts`; AV-012's answer policy in `org.ankivoice.core.answer`; AV-015's rule-based grading in `org.ankivoice.core.grading`; AV-013's session state machine in `org.ankivoice.core.session`; the fakes in its `testFixtures` source set | #18, #15, #20 |
+| `:core` | Kotlin/JVM, no Android plugin or dependency | The AV-007 contract port in `org.ankivoice.core.contracts`; AV-012's answer policy in `org.ankivoice.core.answer`; AV-015's rule-based grading in `org.ankivoice.core.grading`; AV-013's session state machine in `org.ankivoice.core.session`; AV-018's journal port and reconciliation policy in `org.ankivoice.core.journal`; the fakes in its `testFixtures` source set | #15, #27 |
 | `:ankidroid` | Android library | Access preflight; `decks` reads and verified `selected_deck` updates | #25, #10 |
 | `:speech` | Android library | AV-025's speech transport: the pinned TTS/recognizer route, the app-owned microphone pipe, and the ordering, cancellation and failure rules behind both AV-007 speech contracts | #13 |
 | `:provider` | Android library | AV-020's credential store, free-route guard, durable quota ledger, content-free diagnostics and the one HTTPS seam | #18 |
-| `:app` | Android application | Single-activity shell, onboarding, private settings, lifecycle delivery and debug sample session | #27, #17 |
+| `:app` | Android application | Single-activity shell, onboarding, private settings, lifecycle delivery, debug sample session and AV-018's durable journal store | #27 |
 
 `checkModuleBoundaries` fails the build when:
 
@@ -759,3 +759,108 @@ has discharged AV-025's absorbed live verification and carried one spoken answer
 to a verified guarded write. One turn is not a reliability estimate, and the pinned
 recognizer reported absent confidence throughout, so every spoken answer needed a manual
 acceptance; [results](../docs/testing/av013/results.md) records every attempt.
+
+## Session journal and recovery
+
+AV-018 (#20) makes one review intent durable before it is dispatched, settles it from the
+guarded writer's own evidence, and reconciles whatever process loss left behind — without
+ever blind-retrying a write or claiming one this app cannot prove it made.
+
+- Issue: [#20 — AV-018: Implement review commit tracking and recovery](https://github.com/BrockBadeaux14/AnkiVoice/issues/20).
+- Evidence: [results](../docs/testing/av018/results.md) and [runbook](../docs/testing/av018/runbook.md).
+
+Per AV-022, the port, entry model and reconciliation policy are pure Kotlin in
+`org.ankivoice.core.journal`; the durable file lives in `:app` and its I/O runs on an
+executor of its own, never the main thread.
+
+| Part | Module | What it owns |
+| --- | --- | --- |
+| `JournalEntry`, `JournalPhase`, `JournalResolution` | `:core` | The entry model and its four phases: `dispatching`, `settled`, `reconciled`, `unreadable` |
+| `JournalStore` | `:core` | The storage port. `append` is durable on return, and `readLines` never drops a line it cannot parse |
+| `ReviewJournal` | `:core` | The append-only fold, the settle rules and the retention bound |
+| `JournalReconciler` | `:core` | The startup reconciliation table; only it may resolve an unsettled entry |
+| `JournaledReviewWriter` | `:core` | Journal, flush, call the guarded writer once, settle from what it returned |
+| `FileJournalStore` | `:app` | Appends and `fsync`s before returning; pruning replaces the file through a temporary |
+| `JournalAccess` | `:app` | Every journal call on the I/O executor; only immutable results cross back |
+
+### Journalled before dispatch, settled only from evidence
+
+`JournaledReviewWriter` wraps AV-024's `GuardedReviewWriter` rather than changing it. It
+writes the entry and flushes it *before* `commit` is entered, so it is durable before the
+pre-commit reads and before the single dispatch; a crash on the next instruction leaves a
+readable unsettled entry. It then settles from the returned `ReviewOutcome` alone — state,
+reason, acknowledgement, pre-state and post-state. It never re-reads the card for a second
+opinion, never re-derives confirmation, and never upgrades an unknown outcome.
+
+A duplicate or delayed settle is ignored: the first evidence stands. A settle for an
+unknown entry is refused rather than inventing one. If the delegate throws, the entry is
+left **unsettled** on purpose — a throw is not evidence, the write may already have been
+handed over, and reconciliation is what resolves it.
+
+### Reconciliation on restart, which never auto-confirms
+
+`JournalReconciler` runs once per process, **before the first card is offered**:
+
+| Observation after re-reading the journalled card by ID | Resolution |
+| --- | --- |
+| Identity and stored state byte-for-byte as journalled | `failed` — provably no write landed |
+| A consistent one-review transition from the pre-state | `outcome-unknown` |
+| Any other change, or a changed identity | `outcome-unknown` |
+| Card missing, deck missing, access denied, API disabled, read failure or a throwing provider | `outcome-unknown` |
+| The journal line itself is truncated or corrupt | `outcome-unknown`, and the line is kept |
+
+`confirmed` is unreachable from this path by construction. AV-004 measured that reps and
+time cannot attribute a competing native or sync write to this caller, so `reps + 1` after
+a restart proves *a* review happened, not that AnkiVoice made it. The table's "content
+changed" is checked only as far as identity allows, because checking it further would mean
+storing card content, which this card may not do; the `failed` branch does not depend on
+it, since unchanged stored state is itself the proof that no review was recorded.
+
+This is **not** #14's `ReviewSession.reconcile(...)`, which is the in-session,
+learner-reported path out of an `OUTCOME_UNKNOWN` halt. Neither is implemented in terms of
+the other, #14's signature is unchanged, and a test holds that line. The startup path may
+resolve to `outcome-unknown` and hand the learner to #14's halt, which is where the two
+meet.
+
+An `outcome-unknown` resolution blocks the session until the learner acknowledges it, and a
+restart does not erase the obligation. The shell shows it on the debug-grade surface until
+#15 owns the command surface and #27 the study surface: it names the card and the rating,
+says plainly that the app cannot prove the review is its own, hands off to AnkiDroid, and
+offers no retry — because no branch here retries.
+
+### What it stores, and the disclosure that moved with it
+
+Recorded: card and note identity, ordinal, deck, the proposed rating, elapsed ms, the
+session/turn/attempt token, the AV-012 transcript revision, **the settled transcript text
+for that revision**, the journalled `CardState` pre-state, monotonic and wall-clock
+timestamps, the phase, and on settle the outcome state, reason, acknowledgement and
+post-state.
+
+Never recorded: card content, reference answers, accepted answers, audio, prompts or
+grading reasons. Transcript text lives in the journal file only; tests assert that no
+journal surface puts it into an AV-020 diagnostics bundle, and that no card field reaches
+the file.
+
+Because this widened the app's stored footprint, AV-020's retention disclosure moved with
+it, and the same text is also shown unconditionally in a **Kept on this device** card —
+the grading disclosure is gated on a saved key, but the journal records transcripts
+whether or not grading is configured. The journal is app-private, separate from Anki's
+collection, and named explicitly in
+[`data_extraction_rules.xml`](app/src/main/res/xml/data_extraction_rules.xml) alongside
+AV-020's wrapped key and quota ledger, on top of `allowBackup="false"`. A test checks that
+coverage rather than assuming it is inherited.
+
+Retention keeps the current session plus the most recent 50 settled entries or 7 days,
+whichever is smaller, pruning oldest first. Unsettled entries, unreadable lines and
+unacknowledged unknown outcomes are never pruned. `JournalSizeTest` measures the worst case
+on disk with transcript text included — 135,982 bytes for plain text at the bound, 635,982
+in the fully escaped extreme — so the bound is justified rather than assumed.
+
+### What this does not establish
+
+The offline suite proves durability and the table, not that a real kill leaves a readable
+file. That is [the AV-018 runbook](../docs/testing/av018/runbook.md), whose two cases
+force-stopped the process in both specified windows on the pinned AVD and reached `failed`
+and `outcome-unknown` with no second review added. Two kills are not a reliability
+estimate, the windows are chosen rather than accidental, and nothing here was run under
+sync — #28 owns that.

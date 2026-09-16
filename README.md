@@ -105,6 +105,14 @@ speech contracts. Its [runbook](docs/testing/av025/runbook.md) separates the off
 checks from the live check on the pinned AVD, and
 [results](docs/testing/av025/results.md) records what has and has not been verified.
 
+See [AV-018: Session journal and recovery](android/README.md#session-journal-and-recovery)
+for the durable record of a review intent: journalled and flushed before dispatch, settled
+only from the guarded writer's own evidence, and reconciled after process loss to `failed`
+or `outcome-unknown` — never to a confirmed write this app cannot prove it made. Its
+[results](docs/testing/av018/results.md) record two real force-stops on the pinned AVD, one
+in each specified window, neither of which added a second review; the
+[runbook](docs/testing/av018/runbook.md) reproduces them.
+
 See [AV-013: Session state machine](android/README.md#session-state-machine) for the
 deterministic turn loop: the explicit states, the token rules that reject late callbacks,
 the invalidate-then-clean-up teardown, main-thread confinement, and the rule that only an

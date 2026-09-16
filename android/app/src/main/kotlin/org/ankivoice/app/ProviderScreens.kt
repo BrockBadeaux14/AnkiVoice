@@ -32,6 +32,23 @@ internal val DISCLOSURE_LIMITS = listOf(
     "Speech recognition is Android's own service, signed out. Its retention was not established.",
 )
 
+/**
+ * AV-018 (#20) widened what this app stores on the device, so the disclosure moves with
+ * it. The app must never describe a narrower footprint than it has.
+ */
+internal val DISCLOSURE_STORED_ON_DEVICE = listOf(
+    "Your answer, as text, in a session journal: what you said, which card it was for, the " +
+        "rating and what happened to it. It is kept so an interrupted review can be " +
+        "explained rather than guessed at.",
+    "The journal keeps the current session plus the newest 50 finished reviews, or 7 days, " +
+        "whichever is smaller. Older entries are deleted automatically.",
+    "It stays in this app's private storage, separate from your Anki collection, and is " +
+        "excluded from cloud backup and device-to-device transfer. Clearing this app's data " +
+        "deletes it.",
+    "Card text — prompts, reference answers and Extra — and audio are never written to " +
+        "disk. Diagnostics stay free of your answers unless you turn content on below.",
+)
+
 @Composable
 internal fun ProviderSettingsCard(state: ProviderState, controller: ProviderController) {
     Card(Modifier.fillMaxWidth()) {
@@ -75,6 +92,25 @@ internal fun ProviderSettingsCard(state: ProviderState, controller: ProviderCont
     }
 }
 
+/**
+ * What this app keeps on the device, shown whether or not AI grading is configured.
+ *
+ * The AV-020 disclosure below is gated on a saved key, but AV-018's journal records
+ * transcripts on every study session, so the storage statement cannot be gated with it.
+ */
+@Composable
+internal fun OnDeviceStorageCard() {
+    Card(
+        Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+    ) {
+        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text("Kept on this device", style = MaterialTheme.typography.titleLarge)
+            DISCLOSURE_STORED_ON_DEVICE.forEach { Text("• $it") }
+        }
+    }
+}
+
 @Composable
 internal fun DisclosureCard(state: ProviderState, controller: ProviderController) {
     Card(
@@ -87,6 +123,8 @@ internal fun DisclosureCard(state: ProviderState, controller: ProviderController
             DISCLOSURE_SENT.forEach { Text("• $it") }
             Text("Never sent:", style = MaterialTheme.typography.titleMedium)
             DISCLOSURE_NEVER_SENT.forEach { Text("• $it") }
+            Text("Kept on this device:", style = MaterialTheme.typography.titleMedium)
+            DISCLOSURE_STORED_ON_DEVICE.forEach { Text("• $it") }
             Text("What is not established:", style = MaterialTheme.typography.titleMedium)
             DISCLOSURE_LIMITS.forEach { Text("• $it", style = MaterialTheme.typography.bodySmall) }
             Text("Grading stays off until you acknowledge this, and self-grading is always available.")

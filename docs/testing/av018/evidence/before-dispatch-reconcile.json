@@ -1,0 +1,82 @@
+{
+  "journalPath": "/data/user/0/org.ankivoice/files/av018-session-journal.jsonl",
+  "entriesBefore": [
+    {
+      "entryId": 1,
+      "session": "av018-live",
+      "cardId": 1789534470381,
+      "noteId": 1789534470381,
+      "deckId": 1789534470372,
+      "rating": 3,
+      "elapsedMs": 4200,
+      "transcriptRevision": 2,
+      "transcript": "five blocks",
+      "preState": {
+        "reps": 1,
+        "type": 1,
+        "queue": 1,
+        "due": 1789563936,
+        "interval": 0,
+        "lastReviewTimeSecs": 1789563332
+      },
+      "phase": "dispatching",
+      "resolutionReason": "",
+      "observedState": null,
+      "acknowledgedByLearner": false
+    }
+  ],
+  "reconciliations": [
+    {
+      "entryId": 1,
+      "cardId": 1789534470381,
+      "rating": 3,
+      "resolution": "failed",
+      "reason": "The card is byte-for-byte as it was journalled, so no review was recorded against it.",
+      "observedState": {
+        "reps": 1,
+        "type": 1,
+        "queue": 1,
+        "due": 1789563936,
+        "interval": 0,
+        "lastReviewTimeSecs": 1789563332
+      },
+      "notice": "Card 1789534470381: rating 3 was not saved. The card is unchanged from what this app recorded before submitting, so no review was written. Answer it again when you are ready."
+    }
+  ],
+  "entriesAfter": [
+    {
+      "entryId": 1,
+      "session": "av018-live",
+      "cardId": 1789534470381,
+      "noteId": 1789534470381,
+      "deckId": 1789534470372,
+      "rating": 3,
+      "elapsedMs": 4200,
+      "transcriptRevision": 2,
+      "transcript": "five blocks",
+      "preState": {
+        "reps": 1,
+        "type": 1,
+        "queue": 1,
+        "due": 1789563936,
+        "interval": 0,
+        "lastReviewTimeSecs": 1789563332
+      },
+      "phase": "reconciled",
+      "resolution": "failed",
+      "resolutionReason": "The card is byte-for-byte as it was journalled, so no review was recorded against it.",
+      "observedState": {
+        "reps": 1,
+        "type": 1,
+        "queue": 1,
+        "due": 1789563936,
+        "interval": 0,
+        "lastReviewTimeSecs": 1789563332
+      },
+      "acknowledgedByLearner": false
+    }
+  ],
+  "outstanding": 0,
+  "blocked": false,
+  "passed": true
+}
