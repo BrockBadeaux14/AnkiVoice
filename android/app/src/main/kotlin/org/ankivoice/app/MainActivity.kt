@@ -153,6 +153,8 @@ private fun ShellScreen(
                     Text("Session", style = MaterialTheme.typography.titleLarge)
                     Text(statusText(if (failure != null && state.status == PreviewStatus.Idle) PreviewStatus.Paused(failure) else state.status), style = MaterialTheme.typography.titleMedium)
                     Text(PREVIEW_DESCRIPTION, style = MaterialTheme.typography.bodyMedium)
+                    state.skipped.forEach { Text(it.announcement.text) }
+                    state.skipSummary?.let { Text(it) }
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         Button(
                             onClick = controller::start,
@@ -311,4 +313,5 @@ private fun statusText(status: PreviewStatus): String = when (status) {
     is PreviewStatus.Paused -> status.failure?.let { "Paused · ${it.mode.specName}" } ?: "Paused · Tap Resume to continue"
     PreviewStatus.Stopped -> "Stopped"
     PreviewStatus.Unavailable -> "Study unavailable"
+    PreviewStatus.IneligibleLimit -> "Stopped · too many unstudiable cards"
 }

@@ -2,6 +2,7 @@ package org.ankivoice.ankidroid
 
 import java.util.concurrent.Executor
 import org.ankivoice.core.contracts.*
+import org.ankivoice.core.eligibility.*
 
 data class QueueCard(val noteId: Long, val ordinal: Int, val buttonCount: Int)
 data class StoredReviewCard(val cardId: Long, val noteId: Long, val deckId: Long, val ordinal: Int, val state: CardState)
@@ -9,7 +10,7 @@ data class ReviewNote(val modelId: Long, val fields: String)
 
 /** Extends the existing resolver seam. Null cursors and valid empty rows stay distinct. */
 interface ReviewPlatform : AccessPlatform {
-    fun querySchedule(deckId: Long): List<QueueCard>?
+    fun querySchedule(deckId: Long, limit: Int = 1): List<QueueCard>?
     fun queryReviewCards(search: String): List<StoredReviewCard>?
     fun queryReviewNote(noteId: Long): List<ReviewNote>?
     fun queryReviewModels(): List<InstalledNoteType>?
@@ -26,7 +27,10 @@ class AnkiDroidCardProvider(
     private val worker: Executor,
     private val delivery: Executor,
     private val clock: MonotonicClock = SystemMonotonicClock,
-) : CardProvider {
+) : EligibilityCardProvider {
+    // Session-local exclusions; never a provider update or a reordered queue.
+    private val excluded = mutableSetOf<Pair<Long, Int>>()
+    private var lastCandidate: CardIdentity? = null
     private class ReadFailure(val failure: Failure) : RuntimeException()
     private fun fail(mode: CardProviderFailure, detail: String = ""): Nothing = throw ReadFailure(Failure(mode, detail))
     private fun accessFailure(): Failure? = when {
@@ -49,9 +53,11 @@ class AnkiDroidCardProvider(
         catch (_: RuntimeException) { Failure(CardProviderFailure.NULL_CURSOR) }
     }
     private fun queue(): QueueCard? {
-        val rows = rows(platform.querySchedule(deckId))
-        if (rows.size > 1) fail(CardProviderFailure.MALFORMED_CARD, "Expected at most one scheduled card")
-        return rows.singleOrNull()
+        val limit = excluded.size + 1
+        val rows = rows(platform.querySchedule(deckId, limit))
+        if (rows.size > limit || rows.map { it.noteId to it.ordinal }.distinct().size != rows.size)
+            fail(CardProviderFailure.MALFORMED_CARD, "Invalid scheduled-card prefix")
+        return rows.firstOrNull { (it.noteId to it.ordinal) !in excluded }
     }
     private fun ratings(offered: QueueCard?): List<Int> {
         if (offered == null) return emptyList()
@@ -65,42 +71,69 @@ class AnkiDroidCardProvider(
         Capabilities(permittedRatings = ratings(queue()), maxReviewTimeMs = cap)
     } as CapabilitiesResult
 
-    override fun nextCard(): NextCardResult = guarded {
-        val offered = queue() ?: return@guarded QueueExhausted
-        val cards = rows(platform.queryReviewCards("nid:${offered.noteId}"))
-        val card = cards.singleOrNull { it.ordinal == offered.ordinal }
-            ?: fail(CardProviderFailure.CARD_NOT_FOUND)
-        snapshot(card, offered)
-    } as NextCardResult
+    override fun nextCandidate(): CandidateRead {
+        lastCandidate = null
+        val result = guarded {
+            val offered = queue() ?: return@guarded CandidateRead.Exhausted
+            val cards = rows(platform.queryReviewCards("nid:${offered.noteId}"))
+            val card = cards.singleOrNull { it.ordinal == offered.ordinal }
+                ?: fail(CardProviderFailure.CARD_NOT_FOUND)
+            if (card.noteId != offered.noteId) fail(CardProviderFailure.COLLECTION_CHANGED)
+            parse(card, offered)
+        }
+        return when (result) {
+            is Failure -> CandidateRead.Failed(result)
+            is CandidateRead.Card -> result.also { lastCandidate = it.snapshot.identity }
+            else -> result as CandidateRead.Exhausted
+        }
+    }
+
+    override fun excludeIneligibleCard(identity: CardIdentity) {
+        check(identity == lastCandidate) { "Only the last observed candidate can be excluded" }
+        excluded += identity.noteId to identity.ordinal
+        lastCandidate = null
+    }
+
+    override fun nextCard(): NextCardResult = when (val result = nextCandidate()) {
+        CandidateRead.Exhausted -> QueueExhausted
+        is CandidateRead.Failed -> result.failure
+        is CandidateRead.Card -> validate(result)
+    }
 
     override fun readCard(cardId: Long): ReadCardResult = guarded {
         val card = rows(platform.queryReviewCards("cid:$cardId")).singleOrNull()
             ?: fail(CardProviderFailure.CARD_NOT_FOUND)
         if (card.cardId != cardId) fail(CardProviderFailure.COLLECTION_CHANGED)
-        snapshot(card, queue())
+        validate(parse(card, queue()))
     } as ReadCardResult
 
-    private fun snapshot(card: StoredReviewCard, offered: QueueCard?): ScheduledCard {
+    private fun parse(card: StoredReviewCard, offered: QueueCard?): CandidateRead.Card {
         if (card.deckId != deckId) fail(CardProviderFailure.COLLECTION_CHANGED, "Card moved from selected deck")
         val note = rows(platform.queryReviewNote(card.noteId)).singleOrNull()
             ?: fail(CardProviderFailure.COLLECTION_CHANGED, "Card note disappeared")
         val model = rows(platform.queryReviewModels()).singleOrNull { it.id == note.modelId }
             ?: fail(CardProviderFailure.COLLECTION_CHANGED, "Note model disappeared")
-        if (model.name != VOICEQA_MODEL) fail(CardProviderFailure.UNSUPPORTED_NOTE_TYPE)
         val values = note.fields.split('\u001f')
-        if (values.size != model.fieldNames.size || model.fieldNames.distinct().size != model.fieldNames.size)
-            fail(CardProviderFailure.MALFORMED_CARD, "Field layout mismatch")
         val fields = model.fieldNames.zip(values).toMap()
-        val prompt = fields["Prompt"]
-        val reference = fields["ReferenceAnswer"]
-        if (card.ordinal != 0 || prompt.isNullOrBlank() || reference.isNullOrBlank())
-            fail(CardProviderFailure.MALFORMED_CARD, "Missing VoiceQA prompt/reference or invalid ordinal")
+        val prompt = fields["Prompt"].orEmpty()
+        val reference = fields["ReferenceAnswer"].orEmpty()
         fun lines(name: String) = fields[name].orEmpty().lines().map { it.trim() }.filter { it.isNotEmpty() }
-        return ScheduledCard(CardIdentity(card.cardId, card.noteId, card.deckId, card.ordinal, model.name),
+        return CandidateRead.Card(ScheduledCard(CardIdentity(card.cardId, card.noteId, card.deckId, card.ordinal, model.name),
             card.state, VoiceQAFields(prompt, reference, lines("RequiredConcepts"), lines("AcceptedAnswers"),
                 fields["Language"].orEmpty(), fields["Extra"].orEmpty()),
-            ratings(offered?.takeIf { it.noteId == card.noteId && it.ordinal == card.ordinal }), clock.nowMs())
+            ratings(offered?.takeIf { it.noteId == card.noteId && it.ordinal == card.ordinal }), clock.nowMs()),
+            model.fieldNames, values.size)
     }
+
+    private fun validate(candidate: CandidateRead.Card): ReadCardResult =
+        when (val result = classify(candidate.observed, "en-US")) {
+            is Eligibility.Studiable -> candidate.snapshot
+            is Eligibility.Ineligible -> Failure(
+                if (result.reason == IneligibleReason.UNSUPPORTED_NOTE_TYPE) CardProviderFailure.UNSUPPORTED_NOTE_TYPE
+                else CardProviderFailure.MALFORMED_CARD,
+                result.announcement.text,
+            )
+        }
 
     fun capabilities(token: OperationToken, callback: (CardReadReply<CapabilitiesResult>) -> Unit) =
         dispatch(token, callback, ::capabilities)

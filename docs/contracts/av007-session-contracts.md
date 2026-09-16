@@ -40,6 +40,10 @@ re-litigate them.
 - **No skip.** AV-004 found no non-mutating skip operation. Bury and suspend both
   change scheduling. A skip request pauses or exits the session **without any write**.
   Skip is never emulated by rating, burying, suspending or reordering another queue.
+  AV-010's later automatic eligibility policy is separate: it reads a bounded
+  scheduled prefix and excludes rejected candidates in session memory without
+  changing Anki's queue. See [AV-010](../testing/av010/results.md); the
+  `supportsSkip` flag and this user-requested skip behavior remain unchanged.
 - **Correction before commit only.** The learner may change a rating until it is
   submitted. After a confirmed commit the app offers no in-app correction: it directs
   the learner to AnkiDroid's native Undo, then stops the session and reloads. No

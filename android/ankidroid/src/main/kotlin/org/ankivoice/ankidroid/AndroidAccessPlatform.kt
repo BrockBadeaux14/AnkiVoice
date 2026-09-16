@@ -179,9 +179,9 @@ class AndroidAccessPlatform(private val context: Context) : ProvisioningPlatform
         )
     }
 
-    override fun querySchedule(deckId: Long): List<QueueCard>? = read(
+    override fun querySchedule(deckId: Long, limit: Int): List<QueueCard>? = read(
         Uri.parse("$BASE/schedule"), arrayOf("note_id", "ord", "button_count"),
-        "limit=?,deckID=?", arrayOf("1", deckId.toString()),
+        "limit=?,deckID=?", arrayOf(limit.toString(), deckId.toString()),
     ) { QueueCard(it.getLong(0), it.getInt(1), it.getInt(2)) }
 
     override fun queryReviewCards(search: String): List<StoredReviewCard>? = read(
