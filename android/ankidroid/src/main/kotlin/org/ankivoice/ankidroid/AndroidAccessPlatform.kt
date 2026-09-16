@@ -8,14 +8,17 @@ import android.content.pm.PackageManager
 import android.database.Cursor
 import android.net.Uri
 import android.os.Looper
+import org.json.JSONObject
+import org.ankivoice.core.contracts.CardIdentity
+import org.ankivoice.core.contracts.CardState
 
 /**
- * Pinned AnkiDroid 2.24.1's public package, permission and resolver route: deck reads and
- * the verified `selected_deck` update for AV-023, and AV-039's provisioning calls. Every
+ * Pinned AnkiDroid 2.24.1's shared resolver route for access, provisioning and AV-024
+ * scheduled-card reads/single-shot review writes. Every
  * column name below is `FlashCardsContract` 2.24.1's, and the deck and model columns are
  * the ones AV-004 measured on the pinned emulator.
  */
-class AndroidAccessPlatform(private val context: Context) : ProvisioningPlatform {
+class AndroidAccessPlatform(private val context: Context) : ProvisioningPlatform, ReviewPlatform {
     companion object {
         const val PACKAGE = "com.ichi2.anki"
         const val DATABASE_PERMISSION = "com.ichi2.anki.permission.READ_WRITE_DATABASE"
@@ -176,9 +179,52 @@ class AndroidAccessPlatform(private val context: Context) : ProvisioningPlatform
         )
     }
 
-    private fun <T> read(uri: Uri, projection: Array<String>, row: (Cursor) -> T): List<T>? {
+    override fun querySchedule(deckId: Long): List<QueueCard>? = read(
+        Uri.parse("$BASE/schedule"), arrayOf("note_id", "ord", "button_count"),
+        "limit=?,deckID=?", arrayOf("1", deckId.toString()),
+    ) { QueueCard(it.getLong(0), it.getInt(1), it.getInt(2)) }
+
+    override fun queryReviewCards(search: String): List<StoredReviewCard>? = read(
+        Uri.parse("$BASE/cards"),
+        arrayOf("_id", "note_id", "deck_id", "ord", "reps", "type", "queue", "due", "interval", "last_review_time_secs"),
+        search,
+    ) { c ->
+        require((0..8).none { c.isNull(it) }) { "Missing card state" }
+        StoredReviewCard(c.getLong(0), c.getLong(1), c.getLong(2), c.getInt(3),
+            CardState(c.getInt(4), c.getInt(5), c.getInt(6), c.getLong(7), c.getInt(8),
+                if (c.isNull(9)) null else c.getLong(9)))
+    }
+
+    override fun queryReviewNote(noteId: Long): List<ReviewNote>? = read(
+        Uri.parse("$BASE/notes/$noteId"), arrayOf("mid", "flds"),
+    ) { ReviewNote(it.getLong(0), it.getString(1)) }
+
+    override fun queryReviewModels(): List<InstalledNoteType>? = queryNoteTypes()
+
+    override fun queryDeckTimeCap(deckId: Long): List<Long?>? = read(
+        DECKS, arrayOf("deck_id", "options"),
+    ) { c ->
+        c.getLong(0) to try {
+            val raw = JSONObject(c.getString(1)).get("maxTaken")
+            // Do not let JSON coercion turn booleans, strings or fractions into a cap.
+            val seconds = when (raw) { is Int -> raw.toLong(); is Long -> raw; else -> null }
+            seconds?.takeIf { it >= 0 && it <= Long.MAX_VALUE / 1000 }?.times(1000)
+        } catch (_: Exception) { null }
+    }?.filter { it.first == deckId }?.map { it.second }
+
+    override fun updateSchedule(identity: CardIdentity, rating: Int, elapsedMs: Long): Int {
         requireWorker()
-        return context.contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
+        return context.contentResolver.update(Uri.parse("$BASE/schedule"), ContentValues().apply {
+            put("note_id", identity.noteId)
+            put("ord", identity.ordinal)
+            put("answer_ease", rating)
+            put("time_taken", elapsedMs)
+        }, null, null)
+    }
+
+    private fun <T> read(uri: Uri, projection: Array<String>, selection: String? = null, args: Array<String>? = null, row: (Cursor) -> T): List<T>? {
+        requireWorker()
+        return context.contentResolver.query(uri, projection, selection, args, null)?.use { cursor ->
             buildList { while (cursor.moveToNext()) add(row(cursor)) }
         }
     }

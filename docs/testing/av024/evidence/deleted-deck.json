@@ -1,0 +1,5 @@
+{
+  "capabilities": "CardProvider.deckMissing",
+  "next": "CardProvider.deckMissing",
+  "passed": true
+}

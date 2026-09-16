@@ -1,0 +1,17 @@
+{
+  "capabilities": {
+    "maxReviewTimeMs": 60000,
+    "permittedRatings": [
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  "asyncMainThreadReplies": [
+    "Capabilities",
+    "ScheduledCard",
+    "ScheduledCard"
+  ],
+  "passed": true
+}

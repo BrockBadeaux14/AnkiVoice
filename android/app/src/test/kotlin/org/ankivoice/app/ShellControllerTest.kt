@@ -283,4 +283,25 @@ class ShellControllerTest {
         assertEquals(1, provisioner.inspections.size)
         assertTrue(provisioner.answers.isEmpty())
     }
+    @Test fun `real card work is dispatched and late completion after stop cannot restore readiness`() {
+        val work = ArrayDeque<Runnable>()
+        val deliveries = ArrayDeque<Runnable>()
+        var boundDeck: Long? = null
+        val shell = ShellController(access, settings, provisioner,
+            java.util.concurrent.Executor { work.add(it) }, java.util.concurrent.Executor { deliveries.add(it) }) {
+            boundDeck = it
+            provider
+        }
+        shell.onForegroundEvent(ForegroundEvent.RESUME); access.deliver()
+        shell.start(); access.deliver()
+        assertEquals(PreviewStatus.Starting, shell.state.status)
+        assertNull(boundDeck)
+        work.removeFirst().run()
+        assertEquals(7L, boundDeck)
+        assertEquals(PreviewStatus.Starting, shell.state.status)
+        shell.stop()
+        deliveries.removeFirst().run()
+        assertEquals(PreviewStatus.Stopped, shell.state.status)
+        assertTrue(provider.collection.reviews.isEmpty())
+    }
 }

@@ -1,0 +1,50 @@
+{
+  "capabilities": {
+    "maxReviewTimeMs": 60000,
+    "permittedRatings": [
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  "setupCard": 1789519238847,
+  "next": {
+    "cardId": 1789519238844,
+    "noteId": 1789519238844,
+    "deckId": 1789519238842,
+    "ordinal": 0,
+    "model": "VoiceQA",
+    "permittedRatings": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "state": {
+      "reps": 0,
+      "type": 0,
+      "queue": 0,
+      "due": 1,
+      "interval": 0
+    }
+  },
+  "outcome": {
+    "state": "failed",
+    "reason": "Scheduled snapshot changed or was withdrawn",
+    "failure": "ReviewWriter.staleIdentity: Scheduled snapshot changed or was withdrawn",
+    "preState": {
+      "reps": 0,
+      "type": 0,
+      "queue": 0,
+      "due": 1,
+      "interval": 0
+    },
+    "postState": null,
+    "submittedTimeMs": 12345,
+    "writeAttempted": false,
+    "dispatches": 0,
+    "dispatchDurationMs": 0
+  },
+  "passed": true
+}

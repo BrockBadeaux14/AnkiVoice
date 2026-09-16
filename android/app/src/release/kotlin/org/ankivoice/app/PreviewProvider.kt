@@ -1,6 +1,3 @@
 package org.ankivoice.app
 
-import org.ankivoice.core.contracts.CardProvider
-
-internal fun previewCardProvider(): CardProvider? = null
-internal const val PREVIEW_DESCRIPTION = "Study is unavailable in this build. You can set up access and choose a deck."
+internal const val PREVIEW_DESCRIPTION = "Checks the selected AnkiDroid deck. No review is submitted from this screen."

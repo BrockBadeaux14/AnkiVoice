@@ -12,6 +12,7 @@ android {
         applicationId = "org.ankivoice"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
+        testInstrumentationRunner = "org.ankivoice.app.ReviewInstrumentation"
         versionCode = 1
         versionName = "0.1.0"
     }

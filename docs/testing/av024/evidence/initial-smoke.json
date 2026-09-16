@@ -1,0 +1,6 @@
+{
+  "capabilities": "CardProvider.deckMissing",
+  "next": "CardProvider.deckMissing",
+  "passed": false,
+  "error": "java.lang.IllegalStateException: Check failed."
+}

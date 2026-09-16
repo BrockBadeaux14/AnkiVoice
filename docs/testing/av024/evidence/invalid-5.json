@@ -1,0 +1,49 @@
+{
+  "capabilities": {
+    "maxReviewTimeMs": 60000,
+    "permittedRatings": [
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  "next": {
+    "cardId": 1789519238806,
+    "noteId": 1789519238806,
+    "deckId": 1789519238797,
+    "ordinal": 0,
+    "model": "VoiceQA",
+    "permittedRatings": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "state": {
+      "reps": 0,
+      "type": 0,
+      "queue": 0,
+      "due": 1,
+      "interval": 0
+    }
+  },
+  "outcome": {
+    "state": "failed",
+    "reason": "Rating was not offered",
+    "failure": "ReviewWriter.ratingRejected: Rating was not offered",
+    "preState": {
+      "reps": 0,
+      "type": 0,
+      "queue": 0,
+      "due": 1,
+      "interval": 0
+    },
+    "postState": null,
+    "submittedTimeMs": 12345,
+    "writeAttempted": false,
+    "dispatches": 0,
+    "dispatchDurationMs": 0
+  },
+  "passed": true
+}

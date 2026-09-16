@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import java.util.concurrent.Executors
 import org.ankivoice.ankidroid.AndroidAccessPlatform
+import org.ankivoice.ankidroid.AnkiDroidCardProvider
 import org.ankivoice.ankidroid.AnkiDroidAccess
 import org.ankivoice.ankidroid.AnkiDroidProvisioning
 import org.ankivoice.core.contracts.ForegroundEventPort
@@ -29,7 +30,8 @@ class ShellApplication : Application() {
             AnkiDroidAccess(platform, worker, mainExecutor),
             PrivateShellSettings(this),
             AnkiDroidProvisioning(platform, worker, mainExecutor),
-            ::previewCardProvider,
+            worker, mainExecutor,
+            { deckId -> AnkiDroidCardProvider(platform, deckId, worker, mainExecutor) },
         )
         // AV-020: :provider owns the only network route. Its work never runs on the main thread.
         val settings = PrivateProviderSettings(this)
