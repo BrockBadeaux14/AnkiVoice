@@ -81,6 +81,10 @@ policy. It suggests Good only on an exact normalized match or a one-letter slip 
 word that is not a number, negation or unit. Otherwise it defers to the AI grader or an
 explicit self-grade.
 
+See [AV-012: Answer boundaries and transcript policy](android/README.md#answer-boundaries-and-transcript-policy)
+for the bounded answer window, the separate finalization deadline, the six transcript
+states and the revision rules that keep a stale transcript or grade off the screen.
+
 See [AV-016: Semantic grading and optional rubrics](android/README.md#semantic-grading-and-optional-rubrics)
 for the policy layer between those rules and the free route: the pinned AV-006 instruction,
 the strict two-key reply schema, the 20-second deadline with one quota-consuming retry, and
