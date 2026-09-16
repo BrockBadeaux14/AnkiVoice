@@ -1,0 +1,510 @@
+{
+  "schema_version": 1,
+  "issue": 2,
+  "profile": "baseline",
+  "anki_version": "25.9.2",
+  "python_version": "3.13.7",
+  "built_at": "2026-09-16T17:46:09+00:00",
+  "local_timezone": "CDT",
+  "scheduler_today": 90,
+  "next_day_at": 1789635600,
+  "scheduler": "v3 / SM-2; FSRS disabled",
+  "synthetic_history": true,
+  "source_sha256": {
+    "note-type.json": "714ce3e6b4afefe3bb6bd6f18ddedb7e1c0ef2c2632a0db104b8236c75e5a617",
+    "scenarios.json": "ffd3fd91c4688335ad537dc87de050fc7b51dc9e1c60d3954f4e8754a652b4d6"
+  },
+  "expected_rejections": {},
+  "initial_counts_new_learning_review": [
+    1,
+    2,
+    1
+  ],
+  "cards": [
+    {
+      "fixture_id": "new",
+      "card_id": 1789580769982,
+      "note_id": 1789580769981,
+      "note_type": "VoiceQA",
+      "fields": {
+        "Prompt": "A box has three red blocks and two blue blocks. How many blocks are there in total?",
+        "ReferenceAnswer": "Five blocks.",
+        "RequiredConcepts": "Five",
+        "AcceptedAnswers": "Five\n5\nThere are five blocks",
+        "Language": "en-US",
+        "Extra": "Three plus two equals five."
+      },
+      "tags": [
+        "av002",
+        "fixture::new",
+        "profile::baseline",
+        "state::new"
+      ],
+      "type": 0,
+      "queue": 0,
+      "due": 1,
+      "interval_days": 0,
+      "remaining_steps": 0,
+      "reps": 0,
+      "lapses": 0,
+      "ease_factor": 0,
+      "review_history": []
+    },
+    {
+      "fixture_id": "learning",
+      "card_id": 1789580769983,
+      "note_id": 1789580769982,
+      "note_type": "VoiceQA",
+      "fields": {
+        "Prompt": "Reverse the sequence red, blue, green.",
+        "ReferenceAnswer": "Green, blue, red.",
+        "RequiredConcepts": "Green first\nBlue second\nRed last",
+        "AcceptedAnswers": "Green blue red",
+        "Language": "en-US",
+        "Extra": "Reversing changes the order, not the items."
+      },
+      "tags": [
+        "av002",
+        "fixture::learning",
+        "profile::baseline",
+        "state::learning"
+      ],
+      "type": 1,
+      "queue": 1,
+      "due": 1789580709,
+      "interval_days": 0,
+      "remaining_steps": 2002,
+      "reps": 1,
+      "lapses": 0,
+      "ease_factor": 0,
+      "review_history": [
+        [
+          1789580649002,
+          1789580769983,
+          -1,
+          1,
+          -60,
+          0,
+          2500,
+          2500,
+          0
+        ]
+      ]
+    },
+    {
+      "fixture_id": "relearning",
+      "card_id": 1789580769984,
+      "note_id": 1789580769983,
+      "note_type": "VoiceQA",
+      "fields": {
+        "Prompt": "In a game, a token is valid only if it is blue and square. A token is blue and round. Is it valid, and why?",
+        "ReferenceAnswer": "No. It is blue but not square, and both conditions are required.",
+        "RequiredConcepts": "It is not valid\nIt fails the square requirement",
+        "AcceptedAnswers": "No, because it is round instead of square.",
+        "Language": "en-US",
+        "Extra": "Meeting just one required condition is insufficient."
+      },
+      "tags": [
+        "av002",
+        "fixture::relearning",
+        "profile::baseline",
+        "state::relearning"
+      ],
+      "type": 3,
+      "queue": 1,
+      "due": 1789580709,
+      "interval_days": 1,
+      "remaining_steps": 1001,
+      "reps": 4,
+      "lapses": 1,
+      "ease_factor": 2300,
+      "review_history": [
+        [
+          1786297569003,
+          1789580769984,
+          -1,
+          3,
+          1,
+          0,
+          2500,
+          2500,
+          0
+        ],
+        [
+          1786383969003,
+          1789580769984,
+          -1,
+          3,
+          7,
+          1,
+          2500,
+          2500,
+          1
+        ],
+        [
+          1786988769003,
+          1789580769984,
+          -1,
+          3,
+          30,
+          7,
+          2500,
+          2500,
+          1
+        ],
+        [
+          1789580109003,
+          1789580769984,
+          -1,
+          1,
+          -600,
+          30,
+          2300,
+          2500,
+          1
+        ]
+      ]
+    },
+    {
+      "fixture_id": "mature",
+      "card_id": 1789580769985,
+      "note_id": 1789580769984,
+      "note_type": "VoiceQA",
+      "fields": {
+        "Prompt": "A machine sorts numbers from smallest to largest. Explain what it does to the list seven, two, five.",
+        "ReferenceAnswer": "It returns two, five, seven, ordering the numbers from smallest to largest.",
+        "RequiredConcepts": "The resulting order is two, five, seven",
+        "AcceptedAnswers": "Two five seven",
+        "Language": "en-US",
+        "Extra": "The values stay the same; only their order changes."
+      },
+      "tags": [
+        "av002",
+        "fixture::mature",
+        "profile::baseline",
+        "state::mature"
+      ],
+      "type": 2,
+      "queue": 2,
+      "due": 90,
+      "interval_days": 30,
+      "remaining_steps": 0,
+      "reps": 3,
+      "lapses": 0,
+      "ease_factor": 2500,
+      "review_history": [
+        [
+          1786297569004,
+          1789580769985,
+          -1,
+          3,
+          1,
+          0,
+          2500,
+          2500,
+          0
+        ],
+        [
+          1786383969004,
+          1789580769985,
+          -1,
+          3,
+          7,
+          1,
+          2500,
+          2500,
+          1
+        ],
+        [
+          1786988769004,
+          1789580769985,
+          -1,
+          3,
+          30,
+          7,
+          2500,
+          2500,
+          1
+        ]
+      ]
+    },
+    {
+      "fixture_id": "suspended",
+      "card_id": 1789580769986,
+      "note_id": 1789580769985,
+      "note_type": "VoiceQA",
+      "fields": {
+        "Prompt": "A box has three red blocks and two blue blocks. How many blocks are there in total?",
+        "ReferenceAnswer": "Five blocks.",
+        "RequiredConcepts": "Five",
+        "AcceptedAnswers": "Five\n5\nThere are five blocks",
+        "Language": "en-US",
+        "Extra": "Three plus two equals five."
+      },
+      "tags": [
+        "av002",
+        "fixture::suspended",
+        "profile::baseline",
+        "state::suspended"
+      ],
+      "type": 0,
+      "queue": -1,
+      "due": 5,
+      "interval_days": 0,
+      "remaining_steps": 0,
+      "reps": 0,
+      "lapses": 0,
+      "ease_factor": 0,
+      "review_history": []
+    },
+    {
+      "fixture_id": "buried-manual",
+      "card_id": 1789580769987,
+      "note_id": 1789580769987,
+      "note_type": "VoiceQA",
+      "fields": {
+        "Prompt": "In a game, a token is valid only if it is blue and square. A token is blue and round. Is it valid, and why?",
+        "ReferenceAnswer": "No. It is blue but not square, and both conditions are required.",
+        "RequiredConcepts": "It is not valid\nIt fails the square requirement",
+        "AcceptedAnswers": "No, because it is round instead of square.",
+        "Language": "en-US",
+        "Extra": "Meeting just one required condition is insufficient."
+      },
+      "tags": [
+        "av002",
+        "fixture::buried-manual",
+        "profile::baseline",
+        "state::buried-manual"
+      ],
+      "type": 0,
+      "queue": -3,
+      "due": 6,
+      "interval_days": 0,
+      "remaining_steps": 0,
+      "reps": 0,
+      "lapses": 0,
+      "ease_factor": 0,
+      "review_history": []
+    },
+    {
+      "fixture_id": "buried-sibling",
+      "card_id": 1789580769988,
+      "note_id": 1789580769988,
+      "note_type": "VoiceQA",
+      "fields": {
+        "Prompt": "Reverse the sequence red, blue, green.",
+        "ReferenceAnswer": "Green, blue, red.",
+        "RequiredConcepts": "Green first\nBlue second\nRed last",
+        "AcceptedAnswers": "Green blue red",
+        "Language": "en-US",
+        "Extra": "Reversing changes the order, not the items."
+      },
+      "tags": [
+        "av002",
+        "fixture::buried-sibling",
+        "profile::baseline",
+        "state::buried-sibling"
+      ],
+      "type": 0,
+      "queue": -2,
+      "due": 7,
+      "interval_days": 0,
+      "remaining_steps": 0,
+      "reps": 0,
+      "lapses": 0,
+      "ease_factor": 0,
+      "review_history": []
+    },
+    {
+      "fixture_id": "future",
+      "card_id": 1789580769989,
+      "note_id": 1789580769989,
+      "note_type": "VoiceQA",
+      "fields": {
+        "Prompt": "A machine sorts numbers from smallest to largest. Explain what it does to the list seven, two, five.",
+        "ReferenceAnswer": "It returns two, five, seven, ordering the numbers from smallest to largest.",
+        "RequiredConcepts": "The resulting order is two, five, seven",
+        "AcceptedAnswers": "Two five seven",
+        "Language": "en-US",
+        "Extra": "The values stay the same; only their order changes."
+      },
+      "tags": [
+        "av002",
+        "fixture::future",
+        "profile::baseline",
+        "state::future"
+      ],
+      "type": 2,
+      "queue": 2,
+      "due": 97,
+      "interval_days": 30,
+      "remaining_steps": 0,
+      "reps": 3,
+      "lapses": 0,
+      "ease_factor": 2500,
+      "review_history": [
+        [
+          1786902369008,
+          1789580769989,
+          -1,
+          3,
+          1,
+          0,
+          2500,
+          2500,
+          0
+        ],
+        [
+          1786988769008,
+          1789580769989,
+          -1,
+          3,
+          7,
+          1,
+          2500,
+          2500,
+          1
+        ],
+        [
+          1787593569008,
+          1789580769989,
+          -1,
+          3,
+          30,
+          7,
+          2500,
+          2500,
+          1
+        ]
+      ]
+    }
+  ],
+  "deck": {
+    "id": 1789580769973,
+    "mod": 1789580769,
+    "name": "AV002 Baseline",
+    "usn": -1,
+    "lrnToday": [
+      0,
+      0
+    ],
+    "revToday": [
+      0,
+      0
+    ],
+    "newToday": [
+      0,
+      0
+    ],
+    "timeToday": [
+      0,
+      0
+    ],
+    "collapsed": true,
+    "browserCollapsed": true,
+    "desc": "",
+    "dyn": 0,
+    "conf": 1789580769975,
+    "extendNew": 0,
+    "extendRev": 0,
+    "reviewLimit": null,
+    "newLimit": null,
+    "reviewLimitToday": null,
+    "newLimitToday": null,
+    "desiredRetention": null
+  },
+  "preset": {
+    "id": 1789580769975,
+    "mod": 1789580769,
+    "name": "AV002 baseline",
+    "usn": -1,
+    "maxTaken": 60,
+    "autoplay": true,
+    "timer": 0,
+    "replayq": true,
+    "new": {
+      "bury": false,
+      "delays": [
+        1.0,
+        10.0
+      ],
+      "initialFactor": 2500,
+      "ints": [
+        1,
+        4,
+        0
+      ],
+      "order": 1,
+      "perDay": 20
+    },
+    "rev": {
+      "bury": false,
+      "ease4": 1.3,
+      "ivlFct": 1.0,
+      "maxIvl": 36500,
+      "perDay": 20,
+      "hardFactor": 1.2
+    },
+    "lapse": {
+      "delays": [
+        10.0
+      ],
+      "leechAction": 1,
+      "leechFails": 8,
+      "minInt": 1,
+      "mult": 0.0
+    },
+    "dyn": false,
+    "newMix": 0,
+    "newPerDayMinimum": 0,
+    "interdayLearningMix": 0,
+    "reviewOrder": 0,
+    "newSortOrder": 0,
+    "newGatherPriority": 0,
+    "buryInterdayLearning": false,
+    "fsrsWeights": [],
+    "fsrsParams5": [],
+    "fsrsParams6": [
+      0.212,
+      1.2931,
+      2.3065,
+      8.2956,
+      6.4133,
+      0.8334,
+      3.0194,
+      0.001,
+      1.8722,
+      0.1666,
+      0.796,
+      1.4835,
+      0.0614,
+      0.2629,
+      1.6483,
+      0.6014,
+      1.8729,
+      0.5425,
+      0.0912,
+      0.0658,
+      0.1542
+    ],
+    "desiredRetention": 0.9,
+    "ignoreRevlogsBeforeDate": "",
+    "easyDaysPercentages": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "stopTimerOnAnswer": false,
+    "secondsToShowQuestion": 0.0,
+    "secondsToShowAnswer": 0.0,
+    "questionAction": 0,
+    "answerAction": 0,
+    "waitForAudio": true,
+    "sm2Retention": 0.9,
+    "weightSearch": ""
+  }
+}

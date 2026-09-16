@@ -123,3 +123,12 @@ on the pinned AVD, and [results](docs/testing/av013/results.md) records what has
 not been verified. Both live criteria passed on September 16, 2026: AV-025's absorbed
 speech check, and one spoken answer carried through explicit confirmation to a verified
 guarded write.
+
+See [AV-014: Voice commands and safe navigation](android/README.md#voice-commands-and-safe-navigation)
+for the command vocabulary over that loop: context-only disambiguation with no wake word and
+no keyword stripping, a confidence gate on the commands that advance, reveal or rate, a pause
+that releases the recognizer and a touch-only resume that re-queries a fresh card, and a skip
+that halts without any write. No command path reaches the writer. Its
+[runbook](docs/testing/av014/runbook.md) separates the offline suite, the unattended touch
+sweep and the operator voice check on the pinned AVD, and
+[results](docs/testing/av014/results.md) records what has and has not been verified.

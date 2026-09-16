@@ -864,3 +864,95 @@ force-stopped the process in both specified windows on the pinned AVD and reache
 and `outcome-unknown` with no second review added. Two kills are not a reliability
 estimate, the windows are chosen rather than accidental, and nothing here was run under
 sync — #28 owns that.
+
+## Voice commands and safe navigation
+
+AV-014 (#15) adds the command vocabulary over AV-013's turn loop: repeat, reveal, pause,
+resume, finish session, skip, the four explicit rating commands, and confirm/change within
+the pre-commit exchange. Per AV-022 the parser lives in `org.ankivoice.core.commands` and
+takes no platform types; capture is requested through AV-007's `SpeechInput` and nothing
+else.
+
+- Issue: [#15 — AV-014: Add voice commands and safe navigation](https://github.com/BrockBadeaux14/AnkiVoice/issues/15).
+- Evidence: [results](../docs/testing/av014/results.md) and [runbook](../docs/testing/av014/runbook.md).
+
+### Context, not a wake word
+
+There is no wake word, no prefix keyword and no keyword stripping. **The context alone
+decides**, and the contexts are disjoint from AV-012's answer window by construction:
+
+| Context | Where | What resolves |
+| --- | --- | --- |
+| `answer` | AV-012 reports an attempt in flight | Nothing. Every utterance is answer text |
+| `command` | Idle, thinking, retrying, grading, committed or paused | Everything except confirm/change |
+| `confirmation` | `PROPOSING`: a pending rating is open | Everything, plus confirm and change |
+| `unavailable` | Playback or the write in flight; a halt no command may leave | Nothing |
+
+`outcome-unknown` is `unavailable`, so no command can clear the obligation to reconcile an
+ambiguous write. Inside the answer window the parser returns the utterance **unchanged** —
+no token is stripped — so "repeat the experiment", "pause the reaction" and "skip a
+generation" are graded as the answers they are. A learner-opened command capture is refused
+outright there, because AV-025 permits one active capture.
+
+Matching is whole-utterance after case and punctuation folding, never a substring. A phrase
+with two meanings is ambiguous and runs nothing: "again" is deliberately both `repeat` and
+`rate-again`, and resolves to neither.
+
+### Confidence, and why it is not a blanket gate
+
+Commands that **advance past the card, reveal the answer, or propose or confirm a rating**
+are guarded: recognition below `Confidence.SUFFICIENT` never executes one, and a spoken
+confirmation below it is not a confirmation — which `ReviewIntent.hasConfirmation` enforces
+again independently. Repeat, pause and change are not guarded: they replay audio, stop the
+microphone or reopen a choice, so a misrecognition costs nothing irreversible and always
+moves toward safety. That distinction is load-bearing, because the pinned recognizer
+reported **absent** confidence throughout AV-013's live check; a blanket gate would leave
+nothing usable by voice at all.
+
+### Pause, resume and skip
+
+Pause releases the recognizer and opens no idle listening anywhere. A pause during active
+capture settles that attempt as AV-012 `cancelled`, so partial text never becomes an answer.
+
+Resume is an **on-screen control only**. It calls AV-013's shipped `resume()`, which
+discards the turn and re-queries, because a paused snapshot may have been overtaken by a
+native or sync write; the learner is told plainly that the previous attempt was discarded
+and the card was read again. There is no open microphone for a spoken "resume" to arrive
+on, so a spoken one is refused and points at the button.
+
+Skip halts without any write. AV-004 found no non-mutating skip, so nothing is rated,
+buried, suspended or reordered to emulate one, and no command invents a rating.
+
+### Nothing here writes a review
+
+`CommandRouter` has no code path to `ReviewSession.commit`. A rating command is a
+*proposal* and confirm only *authorizes* one; submitting it is #27's step. The sweep in
+`CommandRouterTest` runs every command from every position a session can reach, by touch
+and by voice, and asserts the transport is never called.
+
+### Every command has a touch control
+
+Touch is the fallback for all of them, and it is deliberately **not** filtered by context:
+tapping Pause or Skip during an attempt is the escape hatch. Only resume is touch-only; no
+command is voice-only.
+
+`CommandController` in `:app` is the debug-grade surface decision 3 of the card calls for,
+modelled on AV-023's shell controls. It runs the session on a thread of its own, because
+AV-025's transport blocks its caller for the whole of playback and capture. It shows no
+card text, no transcript and no grade: #27 owns the readable study surface and replaces
+this one.
+
+### What this does not establish
+
+The 48 JVM tests prove the vocabulary, the context rule and the guards against the fakes;
+they say nothing about recognition quality.
+
+The live layer splits in two, and only one half has run.
+[The unattended sweep](../docs/testing/av014/results.md) passed on September 16, 2026: all
+twelve commands ran by touch on the pinned AVD against a real AnkiDroid collection, the
+context rule held with AV-012's window open, and the card came back byte-identical with no
+write recorded. **No command has been verified by voice on a device** — that needs a person
+speaking into the AVD, and section 3 of
+[the runbook](../docs/testing/av014/runbook.md) is the outstanding work. One unattended run
+is not a reliability estimate either; the 30-turn acceptance run stays in
+[#29](https://github.com/BrockBadeaux14/AnkiVoice/issues/29).
