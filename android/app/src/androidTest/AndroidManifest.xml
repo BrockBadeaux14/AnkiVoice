@@ -26,4 +26,8 @@
     <instrumentation
         android:name="org.ankivoice.app.CommandInstrumentation"
         android:targetPackage="org.ankivoice" />
+
+    <instrumentation
+        android:name="org.ankivoice.app.EvaluationInstrumentation"
+        android:targetPackage="org.ankivoice" />
 </manifest>

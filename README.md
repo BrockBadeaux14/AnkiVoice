@@ -124,6 +124,15 @@ not been verified. Both live criteria passed on September 16, 2026: AV-025's abs
 speech check, and one spoken answer carried through explicit confirmation to a verified
 guarded write.
 
+See [AV-017: Advisory grading evaluation](docs/testing/av017/results.md) for the
+60-answer labeled corpus over the AV-002 baseline package, the offline harness that replays
+it through the shipped rule and semantic graders without an emulator, the frozen-configuration
+and held-out discipline, and the measured error and abstention rates. The measurement is
+advisory quality evidence with no pass/fail threshold: it gates nothing, authorises no
+automatic acceptance, and changes neither grader. Its
+[runbook](docs/testing/av017/runbook.md) separates the offline scoring run from the live
+STT capture and the one recorded provider pass.
+
 See [AV-014: Voice commands and safe navigation](android/README.md#voice-commands-and-safe-navigation)
 for the command vocabulary over that loop: context-only disambiguation with no wake word and
 no keyword stripping, a confidence gate on the commands that advance, reveal or rate, a pause

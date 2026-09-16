@@ -1,0 +1,916 @@
+{
+  "schema_version": 1,
+  "card": "AV-017",
+  "issue": "https://github.com/BrockBadeaux14/AnkiVoice/issues/19",
+  "purpose": "The labeled answer corpus for AV-017's advisory grading evaluation. Every label is a human judgement written against the card's ReferenceAnswer, RequiredConcepts and AcceptedAnswers before any grader was run. The split is fixed here and nowhere else.",
+  "language": "en-US",
+  "note_type_source": "fixtures/voiceqa/note-type.json",
+  "note_type_sha256": "714ce3e6b4afefe3bb6bd6f18ddedb7e1c0ef2c2632a0db104b8236c75e5a617",
+  "scenarios_source": "fixtures/voiceqa/scenarios.json",
+  "scenarios_sha256": "ffd3fd91c4688335ad537dc87de050fc7b51dc9e1c60d3954f4e8754a652b4d6",
+  "baseline_profile": "baseline",
+  "baseline_cards": {
+    "new": "demo-arithmetic",
+    "learning": "demo-reversal",
+    "relearning": "demo-rules",
+    "mature": "demo-explanation",
+    "suspended": "demo-arithmetic",
+    "buried-manual": "demo-rules",
+    "buried-sibling": "demo-reversal",
+    "future": "demo-explanation"
+  },
+  "label_rule": {
+    "correct": "Every required concept is expressed, with no contradiction of the key.",
+    "partial": "Relevant to the prompt and consistent with the key, but at least one required concept is omitted and nothing contradicts the key.",
+    "incorrect": "Contradicts the key, states a wrong value or order, or is not a usable answer to the prompt at all.",
+    "written": "2026-09-16, before any grader was run against this corpus.",
+    "note": "An STT-mistake answer is labeled for what the transcript says, not for what the speaker intended. The evaluation grades the text the graders receive."
+  },
+  "split_discipline": {
+    "tuning": "Prompt, rubric and threshold inspection may look at these 20 answers only.",
+    "held-out": "Scored once per frozen configuration. Every run is recorded with its configuration hash, including discarded ones.",
+    "av006": "AV-006's tuned 12-answer corpus and its first-pass false-correct results are regression context only. They are not held-out evidence and are not counted in the 60. Two AV-006/AV-042 recognizer transcripts are reused as STT-mistake answers, and both are placed in the tuning split so that no previously inspected output is scored as held-out evidence."
+  },
+  "stt_sourcing": {
+    "required_live": 6,
+    "planned_live": 7,
+    "recorded_reuse": 2,
+    "rule": "At least 6 of the 9 STT-mistake answers must be genuine misrecognitions captured live on the pinned AVD through the #13 + #26 path. The remainder may reuse misrecognitions already recorded in AV-006, AV-040 or AV-042 evidence. Synthetic character-level corruption is not an acceptable substitute for any of the 9.",
+    "why_seven_live": "Only two genuine misrecognitions exist in the recorded evidence: AV-006's demo-explanation-1 and AV-042's attempt 4. Seven live captures are therefore planned so that all nine slots can be filled without synthesising one."
+  },
+  "category_counts": {
+    "paraphrase": {
+      "tuning": 3,
+      "held-out": 6
+    },
+    "negation": {
+      "tuning": 3,
+      "held-out": 5
+    },
+    "number-or-unit": {
+      "tuning": 3,
+      "held-out": 5
+    },
+    "incomplete": {
+      "tuning": 3,
+      "held-out": 6
+    },
+    "stt-mistake": {
+      "tuning": 3,
+      "held-out": 6
+    },
+    "correct-short": {
+      "tuning": 3,
+      "held-out": 6
+    },
+    "incorrect-short": {
+      "tuning": 2,
+      "held-out": 6
+    }
+  },
+  "examples": {
+    "demo-reversal": {
+      "Prompt": "Reverse the sequence red, blue, green.",
+      "ReferenceAnswer": "Green, blue, red.",
+      "RequiredConcepts": "Green first\nBlue second\nRed last",
+      "AcceptedAnswers": "Green blue red",
+      "Language": "en-US",
+      "Extra": "Reversing changes the order, not the items."
+    },
+    "demo-rules": {
+      "Prompt": "In a game, a token is valid only if it is blue and square. A token is blue and round. Is it valid, and why?",
+      "ReferenceAnswer": "No. It is blue but not square, and both conditions are required.",
+      "RequiredConcepts": "It is not valid\nIt fails the square requirement",
+      "AcceptedAnswers": "No, because it is round instead of square.",
+      "Language": "en-US",
+      "Extra": "Meeting just one required condition is insufficient."
+    },
+    "demo-arithmetic": {
+      "Prompt": "A box has three red blocks and two blue blocks. How many blocks are there in total?",
+      "ReferenceAnswer": "Five blocks.",
+      "RequiredConcepts": "Five",
+      "AcceptedAnswers": "Five\n5\nThere are five blocks",
+      "Language": "en-US",
+      "Extra": "Three plus two equals five."
+    },
+    "demo-explanation": {
+      "Prompt": "A machine sorts numbers from smallest to largest. Explain what it does to the list seven, two, five.",
+      "ReferenceAnswer": "It returns two, five, seven, ordering the numbers from smallest to largest.",
+      "RequiredConcepts": "The resulting order is two, five, seven",
+      "AcceptedAnswers": "Two five seven",
+      "Language": "en-US",
+      "Extra": "The values stay the same; only their order changes."
+    }
+  },
+  "answers": [
+    {
+      "id": "av017-paraphrase-t1",
+      "split": "tuning",
+      "category": "paraphrase",
+      "fixture_card": "learning",
+      "example_id": "demo-reversal",
+      "answer": "Start with green, then blue, and finish with red.",
+      "label": "correct",
+      "label_rationale": "States green first, blue second and red last; every required concept is present.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-paraphrase-t2",
+      "split": "tuning",
+      "category": "paraphrase",
+      "fixture_card": "new",
+      "example_id": "demo-arithmetic",
+      "answer": "The box holds five blocks altogether.",
+      "label": "correct",
+      "label_rationale": "States the total as five; the single required concept is present.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-paraphrase-t3",
+      "split": "tuning",
+      "category": "paraphrase",
+      "fixture_card": "mature",
+      "example_id": "demo-explanation",
+      "answer": "It arranges them as two, then five, then seven.",
+      "label": "correct",
+      "label_rationale": "States the resulting order two, five, seven.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-paraphrase-h1",
+      "split": "held-out",
+      "category": "paraphrase",
+      "fixture_card": "buried-sibling",
+      "example_id": "demo-reversal",
+      "answer": "The reversed order is green first, blue second, red last.",
+      "label": "correct",
+      "label_rationale": "Names all three positions in the order the key requires.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-paraphrase-h2",
+      "split": "held-out",
+      "category": "paraphrase",
+      "fixture_card": "suspended",
+      "example_id": "demo-arithmetic",
+      "answer": "Altogether there are five.",
+      "label": "correct",
+      "label_rationale": "States the total as five; the required concept 'Five' is present.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-paraphrase-h3",
+      "split": "held-out",
+      "category": "paraphrase",
+      "fixture_card": "relearning",
+      "example_id": "demo-rules",
+      "answer": "It is not valid, since being round means it misses the square condition.",
+      "label": "correct",
+      "label_rationale": "States that it is not valid and that the square requirement fails.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-paraphrase-h4",
+      "split": "held-out",
+      "category": "paraphrase",
+      "fixture_card": "future",
+      "example_id": "demo-explanation",
+      "answer": "The machine outputs the list ordered two, five, seven.",
+      "label": "correct",
+      "label_rationale": "States the resulting order two, five, seven.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-paraphrase-h5",
+      "split": "held-out",
+      "category": "paraphrase",
+      "fixture_card": "buried-manual",
+      "example_id": "demo-rules",
+      "answer": "No, it cannot be valid because it satisfies blue but not square.",
+      "label": "correct",
+      "label_rationale": "States invalidity and names the failed square requirement.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-paraphrase-h6",
+      "split": "held-out",
+      "category": "paraphrase",
+      "fixture_card": "learning",
+      "example_id": "demo-reversal",
+      "answer": "Reading it backwards gives green, blue, red.",
+      "label": "correct",
+      "label_rationale": "States the reversed sequence in full.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-negation-t1",
+      "split": "tuning",
+      "category": "negation",
+      "fixture_card": "relearning",
+      "example_id": "demo-rules",
+      "answer": "Yes, it is valid because both conditions are met.",
+      "label": "incorrect",
+      "label_rationale": "Contradicts the key: the token is not valid and the square condition is not met.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-negation-t2",
+      "split": "tuning",
+      "category": "negation",
+      "fixture_card": "mature",
+      "example_id": "demo-explanation",
+      "answer": "It does not change the order at all; it returns seven, two, five.",
+      "label": "incorrect",
+      "label_rationale": "Contradicts the key: the machine sorts, and the returned order is wrong.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-negation-t3",
+      "split": "tuning",
+      "category": "negation",
+      "fixture_card": "learning",
+      "example_id": "demo-reversal",
+      "answer": "Reversing does not change the order, so it stays red, blue, green.",
+      "label": "incorrect",
+      "label_rationale": "Contradicts the key: the reversed sequence is green, blue, red.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-negation-h1",
+      "split": "held-out",
+      "category": "negation",
+      "fixture_card": "buried-manual",
+      "example_id": "demo-rules",
+      "answer": "Yes, being round is enough to satisfy the square requirement.",
+      "label": "incorrect",
+      "label_rationale": "Contradicts the key on both required concepts.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-negation-h2",
+      "split": "held-out",
+      "category": "negation",
+      "fixture_card": "new",
+      "example_id": "demo-arithmetic",
+      "answer": "There are no blocks in the box.",
+      "label": "incorrect",
+      "label_rationale": "Contradicts the key: the total is five, not none.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-negation-h3",
+      "split": "held-out",
+      "category": "negation",
+      "fixture_card": "future",
+      "example_id": "demo-explanation",
+      "answer": "It sorts them from largest to smallest, so seven comes first.",
+      "label": "incorrect",
+      "label_rationale": "Contradicts the key: the order is smallest to largest.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-negation-h4",
+      "split": "held-out",
+      "category": "negation",
+      "fixture_card": "buried-sibling",
+      "example_id": "demo-reversal",
+      "answer": "It is not reversed; green stays last.",
+      "label": "incorrect",
+      "label_rationale": "Contradicts the key: green is first after reversal.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-negation-h5",
+      "split": "held-out",
+      "category": "negation",
+      "fixture_card": "relearning",
+      "example_id": "demo-rules",
+      "answer": "It is valid, and the square requirement does not apply.",
+      "label": "incorrect",
+      "label_rationale": "Contradicts both required concepts.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-number-or-unit-t1",
+      "split": "tuning",
+      "category": "number-or-unit",
+      "fixture_card": "new",
+      "example_id": "demo-arithmetic",
+      "answer": "Six blocks.",
+      "label": "incorrect",
+      "label_rationale": "Wrong value: the total is five.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-number-or-unit-t2",
+      "split": "tuning",
+      "category": "number-or-unit",
+      "fixture_card": "mature",
+      "example_id": "demo-explanation",
+      "answer": "It returns two, five, six.",
+      "label": "incorrect",
+      "label_rationale": "Wrong value in the resulting order; seven is replaced by six.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-number-or-unit-t3",
+      "split": "tuning",
+      "category": "number-or-unit",
+      "fixture_card": "suspended",
+      "example_id": "demo-arithmetic",
+      "answer": "Fifty blocks.",
+      "label": "incorrect",
+      "label_rationale": "Wrong value: the total is five, not fifty.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-number-or-unit-h1",
+      "split": "held-out",
+      "category": "number-or-unit",
+      "fixture_card": "new",
+      "example_id": "demo-arithmetic",
+      "answer": "Three blocks.",
+      "label": "incorrect",
+      "label_rationale": "Wrong value: three is one addend, not the total.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-number-or-unit-h2",
+      "split": "held-out",
+      "category": "number-or-unit",
+      "fixture_card": "future",
+      "example_id": "demo-explanation",
+      "answer": "It returns two, five, seventy.",
+      "label": "incorrect",
+      "label_rationale": "Wrong value in the resulting order; seventy is not seven.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-number-or-unit-h3",
+      "split": "held-out",
+      "category": "number-or-unit",
+      "fixture_card": "suspended",
+      "example_id": "demo-arithmetic",
+      "answer": "There are five hundred blocks.",
+      "label": "incorrect",
+      "label_rationale": "Wrong value: five hundred is not five.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-number-or-unit-h4",
+      "split": "held-out",
+      "category": "number-or-unit",
+      "fixture_card": "mature",
+      "example_id": "demo-explanation",
+      "answer": "It returns 2, 5, 8.",
+      "label": "incorrect",
+      "label_rationale": "Wrong value in the resulting order; eight is not seven.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-number-or-unit-h5",
+      "split": "held-out",
+      "category": "number-or-unit",
+      "fixture_card": "new",
+      "example_id": "demo-arithmetic",
+      "answer": "Four blocks in total.",
+      "label": "incorrect",
+      "label_rationale": "Wrong value: the total is five.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-incomplete-t1",
+      "split": "tuning",
+      "category": "incomplete",
+      "fixture_card": "relearning",
+      "example_id": "demo-rules",
+      "answer": "No.",
+      "label": "partial",
+      "label_rationale": "Expresses 'It is not valid' and nothing that contradicts the key, but omits the square requirement. This is the AV-002 fixture's own partial case.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-incomplete-t2",
+      "split": "tuning",
+      "category": "incomplete",
+      "fixture_card": "learning",
+      "example_id": "demo-reversal",
+      "answer": "Green comes first.",
+      "label": "partial",
+      "label_rationale": "Expresses one of three required concepts, with no contradiction.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-incomplete-t3",
+      "split": "tuning",
+      "category": "incomplete",
+      "fixture_card": "mature",
+      "example_id": "demo-explanation",
+      "answer": "It sorts the numbers.",
+      "label": "partial",
+      "label_rationale": "Relevant and consistent with the key, but states no resulting order.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-incomplete-h1",
+      "split": "held-out",
+      "category": "incomplete",
+      "fixture_card": "buried-manual",
+      "example_id": "demo-rules",
+      "answer": "It is not valid.",
+      "label": "partial",
+      "label_rationale": "Expresses one required concept; the square requirement is omitted.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-incomplete-h2",
+      "split": "held-out",
+      "category": "incomplete",
+      "fixture_card": "buried-sibling",
+      "example_id": "demo-reversal",
+      "answer": "Green first, then blue.",
+      "label": "partial",
+      "label_rationale": "Expresses two of three required concepts; 'Red last' is omitted.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-incomplete-h3",
+      "split": "held-out",
+      "category": "incomplete",
+      "fixture_card": "future",
+      "example_id": "demo-explanation",
+      "answer": "It puts two first.",
+      "label": "partial",
+      "label_rationale": "Names only the first element of the required order.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-incomplete-h4",
+      "split": "held-out",
+      "category": "incomplete",
+      "fixture_card": "relearning",
+      "example_id": "demo-rules",
+      "answer": "It fails one of the requirements.",
+      "label": "partial",
+      "label_rationale": "Relevant and uncontradicting, but names neither invalidity explicitly nor which requirement fails.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-incomplete-h5",
+      "split": "held-out",
+      "category": "incomplete",
+      "fixture_card": "learning",
+      "example_id": "demo-reversal",
+      "answer": "The order is reversed.",
+      "label": "partial",
+      "label_rationale": "Restates the operation without giving the resulting sequence.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-incomplete-h6",
+      "split": "held-out",
+      "category": "incomplete",
+      "fixture_card": "mature",
+      "example_id": "demo-explanation",
+      "answer": "It orders them from smallest to largest.",
+      "label": "partial",
+      "label_rationale": "States the ordering rule but not the required resulting order.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-stt-mistake-t1",
+      "split": "tuning",
+      "category": "stt-mistake",
+      "fixture_card": "mature",
+      "example_id": "demo-explanation",
+      "answer": "it puts you first then five then seven",
+      "label": "partial",
+      "label_rationale": "The transcript states an ordering whose first element is not a number, so the required order 'two, five, seven' is not expressed; nothing in it contradicts the key.",
+      "provenance": {
+        "kind": "recorded",
+        "spoken": "It puts two first, then five, then seven.",
+        "source": "AV-006 native speech, online-permitted pass, case demo-explanation-1",
+        "evidence": "docs/testing/av006/evidence/native-stt-online-remainder.json",
+        "note": "Genuine recognizer output on the pinned route: 'two' came back as 'you'."
+      }
+    },
+    {
+      "id": "av017-stt-mistake-t2",
+      "split": "tuning",
+      "category": "stt-mistake",
+      "fixture_card": "learning",
+      "example_id": "demo-reversal",
+      "answer": "You red",
+      "label": "incorrect",
+      "label_rationale": "The transcript expresses none of the three required position concepts and is not a usable answer to the prompt.",
+      "provenance": {
+        "kind": "recorded",
+        "spoken": "Green, blue, red.",
+        "source": "AV-042 live probe, attempt 4",
+        "evidence": "docs/testing/av042/results.md",
+        "note": "Genuine recognizer output on the pinned route; recorded in the AV-042 attempt table."
+      }
+    },
+    {
+      "id": "av017-stt-mistake-t3",
+      "split": "tuning",
+      "category": "stt-mistake",
+      "fixture_card": "new",
+      "example_id": "demo-arithmetic",
+      "answer": null,
+      "label": null,
+      "label_rationale": null,
+      "provenance": {
+        "kind": "live-pending",
+        "spoken_target": "There are five blocks",
+        "slot": "stt-live-1",
+        "note": "Filled only by a genuine misrecognition captured on the pinned AVD through the #13 + #26 path. Synthetic corruption is not an acceptable substitute."
+      }
+    },
+    {
+      "id": "av017-stt-mistake-h1",
+      "split": "held-out",
+      "category": "stt-mistake",
+      "fixture_card": "suspended",
+      "example_id": "demo-arithmetic",
+      "answer": null,
+      "label": null,
+      "label_rationale": null,
+      "provenance": {
+        "kind": "live-pending",
+        "spoken_target": "Five blocks",
+        "slot": "stt-live-2",
+        "note": "Filled only by a genuine misrecognition captured on the pinned AVD through the #13 + #26 path. Synthetic corruption is not an acceptable substitute."
+      }
+    },
+    {
+      "id": "av017-stt-mistake-h2",
+      "split": "held-out",
+      "category": "stt-mistake",
+      "fixture_card": "buried-sibling",
+      "example_id": "demo-reversal",
+      "answer": null,
+      "label": null,
+      "label_rationale": null,
+      "provenance": {
+        "kind": "live-pending",
+        "spoken_target": "Green, blue, red",
+        "slot": "stt-live-3",
+        "note": "Filled only by a genuine misrecognition captured on the pinned AVD through the #13 + #26 path. Synthetic corruption is not an acceptable substitute."
+      }
+    },
+    {
+      "id": "av017-stt-mistake-h3",
+      "split": "held-out",
+      "category": "stt-mistake",
+      "fixture_card": "relearning",
+      "example_id": "demo-rules",
+      "answer": null,
+      "label": null,
+      "label_rationale": null,
+      "provenance": {
+        "kind": "live-pending",
+        "spoken_target": "No, round does not satisfy square",
+        "slot": "stt-live-4",
+        "note": "Filled only by a genuine misrecognition captured on the pinned AVD through the #13 + #26 path. Synthetic corruption is not an acceptable substitute."
+      }
+    },
+    {
+      "id": "av017-stt-mistake-h4",
+      "split": "held-out",
+      "category": "stt-mistake",
+      "fixture_card": "buried-manual",
+      "example_id": "demo-rules",
+      "answer": null,
+      "label": null,
+      "label_rationale": null,
+      "provenance": {
+        "kind": "live-pending",
+        "spoken_target": "It is not valid because it is not square",
+        "slot": "stt-live-5",
+        "note": "Filled only by a genuine misrecognition captured on the pinned AVD through the #13 + #26 path. Synthetic corruption is not an acceptable substitute."
+      }
+    },
+    {
+      "id": "av017-stt-mistake-h5",
+      "split": "held-out",
+      "category": "stt-mistake",
+      "fixture_card": "future",
+      "example_id": "demo-explanation",
+      "answer": null,
+      "label": null,
+      "label_rationale": null,
+      "provenance": {
+        "kind": "live-pending",
+        "spoken_target": "It puts two first, then five, then seven",
+        "slot": "stt-live-6",
+        "note": "Filled only by a genuine misrecognition captured on the pinned AVD through the #13 + #26 path. Synthetic corruption is not an acceptable substitute."
+      }
+    },
+    {
+      "id": "av017-stt-mistake-h6",
+      "split": "held-out",
+      "category": "stt-mistake",
+      "fixture_card": "mature",
+      "example_id": "demo-explanation",
+      "answer": null,
+      "label": null,
+      "label_rationale": null,
+      "provenance": {
+        "kind": "live-pending",
+        "spoken_target": "Two five seven",
+        "slot": "stt-live-7",
+        "note": "Filled only by a genuine misrecognition captured on the pinned AVD through the #13 + #26 path. Synthetic corruption is not an acceptable substitute."
+      }
+    },
+    {
+      "id": "av017-correct-short-t1",
+      "split": "tuning",
+      "category": "correct-short",
+      "fixture_card": "new",
+      "example_id": "demo-arithmetic",
+      "answer": "Five.",
+      "label": "correct",
+      "label_rationale": "Exactly the first accepted answer.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-correct-short-t2",
+      "split": "tuning",
+      "category": "correct-short",
+      "fixture_card": "learning",
+      "example_id": "demo-reversal",
+      "answer": "Green, blue, red.",
+      "label": "correct",
+      "label_rationale": "Exactly the reference answer.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-correct-short-t3",
+      "split": "tuning",
+      "category": "correct-short",
+      "fixture_card": "relearning",
+      "example_id": "demo-rules",
+      "answer": "No, round does not satisfy square.",
+      "label": "correct",
+      "label_rationale": "States invalidity and the failed square requirement; the AV-002 fixture's correct case.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-correct-short-h1",
+      "split": "held-out",
+      "category": "correct-short",
+      "fixture_card": "suspended",
+      "example_id": "demo-arithmetic",
+      "answer": "Five blocks.",
+      "label": "correct",
+      "label_rationale": "Exactly the reference answer.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-correct-short-h2",
+      "split": "held-out",
+      "category": "correct-short",
+      "fixture_card": "buried-sibling",
+      "example_id": "demo-reversal",
+      "answer": "Green blue red",
+      "label": "correct",
+      "label_rationale": "Exactly the first accepted answer.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-correct-short-h3",
+      "split": "held-out",
+      "category": "correct-short",
+      "fixture_card": "mature",
+      "example_id": "demo-explanation",
+      "answer": "Two five seven",
+      "label": "correct",
+      "label_rationale": "Exactly the first accepted answer.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-correct-short-h4",
+      "split": "held-out",
+      "category": "correct-short",
+      "fixture_card": "new",
+      "example_id": "demo-arithmetic",
+      "answer": "5",
+      "label": "correct",
+      "label_rationale": "Exactly the second accepted answer.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-correct-short-h5",
+      "split": "held-out",
+      "category": "correct-short",
+      "fixture_card": "buried-manual",
+      "example_id": "demo-rules",
+      "answer": "No, because it is round instead of square.",
+      "label": "correct",
+      "label_rationale": "Exactly the first accepted answer.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-correct-short-h6",
+      "split": "held-out",
+      "category": "correct-short",
+      "fixture_card": "future",
+      "example_id": "demo-explanation",
+      "answer": "It puts two first, then five, then seven.",
+      "label": "correct",
+      "label_rationale": "States the required resulting order; the AV-002 fixture's correct case.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-incorrect-short-t1",
+      "split": "tuning",
+      "category": "incorrect-short",
+      "fixture_card": "learning",
+      "example_id": "demo-reversal",
+      "answer": "Blue, green, red.",
+      "label": "incorrect",
+      "label_rationale": "Wrong order; the AV-002 fixture's incorrect case.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-incorrect-short-t2",
+      "split": "tuning",
+      "category": "incorrect-short",
+      "fixture_card": "new",
+      "example_id": "demo-arithmetic",
+      "answer": "Six.",
+      "label": "incorrect",
+      "label_rationale": "Wrong value; the AV-002 fixture's incorrect case.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-incorrect-short-h1",
+      "split": "held-out",
+      "category": "incorrect-short",
+      "fixture_card": "buried-manual",
+      "example_id": "demo-rules",
+      "answer": "Yes, because it is blue.",
+      "label": "incorrect",
+      "label_rationale": "Contradicts the key; the AV-002 fixture's incorrect case.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-incorrect-short-h2",
+      "split": "held-out",
+      "category": "incorrect-short",
+      "fixture_card": "mature",
+      "example_id": "demo-explanation",
+      "answer": "It gives seven, five, two.",
+      "label": "incorrect",
+      "label_rationale": "Wrong order; the AV-002 fixture's incorrect case.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-incorrect-short-h3",
+      "split": "held-out",
+      "category": "incorrect-short",
+      "fixture_card": "buried-sibling",
+      "example_id": "demo-reversal",
+      "answer": "Red, blue, green.",
+      "label": "incorrect",
+      "label_rationale": "The unreversed input, not the reversed sequence.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-incorrect-short-h4",
+      "split": "held-out",
+      "category": "incorrect-short",
+      "fixture_card": "suspended",
+      "example_id": "demo-arithmetic",
+      "answer": "Blue.",
+      "label": "incorrect",
+      "label_rationale": "Names a colour rather than a total; not a usable answer to the prompt.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-incorrect-short-h5",
+      "split": "held-out",
+      "category": "incorrect-short",
+      "fixture_card": "future",
+      "example_id": "demo-explanation",
+      "answer": "It reverses the list.",
+      "label": "incorrect",
+      "label_rationale": "Wrong operation: the machine sorts, it does not reverse.",
+      "provenance": {
+        "kind": "authored"
+      }
+    },
+    {
+      "id": "av017-incorrect-short-h6",
+      "split": "held-out",
+      "category": "incorrect-short",
+      "fixture_card": "relearning",
+      "example_id": "demo-rules",
+      "answer": "It is square but not blue.",
+      "label": "incorrect",
+      "label_rationale": "Contradicts the key, which says the token is blue and not square.",
+      "provenance": {
+        "kind": "authored"
+      }
+    }
+  ]
+}
