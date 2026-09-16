@@ -1,0 +1,227 @@
+{
+  "schema_version": 1,
+  "card": "AV-017",
+  "utc": "2026-09-16T22:33:56Z",
+  "label": "rule-path-interim-3",
+  "mode": "rule-only",
+  "configuration_hash": "4b093a06dd104215e01052761df99d1b2acc0e21d7acde53ba1ba31cc2033b6c",
+  "corpus": {
+    "file": "av017-corpus.json",
+    "sha256": "09fb524bd0da4739d099b5bbf18c084a5d7fe9f4a1f3825daaa6e38f65a86cee",
+    "answers": 60,
+    "scored": 57,
+    "awaiting_live_capture": [
+      "av017-stt-mistake-t3",
+      "av017-stt-mistake-h1",
+      "av017-stt-mistake-h2"
+    ]
+  },
+  "completeness": {
+    "complete": false,
+    "live_stt_answers": 4,
+    "live_stt_required": 6,
+    "verdict": "INCOMPLETE \u2014 reported as incomplete rather than passed, per AV-017: a scored run that used fewer than 6 genuine live misrecognitions is not a pass."
+  },
+  "quota": {
+    "daily_limit": 50,
+    "session_limit": 30,
+    "requests_per_session": 14,
+    "utc_day": "2026-09-16",
+    "counts": {
+      "reservedToday": 0,
+      "reservedThisSession": 0,
+      "reservedTotal": 0
+    },
+    "reservations": 0
+  },
+  "gates": {
+    "target_error_rate": null,
+    "pass_fail": null,
+    "note": "AV-017 defines no target error rate and gates nothing. Automatic acceptance stays out of the MVP, model confidence is an uncalibrated signal, and explicit user confirmation is enabled throughout."
+  },
+  "held_out": {
+    "answers": 38,
+    "paths": {
+      "rule-only": {
+        "path": "rule-only",
+        "answers": 5,
+        "human_labels": {
+          "correct": 5,
+          "partial": 0,
+          "incorrect": 0
+        },
+        "false_acceptance": {
+          "count": 0,
+          "of": 0,
+          "rate": null,
+          "ids": []
+        },
+        "false_rejection": {
+          "count": 0,
+          "of": 5,
+          "rate": 0.0,
+          "ids": []
+        },
+        "abstention": {
+          "count": 0,
+          "of": 5,
+          "rate": 0.0
+        },
+        "label_agreement": {
+          "count": 5,
+          "of": 5,
+          "rate": 1.0,
+          "note": "Secondary. The card's three rates are the measurement; this is context."
+        },
+        "per_category": {
+          "paraphrase": {
+            "answers": 0,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 0
+          },
+          "negation": {
+            "answers": 0,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 0
+          },
+          "number-or-unit": {
+            "answers": 0,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 0
+          },
+          "incomplete": {
+            "answers": 0,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 0
+          },
+          "stt-mistake": {
+            "answers": 0,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 0
+          },
+          "correct-short": {
+            "answers": 5,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 0
+          },
+          "incorrect-short": {
+            "answers": 0,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 0
+          }
+        },
+        "latency_ms": {
+          "samples": 5,
+          "p50": 0.046,
+          "p95": 0.085
+        }
+      },
+      "ai": {
+        "path": "ai",
+        "status": "not-run",
+        "answers_the_rules_left": 33,
+        "note": "No credential was supplied, so the AI leg was never attempted. This is not an abstention and is not scored as one. Re-run the harness in record mode to measure this path."
+      }
+    }
+  },
+  "tuning": {
+    "answers": 19,
+    "paths": {
+      "rule-only": {
+        "path": "rule-only",
+        "answers": 2,
+        "human_labels": {
+          "correct": 2,
+          "partial": 0,
+          "incorrect": 0
+        },
+        "false_acceptance": {
+          "count": 0,
+          "of": 0,
+          "rate": null,
+          "ids": []
+        },
+        "false_rejection": {
+          "count": 0,
+          "of": 2,
+          "rate": 0.0,
+          "ids": []
+        },
+        "abstention": {
+          "count": 0,
+          "of": 2,
+          "rate": 0.0
+        },
+        "label_agreement": {
+          "count": 2,
+          "of": 2,
+          "rate": 1.0,
+          "note": "Secondary. The card's three rates are the measurement; this is context."
+        },
+        "per_category": {
+          "paraphrase": {
+            "answers": 0,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 0
+          },
+          "negation": {
+            "answers": 0,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 0
+          },
+          "number-or-unit": {
+            "answers": 0,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 0
+          },
+          "incomplete": {
+            "answers": 0,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 0
+          },
+          "stt-mistake": {
+            "answers": 0,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 0
+          },
+          "correct-short": {
+            "answers": 2,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 0
+          },
+          "incorrect-short": {
+            "answers": 0,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 0
+          }
+        },
+        "latency_ms": {
+          "samples": 2,
+          "p50": 0.041,
+          "p95": 0.234
+        }
+      },
+      "ai": {
+        "path": "ai",
+        "status": "not-run",
+        "answers_the_rules_left": 17,
+        "note": "No credential was supplied, so the AI leg was never attempted. This is not an abstention and is not scored as one. Re-run the harness in record mode to measure this path."
+      }
+    }
+  },
+  "note": "Interim, third freeze: two more live STT captures filled held-out slots h3 and h4. Rule path over the 57 complete answers; AI path not run; 3 STT slots await live capture."
+}

@@ -1,0 +1,377 @@
+{
+  "schema_version": 1,
+  "card": "AV-017",
+  "utc": "2026-09-16T22:41:21Z",
+  "label": "ai-record-1",
+  "mode": "record",
+  "configuration_hash": "4b093a06dd104215e01052761df99d1b2acc0e21d7acde53ba1ba31cc2033b6c",
+  "corpus": {
+    "file": "av017-corpus.json",
+    "sha256": "09fb524bd0da4739d099b5bbf18c084a5d7fe9f4a1f3825daaa6e38f65a86cee",
+    "answers": 60,
+    "scored": 57,
+    "awaiting_live_capture": [
+      "av017-stt-mistake-t3",
+      "av017-stt-mistake-h1",
+      "av017-stt-mistake-h2"
+    ]
+  },
+  "completeness": {
+    "complete": false,
+    "live_stt_answers": 4,
+    "live_stt_required": 6,
+    "verdict": "INCOMPLETE \u2014 reported as incomplete rather than passed, per AV-017: a scored run that used fewer than 6 genuine live misrecognitions is not a pass."
+  },
+  "quota": {
+    "daily_limit": 200,
+    "session_limit": 30,
+    "requests_per_session": 14,
+    "utc_day": "2026-09-16",
+    "counts": {
+      "reservedToday": 1,
+      "reservedThisSession": 1,
+      "reservedTotal": 1
+    },
+    "reservations": 0
+  },
+  "gates": {
+    "target_error_rate": null,
+    "pass_fail": null,
+    "note": "AV-017 defines no target error rate and gates nothing. Automatic acceptance stays out of the MVP, model confidence is an uncalibrated signal, and explicit user confirmation is enabled throughout."
+  },
+  "held_out": {
+    "answers": 38,
+    "paths": {
+      "rule-only": {
+        "path": "rule-only",
+        "answers": 5,
+        "human_labels": {
+          "correct": 5,
+          "partial": 0,
+          "incorrect": 0
+        },
+        "false_acceptance": {
+          "count": 0,
+          "of": 0,
+          "rate": null,
+          "ids": []
+        },
+        "false_rejection": {
+          "count": 0,
+          "of": 5,
+          "rate": 0.0,
+          "ids": []
+        },
+        "abstention": {
+          "count": 0,
+          "of": 5,
+          "rate": 0.0
+        },
+        "label_agreement": {
+          "count": 5,
+          "of": 5,
+          "rate": 1.0,
+          "note": "Secondary. The card's three rates are the measurement; this is context."
+        },
+        "per_category": {
+          "paraphrase": {
+            "answers": 0,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 0
+          },
+          "negation": {
+            "answers": 0,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 0
+          },
+          "number-or-unit": {
+            "answers": 0,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 0
+          },
+          "incomplete": {
+            "answers": 0,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 0
+          },
+          "stt-mistake": {
+            "answers": 0,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 0
+          },
+          "correct-short": {
+            "answers": 5,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 0
+          },
+          "incorrect-short": {
+            "answers": 0,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 0
+          }
+        },
+        "latency_ms": {
+          "samples": 5,
+          "p50": 0.086,
+          "p95": 0.187
+        }
+      },
+      "ai": {
+        "path": "ai",
+        "answers": 33,
+        "human_labels": {
+          "correct": 9,
+          "partial": 8,
+          "incorrect": 16
+        },
+        "false_acceptance": {
+          "count": 0,
+          "of": 16,
+          "rate": 0.0,
+          "ids": []
+        },
+        "false_rejection": {
+          "count": 0,
+          "of": 9,
+          "rate": 0.0,
+          "ids": []
+        },
+        "abstention": {
+          "count": 33,
+          "of": 33,
+          "rate": 1.0
+        },
+        "label_agreement": {
+          "count": 0,
+          "of": 33,
+          "rate": 0.0,
+          "note": "Secondary. The card's three rates are the measurement; this is context."
+        },
+        "per_category": {
+          "paraphrase": {
+            "answers": 6,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 6
+          },
+          "negation": {
+            "answers": 5,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 5
+          },
+          "number-or-unit": {
+            "answers": 5,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 5
+          },
+          "incomplete": {
+            "answers": 6,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 6
+          },
+          "stt-mistake": {
+            "answers": 4,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 4
+          },
+          "correct-short": {
+            "answers": 1,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 1
+          },
+          "incorrect-short": {
+            "answers": 6,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 6
+          }
+        },
+        "latency_ms": {
+          "samples": 33,
+          "p50": 0.151,
+          "p95": 0.476
+        }
+      }
+    }
+  },
+  "tuning": {
+    "answers": 19,
+    "paths": {
+      "rule-only": {
+        "path": "rule-only",
+        "answers": 2,
+        "human_labels": {
+          "correct": 2,
+          "partial": 0,
+          "incorrect": 0
+        },
+        "false_acceptance": {
+          "count": 0,
+          "of": 0,
+          "rate": null,
+          "ids": []
+        },
+        "false_rejection": {
+          "count": 0,
+          "of": 2,
+          "rate": 0.0,
+          "ids": []
+        },
+        "abstention": {
+          "count": 0,
+          "of": 2,
+          "rate": 0.0
+        },
+        "label_agreement": {
+          "count": 2,
+          "of": 2,
+          "rate": 1.0,
+          "note": "Secondary. The card's three rates are the measurement; this is context."
+        },
+        "per_category": {
+          "paraphrase": {
+            "answers": 0,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 0
+          },
+          "negation": {
+            "answers": 0,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 0
+          },
+          "number-or-unit": {
+            "answers": 0,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 0
+          },
+          "incomplete": {
+            "answers": 0,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 0
+          },
+          "stt-mistake": {
+            "answers": 0,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 0
+          },
+          "correct-short": {
+            "answers": 2,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 0
+          },
+          "incorrect-short": {
+            "answers": 0,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 0
+          }
+        },
+        "latency_ms": {
+          "samples": 2,
+          "p50": 0.122,
+          "p95": 0.842
+        }
+      },
+      "ai": {
+        "path": "ai",
+        "answers": 17,
+        "human_labels": {
+          "correct": 4,
+          "partial": 4,
+          "incorrect": 9
+        },
+        "false_acceptance": {
+          "count": 0,
+          "of": 9,
+          "rate": 0.0,
+          "ids": []
+        },
+        "false_rejection": {
+          "count": 0,
+          "of": 4,
+          "rate": 0.0,
+          "ids": []
+        },
+        "abstention": {
+          "count": 17,
+          "of": 17,
+          "rate": 1.0
+        },
+        "label_agreement": {
+          "count": 0,
+          "of": 17,
+          "rate": 0.0,
+          "note": "Secondary. The card's three rates are the measurement; this is context."
+        },
+        "per_category": {
+          "paraphrase": {
+            "answers": 3,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 3
+          },
+          "negation": {
+            "answers": 3,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 3
+          },
+          "number-or-unit": {
+            "answers": 3,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 3
+          },
+          "incomplete": {
+            "answers": 3,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 3
+          },
+          "stt-mistake": {
+            "answers": 2,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 2
+          },
+          "correct-short": {
+            "answers": 1,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 1
+          },
+          "incorrect-short": {
+            "answers": 2,
+            "false_acceptance": 0,
+            "false_rejection": 0,
+            "abstention": 2
+          }
+        },
+        "latency_ms": {
+          "samples": 17,
+          "p50": 0.162,
+          "p95": 1593.341
+        }
+      }
+    }
+  },
+  "note": "One live pass over the pinned free route, September 16, 2026, daily limit raised explicitly to 200. The shipped route guard refused the first reply (served by 'Liquid', not the pinned provider tag 'liquid/fp8') and stopped the ledger for the day, so the remaining 49 requests were refused before dispatch: one reservation consumed, every AI-path answer ungraded. Replay reproduces the run with zero differences."
+}

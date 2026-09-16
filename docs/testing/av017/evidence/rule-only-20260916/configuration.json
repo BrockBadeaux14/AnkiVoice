@@ -1,0 +1,29 @@
+{
+  "components": {
+    "corpus_sha256": "0eab7353b63e0ddf22696147f30caab408d92e74f2261cf618de561ceaae7357",
+    "sources": {
+      "android/core/src/main/kotlin/org/ankivoice/core/grading/RuleGrader.kt": "25f6d7f4c024ce710e7922072b41abc028480d60e99b615f96b030a439ef9911",
+      "android/core/src/main/kotlin/org/ankivoice/core/grading/Suggestions.kt": "8b2a291bea8b450bd0f1cf97766bb4112ff507bc09e958cf0f2029ed4c301477",
+      "android/core/src/main/kotlin/org/ankivoice/core/contracts/Grading.kt": "f26d28fbc4e70401bf67e2f978a68f62626261058f3faa2799a97deb2a494b72",
+      "android/provider/src/main/kotlin/org/ankivoice/provider/GradingInstruction.kt": "22f186d593b58fc99f4f74e4bf3554300216e9e6369ddab6942044cb37565669",
+      "android/provider/src/main/kotlin/org/ankivoice/provider/SemanticGrader.kt": "dc1dc73447e7302520c21b490e096e4d6620a691579e6ce8590fd6d033559595",
+      "android/provider/src/main/kotlin/org/ankivoice/provider/FreeRoute.kt": "1277aa7b3f134dd935ee0cf321e13c66539fecdd32e4e472178043c1a7735001"
+    },
+    "pinned_route": {
+      "model": "liquid/lfm-2.5-2.6b:free",
+      "provider": "liquid/fp8",
+      "temperature": 0,
+      "max_tokens": 1024,
+      "deadline_ms": 20000,
+      "attempts": 2
+    },
+    "permitted_ratings": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "rubric_version": 1
+  },
+  "hash": "d502cd71abdfd13406408ae771214cd996516643afffe6bc35779da71d2b49cc"
+}
