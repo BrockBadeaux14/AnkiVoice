@@ -1,5 +1,8 @@
 package org.ankivoice.app
 
+import java.util.concurrent.Executor
+import java.util.UUID
+import org.ankivoice.ankidroid.CardReadReply
 import org.ankivoice.ankidroid.AccessSnapshot
 import org.ankivoice.ankidroid.Deck
 import org.ankivoice.ankidroid.DeckAccess
@@ -45,11 +48,14 @@ internal class ShellController(
     private val access: DeckAccess,
     private val settings: ShellSettings,
     private val provisioner: Provisioner,
-    private val cardProvider: () -> CardProvider?,
+    private val worker: Executor = Executor { it.run() },
+    private val delivery: Executor = Executor { it.run() },
+    private val cardProvider: (Long) -> CardProvider?,
 ) : ForegroundEventPort {
     var state = ShellState(selectedDeckId = settings.selectedDeckId, language = settings.language)
         private set
     var observer: ((ShellState) -> Unit)? = null
+    private val sessionId = UUID.randomUUID().toString()
     private var generation = 0L
     private var foreground = false
     private var selecting = false
@@ -167,18 +173,25 @@ internal class ShellController(
             publish(snapshot.copy(accessFailure = failure, status = PreviewStatus.Paused(failure)))
             return
         }
-        val provider = cardProvider()
-        val status = if (provider == null) PreviewStatus.Unavailable else {
-            when (val capabilities = provider.capabilities()) {
-                is Failure -> PreviewStatus.Paused(capabilities)
-                is Capabilities -> when (val card = provider.nextCard()) {
-                    is Failure -> PreviewStatus.Paused(card)
-                    is ScheduledCard -> PreviewStatus.CardReady
-                    QueueExhausted -> PreviewStatus.Exhausted
+        val operation = OperationToken(sessionId, token.toInt(), token.toInt())
+        worker.execute {
+            val provider = cardProvider(requireNotNull(deckId))
+            val status = if (provider == null) PreviewStatus.Unavailable else {
+                when (val capabilities = provider.capabilities()) {
+                    is Failure -> PreviewStatus.Paused(capabilities)
+                    is Capabilities -> when (val card = provider.nextCard()) {
+                        is Failure -> PreviewStatus.Paused(card)
+                        is ScheduledCard -> PreviewStatus.CardReady
+                        QueueExhausted -> PreviewStatus.Exhausted
+                    }
                 }
             }
+            val reply = CardReadReply(operation, status)
+            delivery.execute {
+                if (reply.token == operation && token == generation && foreground)
+                    publish(snapshot.copy(status = reply.result))
+            }
         }
-        if (token == generation && foreground) publish(snapshot.copy(status = status))
     }
 
     fun stop() {

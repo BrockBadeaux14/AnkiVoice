@@ -74,6 +74,21 @@ class ReviewIntent(
             confident
     }
 
+    /** Accept only a matching learner event; invalid events never authorize a write. */
+    fun confirm(event: RatingConfirmation): Boolean {
+        check(state == ReviewState.PENDING) { "Only pending reviews accept confirmation" }
+        confirmation = event
+        if (!hasConfirmation()) confirmation = null
+        return confirmation != null
+    }
+
+    /** May be signalled during a resolver call; never implies cancellation of a dispatched write. */
+    fun cancel() {
+        interrupted = true
+        confirmation = null
+        if (state == ReviewState.PENDING) state = ReviewState.FAILED
+    }
+
     override fun toString(): String =
         "ReviewIntent(card=${cardSnapshot.identity.cardId}, rating=$rating, elapsedMs=$elapsedMs, " +
             "state=$state, corrections=$corrections, token=$token, transcriptRevision=$transcriptRevision)"

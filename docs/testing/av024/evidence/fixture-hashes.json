@@ -1,0 +1,11 @@
+{
+  "build/av024/isolated/deleted-card/collection.colpkg": "9de081c7fa72580eb89c9ca4d1a8e05400c714d38b990a6e0a8b6a6fa853157e",
+  "build/av024/isolated/learning/collection.colpkg": "22d5663c56ae2403276352d26c67916fde95bb63af9f9803db709cac7bee6b7d",
+  "build/av024/isolated/mature/collection.colpkg": "4dc6dadbc5e161924fbf75224f13957a3a4b2362db5240d84a6eab7daa8bc783",
+  "build/av024/isolated/relearning/collection.colpkg": "8d3b3e061ba0c2c72a01707e6d7de47cf0ae8cfbab2ab9b75ff4646581fb227c",
+  "build/av024/isolated/new/collection.colpkg": "c61562602d9567855ed2ab40b2815674a88546fc791db35b3f85b05c76922abd",
+  "build/av024/isolated/deleted-deck/collection.colpkg": "95f67c5ea6d0447020c71f3d971a19c6f53e7be9f0c002a63a7a8fca9d918a60",
+  "build/av024/fixtures/baseline/collection.colpkg": "d52f517b1b2bbe062030880b63d9a34c2039526caff84335762ec9d55ef34c20",
+  "build/av024/fixtures/limits/collection.colpkg": "dedd820f36d0d803a3582edbedcbc1447b03510cb8c89a5ba48482a6c2872753",
+  "build/av024/fixtures/rejection/collection.colpkg": "8003e7fc5532bd79a0e4847d516dd95ac29cdc526239ea2d5f7e39043a48975c"
+}

@@ -70,3 +70,7 @@ See [AV-015: Rule-based grading](android/README.md#rule-based-grading) for the o
 policy. It suggests Good only on an exact normalized match or a one-letter slip in a long
 word that is not a number, negation or unit. Otherwise it defers to the AI grader or an
 explicit self-grade.
+
+See [AV-024: AnkiDroid adapter and review safeguards](docs/testing/av024/results.md)
+for the real scheduled-card provider, single-shot guarded writer, and per-rating
+emulator evidence. The shell checks real deck readiness without submitting reviews.

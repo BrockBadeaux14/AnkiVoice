@@ -393,3 +393,30 @@ cd android && ./gradlew :ankidroid:testDebugUnitTest
   No sync was performed, so the full-sync consequence the disclosure states is Anki's
   documented schema rule rather than something this build observed. See the
   [AV-039 limits](../docs/testing/av039/results.md#what-this-does-not-establish).
+
+## AnkiDroid adapter and review safeguards
+
+AV-024 (#25) adds `AnkiDroidCardProvider`, `AnkiDroidReviewTransport` and the
+platform-independent `GuardedReviewWriter`. The existing `AndroidAccessPlatform`
+owns every resolver call. All production calls run on the composition root's
+serial worker; token-tagged read overloads deliver on the main executor.
+
+The provider resolves the selected deck's `maxTaken`, reads per-card answer
+buttons from `schedule`, resolves the full card/note/model identity, and splits
+VoiceQA fields on the unit separator. Null cursors, missing decks/cards,
+unsupported note types and malformed cards remain distinct. Collection changes
+are detected when readable IDs no longer agree; no collection-generation token
+exists, so a restore with identical IDs cannot be proven absent.
+
+The writer requires explicit confirmation, re-reads both the offered card and its
+ID, compares identity/state/content, rechecks ratings and cancellation, writes
+once, and verifies the same card. Only an acknowledged consistent one-review
+transition confirms. Unknown outcomes cannot replay. Outcomes carry the evidence
+needed by #20; nothing here persists a journal. `FakeReviewWriter` is available
+in test fixtures. Session orchestration and full UI wiring remain #14/#27.
+
+Both debug and release shell paths now use the real provider. Start reports
+Card ready or Queue exhausted for the selected deck; no review writer is exposed
+by the shell. This supersedes the historical AV-041/023 fake-preview and release
+unavailability descriptions above. See the [AV-024 results](../docs/testing/av024/results.md)
+and [runbook](../docs/testing/av024/runbook.md) for validation and limits.

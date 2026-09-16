@@ -1,0 +1,57 @@
+{
+  "capabilities": {
+    "maxReviewTimeMs": 60000,
+    "permittedRatings": [
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  "next": {
+    "cardId": 1789519238806,
+    "noteId": 1789519238806,
+    "deckId": 1789519238797,
+    "ordinal": 0,
+    "model": "VoiceQA",
+    "permittedRatings": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "state": {
+      "reps": 0,
+      "type": 0,
+      "queue": 0,
+      "due": 1,
+      "interval": 0
+    }
+  },
+  "outcome": {
+    "state": "confirmed",
+    "reason": "Consistent one-review transition",
+    "acknowledgement": 1,
+    "preState": {
+      "reps": 0,
+      "type": 0,
+      "queue": 0,
+      "due": 1,
+      "interval": 0
+    },
+    "postState": {
+      "reps": 1,
+      "type": 2,
+      "queue": 2,
+      "due": 93,
+      "interval": 3,
+      "lastReviewTimeSecs": 1789520530
+    },
+    "submittedTimeMs": 12345,
+    "expectedStoredTimeMs": 12345,
+    "writeAttempted": true,
+    "dispatches": 1,
+    "dispatchDurationMs": 69
+  },
+  "passed": true
+}

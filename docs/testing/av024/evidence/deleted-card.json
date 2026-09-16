@@ -1,0 +1,8 @@
+{
+  "capabilities": {
+    "maxReviewTimeMs": 60000,
+    "permittedRatings": []
+  },
+  "read": "CardProvider.cardNotFound",
+  "passed": true
+}

@@ -1,0 +1,5 @@
+{
+  "capabilities": "CardProvider.apiDisabled",
+  "next": "CardProvider.apiDisabled",
+  "passed": true
+}

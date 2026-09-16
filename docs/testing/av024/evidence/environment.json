@@ -1,0 +1,31 @@
+{
+  "host": "ProductName:\t\tmacOS\nProductVersion:\t\t26.6.2\nBuildVersion:\t\t25G83",
+  "architecture": "arm64",
+  "avd": "AnkiVoice_AV024\r\nOK",
+  "fingerprint": "google/sdk_gphone64_arm64/emu64a:16/BE2A.250530.026.D1/13818094:user/release-keys",
+  "timezone": "America/Chicago",
+  "display": "Physical size: 1080x2400",
+  "density": "Physical density: 420",
+  "accounts": "User UserInfo{0:Owner:4c13}:\n  Accounts: 0\n  \n  AccountId, Action_Type, timestamp, UID, TableName, Key\n  Accounts History\n  \n  Active Sessions: 0\n  \n  RegisteredServicesCache: 4 services\n    ServiceInfo: AuthenticatorDescription {type=com.google.android.gm.pop3}, ComponentInfo{com.google.android.gm/com.android.email.service.Pop3AuthenticatorService}, uid 10173, lastUpdateTime -1\n    ServiceInfo: AuthenticatorDescription {type=com.google}, ComponentInfo{com.google.android.gms/com.google.android.gms.auth.account.authenticator.GoogleAccountAuthenticatorService}, uid 10146, lastUpdateTime -1\n    ServiceInfo: AuthenticatorDescription {type=com.google.android.gm.exchange}, ComponentInfo{com.google.android.gm/com.android.email.service.EasAuthenticatorService}, uid 10173, lastUpdateTime -1\n    ServiceInfo: AuthenticatorDescription {type=com.google.android.gm.legacyimap}, ComponentInfo{com.google.android.gm/com.android.email.service.LegacyImapAuthenticatorService}, uid 10173, lastUpdateTime -1\n  \n  Account visibility:",
+  "emulator": "Android emulator version 37.1.11.0 (build_id 15917651) (CL:N/A)\nCopyright (C) 2006-2024 The Android Open Source Project and many others.\nThis program is a derivative of the QEMU CPU emulator (www.qemu.org).\n\n  This software is licensed under the terms of the GNU General Public\n  License version 2, as published by the Free Software Foundation, and\n  may be copied, distributed, and modified under those terms.\n\n  This program is distributed in the hope that it will be useful,\n  but WITHOUT ANY WARRANTY; without even the implied warranty of\n  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n  GNU General Public License for more details.",
+  "adb": "Android Debug Bridge version 1.0.41\nVersion 37.0.1-15733141\nInstalled as /Users/brockbadeaux/Library/Android/sdk/platform-tools/adb\nRunning on Darwin 25.6.0 (arm64)",
+  "ankidroid": [
+    "versionCode=322401300 minSdk=24 targetSdk=35",
+    "versionName=2.24.1"
+  ],
+  "source_base": "1efc7fde8613d0065e68c50b905f82ee3d9c68f4",
+  "branch": "codex/av024-ankidroid-adapter",
+  "image_properties": "Pkg.Desc=System Image arm64-v8a with Google Play.\nPkg.Revision=7\nPkg.Dependencies=emulator#35.4.9\nAndroidVersion.ApiLevel=36\nAndroidVersion.ExtensionLevel=17\nAndroidVersion.IsBaseSdk=true\nSystemImage.Abi=arm64-v8a\nSystemImage.TagId=google_apis_playstore\nSystemImage.TagDisplay=Google Play\nSystemImage.GpuSupport=true\nAddon.VendorId=google\nAddon.VendorDisplay=Google Inc.\n",
+  "sha256": {
+    "build/av004/AnkiDroid-2.24.1-arm64-v8a.apk": "3012692ca67b856b287430715f99ca6150e471588326f6c8c45f27bbe895afbf",
+    "android/app/build/outputs/apk/debug/app-debug.apk": "1371568bbfc6c5118eb65f74342e71d9143e1c54b457e08832b1f47b35c6e899"
+  },
+  "matrix_apk_sha256": "1371568bbfc6c5118eb65f74342e71d9143e1c54b457e08832b1f47b35c6e899",
+  "final_build_sha256": {
+    "android/app/build/outputs/apk/debug/app-debug.apk": "4719a3e09ddc9a8b1bca950314977597050a00d0b23a8811c5c8b678f30de826",
+    "android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk": "3c57ce97080fc78fb1b6532a73b322f779da7c0c9e026e334bf624769818df40"
+  },
+  "matrix_to_final_change": "The final writer also re-reads after null/error acknowledgement; both remain outcome-unknown. Successful acknowledgement branches are unchanged. JVM tests cover both paths; negative instrumentation uses final build.",
+  "release_smoke_sha256": "e3d6411586891be3af393d6db34c74a3c097e054908668f191df9e4f12213d2f",
+  "release_smoke_signing": "Locally signed with Android debug test key; no distribution or deployment."
+}
