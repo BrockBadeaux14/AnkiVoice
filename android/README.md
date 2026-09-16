@@ -561,13 +561,24 @@ is not extended here. Where several conditions share one mode, the `Failure` det
 carries the distinction — `SpeechTransport`'s constants are the spellings.
 
 `ERROR_NO_MATCH` stays an undiagnosed no-result; an empty final is reported separately by
-detail. Absent recognizer confidence is `ABSENT`, never zero and never certainty. No
+detail. Losing the capture device or route, and the platform silencing the capture client,
+are reported as `EARLY_CLOSURE` with their own detail, so the silence that follows a
+hardware fault is never read as the learner staying quiet. Absent recognizer confidence is
+`ABSENT`, never zero and never certainty. No
 failure writes a review, infers a rating or substitutes another provider — there is no
 second speech implementation and no cloud STT candidate in this module.
 
 Cancel and `releaseAll` invalidate the generation before cleanup runs, so callbacks
 already in flight are recorded as stale and dropped. Each capture delivers exactly one
 event.
+
+### The capability preflight
+
+`SpeechReadiness` resolves the engine, voice and recognition service for a language and
+returns the first thing that would stop a turn, or null. `:app` joins it to #23's access
+preflight through `SpeechAwareAccess`, on a worker thread, so the shell cannot report a
+learner ready to study and then fail in the middle of a card. An AnkiDroid failure still
+wins, and a capability check that throws is a failure rather than a ready device.
 
 ### What this does not establish
 

@@ -50,6 +50,7 @@ class SpeechTransport(
         data class PlaybackError(val detail: String) : Outcome
         data class Final(val text: String, val confidence: Float?) : Outcome
         data class RecognizerError(val code: Int) : Outcome
+        data class CaptureLost(val detail: String) : Outcome
         data class Cancelled(val detail: String) : Outcome
     }
 
@@ -192,6 +193,10 @@ class SpeechTransport(
             }
             stream = opened
             captureStartedMs = clock.nowMs()
+            // Done can arrive in the window between the microphone opening and the transport
+            // recording it. Without this the stop would be dropped and the turn would die on
+            // the finalization deadline with the microphone still running.
+            if (phase == Phase.FINALIZING) opened.stopMicrophone()
         }
         startPump(current, opened)
 
@@ -267,6 +272,8 @@ class SpeechTransport(
                     CaptureEvent.Transcript(token, outcome.text, confidence = classify(outcome.confidence))
                 }
             is Outcome.RecognizerError -> captureFailure(token, classify(outcome.code), "code ${outcome.code}")
+            // Hardware loss, never the learner's silence and never a wrong answer.
+            is Outcome.CaptureLost -> captureFailure(token, SpeechInputFailure.EARLY_CLOSURE, outcome.detail)
             is Outcome.Cancelled -> captureFailure(token, SpeechInputFailure.RECOGNIZER_ERROR, outcome.detail)
             else -> captureFailure(token, SpeechInputFailure.EARLY_CLOSURE, UNEXPECTED_OUTCOME)
         }
@@ -399,6 +406,9 @@ class SpeechTransport(
 
         override fun onRecognizerError(generation: Long, code: Int) =
             offer(generation, Outcome.RecognizerError(code), null)
+
+        override fun onCaptureLost(generation: Long, detail: String) =
+            offer(generation, Outcome.CaptureLost("$DEVICE_LOST: $detail"), null)
     }
 
     private fun playbackFailure(token: OperationToken, mode: SpeechOutputFailure, detail: String) =
@@ -424,6 +434,7 @@ class SpeechTransport(
         const val EMPTY_RESULT = "empty result"
         const val FINALIZATION_DEADLINE = "no final within the finalization deadline"
         const val UNEXPECTED_OUTCOME = "capture ended without a final"
+        const val DEVICE_LOST = "capture device or route lost"
 
         /**
          * Confidence is a policy classification. An absent score stays unknown: it is never

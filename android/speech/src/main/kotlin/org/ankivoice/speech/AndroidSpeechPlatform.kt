@@ -7,6 +7,7 @@ import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioManager
 import android.media.AudioRecord
+import android.media.AudioRecordingConfiguration
 import android.media.MediaPlayer
 import android.media.MediaRecorder
 import android.os.Bundle
@@ -257,8 +258,27 @@ class AndroidSpeechPlatform(private val context: Context) : SpeechPlatform {
             return null
         }
 
+        // The microphone can stop being ours mid-answer. Both signals are reported so the
+        // silence that follows is classified as hardware loss, not as the learner not
+        // speaking. AV-040 established that no *interruption* signal reaches us while the
+        // recognizer holds the microphone; these two are the ones that do.
+        record.addOnRoutingChangedListener({ routed ->
+            if (routed.routedDevice == null) listener.onCaptureLost(generation, "routed device lost")
+        }, main)
+        val silencing = object : AudioManager.AudioRecordingCallback() {
+            override fun onRecordingConfigChanged(configs: MutableList<AudioRecordingConfiguration>) {
+                val mine = configs.firstOrNull { it.clientAudioSessionId == record.audioSessionId }
+                if (mine?.isClientSilenced == true) listener.onCaptureLost(generation, "client silenced")
+            }
+        }
+        audio?.registerAudioRecordingCallback(silencing, main)
+
         record.startRecording()
-        return AudioRecordStream(record, ParcelFileDescriptor.AutoCloseOutputStream(channel[1]))
+        return AudioRecordStream(
+            record,
+            ParcelFileDescriptor.AutoCloseOutputStream(channel[1]),
+            onRelease = { audio?.unregisterAudioRecordingCallback(silencing) },
+        )
     }
 
     private fun recognitionIntent(language: String, readEnd: ParcelFileDescriptor): Intent =
@@ -319,6 +339,7 @@ class AndroidSpeechPlatform(private val context: Context) : SpeechPlatform {
     private class AudioRecordStream(
         private val record: AudioRecord,
         private val sink: OutputStream,
+        private val onRelease: () -> Unit,
     ) : CaptureStream {
         private val recording = AtomicBoolean(true)
         private val closed = AtomicBoolean(false)
@@ -344,6 +365,7 @@ class AndroidSpeechPlatform(private val context: Context) : SpeechPlatform {
             if (!closed.compareAndSet(false, true)) return
             // Closing the write end is what ends the recognizer's segmented session.
             runCatching { sink.close() }
+            runCatching { onRelease() }
             runCatching { record.release() }
         }
     }

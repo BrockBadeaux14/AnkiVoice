@@ -410,6 +410,57 @@ class SpeechTransportTest {
         assertEquals(token, event.token)
     }
 
+    @Test fun `a lost capture device is hardware loss, not the learner staying silent`() {
+        platform.recognition = FakeSpeechPlatform.Recognition.Silent
+        val capture = listenAsync()
+        awaitCaptureOpen()
+        platform.loseCapture("routed device lost")
+        val event = capture.value() as CaptureEvent.Failed
+
+        // Not NO_SPEECH_DETECTED and not NO_MATCH: the microphone left, the learner did not.
+        assertEquals(SpeechInputFailure.EARLY_CLOSURE, event.failure.mode)
+        assertTrue(event.failure.detail.startsWith(SpeechTransport.DEVICE_LOST))
+        assertTrue(event.failure.detail.contains("routed device lost"))
+    }
+
+    @Test fun `a silenced capture client is reported rather than read as silence`() {
+        platform.recognition = FakeSpeechPlatform.Recognition.Silent
+        val capture = listenAsync()
+        awaitCaptureOpen()
+        platform.loseCapture("client silenced")
+        val event = capture.value() as CaptureEvent.Failed
+
+        assertEquals(SpeechInputFailure.EARLY_CLOSURE, event.failure.mode)
+        assertTrue(event.failure.detail.contains("client silenced"))
+    }
+
+    @Test fun `done that arrives before the stream is recorded still stops the microphone`() {
+        // The window between startCapture returning and the transport storing the stream.
+        // A dropped stop here would leave the microphone running until the deadline.
+        platform.recognition = FakeSpeechPlatform.Recognition.Final("five")
+        val capture = listenAsync()
+        awaitCaptureOpen()
+        transport.finishAnswer(token)
+        val event = capture.value()
+
+        assertTrue(event is CaptureEvent.Transcript, "Done was lost: got $event")
+        assertTrue((platform.lastStream ?: error("capture never opened")).microphoneStopped)
+    }
+
+    @Test fun `a capture loss after the turn ended is dropped as stale`() {
+        platform.recognition = FakeSpeechPlatform.Recognition.Final("five")
+        val capture = listenAsync()
+        awaitCaptureOpen()
+        transport.finishAnswer(token)
+        val delivered = capture.value() as CaptureEvent.Transcript
+        val before = transport.staleCallbackLog().size
+
+        platform.loseCapture("routed device lost")
+
+        assertEquals("five", delivered.text)
+        assertEquals(before + 1, transport.staleCallbackLog().size)
+    }
+
     @Test fun `absent confidence is unknown while an explicit zero is low`() {
         assertEquals(Confidence.ABSENT, SpeechTransport.classify(null))
         assertEquals(Confidence.LOW, SpeechTransport.classify(0f))

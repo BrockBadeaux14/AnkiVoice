@@ -43,25 +43,30 @@ into question audio through this module.
   :app:assembleDebugAndroidTest :app:assembleRelease :app:lintDebug
 ```
 
-- **42 `:speech` unit tests, 0 failures**, driving `SpeechTransport` against
+- **52 `:speech` unit tests, 0 failures**, driving `SpeechTransport` against
   `FakeSpeechPlatform` with no emulator and no network. They cover playback ordering and
   the settle interval, capture rejected during playback, overlapping capture and playback
   rejection, Done with trailing silence and pipe closure, both deadlines, explicit Cancel
   during playback and during capture, release, stale and duplicate callbacks, partial text
-  that never settles a capture, and every recognizer error class.
+  that never settles a capture, capture-device and route loss, and every recognizer error
+  class. `SpeechReadinessTest` covers the capability preflight.
 - **`checkModuleBoundaries` passes.** `:speech` still depends only on `:core`, declares no
   `INTERNET` permission and no `READ_PHONE_STATE`.
-- **336 unit tests across all five modules, 0 failures**: `:core` 124, `:provider` 63,
-  `:ankidroid` 61, `:app` 46 and `:speech` 42. This card changed no module but `:speech`,
-  and the four existing suites still pass unchanged.
+- **351 unit tests across all five modules, 0 failures**: `:core` 124, `:provider` 63,
+  `:ankidroid` 61, `:speech` 52 and `:app` 51.
 - `:app:assembleRelease`, `:app:assembleDebugAndroidTest` and `:app:lintDebug` all pass, so
   the release build and both instrumentation harnesses compile.
 - CI now runs `:speech:testDebugUnitTest` and compiles `:app:assembleDebugAndroidTest`, so
   the AV-024 and AV-025 live harnesses cannot silently stop compiling.
 
-Two failures during development were defects in the new tests, not the transport: both
-raced the transport's own threads. They were fixed by waiting for observable state rather
-than by weakening an assertion.
+Two early failures were defects in the new tests, which raced the transport's own threads;
+they were fixed by waiting for observable state rather than by weakening an assertion.
+
+A third failure was a **real defect in the transport**, found by the capture-loss test. A
+Done arriving in the window between the microphone opening and the transport recording the
+stream was dropped: the microphone kept running and the turn died on the finalization
+deadline instead of returning the learner's answer. `listen` now stops a microphone that
+opened into an already-finalizing turn, and a regression test holds that window open.
 
 ## What was **not** verified
 
@@ -69,6 +74,11 @@ than by weakening an assertion.
   through this code. `doneToFinalMs` is unmeasured for the production transport; AV-042's
   690 ms and 687 ms belong to the probe.
 - **The permission-denied and explicit-Cancel live paths** are covered offline only.
+- **Device and route loss is classified but not exercised on hardware.** Unplugging a
+  headset mid-answer, and the platform silencing the capture client, are wired to
+  `AudioRecord`'s routing listener and `AudioRecordingCallback` and reported as
+  `EARLY_CLOSURE` with a distinct detail. Only the transport's half of that is tested; the
+  Android callbacks themselves have not been triggered on a device.
 - **The playback path differs from the probe in one respect worth stating**:
   `AndroidSpeechPlatform` synthesizes to a file and plays it through `MediaPlayer`, which
   is what AV-042 measured as audible, but that has not been re-confirmed from this module.

@@ -90,6 +90,13 @@ interface RecognitionListener {
 
     /** [code] is the raw `SpeechRecognizer.ERROR_*` value, classified by the transport. */
     fun onRecognizerError(generation: Long, code: Int)
+
+    /**
+     * The microphone stopped being ours mid-capture: its routed device disappeared, or the
+     * platform silenced this client. Reported separately because the audio that follows is
+     * not the learner staying quiet, and must never be read as one.
+     */
+    fun onCaptureLost(generation: Long, detail: String)
 }
 
 /**

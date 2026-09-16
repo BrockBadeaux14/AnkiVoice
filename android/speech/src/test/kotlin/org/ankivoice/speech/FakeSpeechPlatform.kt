@@ -102,6 +102,11 @@ class FakeSpeechPlatform : SpeechPlatform {
         }
     }
 
+    /** The microphone stops being ours mid-capture: route gone, or client silenced. */
+    fun loseCapture(detail: String) {
+        listener?.onCaptureLost(generation, detail)
+    }
+
     /** Replays a callback for a generation the transport has already finished with. */
     fun replayFinal(generation: Long, text: String) {
         listener?.onFinal(generation, text, null)
