@@ -65,5 +65,9 @@
     ],
     "old_input_failure": "ALSA pcm_prepare I/O error caused built-in mic fallback to full-scale 220 Hz tone on attempts 5/6; confirmed by HAL logs and PCM samples",
     "host_input_gain_caveat": "Set to 40% before restart; final system read showed 84%. Exact intervening change timing/source not observed. Do not attribute all behavior to gain or claim a fixed 40% throughout successful trials."
+  },
+  "unblock_and_pr_followup": {
+    "verbatim": "Make sure this report allows for AV-025 and AV-012 to be unblocked then create the pull request.",
+    "effect": "Explicit downstream capability release for the narrowed MVP upon report acceptance; publish PR, keep #51 In review, and do not merge or start another task."
   }
 }

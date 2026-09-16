@@ -509,6 +509,11 @@ deferred the other requirements. This supersedes the comprehensive interruption
 gate above for that narrowed scope; it does not establish safe call handling.
 The [AV-042 report](../testing/av042/results.md) preserves the failed call evidence
 and records two owner-confirmed live transcripts: “green blue red” and “five”.
+Its [downstream unblock decision](../testing/av042/results.md#downstream-unblock-decision)
+satisfies the capability prerequisite for #26 (AV-025) and #13 (AV-012) when the
+report is accepted. Their other dependencies are satisfied; neither depends on the
+other. The deferred comprehensive interruption/matrix criteria must not block
+readiness or acceptance of those tasks' narrowed MVP implementation.
 
 The measured disposable route owns an `AudioRecord` MIC stream (mono PCM16,
 16 kHz), feeds the pinned recognizer through `EXTRA_AUDIO_SOURCE`, and requests
@@ -516,8 +521,11 @@ segmentation until stream closure. `EXTRA_PREFER_OFFLINE=false` preserves AV-006
 online-permitted selection. Explicit Start answer keeps thinking outside capture;
 Done ends microphone capture and appends 500 ms of silence before closing the
 pipe. Probe limits are 15 seconds capture/five seconds finalization. The two
-successful Done-to-final measurements were 690 ms and 687 ms. No retry policy or
-full answer-window implementation was validated.
+successful Done-to-final measurements were 690 ms and 687 ms. The handoff selects
+zero automatic re-arms and zero additional attempts within one answer window;
+explicit Try again opens a fresh bounded window on the same card and invalidates
+the previous transcript revision. These are initial implementation decisions, not
+claims that retry behavior or a full answer-window implementation was validated.
 
 The emulator's audio HAL was observed substituting a 220 Hz tone after a microphone
 device I/O failure. App-level recording readiness alone cannot establish a working

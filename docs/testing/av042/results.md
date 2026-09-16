@@ -15,6 +15,53 @@ That superseded the original interruption/matrix gate and its stop rule for this
 work. The original two-turn no-go evidence is preserved; no failed call is relabelled
 as a passing test. Broader interruption behavior is deferred, not verified.
 
+## Downstream unblock decision
+
+**Go for the owner's narrowed human-voice MVP: this report satisfies the AV-042
+capability prerequisite for both [#26 — AV-025: Integrate mobile speech and audio routing](https://github.com/BrockBadeaux14/AnkiVoice/issues/26)
+and [#13 — AV-012: Integrate transcription and answer boundaries](https://github.com/BrockBadeaux14/AnkiVoice/issues/13).**
+The owner explicitly requested that this report allow both tasks to be unblocked.
+This is the current scope decision, not a claim that the original comprehensive
+go/constrained-go thresholds passed.
+
+When this report/PR is reviewed and accepted, #26 and #13 may move from Backlog to
+Ready and the native blocked-by-#51 links can be cleared. Their other prerequisites
+are satisfied: #6 and #45 are closed, and #24 is closed with PR #52 merged. #7's
+contracts are also accepted. Neither task depends on completion of the other;
+implement against the shared contracts/fakes and leave session integration to #14/#27.
+Keep #51 In review until acceptance; PR creation alone does not accept the work.
+
+The earlier issue wording requiring #51 to prove an interruption signal, all four
+prompt types, the 12-turn threshold, echo checks, or the full interruption matrix
+is superseded for this MVP. Those deferred checks must not be reintroduced as
+prerequisites for starting or accepting the narrowed #26/#13 implementation.
+Their results remain limitations, and no safe-call-handling claim is authorized.
+
+### Implementation handoff
+
+The following values are selected as the initial MVP implementation policy. Keep
+the distinction between measured observations and engineering limits: accepting
+these limits permits implementation; it does not make unexercised cases pass.
+
+| Decision | Selected MVP behavior | Evidence / ownership |
+| --- | --- | --- |
+| Native route | `com.google.android.tts`, version `googletts.google-speech-apk_20241125.02_p2.702443970`; `GoogleTTSRecognitionService`; `en-US`; `EXTRA_PREFER_OFFLINE=false`. Local TTS voice `en-US-language`. | Same pins as AV-006; owner-confirmed live results in attempts 7/8. #26 owns platform objects and runtime resolution. |
+| Capture | App-owned MIC `AudioRecord`, mono PCM16 at 16 kHz, passed through `EXTRA_AUDIO_SOURCE`; segmented session ends at pipe closure. | Working probe route, to be implemented in #26. No new provider or phone-state permission. |
+| Playback to input | Complete Prompt playback, settle for at least 400 ms, then wait for explicit Start answer. Thinking is outside active capture. | Probe used the settling interval; both successful trials used explicit Start answer. #26 owns transport ordering; #13 owns answer state. |
+| Answer window | Default and maximum active capture: 15,000 ms from Start answer, using a monotonic clock. Do not consume this budget while the learner is thinking. | Selected initial limit; automatic expiry observed on diagnostic attempts 1/2. No claim that 15 seconds is an optimized recall duration. #13 owns the deadline; #26 stops capture on request. |
+| Done and finalization | Done or capture expiry stops the microphone. #26 sends 500 ms of trailing silence, then closes the pipe. Finalization has a separate 5,000 ms deadline from Done/expiry, including that trailing silence. | Successful Done-to-final times: 690 ms and 687 ms. The five-second ceiling is an engineering bound; forced finalization expiry remains unverified on-device. |
+| Retry cap | Zero automatic re-arms and zero additional recognizer attempts inside one answer window. An explicit Try again opens a new bounded window for the same card with a new attempt/transcript revision. | Conservative initial policy; the probe only repeated on explicit Start. No automatic retry accuracy or shared-window retry behavior was validated. #13 owns the window and invalidation. |
+| Failure / fallback | Preserve the card on no-match, error, timeout or Cancel. Offer explicit Try again, typed transcript correction or manual self-grade; never infer a rating. Partial text cannot start grading. | #13 owns this product behavior and fake-based verification; it is not claimed as implemented in the probe. |
+| Lifecycle scope | Retain explicit Cancel and basic foreground cleanup/token invalidation. Defer detection of all external calls, audio-route combinations and the broader live interruption matrix. | #26 implements basic transport cleanup; #13 rejects stale revisions. Existing call failures remain recorded. |
+
+For #26, the acceptance target is the foreground Prompt → explicit capture → final
+transcript flow using this route, plus its basic serialization, cancellation and
+error handling. For #13, it is the bounded answer/transcript policy above, including
+reviewable/editable text and fake-driven stale-result/deadline checks. Neither may
+turn silence, recognition failure or a final transcript into an automatic review.
+The full multi-condition human matrix is deferred for both tasks; the two confirmed
+phrases establish this prerequisite, not universal recognition reliability.
+
 ## What changed and why
 
 A separate `org.ankivoice.av042` probe owns `AudioRecord` and streams the real
@@ -101,5 +148,6 @@ forwarding is disabled after validation; the AVD is left available for review.
 Not tested under the final setup: “Six,” negation, all four prompt types, a full study
 session, real devices, Bluetooth, real phone calls, interruption safety, automatic
 finalization timeout, or the full #29 acceptance run. The owner deferred those
-requirements for this task. No phone-state permission was added. No PR, merge,
-deployment or next task was started.
+requirements for this task. No phone-state permission was added. A pull request is
+authorized by the owner's follow-up; merge, deployment and starting another task
+remain separate actions.

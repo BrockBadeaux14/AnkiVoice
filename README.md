@@ -31,13 +31,17 @@ fallback requirements, and reproducible evidence.
 
 See [AV-040: Live microphone and interruptions](docs/testing/av040-live-microphone.md)
 for the bounded human investigation, its no-go result, raw evidence and measured
-policy limits. Live capture and interruption safety remain gates for #13/#26.
+policy limits. Its original #13/#26 gate is superseded for the narrowed MVP by
+the AV-042 decision below.
 
 See [AV-042: Live human voice input](docs/testing/av042/results.md) for the owner's
 subsequent scope change to a voice-input-only MVP, the emulator microphone failure
 diagnosis, and the confirmed “green blue red” and “five” transcripts. The broader
 interruption requirements are deferred for this scope; the prior failures remain
-recorded. The [runbook](docs/testing/av042/runbook.md) reproduces the working probe.
+recorded. The [unblock decision](docs/testing/av042/results.md#downstream-unblock-decision)
+satisfies the #26 (AV-025) and #13 (AV-012) capability prerequisite on acceptance
+and supplies their initial implementation policy. The
+[runbook](docs/testing/av042/runbook.md) reproduces the working probe.
 
 See [AV-007: Integration contracts and review lifecycle](docs/contracts/av007-session-contracts.md)
 for the five session contracts, the card-identity and capability rules bound to AV-004's

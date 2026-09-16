@@ -15,4 +15,14 @@ that audio and displays the corresponding transcript. Confirm this on the actual
 operator route. A generated answer, typed transcript, service availability, callback
 simulation, or unconfirmed recording alone is insufficient.
 
-Keep all work on codex/av042-live-speech-blockers. No PR, merge or deployment.
+The owner's follow-up explicitly requests that this report permit AV-025 (#26)
+and AV-012 (#13) to be unblocked, and authorizes creating the pull request.
+The [unblock decision and implementation handoff](results.md#downstream-unblock-decision)
+define the selected MVP policy and supersede the earlier comprehensive capability
+gate. Both tasks can move to Ready once this report is accepted; their other
+dependencies are already satisfied. Deferred requirements are not readiness gates
+for this narrowed implementation.
+
+Keep all work on codex/av042-live-speech-blockers and #51 In review until acceptance.
+Creating the PR is authorized; merging, deploying or starting either downstream
+task is not part of this request.
