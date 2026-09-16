@@ -1,0 +1,22 @@
+{
+  "recorded_at_utc": "2026-09-16T01:40:38.995056+00:00",
+  "sha256": {
+    "tools/av042-probe/ProbeActivity.java": "f7041998ef47549a6238e6bfe428b4dc8b84970ddd8c0114acfc051df85a77f9",
+    "tools/av042-probe/TrialGate.java": "37c6afc2e9a2af3d15e32aceb5d24f158f61e1fa89387acb25a97dc54523d787",
+    "tools/av042-probe/GuardChecks.java": "e85b9f187e5fcd2443b3f9ae0b3d76718c687b281fd59909305f74cb216ad764",
+    "tools/av042-probe/AndroidManifest.xml": "b8e077579acb8f3b007ba1de9df682c9e0409de5ece9133554671c7da44400e7",
+    "build/av042/probe/av042-probe.apk": "ddeff70f68b9e8eeab828de2eb9683d3ae179038649460bd0e2a4235bd9d9f16"
+  },
+  "successful_attempts": [
+    7,
+    8
+  ],
+  "recognition_service": "com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService",
+  "engine_version": "googletts.google-speech-apk_20241125.02_p2.702443970",
+  "voice": "en-US-language",
+  "prefer_offline": false,
+  "capture_sample_rate_hz": 16000,
+  "microphone_forwarding_after_test": "disabled with avd hostmicoff",
+  "probe_after_test": "force-stopped",
+  "host_volume": "output volume:60, input volume:84, alert volume:100, output muted:false"
+}

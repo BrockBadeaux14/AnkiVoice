@@ -501,6 +501,37 @@ the speech-route/interruption assumption; it does not change Kotlin, the framewo
 rubric or component ownership. No alternative provider, permission design or API
 route was evaluated. #29's human integrated 30-turn acceptance is still required.
 
+### AV-042 narrowed MVP scope: September 15, 2026
+
+During [#51](https://github.com/BrockBadeaux14/AnkiVoice/issues/51), the owner
+instructed that only live human voice input must work for the current MVP and
+deferred the other requirements. This supersedes the comprehensive interruption
+gate above for that narrowed scope; it does not establish safe call handling.
+The [AV-042 report](../testing/av042/results.md) preserves the failed call evidence
+and records two owner-confirmed live transcripts: “green blue red” and “five”.
+
+The measured disposable route owns an `AudioRecord` MIC stream (mono PCM16,
+16 kHz), feeds the pinned recognizer through `EXTRA_AUDIO_SOURCE`, and requests
+segmentation until stream closure. `EXTRA_PREFER_OFFLINE=false` preserves AV-006's
+online-permitted selection. Explicit Start answer keeps thinking outside capture;
+Done ends microphone capture and appends 500 ms of silence before closing the
+pipe. Probe limits are 15 seconds capture/five seconds finalization. The two
+successful Done-to-final measurements were 690 ms and 687 ms. No retry policy or
+full answer-window implementation was validated.
+
+The emulator's audio HAL was observed substituting a 220 Hz tone after a microphone
+device I/O failure. App-level recording readiness alone cannot establish a working
+input route. The runbook records restarting the emulator with host audio configured
+and correcting the initial probe's mistaken offline preference. These were changed
+together; their independent effects are not established.
+
+For subsequent implementation, `:speech` owns the AudioRecord and pipe alongside
+the pinned recognizer. No phone-state permission, framework switch or new provider
+is selected. Production integration is not implemented by this disposable probe.
+Broader speech/interruption and integrated-session requirements remain deferred
+work, not acceptance claims of this narrowed result. The historical AV-040 no-go
+record remains unchanged.
+
 ## Product constraints preserved
 
 - Dedicated VoiceQA note type only; foreground study only.

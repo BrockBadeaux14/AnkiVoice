@@ -1,0 +1,11 @@
+{
+  "phase": "capture",
+  "started_epoch_ms": 1789521813567,
+  "commands": [
+    "OK\n",
+    "OK\n"
+  ],
+  "operator_attestation": null,
+  "trigger_epoch_ms": 1789521824993,
+  "trigger_marker": "recorder_started"
+}

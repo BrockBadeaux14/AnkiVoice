@@ -1,0 +1,49 @@
+{
+  "method": "Mono PCM16 sample statistics; 220 Hz sine/cosine projection at 16 kHz. Approximate energy fraction is not a transcription or operator attestation.",
+  "metrics": [
+    {
+      "attempt": 4,
+      "sha256_of_local_pcm": "788fe2ddd8da78f23a8df9ece2d02cd0ca693aa21545bf7d545304490f75f91e",
+      "sample_rate_hz": 16000,
+      "duration_seconds": 4.2,
+      "samples": 67200,
+      "peak": 32768,
+      "clipped_fraction": 0.004836309523809524,
+      "fraction_of_energy_at_220_hz_approx": 8.945082380220837e-05,
+      "raw_file_committed": false
+    },
+    {
+      "attempt": 6,
+      "sha256_of_local_pcm": "064a53be4f88f0b0cb72f38eb7b4cc5b825f5977c5304e0a2c627a658facbc6a",
+      "sample_rate_hz": 16000,
+      "duration_seconds": 4.84,
+      "samples": 77440,
+      "peak": 32768,
+      "clipped_fraction": 0.013765495867768596,
+      "fraction_of_energy_at_220_hz_approx": 0.015258624942113065,
+      "raw_file_committed": false
+    },
+    {
+      "attempt": 7,
+      "sha256_of_local_pcm": "30210ef541800c6b14c5123f037ffe300df334dc435873d2fcb0c84f6ecf991c",
+      "sample_rate_hz": 16000,
+      "duration_seconds": 5.12,
+      "samples": 81920,
+      "peak": 32768,
+      "clipped_fraction": 0.0109619140625,
+      "fraction_of_energy_at_220_hz_approx": 0.001395560304920778,
+      "raw_file_committed": false
+    },
+    {
+      "attempt": 8,
+      "sha256_of_local_pcm": "63d1fb15f36dd245cfb08421b0e65b2adec20992bad34f6a4db8ee60281f66e0",
+      "sample_rate_hz": 16000,
+      "duration_seconds": 2.94,
+      "samples": 47040,
+      "peak": 32768,
+      "clipped_fraction": 0.004570578231292517,
+      "fraction_of_energy_at_220_hz_approx": 0.00022499323288336292,
+      "raw_file_committed": false
+    }
+  ]
+}

@@ -1,0 +1,1226 @@
+--------- beginning of main
+09-15 20:23:44.235   464   516 E android.hardware.audio@7.1-impl.ranchu: updateSinkMetadata:387 failure: Result::NOT_SUPPORTED
+09-15 20:23:44.321   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:44.325   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:44.331   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:44.340   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:44.361   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:45.882   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.003   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.010   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.035   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.051   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.067   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.084   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.100   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.116   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.148   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.163   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.179   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.203   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.211   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.227   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:46.227   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:46.227   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.243   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.261   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.275   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.291   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.307   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.323   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.331   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:46.331   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:46.340   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.356   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.374   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.387   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.404   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.420   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.435   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.436   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:46.436   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:46.452   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.467   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.484   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.500   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.515   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.532   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.540   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:46.540   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:46.547   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.563   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.579   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.596   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.612   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.627   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.644   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.644   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:46.644   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:46.659   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.675   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.692   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.708   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.712   464  4526 D android.hardware.audio@7.1-impl.ranchu: threadLoop: entering standby, frames: 497216
+09-15 20:23:46.712   464  4526 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSink: joining consumeThread
+09-15 20:23:46.724   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.726   464  4528 D android.hardware.audio@7.1-impl.ranchu: consumeThread: exiting
+09-15 20:23:46.726   464  4526 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSink: stopping PCM stream
+09-15 20:23:46.740   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.747   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:46.747   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:46.755   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.772   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.787   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.803   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.820   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.835   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.852   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.852   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:46.852   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:46.867   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.883   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.904   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.915   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.932   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.947   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.955   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:46.955   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:46.964   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.980   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:46.996   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.011   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.028   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.043   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.059   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.059   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:47.059   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:47.075   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.095   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.107   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.123   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.140   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.158   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.163   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:47.163   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:47.171   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.187   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.203   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.219   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.235   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.251   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.267   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:47.267   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:47.267   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.283   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.300   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.316   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.332   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.347   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.363   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.371   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:47.371   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:47.379   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.396   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.411   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.435   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.443   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.459   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.475   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:47.475   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:47.475   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.492   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.508   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.523   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.541   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.558   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.571   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.580   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:47.580   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:47.588   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.603   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.619   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.636   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.652   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.668   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.691   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:47.691   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:47.692   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.700   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.716   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.732   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.748   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.763   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.780   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.791   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:47.792   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:47.795   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.811   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.827   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.845   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.861   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.875   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.893   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.895   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:47.895   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:47.907   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.925   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.939   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.957   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.976   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:47.987   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.004   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:48.004   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:48.007   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.029   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.036   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.054   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.078   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.084   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.099   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.111   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:48.113   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:48.115   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.131   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.149   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.169   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.181   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.195   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.226   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:48.226   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:48.228   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.232   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.248   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.259   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.276   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.292   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.309   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.323   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.327   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:48.327   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:48.339   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.356   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.377   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.392   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.403   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.425   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.433   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:48.433   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:48.442   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.451   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.467   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.512   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.523   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.540   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.543   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:48.543   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:48.545   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.548   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.563   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.579   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.599   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.615   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.629   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.648   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:48.648   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:48.653   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.659   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.676   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.694   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.707   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.723   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.739   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.751   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:48.751   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:48.755   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.771   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.787   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.803   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.829   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.835   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.851   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.860   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:48.860   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:48.870   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.884   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.899   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.916   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.932   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.948   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.963   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.970   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:48.970   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:48.979   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:48.999   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.011   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.027   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.043   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.059   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.075   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:49.075   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:49.075   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.091   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.107   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.123   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.140   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.155   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.172   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.184   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:49.184   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:49.187   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.204   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.219   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.236   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.253   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.267   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.283   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.291   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:49.291   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:49.305   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.322   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.333   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.347   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.363   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.379   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.396   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.396   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:49.396   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:49.413   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.428   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.444   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.460   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.475   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.492   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.500   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:49.500   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:49.507   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.525   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.541   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.555   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.571   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.587   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.603   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:49.603   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:49.604   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.619   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.637   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.651   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.667   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.686   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.702   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.708   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:49.708   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:49.715   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.735   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.750   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.764   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.779   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.795   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.811   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:49.811   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:49.811   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.829   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.844   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.860   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.875   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.892   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.907   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.916   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:49.916   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:49.924   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.939   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.956   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.972   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:49.989   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.004   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.020   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.020   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:50.020   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:50.038   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.051   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.068   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.084   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.100   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.116   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.123   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:50.123   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:50.132   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.148   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.164   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.180   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.195   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.211   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.227   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.228   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:50.228   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:50.243   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.259   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.275   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.292   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.307   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.324   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.335   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:50.335   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:50.340   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.356   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.372   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.387   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.405   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.420   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.435   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.440   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:50.440   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:50.453   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.467   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.483   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.500   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.515   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.532   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.543   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:50.543   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:50.547   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.563   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.579   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.596   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.611   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.629   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.643   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.647   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:50.647   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:50.660   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.675   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.691   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.708   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.724   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.740   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.752   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:50.753   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:50.756   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.772   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.788   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.803   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.820   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.836   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.852   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.855   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:50.855   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:50.867   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.883   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.900   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.915   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.932   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.948   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.959   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:50.960   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:50.964   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.980   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:50.996   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.012   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.027   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.045   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.060   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.067   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:51.067   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:51.075   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.092   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.107   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.125   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.140   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.156   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.172   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:51.172   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:51.172   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.188   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.204   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.219   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.236   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.252   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.267   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.275   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:51.275   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:51.284   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.300   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.315   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.333   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.347   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.363   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.379   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.380   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:51.380   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:51.395   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.412   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.430   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.443   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.460   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.475   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.483   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:51.484   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:51.494   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.508   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.527   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.540   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.558   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.573   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.587   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:51.587   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:51.587   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.603   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.619   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.635   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.652   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.667   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.684   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.692   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:51.692   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:51.700   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.716   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.732   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.748   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.764   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.779   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.796   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.796   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:51.796   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:51.811   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.828   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.843   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.859   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.876   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.891   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.900   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:51.900   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:51.907   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.924   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.940   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.957   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.971   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:51.988   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.004   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:52.004   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:52.004   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.020   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.035   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.052   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.069   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.085   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.100   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.107   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:52.107   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:52.120   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.131   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.148   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.163   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.180   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.196   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.211   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:52.211   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:52.212   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.230   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.243   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.260   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.275   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.292   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.310   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.315   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:52.315   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:52.325   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.340   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.357   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.372   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.387   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.403   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.420   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.420   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:52.420   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:52.435   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.451   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.467   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.484   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.500   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.516   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.523   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:52.523   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:52.533   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.548   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.564   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.581   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.598   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.612   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.627   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:52.627   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:52.627   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.644   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.661   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.676   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.692   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.708   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.724   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.731   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:52.731   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:52.740   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.757   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.771   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.788   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.805   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.820   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.836   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:52.836   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.836   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:52.852   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.867   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.885   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.900   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.915   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.931   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.943   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:52.943   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:52.948   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.963   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.979   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:52.995   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.012   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.027   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.043   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.047   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:53.047   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:53.060   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.075   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.093   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.108   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.125   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.141   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.155   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.156   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:53.156   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:53.172   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.187   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.204   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.222   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.236   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.255   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.259   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:53.259   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:53.268   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.286   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.300   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.315   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.333   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.348   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.364   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:53.364   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:53.364   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.380   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.396   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.412   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.428   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.443   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.459   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.468   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:53.468   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:53.475   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.492   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.508   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.523   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.539   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.557   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.571   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.572   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:53.572   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:53.587   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.605   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.621   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.637   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.653   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.667   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.675   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:53.675   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:53.686   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.699   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.715   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.732   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.748   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.763   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.779   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:53.779   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:53.779   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.795   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.812   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.827   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.843   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.860   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.876   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.884   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:53.884   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:53.892   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.907   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.924   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.940   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.955   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.972   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.989   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:53.989   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:53.989   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:54.005   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.022   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.038   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.052   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.069   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.084   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.092   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:54.092   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:54.100   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.115   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.131   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.147   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.163   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.179   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.195   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:54.195   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:54.195   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.211   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.227   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.245   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.261   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.275   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.293   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.300   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:54.300   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:54.307   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.324   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.340   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.355   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.371   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.387   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.404   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.404   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:54.404   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:54.420   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.435   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.453   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.468   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.483   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.500   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.508   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:54.508   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:54.516   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.531   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.548   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.563   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.580   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.595   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.611   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:54.611   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:54.611   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.627   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.644   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.660   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.675   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.692   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.707   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.715   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:54.715   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:54.724   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.739   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.756   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.772   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.788   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.804   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.819   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.820   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:54.820   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:54.836   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.852   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.867   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.883   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.899   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.916   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.924   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:54.924   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:54.933   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.948   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.963   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.979   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:54.995   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.012   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.027   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:55.027   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:55.027   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.045   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.060   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.076   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.094   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.108   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.124   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.132   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:55.132   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:55.140   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.156   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.171   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.188   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.204   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.220   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.236   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:55.236   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:55.236   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.253   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.267   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.284   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.300   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.316   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.332   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.340   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:55.340   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:55.348   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.364   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.379   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.396   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.412   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.427   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.446   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.446   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:55.446   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:55.460   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.475   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.492   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.509   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.524   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.540   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.547   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:55.547   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:55.555   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.572   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.587   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.604   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.620   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.636   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.652   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.652   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:55.652   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:55.668   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.685   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.700   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.719   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.732   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.747   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.756   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:55.756   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:55.763   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.779   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.796   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.812   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.827   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.844   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.859   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:55.859   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:55.862   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.875   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.894   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.907   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.927   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.942   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.958   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.963   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:55.963   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:55.973   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:55.988   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.003   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.020   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.035   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.053   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.067   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:56.067   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:56.067   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.083   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.100   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.115   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.132   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.148   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.165   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.171   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:56.172   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:56.180   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.195   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.212   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.229   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.245   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.260   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.275   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:56.275   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:56.275   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.293   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.307   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.325   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.339   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.357   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.372   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.379   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:56.379   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:56.388   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.404   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.419   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.437   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.452   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.469   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.484   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.484   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:56.484   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:56.500   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.515   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.536   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.548   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.563   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.579   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.588   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:56.589   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:56.595   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.612   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.627   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.644   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.660   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.675   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.691   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.692   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:56.692   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:56.708   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.724   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.741   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.757   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.774   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.789   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.796   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:56.796   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:56.804   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.821   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.836   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.852   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.868   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.884   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.900   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.900   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:56.900   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:56.916   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.931   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.948   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.964   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.979   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:56.995   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.003   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:57.003   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:57.012   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.028   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.044   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.059   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.076   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.092   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.107   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.111   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:57.111   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:57.125   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.139   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.157   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.172   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.188   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.207   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.216   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:57.216   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:57.220   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.236   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.255   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.270   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.283   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.299   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.322   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:57.322   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:57.323   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.331   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.347   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.364   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.379   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.395   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.411   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.424   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:57.424   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:57.431   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.445   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.460   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.476   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.491   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.510   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.526   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.527   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:57.527   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:57.539   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.555   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.572   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.588   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.604   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.619   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.631   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:57.631   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:57.637   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.652   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.668   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.683   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.700   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.716   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.731   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.735   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:57.735   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:57.747   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.763   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.780   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.797   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.812   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.827   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.839   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:57.839   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:57.844   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.861   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.875   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.892   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.908   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.924   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.940   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.943   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:57.943   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:57.956   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.972   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:57.988   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.003   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.022   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.036   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.047   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:58.048   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:58.053   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.068   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.085   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.106   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.115   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.131   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.148   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.151   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:58.151   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:58.164   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.180   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.195   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.211   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.227   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.245   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.255   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:58.255   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:58.260   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.275   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.294   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.307   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.323   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.339   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.356   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.360   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:58.360   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:58.373   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.388   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.404   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.420   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.435   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.451   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.463   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:58.463   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:58.468   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.484   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.501   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.515   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.531   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.548   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.563   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.567   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:58.567   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:58.581   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.606   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.613   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.628   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.646   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.659   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.674   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:58.674   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:58.676   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.691   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.707   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.723   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.740   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.757   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.772   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.775   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:58.775   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:58.788   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.805   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.820   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.836   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.852   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.867   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.879   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:58.879   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:58.891   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.899   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.916   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.932   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.948   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.963   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.980   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:58.983   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:58.983   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:58.995   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:59.013   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:59.029   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:59.044   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:59.061   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:59.075   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:59.088   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:59.088   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:59.095   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:59.110   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:59.123   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:59.139   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:59.155   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:59.172   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:59.187   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:59.191   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:59.191   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:59.205   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:59.220   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:59.238   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:59.251   464  4716 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:23:59.252   464   516 E android.hardware.audio@7.1-impl.ranchu: updateSinkMetadata:387 failure: Result::NOT_SUPPORTED
+09-15 20:23:59.252   464  4716 D android.hardware.audio@7.1-impl.ranchu: threadLoop: entering standby
+09-15 20:23:59.252   464  4716 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSource: joining producerThread
+09-15 20:23:59.295   464  4719 W android.hardware.audio@7.1-impl.ranchu: pcmRead:221 pcm_readi failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:23:59.295   464  4719 E android.hardware.audio@7.1-impl.ranchu: pcmRead:222 failure: -1
+09-15 20:23:59.295   464  4719 D android.hardware.audio@7.1-impl.ranchu: producerThread: exiting
+09-15 20:23:59.296   464  4716 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSource: stopping PCM stream
+09-15 20:28:30.415   464  4526 D android.hardware.audio@7.1-impl.ranchu: threadLoop: entering standby, frames: 907392
+09-15 20:28:30.415   464  4526 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSink: joining consumeThread
+09-15 20:28:30.419   464  5085 D android.hardware.audio@7.1-impl.ranchu: consumeThread: exiting
+09-15 20:28:30.420   464  4526 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSink: stopping PCM stream
+09-15 20:28:31.343   464   515 E android.hardware.audio@7.1-impl.ranchu: updateSinkMetadata:387 failure: Result::NOT_SUPPORTED
+09-15 20:28:31.449   464  5116 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:28:31.454   464  5116 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:28:31.459   464  5116 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:28:31.481   464  5116 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:28:31.518   464  5116 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:28:34.309   464  4526 D android.hardware.audio@7.1-impl.ranchu: threadLoop: entering standby, frames: 1055360
+09-15 20:28:34.309   464  4526 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSink: joining consumeThread
+09-15 20:28:34.311   464  5112 D android.hardware.audio@7.1-impl.ranchu: consumeThread: exiting
+09-15 20:28:34.311   464  4526 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSink: stopping PCM stream
+09-15 20:28:34.844   464   516 E android.hardware.audio@7.1-impl.ranchu: updateSinkMetadata:387 failure: Result::NOT_SUPPORTED
+09-15 20:28:34.845   464  5116 D android.hardware.audio@7.1-impl.ranchu: threadLoop: entering standby
+09-15 20:28:34.845   464  5116 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSource: joining producerThread
+09-15 20:28:34.858   464  5118 D android.hardware.audio@7.1-impl.ranchu: producerThread: exiting
+09-15 20:28:34.858   464  5116 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSource: stopping PCM stream
+09-15 20:28:35.747   464  5187 W android.hardware.audio@7.1-impl.ranchu: pcmWrite:259 pcm_writei failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:28:35.747   464  5187 E android.hardware.audio@7.1-impl.ranchu: pcmWrite:260 failure: -1
+09-15 20:28:35.851   464  5187 W android.hardware.audio@7.1-impl.ranchu: pcmWrite:259 pcm_writei failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:28:35.851   464  5187 E android.hardware.audio@7.1-impl.ranchu: pcmWrite:260 failure: -1
+09-15 20:28:35.955   464  5187 W android.hardware.audio@7.1-impl.ranchu: pcmWrite:259 pcm_writei failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:28:35.955   464  5187 E android.hardware.audio@7.1-impl.ranchu: pcmWrite:260 failure: -1
+09-15 20:28:36.059   464  5187 W android.hardware.audio@7.1-impl.ranchu: pcmWrite:259 pcm_writei failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:28:36.059   464  5187 E android.hardware.audio@7.1-impl.ranchu: pcmWrite:260 failure: -1
+09-15 20:28:36.166   464  5187 W android.hardware.audio@7.1-impl.ranchu: pcmWrite:259 pcm_writei failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:28:36.166   464  5187 E android.hardware.audio@7.1-impl.ranchu: pcmWrite:260 failure: -1
+09-15 20:28:36.267   464  5187 W android.hardware.audio@7.1-impl.ranchu: pcmWrite:259 pcm_writei failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:28:36.267   464  5187 E android.hardware.audio@7.1-impl.ranchu: pcmWrite:260 failure: -1
+09-15 20:28:36.372   464  5187 W android.hardware.audio@7.1-impl.ranchu: pcmWrite:259 pcm_writei failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:28:36.372   464  5187 E android.hardware.audio@7.1-impl.ranchu: pcmWrite:260 failure: -1
+09-15 20:28:36.476   464  5187 W android.hardware.audio@7.1-impl.ranchu: pcmWrite:259 pcm_writei failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:28:36.476   464  5187 E android.hardware.audio@7.1-impl.ranchu: pcmWrite:260 failure: -1
+09-15 20:28:36.579   464  5187 W android.hardware.audio@7.1-impl.ranchu: pcmWrite:259 pcm_writei failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:28:36.579   464  5187 E android.hardware.audio@7.1-impl.ranchu: pcmWrite:260 failure: -1
+09-15 20:28:36.683   464  5187 W android.hardware.audio@7.1-impl.ranchu: pcmWrite:259 pcm_writei failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:28:36.683   464  5187 E android.hardware.audio@7.1-impl.ranchu: pcmWrite:260 failure: -1
+09-15 20:28:36.790   464  5187 W android.hardware.audio@7.1-impl.ranchu: pcmWrite:259 pcm_writei failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:28:36.790   464  5187 E android.hardware.audio@7.1-impl.ranchu: pcmWrite:260 failure: -1
+09-15 20:28:36.891   464  5187 W android.hardware.audio@7.1-impl.ranchu: pcmWrite:259 pcm_writei failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:28:36.891   464  5187 E android.hardware.audio@7.1-impl.ranchu: pcmWrite:260 failure: -1
+09-15 20:28:36.995   464  5187 W android.hardware.audio@7.1-impl.ranchu: pcmWrite:259 pcm_writei failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:28:36.995   464  5187 E android.hardware.audio@7.1-impl.ranchu: pcmWrite:260 failure: -1
+09-15 20:28:37.099   464  5187 W android.hardware.audio@7.1-impl.ranchu: pcmWrite:259 pcm_writei failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:28:37.099   464  5187 E android.hardware.audio@7.1-impl.ranchu: pcmWrite:260 failure: -1
+09-15 20:28:37.204   464  5187 W android.hardware.audio@7.1-impl.ranchu: pcmWrite:259 pcm_writei failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:28:37.204   464  5187 E android.hardware.audio@7.1-impl.ranchu: pcmWrite:260 failure: -1
+09-15 20:28:37.308   464  5187 W android.hardware.audio@7.1-impl.ranchu: pcmWrite:259 pcm_writei failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:28:37.308   464  5187 E android.hardware.audio@7.1-impl.ranchu: pcmWrite:260 failure: -1
+09-15 20:28:37.411   464  5187 W android.hardware.audio@7.1-impl.ranchu: pcmWrite:259 pcm_writei failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:28:37.412   464  5187 E android.hardware.audio@7.1-impl.ranchu: pcmWrite:260 failure: -1
+09-15 20:28:37.515   464  5187 W android.hardware.audio@7.1-impl.ranchu: pcmWrite:259 pcm_writei failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:28:37.515   464  5187 E android.hardware.audio@7.1-impl.ranchu: pcmWrite:260 failure: -1
+09-15 20:28:37.620   464  5187 W android.hardware.audio@7.1-impl.ranchu: pcmWrite:259 pcm_writei failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:28:37.620   464  5187 E android.hardware.audio@7.1-impl.ranchu: pcmWrite:260 failure: -1
+09-15 20:28:37.724   464  5187 W android.hardware.audio@7.1-impl.ranchu: pcmWrite:259 pcm_writei failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:28:37.724   464  5187 E android.hardware.audio@7.1-impl.ranchu: pcmWrite:260 failure: -1
+09-15 20:28:37.828   464  5187 W android.hardware.audio@7.1-impl.ranchu: pcmWrite:259 pcm_writei failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:28:37.828   464  5187 E android.hardware.audio@7.1-impl.ranchu: pcmWrite:260 failure: -1
+09-15 20:28:37.889   464  4526 D android.hardware.audio@7.1-impl.ranchu: threadLoop: entering standby, frames: 1202240
+09-15 20:28:37.889   464  4526 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSink: joining consumeThread
+09-15 20:28:37.933   464  5187 W android.hardware.audio@7.1-impl.ranchu: pcmWrite:259 pcm_writei failed with 'cannot read/write stream data: I/O error' (-1)
+09-15 20:28:37.933   464  5187 E android.hardware.audio@7.1-impl.ranchu: pcmWrite:260 failure: -1
+09-15 20:28:37.933   464  5187 D android.hardware.audio@7.1-impl.ranchu: consumeThread: exiting
+09-15 20:28:37.933   464  4526 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSink: stopping PCM stream
+09-15 20:29:18.395   464  4526 D android.hardware.audio@7.1-impl.ranchu: threadLoop: entering standby, frames: 1351296
+09-15 20:29:18.395   464  4526 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSink: joining consumeThread
+09-15 20:29:18.412   464  5197 D android.hardware.audio@7.1-impl.ranchu: consumeThread: exiting
+09-15 20:29:18.412   464  4526 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSink: stopping PCM stream
+09-15 20:30:33.234   464  4526 D android.hardware.audio@7.1-impl.ranchu: threadLoop: entering standby, frames: 1646144
+09-15 20:30:33.234   464  4526 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSink: joining consumeThread
+09-15 20:30:33.245   464  5381 D android.hardware.audio@7.1-impl.ranchu: consumeThread: exiting
+09-15 20:30:33.246   464  4526 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSink: stopping PCM stream
+09-15 20:30:35.336   464   515 E android.hardware.audio@7.1-impl.ranchu: updateSinkMetadata:387 failure: Result::NOT_SUPPORTED
+09-15 20:30:35.425   464  5405 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:30:35.430   464  5405 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:30:35.435   464  5405 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:30:35.447   464  5405 D android.hardware.audio@7.1-impl.ranchu: TinyalsaSource::read:148 pcm_readi was late delivering frames, inserting 16000 us of silence
+09-15 20:30:38.309   464  4526 D android.hardware.audio@7.1-impl.ranchu: threadLoop: entering standby, frames: 1795200
+09-15 20:30:38.309   464  4526 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSink: joining consumeThread
+09-15 20:30:38.321   464  5401 D android.hardware.audio@7.1-impl.ranchu: consumeThread: exiting
+09-15 20:30:38.321   464  4526 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSink: stopping PCM stream
+09-15 20:30:39.588   464   516 E android.hardware.audio@7.1-impl.ranchu: updateSinkMetadata:387 failure: Result::NOT_SUPPORTED
+09-15 20:30:39.588   464  5405 D android.hardware.audio@7.1-impl.ranchu: threadLoop: entering standby
+09-15 20:30:39.588   464  5405 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSource: joining producerThread
+09-15 20:30:39.595   464  5407 D android.hardware.audio@7.1-impl.ranchu: producerThread: exiting
+09-15 20:30:39.596   464  5405 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSource: stopping PCM stream
+09-15 20:30:42.632   464  4526 D android.hardware.audio@7.1-impl.ranchu: threadLoop: entering standby, frames: 1944256
+09-15 20:30:42.632   464  4526 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSink: joining consumeThread
+09-15 20:30:42.632   464  5478 D android.hardware.audio@7.1-impl.ranchu: consumeThread: exiting
+09-15 20:30:42.633   464  4526 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSink: stopping PCM stream
+09-15 20:31:59.062   464  4526 D android.hardware.audio@7.1-impl.ranchu: threadLoop: entering standby, frames: 2231488
+09-15 20:31:59.063   464  4526 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSink: joining consumeThread
+09-15 20:31:59.077   464  5532 D android.hardware.audio@7.1-impl.ranchu: consumeThread: exiting
+09-15 20:31:59.077   464  4526 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSink: stopping PCM stream
+09-15 20:31:59.948   464   516 E android.hardware.audio@7.1-impl.ranchu: updateSinkMetadata:387 failure: Result::NOT_SUPPORTED
+09-15 20:31:59.990   464  5554 E android.hardware.audio@7.1-impl.ranchu: pcmOpen:181 pcm_prepare failed for nChannels=1 sampleRateHz=16000 period_count=4 period_size=128 isOut=0 with cannot prepare channel: I/O error (-1)
+09-15 20:31:59.991   464  5554 E android.hardware.audio@7.1-impl.ranchu: pcmOpen:184 failure: nullptr
+09-15 20:31:59.991   464  5554 E android.hardware.audio@7.1-impl.ranchu: create:216 failure: nullptr
+09-15 20:31:59.991   464  5554 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSource: joining producerThread
+09-15 20:31:59.993   464  5554 W android.hardware.audio@7.1-impl.ranchu: create:453 failed to create alsa source for 'AUDIO_DEVICE_IN_BUILTIN_MIC'; creating a tone source instead.
+09-15 20:32:02.931   464  4526 D android.hardware.audio@7.1-impl.ranchu: threadLoop: entering standby, frames: 2380544
+09-15 20:32:02.931   464  4526 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSink: joining consumeThread
+09-15 20:32:02.946   464  5549 D android.hardware.audio@7.1-impl.ranchu: consumeThread: exiting
+09-15 20:32:02.946   464  4526 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSink: stopping PCM stream
+09-15 20:32:04.726   464   516 E android.hardware.audio@7.1-impl.ranchu: updateSinkMetadata:387 failure: Result::NOT_SUPPORTED
+09-15 20:32:04.727   464  5554 D android.hardware.audio@7.1-impl.ranchu: threadLoop: entering standby
+09-15 20:32:07.754   464  4526 D android.hardware.audio@7.1-impl.ranchu: threadLoop: entering standby, frames: 2529600
+09-15 20:32:07.755   464  4526 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSink: joining consumeThread
+09-15 20:32:07.774   464  5596 D android.hardware.audio@7.1-impl.ranchu: consumeThread: exiting
+09-15 20:32:07.774   464  4526 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSink: stopping PCM stream
+09-15 20:32:32.425   464   516 E android.hardware.audio@7.1-impl.ranchu: updateSinkMetadata:387 failure: Result::NOT_SUPPORTED
+09-15 20:32:32.453   464  5613 E android.hardware.audio@7.1-impl.ranchu: pcmOpen:181 pcm_prepare failed for nChannels=1 sampleRateHz=16000 period_count=4 period_size=128 isOut=0 with cannot prepare channel: I/O error (-1)
+09-15 20:32:32.453   464  5613 E android.hardware.audio@7.1-impl.ranchu: pcmOpen:184 failure: nullptr
+09-15 20:32:32.453   464  5613 E android.hardware.audio@7.1-impl.ranchu: create:216 failure: nullptr
+09-15 20:32:32.453   464  5613 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSource: joining producerThread
+09-15 20:32:32.453   464  5613 W android.hardware.audio@7.1-impl.ranchu: create:453 failed to create alsa source for 'AUDIO_DEVICE_IN_BUILTIN_MIC'; creating a tone source instead.
+09-15 20:32:35.463   464  4526 D android.hardware.audio@7.1-impl.ranchu: threadLoop: entering standby, frames: 2925632
+09-15 20:32:35.463   464  4526 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSink: joining consumeThread
+09-15 20:32:35.475   464  5599 D android.hardware.audio@7.1-impl.ranchu: consumeThread: exiting
+09-15 20:32:35.475   464  4526 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSink: stopping PCM stream
+09-15 20:32:37.333   464   645 E android.hardware.audio@7.1-impl.ranchu: updateSinkMetadata:387 failure: Result::NOT_SUPPORTED
+09-15 20:32:37.333   464  5613 D android.hardware.audio@7.1-impl.ranchu: threadLoop: entering standby
+09-15 20:32:40.372   464  4526 D android.hardware.audio@7.1-impl.ranchu: threadLoop: entering standby, frames: 3074688
+09-15 20:32:40.372   464  4526 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSink: joining consumeThread
+09-15 20:32:40.389   464  5654 D android.hardware.audio@7.1-impl.ranchu: consumeThread: exiting
+09-15 20:32:40.389   464  4526 D android.hardware.audio@7.1-impl.ranchu: ~TinyalsaSink: stopping PCM stream

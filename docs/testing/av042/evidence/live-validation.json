@@ -1,0 +1,26 @@
+{
+  "scope": "human voice input only, per owner instruction",
+  "integrity_passed": true,
+  "failures": [],
+  "human_voice_verified": true,
+  "turns_used": 8,
+  "verified_transcripts": [
+    {
+      "attempt": 7,
+      "spoken_test_phrase": "Green, blue, red.",
+      "transcript": "green blue red",
+      "operator_confirmation": "user reply to live test instructions",
+      "done_to_final_ms": 690
+    },
+    {
+      "attempt": 8,
+      "spoken_test_phrase": "Five.",
+      "transcript": "five",
+      "operator_confirmation": "user reply to live test instructions",
+      "done_to_final_ms": 687
+    }
+  ],
+  "interruption_requirements": "deferred by owner; no passing claim",
+  "platform": "MacBook microphone \u2192 API 36 ARM64 emulator \u2192 pinned native recognizer",
+  "production_app_integration": "outside this disposable #51 investigation"
+}

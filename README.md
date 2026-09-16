@@ -33,6 +33,12 @@ See [AV-040: Live microphone and interruptions](docs/testing/av040-live-micropho
 for the bounded human investigation, its no-go result, raw evidence and measured
 policy limits. Live capture and interruption safety remain gates for #13/#26.
 
+See [AV-042: Live human voice input](docs/testing/av042/results.md) for the owner's
+subsequent scope change to a voice-input-only MVP, the emulator microphone failure
+diagnosis, and the confirmed “green blue red” and “five” transcripts. The broader
+interruption requirements are deferred for this scope; the prior failures remain
+recorded. The [runbook](docs/testing/av042/runbook.md) reproduces the working probe.
+
 See [AV-007: Integration contracts and review lifecycle](docs/contracts/av007-session-contracts.md)
 for the five session contracts, the card-identity and capability rules bound to AV-004's
 measurements, and the five-state review lifecycle. The

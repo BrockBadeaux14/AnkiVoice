@@ -1,0 +1,69 @@
+{
+  "scope_change": {
+    "user_text": "I need to just ship a MVP, the only case that needs to work is the human voice imput working. Ignore other requirements for now.",
+    "effect": "Prior no-go and interruption matrix no longer block the narrowed human voice input task. Prior observations remain unchanged."
+  },
+  "operator_replies": [
+    {
+      "after_attempt": 3,
+      "verbatim": "Prompt is audible but quiet.",
+      "establishes": [
+        "prompt audible and quiet"
+      ],
+      "does_not_establish": [
+        "spoken phrase attestation",
+        "successful transcript"
+      ]
+    },
+    {
+      "after_attempt": 4,
+      "verbatim": "Still quiet. Make louder.",
+      "establishes": [
+        "prompt still too quiet"
+      ],
+      "does_not_establish": [
+        "spoken phrase attestation"
+      ]
+    },
+    {
+      "after_attempt": 6,
+      "verbatim": "Its saying recognizer_error_7",
+      "establishes": [
+        "no-match result observed by operator"
+      ]
+    },
+    {
+      "after_attempt": 7,
+      "verbatim": "green blue red",
+      "establishes": [
+        "operator reported matching displayed transcript after requested live phrase trial"
+      ]
+    },
+    {
+      "after_attempt": 8,
+      "verbatim": "five",
+      "establishes": [
+        "operator reported matching displayed transcript after requested live short-answer trial"
+      ]
+    }
+  ],
+  "audio_debug": {
+    "local_only": "last-input.pcm, overwritten per trial; pulled under ignored build/av042 for troubleshooting",
+    "raw_audio_committed": false,
+    "source_rate": 16000,
+    "channels": 1,
+    "encoding": "PCM16 little endian",
+    "post_done_generated_silence_ms": 500
+  },
+  "recovery": {
+    "host_speaker_percent": 60,
+    "host_input_percent": 40,
+    "guest_media_volume": "9/15",
+    "changes": [
+      "restarted emulator after audio settings stabilized",
+      "corrected EXTRA_PREFER_OFFLINE to false, matching AV-006"
+    ],
+    "old_input_failure": "ALSA pcm_prepare I/O error caused built-in mic fallback to full-scale 220 Hz tone on attempts 5/6; confirmed by HAL logs and PCM samples",
+    "host_input_gain_caveat": "Set to 40% before restart; final system read showed 84%. Exact intervening change timing/source not observed. Do not attribute all behavior to gain or claim a fixed 40% throughout successful trials."
+  }
+}
