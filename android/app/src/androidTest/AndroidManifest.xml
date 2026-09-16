@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   AGP rewrites the first instrumentation entry to the defaultConfig runner. Keep AV-024's
-  default runner first, then the two additional live entry points, so packaging preserves
-  all three components selected explicitly by `am instrument`.
+  default runner first, then the three additional live entry points, so packaging preserves
+  all four components selected explicitly by `am instrument`.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -17,5 +17,9 @@
 
     <instrumentation
         android:name="org.ankivoice.app.SessionInstrumentation"
+        android:targetPackage="org.ankivoice" />
+
+    <instrumentation
+        android:name="org.ankivoice.app.JournalInstrumentation"
         android:targetPackage="org.ankivoice" />
 </manifest>

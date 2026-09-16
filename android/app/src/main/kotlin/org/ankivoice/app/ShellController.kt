@@ -29,6 +29,12 @@ internal sealed interface PreviewStatus {
     data object Unavailable : PreviewStatus
     /** Five consecutive ineligible cards; not [Exhausted] and not a transport pause. */
     data object IneligibleLimit : PreviewStatus
+
+    /**
+     * AV-018: a journalled review from an earlier process could not be attributed to this
+     * app. No card is offered until the learner has seen it.
+     */
+    data object OutcomeUnknown : PreviewStatus
 }
 
 internal data class ShellState(
@@ -45,6 +51,10 @@ internal data class ShellState(
     val disclosing: Boolean = false,
     val skipped: List<Eligibility.Ineligible> = emptyList(),
     val skipSummary: String? = null,
+    /** AV-018: what startup reconciliation could not attribute to this app, in its own words. */
+    val journalNotices: List<String> = emptyList(),
+    /** The journal entries those notices belong to, so the learner can acknowledge them. */
+    val journalOutstanding: List<Long> = emptyList(),
 )
 
 /**
@@ -57,6 +67,7 @@ internal class ShellController(
     private val provisioner: Provisioner,
     private val worker: Executor = Executor { it.run() },
     private val delivery: Executor = Executor { it.run() },
+    private val journal: JournalAccess? = null,
     private val cardProvider: (Long) -> CardProvider?,
 ) : ForegroundEventPort {
     var state = ShellState(selectedDeckId = settings.selectedDeckId, language = settings.language)
@@ -67,6 +78,9 @@ internal class ShellController(
     private var foreground = false
     private var selecting = false
     private var refreshAfterSelection = false
+
+    /** AV-018 reconciliation is a once-per-process pass, not a once-per-start one. */
+    private var reconciled = false
 
     private fun publish(next: ShellState) {
         state = next
@@ -162,9 +176,51 @@ internal class ShellController(
         val token = ++generation
         val deckId = state.selectedDeckId
         publish(state.copy(checking = true, status = PreviewStatus.Starting, skipped = emptyList(), skipSummary = null))
+        // AV-018: whatever an unclean exit left in the journal is resolved before any card
+        // is offered, and an unknown outcome stops the start rather than being studied over.
+        if (journal != null && !reconciled) {
+            journal.reconcile(sessionId, { cardProvider(requireNotNull(deckId)) }) { report ->
+                if (token != generation || !foreground) return@reconcile
+                reconciled = true
+                val next = state.copy(
+                    journalNotices = report.notices,
+                    journalOutstanding = report.outstanding.map { it.entryId },
+                )
+                if (report.blocking) {
+                    publish(next.copy(checking = false, status = PreviewStatus.OutcomeUnknown))
+                } else {
+                    publish(next)
+                    access.inspect(deckId) { result ->
+                        if (token != generation || !foreground) return@inspect
+                        finishStart(result, deckId, token)
+                    }
+                }
+            }
+            return
+        }
         access.inspect(deckId) { result ->
             if (token != generation || !foreground) return@inspect
             finishStart(result, deckId, token)
+        }
+    }
+
+    /**
+     * The learner has read an unknown-outcome notice. Clearing it does not resolve the
+     * review: AnkiDroid is still the only place that can say what happened, and this app
+     * never resubmits it.
+     */
+    fun acknowledgeJournalNotice(entryId: Long) {
+        val access = journal ?: return
+        access.acknowledge(entryId) { report ->
+            val remaining = report.outstanding.map { it.entryId }
+            publish(
+                state.copy(
+                    journalOutstanding = remaining,
+                    journalNotices = if (remaining.isEmpty()) emptyList() else state.journalNotices,
+                    status = if (remaining.isEmpty() && state.status == PreviewStatus.OutcomeUnknown)
+                        PreviewStatus.Idle else state.status,
+                ),
+            )
         }
     }
 

@@ -5,6 +5,9 @@ import org.ankivoice.core.contracts.*
 import org.ankivoice.core.eligibility.CONSECUTIVE_INELIGIBLE_LIMIT
 import org.ankivoice.core.eligibility.IneligibleReason
 import org.ankivoice.core.fakes.*
+import org.ankivoice.core.journal.JournalRequest
+import org.ankivoice.core.journal.JournalResolution
+import org.ankivoice.core.journal.ReviewJournal
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -372,5 +375,109 @@ class ShellControllerTest {
         deliveries.removeFirst().run()
         assertEquals(PreviewStatus.Stopped, shell.state.status)
         assertTrue(provider.collection.reviews.isEmpty())
+    }
+}
+
+/**
+ * AV-018 (#20) at the shell boundary: reconciliation runs before the first card is
+ * offered, an unknown outcome stops the start rather than being studied over, and no
+ * branch of it submits or resubmits a review.
+ */
+class ShellJournalTest {
+    private class Settings : ShellSettings {
+        override var selectedDeckId: Long? = 7
+        override var language = "en-US"
+    }
+
+    private class Access : DeckAccess {
+        val callbacks = ArrayDeque<(AccessSnapshot) -> Unit>()
+        override fun inspect(selectedDeckId: Long?, callback: (AccessSnapshot) -> Unit) { callbacks.add(callback) }
+        override fun select(deckId: Long, callback: (AccessSnapshot) -> Unit) { callbacks.add(callback) }
+        fun deliver(result: AccessSnapshot = AccessSnapshot(listOf(Deck(7, "Demo")))) {
+            callbacks.removeFirst()(result)
+        }
+    }
+
+    private class Provisioning : Provisioner {
+        override fun inspect(callback: (ProvisioningReport) -> Unit) = Unit
+        override fun provision(fullSyncAccepted: Boolean, callback: (ProvisioningReport) -> Unit) = Unit
+    }
+
+    private val access = Access()
+    private val provider = FakeCardProvider(demoCollection())
+    private val card = provider.collection.scheduled(provider.collection.order.first())
+    private val store = FakeJournalStore()
+    private val journal = ReviewJournal(store)
+    private val direct = java.util.concurrent.Executor { it.run() }
+    private var creations = 0
+    private val controller = ShellController(
+        access, Settings(), Provisioning(), direct, direct, JournalAccess(journal, direct, direct),
+    ) { creations++; provider }
+
+    private fun strand(rating: Int = 3) = journal.record(
+        JournalRequest("earlier-run", OperationToken("earlier-run", 1, 1), card.identity, rating, 4_200, 2, "five blocks", card.state),
+    )
+
+    private fun ready() { controller.onForegroundEvent(ForegroundEvent.RESUME); access.deliver() }
+
+    @Test fun `with an empty journal the start is unchanged`() {
+        ready()
+        controller.start()
+        access.deliver()
+        assertEquals(PreviewStatus.CardReady, controller.state.status)
+        assertTrue(controller.state.journalNotices.isEmpty())
+    }
+
+    @Test fun `a provably failed review is resolved and the start continues`() {
+        strand()
+        ready()
+        controller.start()
+        assertEquals(listOf(card.identity.cardId), provider.reads, "the journalled card is re-read first")
+        assertEquals(PreviewStatus.Starting, controller.state.status, "no card is offered before reconciliation")
+        access.deliver()
+        assertEquals(PreviewStatus.CardReady, controller.state.status)
+        assertTrue(controller.state.journalNotices.isEmpty(), "a provable non-write needs no warning")
+        assertTrue(provider.collection.reviews.isEmpty(), "reconciliation writes nothing")
+    }
+
+    @Test fun `an unknown outcome stops the start and offers no card`() {
+        strand()
+        provider.collection.applyReview(card.identity.cardId, 3, 4_200)
+        ready()
+        controller.start()
+        assertEquals(PreviewStatus.OutcomeUnknown, controller.state.status)
+        assertTrue(access.callbacks.isEmpty(), "no access preflight and no card follows a blocking notice")
+        val notice = controller.state.journalNotices.single()
+        assertTrue(notice.contains("cannot prove it saved rating 3"))
+        assertTrue(notice.contains("Open AnkiDroid"))
+        assertFalse(notice.contains("Saved"))
+        assertEquals(1, provider.collection.reviews.size, "no second review is added")
+    }
+
+    @Test fun `acknowledging the notice clears it without resolving the review`() {
+        val entry = strand()
+        provider.collection.applyReview(card.identity.cardId, 3, 4_200)
+        ready()
+        controller.start()
+        controller.acknowledgeJournalNotice(entry.entryId)
+        assertEquals(PreviewStatus.Idle, controller.state.status)
+        assertTrue(controller.state.journalOutstanding.isEmpty())
+        assertEquals(1, provider.collection.reviews.size, "acknowledging never writes")
+        assertEquals(
+            JournalResolution.OUTCOME_UNKNOWN,
+            journal.entries().single().resolution,
+            "the recorded resolution is never upgraded by an acknowledgement",
+        )
+    }
+
+    @Test fun `reconciliation runs once per process not once per start`() {
+        strand()
+        ready()
+        controller.start(); access.deliver()
+        val reads = provider.reads.size
+        controller.stop()
+        controller.start(); access.deliver()
+        assertEquals(reads, provider.reads.size, "a second start does not reconcile again")
+        assertEquals(PreviewStatus.CardReady, controller.state.status)
     }
 }

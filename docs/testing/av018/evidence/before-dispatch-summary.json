@@ -1,0 +1,28 @@
+{
+  "window": "before",
+  "card": 1789534470381,
+  "rating": 3,
+  "journalledPreState": {
+    "reps": 1,
+    "type": 1,
+    "queue": 1,
+    "due": 1789563936,
+    "interval": 0,
+    "lastReviewTimeSecs": 1789563332
+  },
+  "observedState": {
+    "reps": 1,
+    "type": 1,
+    "queue": 1,
+    "due": 1789563936,
+    "interval": 0,
+    "lastReviewTimeSecs": 1789563332
+  },
+  "resolution": "failed",
+  "reason": "The card is byte-for-byte as it was journalled, so no review was recorded against it.",
+  "notice": "Card 1789534470381: rating 3 was not saved. The card is unchanged from what this app recorded before submitting, so no review was written. Answer it again when you are ready.",
+  "revlogAddedByStrand": 0,
+  "revlogAddedByReconciliation": 0,
+  "outstandingNotices": 0,
+  "blocked": false
+}

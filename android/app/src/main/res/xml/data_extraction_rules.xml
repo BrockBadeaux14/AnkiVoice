@@ -1,16 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   AV-020 (#17): the wrapped OpenRouter key and the durable quota ledger never leave this
-  device. The app also sets allowBackup="false"; these rules additionally exclude the two
-  files from device-to-device transfer, where allowBackup does not apply.
+  device. AV-018 (#20) adds the session journal, which stores the learner's own answer
+  transcripts. The app also sets allowBackup="false"; these rules additionally exclude the
+  three files from device-to-device transfer, where allowBackup does not apply.
+
+  JournalBackupRulesTest checks that the journal's filename is actually listed here rather
+  than assuming it inherits the exclusion.
 -->
 <data-extraction-rules>
     <cloud-backup>
         <exclude domain="sharedpref" path="provider.xml" />
         <exclude domain="file" path="av020-quota-ledger.jsonl" />
+        <exclude domain="file" path="av018-session-journal.jsonl" />
     </cloud-backup>
     <device-transfer>
         <exclude domain="sharedpref" path="provider.xml" />
         <exclude domain="file" path="av020-quota-ledger.jsonl" />
+        <exclude domain="file" path="av018-session-journal.jsonl" />
     </device-transfer>
 </data-extraction-rules>

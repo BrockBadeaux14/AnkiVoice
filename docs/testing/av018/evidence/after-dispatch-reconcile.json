@@ -1,0 +1,82 @@
+{
+  "journalPath": "/data/user/0/org.ankivoice/files/av018-session-journal.jsonl",
+  "entriesBefore": [
+    {
+      "entryId": 1,
+      "session": "av018-live",
+      "cardId": 1789534470381,
+      "noteId": 1789534470381,
+      "deckId": 1789534470372,
+      "rating": 3,
+      "elapsedMs": 4200,
+      "transcriptRevision": 2,
+      "transcript": "five blocks",
+      "preState": {
+        "reps": 1,
+        "type": 1,
+        "queue": 1,
+        "due": 1789563936,
+        "interval": 0,
+        "lastReviewTimeSecs": 1789563332
+      },
+      "phase": "dispatching",
+      "resolutionReason": "",
+      "observedState": null,
+      "acknowledgedByLearner": false
+    }
+  ],
+  "reconciliations": [
+    {
+      "entryId": 1,
+      "cardId": 1789534470381,
+      "rating": 3,
+      "resolution": "outcome-unknown",
+      "reason": "The card shows one more review than it did, which this app cannot attribute to itself.",
+      "observedState": {
+        "reps": 2,
+        "type": 2,
+        "queue": 2,
+        "due": 92,
+        "interval": 1,
+        "lastReviewTimeSecs": 1789567469
+      },
+      "notice": "Card 1789534470381: this app cannot prove it saved rating 3. The card shows one more review than it did, which this app cannot attribute to itself. Open AnkiDroid and check the card before studying it again. AnkiVoice will not resubmit it."
+    }
+  ],
+  "entriesAfter": [
+    {
+      "entryId": 1,
+      "session": "av018-live",
+      "cardId": 1789534470381,
+      "noteId": 1789534470381,
+      "deckId": 1789534470372,
+      "rating": 3,
+      "elapsedMs": 4200,
+      "transcriptRevision": 2,
+      "transcript": "five blocks",
+      "preState": {
+        "reps": 1,
+        "type": 1,
+        "queue": 1,
+        "due": 1789563936,
+        "interval": 0,
+        "lastReviewTimeSecs": 1789563332
+      },
+      "phase": "reconciled",
+      "resolution": "outcome-unknown",
+      "resolutionReason": "The card shows one more review than it did, which this app cannot attribute to itself.",
+      "observedState": {
+        "reps": 2,
+        "type": 2,
+        "queue": 2,
+        "due": 92,
+        "interval": 1,
+        "lastReviewTimeSecs": 1789567469
+      },
+      "acknowledgedByLearner": false
+    }
+  ],
+  "outstanding": 1,
+  "blocked": true,
+  "passed": true
+}

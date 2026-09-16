@@ -126,6 +126,10 @@ private fun ShellScreen(
                 Text("AnkiDroid connected · Microphone allowed", color = MaterialTheme.colorScheme.primary)
             }
 
+            // AV-018: an unattributable review from an earlier run is shown before anything
+            // else the learner could act on, and it is never announced as a success.
+            UnknownOutcomeCard(state, controller)
+
             // Always offered: provisioning reports its own failure by name rather than
             // disappearing, and a denied microphone does not stop it.
             SetupCard(state, controller)
@@ -170,6 +174,7 @@ private fun ShellScreen(
                 DisclosureCard(providerState, provider)
             }
             QuotaCard(providerState, provider)
+            OnDeviceStorageCard()
             DiagnosticsCard(providerState, provider)
 
             var language by rememberSaveable(state.language) { mutableStateOf(state.language) }
@@ -182,6 +187,38 @@ private fun ShellScreen(
                 TextButton(onClick = { controller.setLanguage(language) }, enabled = language.isNotBlank()) { Text("Save language") }
             }
             TextButton(onClick = controller::refresh, enabled = !state.checking) { Text("Check access again") }
+        }
+    }
+}
+
+/**
+ * AV-018's debug-grade notice, until #15 owns the command surface and #27 the study one.
+ *
+ * It names the card and the rating, says plainly that the app cannot prove the review is
+ * its own, and hands the learner to AnkiDroid. There is no retry button, because no
+ * branch of this card retries a write, and no success message, because the outcome is by
+ * definition not known.
+ */
+@Composable
+private fun UnknownOutcomeCard(state: ShellState, controller: ShellController) {
+    if (state.journalNotices.isEmpty()) return
+    Card(
+        Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+    ) {
+        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text("An earlier review is unresolved", style = MaterialTheme.typography.titleLarge)
+            state.journalNotices.forEach { Text(it) }
+            Text(
+                "AnkiVoice stopped before it could confirm what it wrote. It will not send " +
+                    "this review again.",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            state.journalOutstanding.forEach { entryId ->
+                Button(onClick = { controller.acknowledgeJournalNotice(entryId) }) {
+                    Text("I have checked AnkiDroid")
+                }
+            }
         }
     }
 }
@@ -314,4 +351,5 @@ private fun statusText(status: PreviewStatus): String = when (status) {
     PreviewStatus.Stopped -> "Stopped"
     PreviewStatus.Unavailable -> "Study unavailable"
     PreviewStatus.IneligibleLimit -> "Stopped · too many unstudiable cards"
+    PreviewStatus.OutcomeUnknown -> "Stopped · an earlier review could not be confirmed"
 }
