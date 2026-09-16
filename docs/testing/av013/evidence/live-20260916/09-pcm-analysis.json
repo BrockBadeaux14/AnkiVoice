@@ -1,0 +1,8 @@
+{
+  "sampleCount": 70400,
+  "durationSeconds": 4.4,
+  "zeros": 3014,
+  "clippedSamples": 3682,
+  "rms": 8328.343453273395,
+  "purpose": "Read-only observation of live MIC frames; no replacement or injection; raw PCM remains ignored. Successful attempt does not explain earlier no-match failures."
+}

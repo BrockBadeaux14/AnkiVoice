@@ -1,0 +1,66 @@
+{
+  "microphonePermission": true,
+  "readiness": "ready",
+  "offered": {
+    "cardId": 1789534470381,
+    "model": "VoiceQA",
+    "reps": 0
+  },
+  "cardId": 1789534470381,
+  "expectedPhrase": "five blocks",
+  "permittedRatings": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "playback": "completed",
+  "operatorAction": "Done",
+  "doneToFinalMs": 659,
+  "capture": {
+    "kind": "transcript",
+    "text": "five blocks",
+    "confidence": "absent",
+    "token": "OperationToken(sessionId=av013-live\/answer, turn=1, sequence=1)"
+  },
+  "staleCallbacks": 0,
+  "operatorAttestation": {
+    "promptAudible": true,
+    "spokeExpectedPhrase": true,
+    "source": "operator-touch"
+  },
+  "answer": {
+    "halt": "lowConfidence",
+    "detail": "learner correction or retry required",
+    "resumable": true,
+    "reconciliationRequired": false
+  },
+  "transcriptReviewAction": "Use this transcript",
+  "acceptedTranscript": {
+    "status": "user-corrected",
+    "text": "five blocks",
+    "confidence": "absent",
+    "gradable": true
+  },
+  "acceptedTranscriptRevision": 2,
+  "transcript": "five blocks",
+  "suggestion": "correct: Exact match with the reference answer.",
+  "proposedRating": 3,
+  "confirmationSource": "operator-touch",
+  "confirmationAction": "Confirm Good (3)",
+  "confirmed": true,
+  "outcome": {
+    "state": "confirmed",
+    "reason": "Consistent one-review transition",
+    "acknowledgement": 1,
+    "submittedTimeMs": 47582,
+    "expectedStoredTimeMs": 47582,
+    "writeAttempted": true
+  },
+  "sessionState": "idle",
+  "announcement": "Saved rating 3.",
+  "advanced": true,
+  "events": "  start             language en-US\n  offer_card        card 1789534470381, ratings [1, 2, 3, 4]\n  ask               A box has three red blocks and two blue blocks. How many blocks are there in total?\n  start_answer      attempt 1\n  paused            lowConfidence: learner correction or retry required\n  correct_transcript revision 2: five blocks\n  grade             correct: Exact match with the reference answer.\n  propose           rating 3, 38339 ms\n  confirm           touch: rating 3\n  commit            confirmed: Consistent one-review transition\n  advance           confirmed; moving to the next card",
+  "completed": true,
+  "passed": true
+}

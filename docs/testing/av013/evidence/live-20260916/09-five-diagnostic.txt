@@ -1,0 +1,16 @@
+INSTRUMENTATION_STATUS: livePhase=Ready for the speech check
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: livePhase=Listen to the prompt
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: livePhase=Ready to answer
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: livePhase=Opening microphone
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: livePhase=Speak now
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: av025Capture={"engine":"com.google.android.tts","service":"com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService","preferOffline":false,"microphonePermission":true,"expectedPhrase":"five","playback":"completed","operatorAction":"Done","doneToFinalMs":672,"capture":{"kind":"transcript","text":"five","confidence":"absent","token":"OperationToken(sessionId=av013-five-09, turn=1, sequence=1)"},"microphoneDiagnostics":{"file":"av025-input.pcm","sampleRateHz":16000,"sampleCount":70400,"zeroSamples":3014,"peak":32768,"rms":8328.343453273395,"format":"mono PCM16 little-endian; microphone only, before trailing silence"},"staleCallbacks":0}
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: livePhase=Speech result
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_RESULT: av025={"engine":"com.google.android.tts","service":"com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService","preferOffline":false,"microphonePermission":true,"expectedPhrase":"five","playback":"completed","operatorAction":"Done","doneToFinalMs":672,"capture":{"kind":"transcript","text":"five","confidence":"absent","token":"OperationToken(sessionId=av013-five-09, turn=1, sequence=1)"},"microphoneDiagnostics":{"file":"av025-input.pcm","sampleRateHz":16000,"sampleCount":70400,"zeroSamples":3014,"peak":32768,"rms":8328.343453273395,"format":"mono PCM16 little-endian; microphone only, before trailing silence"},"staleCallbacks":0,"operatorAttestation":{"promptAudible":true,"spokeExpectedPhrase":true,"source":"operator-touch"}}
+INSTRUMENTATION_CODE: 0

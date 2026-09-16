@@ -1,0 +1,40 @@
+{
+  "microphonePermission": true,
+  "readiness": "ready",
+  "offered": {
+    "cardId": 1789534470381,
+    "model": "VoiceQA",
+    "reps": 0
+  },
+  "cardId": 1789534470381,
+  "expectedPhrase": "five blocks",
+  "permittedRatings": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "playback": "completed",
+  "operatorAction": "Done",
+  "doneToFinalMs": 681,
+  "capture": {
+    "kind": "failed",
+    "failure": "SpeechInput.noMatch: code 7",
+    "token": "OperationToken(sessionId=av013-session-08\/answer, turn=1, sequence=1)"
+  },
+  "staleCallbacks": 0,
+  "operatorAttestation": {
+    "promptAudible": true,
+    "spokeExpectedPhrase": true,
+    "source": "operator-touch"
+  },
+  "answer": {
+    "halt": "noMatch",
+    "detail": "code 7",
+    "resumable": true,
+    "reconciliationRequired": false
+  },
+  "sessionState": "paused",
+  "events": "  start             language en-US\n  offer_card        card 1789534470381, ratings [1, 2, 3, 4]\n  ask               A box has three red blocks and two blue blocks. How many blocks are there in total?\n  start_answer      attempt 1\n  paused            noMatch: code 7",
+  "passed": true
+}

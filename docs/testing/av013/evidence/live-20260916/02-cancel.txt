@@ -1,0 +1,3 @@
+INSTRUMENTATION_STATUS: Error=Unable to find instrumentation info for: ComponentInfo{org.ankivoice.test/org.ankivoice.app.SpeechInstrumentation}
+INSTRUMENTATION_STATUS: id=ActivityManagerService
+INSTRUMENTATION_STATUS_CODE: -1

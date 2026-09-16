@@ -1,0 +1,16 @@
+INSTRUMENTATION_STATUS: livePhase=Ready for the speech check
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: livePhase=Listen to the prompt
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: livePhase=Ready to answer
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: livePhase=Opening microphone
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: livePhase=Speak now
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: av025Capture={"engine":"com.google.android.tts","service":"com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService","preferOffline":false,"microphonePermission":true,"expectedPhrase":"five","playback":"completed","operatorAction":"Done","doneToFinalMs":685,"capture":{"kind":"failed","failure":"SpeechInput.noMatch: code 7","token":"OperationToken(sessionId=av013-five-07, turn=1, sequence=1)"},"staleCallbacks":0}
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: livePhase=Speech result
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_RESULT: av025={"engine":"com.google.android.tts","service":"com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService","preferOffline":false,"microphonePermission":true,"expectedPhrase":"five","playback":"completed","operatorAction":"Done","doneToFinalMs":685,"capture":{"kind":"failed","failure":"SpeechInput.noMatch: code 7","token":"OperationToken(sessionId=av013-five-07, turn=1, sequence=1)"},"staleCallbacks":0,"operatorAttestation":{"promptAudible":true,"spokeExpectedPhrase":true,"source":"operator-touch"}}
+INSTRUMENTATION_CODE: 0

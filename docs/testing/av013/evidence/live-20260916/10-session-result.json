@@ -1,0 +1,51 @@
+{
+  "microphonePermission": true,
+  "readiness": "ready",
+  "offered": {
+    "cardId": 1789534470381,
+    "model": "VoiceQA",
+    "reps": 0
+  },
+  "cardId": 1789534470381,
+  "expectedPhrase": "five blocks",
+  "permittedRatings": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "playback": "completed",
+  "operatorAction": "Done",
+  "doneToFinalMs": 681,
+  "capture": {
+    "kind": "transcript",
+    "text": "five blocks",
+    "confidence": "absent",
+    "token": "OperationToken(sessionId=av013-session-10\/answer, turn=1, sequence=1)"
+  },
+  "microphoneDiagnostics": {
+    "file": "av013-input.pcm",
+    "sampleRateHz": 16000,
+    "sampleCount": 78400,
+    "zeroSamples": 2885,
+    "peak": 32768,
+    "rms": 9475.887650963694,
+    "format": "mono PCM16 little-endian; microphone only, before trailing silence"
+  },
+  "staleCallbacks": 0,
+  "operatorAttestation": {
+    "promptAudible": true,
+    "spokeExpectedPhrase": true,
+    "source": "operator-touch"
+  },
+  "answer": {
+    "halt": "lowConfidence",
+    "detail": "learner correction or retry required",
+    "resumable": true,
+    "reconciliationRequired": false
+  },
+  "sessionState": "paused",
+  "events": "  start             language en-US\n  offer_card        card 1789534470381, ratings [1, 2, 3, 4]\n  ask               A box has three red blocks and two blue blocks. How many blocks are there in total?\n  start_answer      attempt 1\n  paused            lowConfidence: learner correction or retry required",
+  "completed": true,
+  "passed": false
+}

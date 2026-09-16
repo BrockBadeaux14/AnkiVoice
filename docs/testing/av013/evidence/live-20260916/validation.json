@@ -1,0 +1,29 @@
+{
+  "integrityChecksPassed": true,
+  "allAttemptsMatchRawInstrumentation": true,
+  "attemptsRetained": 12,
+  "criterion9Passed": true,
+  "criterion8Passed": true,
+  "successfulPhrases": {
+    "green blue red": 625,
+    "five": 672
+  },
+  "sessionRawTranscript": {
+    "text": "five blocks",
+    "doneToFinalMs": 659,
+    "confidence": "absent",
+    "outcome": "paused on lowConfidence, then operator-accepted and confirmed"
+  },
+  "newReviews": 1,
+  "criterion8Evidence": {
+    "attempt": 12,
+    "outcome": "confirmed",
+    "acknowledgement": 1,
+    "repsBefore": 0,
+    "repsAfter": 1,
+    "otherCardsChanged": [],
+    "notesUnchanged": true,
+    "submittedTimeMs": 47582,
+    "storedTimeMs": 47583
+  }
+}

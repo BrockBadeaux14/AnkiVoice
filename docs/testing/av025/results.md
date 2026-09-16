@@ -1,17 +1,31 @@
-# AV-025: The speech transport is implemented; its live check is not yet run
+# AV-025: Production transport verified on the pinned AVD
 
 Issue [#26 — Integrate mobile speech and audio routing](https://github.com/BrockBadeaux14/AnkiVoice/issues/26).
 Branch `codex/av-025-mobile-speech-routing`.
 
-**Result: the transport is implemented and its rules are verified offline. The live
-verification on the pinned AVD has not been performed.** That run needs a person speaking
-into a running emulator, so it cannot be produced from this session. Until it exists, this
-card has no evidence that the production transport transcribes real speech — only that it
-orders, bounds and classifies the route correctly.
+**Result: the absorbed live check passed under AV-013 on September 16, 2026 UTC.**
+The production transport returned operator-confirmed **“green blue red” in 625 ms**
+and **“five” in 672 ms** from Done to final. Explicit Cancel and permission-denied also
+returned the expected failures without a transcript. Every failed launch and no-match
+is retained in [AV-013's results](../av013/results.md) and its
+[all-attempt ledger](../av013/evidence/live-20260916/ledger.json).
 
-AV-042 proved the *route* live through a disposable probe. This card moves that route into
-`:speech`. Those are not the same artifact, and the probe's evidence does not transfer to
-this code.
+AV-042 proved the route through a disposable probe. These new measurements instead
+use the shipped `SpeechTransport` and `AndroidSpeechPlatform`, with the pinned
+service/version, local voice, PCM format and timings. The successful “five” check also
+used a test-only observer that copied actual microphone samples without changing what
+the transport sent to the recognizer. Raw PCM stays under ignored `build/av013/`.
+
+Ownership moved to [#14 (AV-013)](https://github.com/BrockBadeaux14/AnkiVoice/issues/14)
+when #26 closed without live evidence. **AV-013 criterion 9 is now discharged.** This
+is two confirmed phrases, not a reliability estimate. The first colors attempt and
+first “five” attempt failed; a session “five blocks” attempt also failed. No failure
+was erased or converted to a transcript.
+
+The first two launches found missing test-runner registration, now fixed. The initial
+harness had no visible test screen. The test APK now supplies operator Play prompt,
+Start answer, Done and result-attestation controls. No production transport code was
+changed during verification.
 
 ## What was implemented
 
@@ -68,12 +82,14 @@ stream was dropped: the microphone kept running and the turn died on the finaliz
 deadline instead of returning the learner's answer. `listen` now stops a microphone that
 opened into an already-finalizing turn, and a regression test holds that window open.
 
-## What was **not** verified
+## Remaining limits
 
-- **The live run on the pinned AVD has not happened.** No turn of real speech has gone
-  through this code. `doneToFinalMs` is unmeasured for the production transport; AV-042's
-  690 ms and 687 ms belong to the probe.
-- **The permission-denied and explicit-Cancel live paths** are covered offline only.
+- **Recognition reliability is unmeasured.** Two confirmed correct phrases establish
+  the scoped route; the retained no-match results still matter. Successful production
+  durations are 625 ms and 672 ms; AV-042's 690 ms and 687 ms remain probe measurements.
+- **Permission-denied and explicit Cancel have live evidence** in
+  [AV-013's ledger](../av013/evidence/live-20260916/ledger.json). Both returned failures
+  without transcripts.
 - **Device and route loss is classified but not exercised on hardware.** Unplugging a
   headset mid-answer, and the platform silencing the capture client, are wired to
   `AudioRecord`'s routing listener and `AudioRecordingCallback` and reported as
@@ -81,7 +97,7 @@ opened into an already-finalizing turn, and a regression test holds that window 
   Android callbacks themselves have not been triggered on a device.
 - **The playback path differs from the probe in one respect worth stating**:
   `AndroidSpeechPlatform` synthesizes to a file and plays it through `MediaPlayer`, which
-  is what AV-042 measured as audible, but that has not been re-confirmed from this module.
+  is what AV-042 measured as audible, and the operator confirmed audible playback in both successful live turns.
   The engine, voice and rate are the pinned ones.
 - **Recognition quality is not simulated and cannot be.** Every offline test uses scripted
   results. A green suite says the transport handles a transcript correctly, never that a
@@ -102,7 +118,6 @@ that come back wrong.
 
 ## Next
 
-The live section of the runbook is the remaining work on this card. Run it on the pinned
-AVD with the two AV-042 phrases plus the Cancel and permission-denied paths, record each
-turn and its Done-to-final duration here, and only then is the card's verification bar
-met.
+The narrowed live transport check is complete. See [AV-013's results](../av013/results.md)
+for the separate end-to-end session criterion. The broader reliability and interruption
+work remains outside this check; no physical-device, Bluetooth or call-safety claim is made.

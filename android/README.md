@@ -100,12 +100,12 @@ flowchart TD
 
 | Module | Kind | Contents now | Owner of what comes next |
 | --- | --- | --- | --- |
-| `:core` | Kotlin/JVM, no Android plugin or dependency | The AV-007 contract port in `org.ankivoice.core.contracts`; the fakes in its `testFixtures` source set | #14, #13, #25, #16/#18, #15, #20 |
+| `:core` | Kotlin/JVM, no Android plugin or dependency | The AV-007 contract port in `org.ankivoice.core.contracts`; AV-013's session state machine in `org.ankivoice.core.session`; the fakes in its `testFixtures` source set | #16/#18, #15, #20 |
 | `:ankidroid` | Android library | Access preflight; `decks` reads and verified `selected_deck` updates; AV-039 VoiceQA provisioning with read-back | #25 |
 | `:speech` | Android library | AV-025's speech transport: the pinned TTS/recognizer route, the app-owned microphone pipe, and the ordering, cancellation and failure rules behind both AV-007 speech contracts | #13 |
 | `:provider` | Android library | A marker object; no platform calls or network access | #17, #18 |
 | `:app` | Android application | Single-activity shell, onboarding, the VoiceQA setup action and its full-sync disclosure, private settings, lifecycle delivery and debug sample session | #27, #17 |
-| `:core` | Kotlin/JVM, no Android plugin or dependency | The AV-007 contract port in `org.ankivoice.core.contracts`; AV-015's rule-based grading in `org.ankivoice.core.grading`; the fakes in its `testFixtures` source set | #14, #13, #25, #18, #15, #20 |
+| `:core` | Kotlin/JVM, no Android plugin or dependency | The AV-007 contract port in `org.ankivoice.core.contracts`; AV-012's answer policy in `org.ankivoice.core.answer`; AV-015's rule-based grading in `org.ankivoice.core.grading`; AV-013's session state machine in `org.ankivoice.core.session`; the fakes in its `testFixtures` source set | #18, #15, #20 |
 | `:ankidroid` | Android library | Access preflight; `decks` reads and verified `selected_deck` updates | #25, #10 |
 | `:speech` | Android library | AV-025's speech transport: the pinned TTS/recognizer route, the app-owned microphone pipe, and the ordering, cancellation and failure rules behind both AV-007 speech contracts | #13 |
 | `:provider` | Android library | AV-020's credential store, free-route guard, durable quota ledger, content-free diagnostics and the one HTTPS seam | #18 |
@@ -509,6 +509,24 @@ checked-in copy is stale or escapes a value a properties parser would not return
 unchanged; `VoiceQaNoteTypeTest` fails if the Kotlin loader disagrees with the resource,
 or if the resource is not packaged where the app looks for it.
 
+AV-013 guards the ported conformance suite the same way.
+[`tools/av013_scenarios.py`](../tools/av013_scenarios.py) derives
+[`core/src/test/resources/av007/scenarios.txt`](core/src/test/resources/av007/scenarios.txt)
+from [`tools/av007_scenarios.py`](../tools/av007_scenarios.py): the 19 named scenarios by
+name, the 34 failure modes by contract, and the binding's session states and interruption
+kinds. `tests/test_av013_session.py` fails if the checked-in copy is stale or a named
+scenario has no `@Scenario` in the Kotlin suite; `ScenarioDriftTest` in `:core` fails if
+the ported suite, the failure taxonomy, the binding-state coverage or the interruption
+kinds disagree with it.
+
+After an intentional change to `tools/av007_scenarios.py`:
+
+```sh
+python tools/av013_scenarios.py --write
+python -m unittest tests.test_av013_session -v
+cd android && ./gradlew :core:test
+```
+
 AV-016 pins AV-006's grading instruction the same way, without a generated file:
 `tests/test_av016_grading.py` parses `tools/av006_providers.py` and fails if
 `GradingInstruction.PINNED` drifts from the measured pass-2 text, or if the deadline, the
@@ -660,3 +678,84 @@ comes only from [the AV-025 runbook](../docs/testing/av025/runbook.md) on the pi
 Backgrounding, screen lock, audio-route changes, Bluetooth and real calls are out of
 scope here and remain with #32; AV-040 recorded that no interruption signal reaches the
 app while the recognizer holds the microphone, and nothing in this module changes that.
+
+## Session state machine
+
+AV-013 (#14) ports `ReviewSession` from
+[`tools/av007_contracts.py`](../tools/av007_contracts.py) into
+`org.ankivoice.core.session`. It is the single owner of turn progression across AV-007's
+five-state review lifecycle, and it reaches the recognizer, the synthesizer, the
+collection and the grader only through AV-007's contracts, so no platform type appears in
+`:core`.
+
+### The states
+
+The binding folds several conditions into `paused`/`stopped` and has no state for retry
+or reveal. AV-013 separates them, and `SessionState.binding` records the correspondence so
+the ported suite can still assert against its source:
+
+| Kotlin state | Binding state | Meaning |
+| --- | --- | --- |
+| `IDLE` | `idle` | No card is open |
+| `ASKING` | `asking` | Question playback in flight; capture may not open |
+| `LISTENING` | `listening` | The answer phase; AV-012 owns the finer detail |
+| `RETRYING` | `listening` | An explicit Try again opened a new revision |
+| `GRADING` | `grading` | A gradable transcript exists for this revision |
+| `REVEALING` | — | Reveal or elaboration playback; transient |
+| `PROPOSING` | `proposing` | A pending review is open for correction |
+| `COMMITTING` | `committing` | The single write is in flight |
+| `COMMITTED` | `committed` | Confirmed; awaiting advance or a native-undo handoff |
+| `PAUSED` | `paused` | Resumable; the learner may fix the cause |
+| `OUTCOME_UNKNOWN` | `paused` | A write may have landed; reconcile first |
+| `INTERRUPTED` | `stopped` | The single-active-reviewer precondition broke |
+| `UNSUPPORTED` | `stopped` | The offered card is not a usable VoiceQA card |
+| `STOPPED` | `stopped` | Reload the collection to continue |
+| `EXHAUSTED` | `exhausted` | The queue emptied normally |
+
+`OUTCOME_UNKNOWN` never retries the write and never advances. It stays until the learner
+reports what AnkiDroid actually shows, and no later halt can erase that obligation.
+
+### Tokens, ordering and confinement
+
+Session, card, turn and attempt are bound into every token. AV-012 mints capture tokens
+under a namespaced session id, so a capture token can never equal a playback, grading or
+proposal token that shares a turn and sequence. A callback whose token does not match the
+operation in flight is dropped and logged, never applied — which is what keeps a
+superseded turn from advancing the wrong card, overlapping playback with recording, or
+producing a second rating for one answer.
+
+Teardown follows AV-022's **invalidate-then-clean-up** order: every token is cleared
+*before* anything is cancelled, because cancellation itself produces late callbacks. Three
+tests drive fakes that answer their own `cancel()` and assert the answer is dropped.
+
+Every transition is confined to the thread that constructed the session — the main thread
+in the app. A recognizer, synthesizer or grader callback must be posted to that thread;
+calling in from another one throws rather than corrupting the turn.
+
+### Nothing writes a review by itself
+
+A rating reaches the writer only from `commit`, only for an intent carrying a current,
+final, sufficiently confident confirmation for this attempt and revision. Silence, a
+timeout, a speech failure, a grading failure and a confident model are none of them
+confirmations, and a transcript edit discards the pending suggestion, the pending rating
+and any confirmation bound to the old revision.
+
+Every fault from `:speech` or AV-012 routes into a halt that preserves the card.
+`recoveryOptions` names the explicit manual controls it offers; self-grade appears only
+when a gradable transcript exists, because a fault never supplies one.
+
+### The conformance suite
+
+`core/src/test/.../session` ports the 53 scenarios of
+[`tools/av007_scenarios.py`](../tools/av007_scenarios.py) as JVM tests against the fakes:
+19 named scenarios and a 34-mode failure sweep, with no emulator and no network. The
+[drift guard](#drift-guard) keeps them in step with the Python source.
+
+### What this does not establish
+
+The offline suite proves the turn's ordering and guards, not that a turn works on a
+device. The live check is [the AV-013 runbook](../docs/testing/av013/runbook.md), which
+has discharged AV-025's absorbed live verification and carried one spoken answer through
+to a verified guarded write. One turn is not a reliability estimate, and the pinned
+recognizer reported absent confidence throughout, so every spoken answer needed a manual
+acceptance; [results](../docs/testing/av013/results.md) records every attempt.
