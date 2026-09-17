@@ -28,13 +28,34 @@ from pathlib import Path
 import sys
 
 EVIDENCE = Path(__file__).resolve().parents[2] / "docs/testing/av019/evidence"
-CASES = {
+# Whether the case hands the writer an intent at all. This is the property the exchange
+# owns, and it never depends on what the operator did afterwards.
+WRITES = {
     "confirmed": 1,
     "corrected": 1,
     "correction-only": 0,
     "abandoned": 0,
     "undo-handoff": 1,
 }
+CASES = WRITES
+
+# The operator's report on the handoff screen that means the review was taken back.
+UNDO_USED = "AnkiDroid offered Undo and I used it"
+
+
+def expected_reviews(name, result):
+    """How many reviews should have survived in the revlog.
+
+    `undo-handoff` is the only conditional one, and only on the operator's own report:
+    AnkiVoice writes one review and stops, and AnkiDroid's native Undo — if it was offered
+    and used — takes it back. A net delta of zero there is the handoff working, not a
+    missing write; the write itself is checked through the transport and the journal.
+    """
+    if name != "undo-handoff":
+        return WRITES[name]
+    steps = result.get("steps", [])
+    handoff = next((s for s in steps if s.get("step") == "undo-handoff"), {})
+    return 0 if handoff.get("operatorReport") == UNDO_USED else 1
 
 # The steps a case has to have actually reached. Without this a case the harness skipped —
 # because the rules abstained and nothing was pending — passes the no-write checks while
@@ -60,26 +81,29 @@ def card_states(rows):
 
 
 def validate(name, record):
-    expected = CASES[name]
+    result = record["result"]
+    wrote = WRITES[name]
+    survived = expected_reviews(name, result)
     check(record["case"] == name, f"{name}: the record names a different case")
     check(record["integrityBefore"] == record["integrityAfter"] == "ok", f"{name}: collection integrity")
 
     # The collection's own revlog, not the app's account of what it did.
     added = record["revlogAdded"]
-    check(len(added) == expected, f"{name}: {len(added)} reviews added, expected {expected}")
-    check(record["reviewsAdded"] == expected, f"{name}: the driver counted {record['reviewsAdded']}")
+    check(len(added) == survived, f"{name}: {len(added)} reviews survived, expected {survived}")
+    check(record["reviewsAdded"] == survived, f"{name}: the driver counted {record['reviewsAdded']}")
 
-    result = record["result"]
     check("error" not in result, f"{name}: {result.get('error')}")
     check(result["case"] == name, f"{name}: the harness ran a different case")
 
+    # What the exchange did is separate from what survived it: the transport call and the
+    # journal entry are the evidence that a write happened at all.
     writes = result.get("writes", [])
-    check(len(writes) == expected, f"{name}: the transport was called {len(writes)} times")
+    check(len(writes) == wrote, f"{name}: the transport was called {len(writes)} times, expected {wrote}")
 
     journal = result.get("journalAfter", [])
-    check(result.get("journalEntriesAdded") == expected,
-          f"{name}: {result.get('journalEntriesAdded')} journal entries added, expected {expected}")
-    check(len(journal) == expected, f"{name}: {len(journal)} journal entries retained")
+    check(result.get("journalEntriesAdded") == wrote,
+          f"{name}: {result.get('journalEntriesAdded')} journal entries added, expected {wrote}")
+    check(len(journal) == wrote, f"{name}: {len(journal)} journal entries retained")
 
     # Every rating announced carries a source and the revision it was computed from.
     announcements = result.get("announcements", [])
@@ -114,7 +138,7 @@ def validate(name, record):
         check(required in taken, f"{name}: never reached the {required} step; ran {taken}")
 
     confirmations = [step for step in steps if step.get("step") == "confirm"]
-    if expected:
+    if wrote:
         check(len(confirmations) == 1, f"{name}: {len(confirmations)} confirmations for one write")
         confirmation = confirmations[0]
         source = confirmation.get("confirmationSource")
@@ -125,10 +149,19 @@ def validate(name, record):
         entry = journal[0]
         check(entry["outcomeState"] == "confirmed", f"{name}: the journal entry settled {entry['outcomeState']}")
         check(entry["phase"] == "settled", f"{name}: the journal entry is {entry['phase']}")
-        check(entry["rating"] == added[0]["ease"],
-              f"{name}: journalled rating {entry['rating']} but the revlog records {added[0]['ease']}")
-        check(entry["cardId"] == added[0]["cid"], f"{name}: the journal and the revlog name different cards")
-        check(not result["stateUnchanged"], f"{name}: a confirmed review left the card untouched")
+        check(entry["rating"] == confirmation["rating"],
+              f"{name}: journalled rating {entry['rating']} but {confirmation['rating']} was confirmed")
+        if survived:
+            check(entry["rating"] == added[0]["ease"],
+                  f"{name}: journalled rating {entry['rating']} but the revlog records {added[0]['ease']}")
+            check(entry["cardId"] == added[0]["cid"],
+                  f"{name}: the journal and the revlog name different cards")
+            check(not result["stateUnchanged"], f"{name}: a confirmed review left the card untouched")
+        else:
+            # The review was written and then taken back in AnkiDroid. The card is back where
+            # it started, which is the handoff working rather than a write that never happened.
+            check(result["stateUnchanged"],
+                  f"{name}: Undo was reported used but the card did not return to its prior state")
     else:
         check(not confirmations, f"{name}: a case that must not write ran a confirmation")
         check(result["stateUnchanged"], f"{name}: the card changed without a write")
@@ -149,6 +182,8 @@ def validate(name, record):
         correction = next(step for step in steps if step.get("step") == "correct")
         check(added[0]["ease"] == correction["to"],
               f"{name}: the review recorded {added[0]['ease']}, not the corrected {correction['to']}")
+        check(added[0]["ease"] != correction["from"],
+              f"{name}: the replaced rating {correction['from']} is what reached the collection")
     if name == "abandoned":
         pause = next(step for step in steps if step.get("step") == "pause")
         # A pause that was refused because the turn had already halted abandons nothing.
@@ -184,8 +219,10 @@ def main():
 
     outstanding = [name for name in CASES if name not in recorded]
     total = sum(entry["reviewsAdded"] for entry in summary["cases"])
+    written = sum(WRITES[entry["case"]] for entry in summary["cases"])
     done = f"{checks} checks over {len(recorded)} of {len(CASES)} cases; " \
-           f"{total} reviews written, all from an explicit confirmation."
+           f"{written} reviews written, all from an explicit confirmation; " \
+           f"{total} surviving in the collection."
     if outstanding:
         print(f"AV-019 evidence (incomplete): {done} Still to run: {', '.join(outstanding)}.")
     else:

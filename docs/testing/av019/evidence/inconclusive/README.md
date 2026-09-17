@@ -63,6 +63,17 @@ AV-019's retry path was added because of it; whether these particular empty capt
 that same fault, or something in AV-025's own pipe, is an AV-025 (#26) question and not one
 this card can answer. It is recorded here rather than guessed at.
 
-The practical consequence for anyone resuming: **tap the confirmation rather than speaking
-it.** The spoken path is already proven by `confirmed`, and a spoken confirm costs a second
-microphone open in a boot that may not have one left.
+The practical consequence, which is what finally got the run through: **tap the
+confirmation rather than speaking it.** The spoken path is already proven by `confirmed`,
+and a spoken confirm costs a second microphone open in a boot that may not have one left.
+
+## Third round: all five cases passed
+
+Later the same day `corrected` and `undo-handoff` both passed with the confirmation
+**tapped** rather than spoken, and the live layer is complete. `undo-handoff` exposed a
+wrong expectation in this card's own tooling rather than anything in the app: both the
+driver and the harness assumed the case must add one review to the revlog, which is only
+true when AnkiDroid's Undo is *not* used. The operator used it, the net delta was zero, and
+a case that had done exactly what was asked of it was marked a failure. See
+[results.md](../../results.md) for how the two questions — did a write happen, and should a
+review have survived — were separated.

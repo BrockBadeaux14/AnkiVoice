@@ -65,8 +65,57 @@ OUT = ROOT / "docs/testing/av019/evidence"
 BUILD = ROOT / "build/av019"
 
 CASES = ["confirmed", "corrected", "correction-only", "abandoned", "undo-handoff"]
-# What each case promises. The driver checks it rather than trusting the harness summary.
-WRITES = {"confirmed": 1, "corrected": 1, "correction-only": 0, "abandoned": 0, "undo-handoff": 1}
+# Reviews each case is expected to leave in the revlog. `undo-handoff` is deliberately
+# absent: it writes one review and then hands the learner to AnkiDroid's own Undo, so
+# whether one survives depends on what the operator did there. See `expected_reviews`.
+WRITES = {"confirmed": 1, "corrected": 1, "correction-only": 0, "abandoned": 0}
+
+# The operator's report on the handoff screen that means the review was taken back.
+UNDO_USED = "AnkiDroid offered Undo and I used it"
+
+
+def expected_reviews(name, result):
+    """How many reviews this case should leave behind, given what actually happened.
+
+    Only `undo-handoff` is conditional, and only on the operator's own report: AnkiVoice
+    writes one review and then stops, and AnkiDroid's native Undo — if it was offered and
+    used — removes it again. A net delta of zero there is the handoff working, not a
+    missing write, and the write itself is checked separately through the transport and
+    the journal.
+    """
+    if name in WRITES:
+        return WRITES[name]
+    steps = result.get("steps", []) if isinstance(result, dict) else []
+    handoff = next((s for s in steps if s.get("step") == "undo-handoff"), {})
+    return 0 if handoff.get("operatorReport") == UNDO_USED else 1
+
+
+def expected_writes(name):
+    """Whether this case hands the writer an intent at all. Independent of what survives."""
+    return 0 if name in ("correction-only", "abandoned") else 1
+
+
+def verdict(name, result, added):
+    """Judge the case from what the collection and the journal show, not from the harness.
+
+    The harness reports its own `passed`, but it cannot know what the operator did in
+    AnkiDroid after the handoff, so the driver decides here: the write either reached the
+    transport and settled in the journal or it did not, and the revlog delta either matches
+    what should have survived or it does not.
+    """
+    if not isinstance(result, dict) or "error" in result:
+        return False
+    wrote = expected_writes(name)
+    if len(result.get("writes", [])) != wrote:
+        return False
+    if result.get("journalEntriesAdded") != wrote:
+        return False
+    if added != expected_reviews(name, result):
+        return False
+    # A case that must not write must also leave the card's scheduling exactly as it was.
+    if wrote == 0 and not result.get("stateUnchanged"):
+        return False
+    return True
 
 
 def utc():
@@ -192,7 +241,7 @@ def case(name, deck, log_path, reboot):
 
     before_log, after_log = revlog(before), revlog(after)
     added = len(after_log) - len(before_log)
-    expected = WRITES[name]
+    expected = expected_reviews(name, result)
     record = {
         "case": name,
         "utc": utc(),
@@ -208,7 +257,8 @@ def case(name, deck, log_path, reboot):
         "spokenBy": "the operator; see result.answer.attested for what they confirmed",
         "result": result,
     }
-    record["passed"] = bool(result.get("passed")) and added == expected
+    record["harnessPassed"] = bool(result.get("passed"))
+    record["passed"] = verdict(name, result, added)
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / f"{name}.json").write_text(json.dumps(record, indent=2) + "\n")
     print(f"  reviews added {added} (expected {expected}) · "

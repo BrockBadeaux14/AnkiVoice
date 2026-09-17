@@ -1,4 +1,4 @@
-# AV-019: pre-commit exchange implemented; one live case of five
+# AV-019: pre-commit exchange implemented and verified on the pinned AVD
 
 Issue [#21 — Make rating correction predictable](https://github.com/BrockBadeaux14/AnkiVoice/issues/21).
 Branch `codex/av-019-rating-correction`. Review remains pending.
@@ -8,12 +8,14 @@ handling are in `:core`; the writer wiring, the surface controls and the live ha
 in `:app`. **The offline layer passed on September 16, 2026**: 45 new JVM tests across
 `:core` and `:app`, with no emulator and no network.
 
-**The live layer is one case of five.** `confirmed` passed on the pinned AVD on
-September 17, 2026, in the owner's own voice, and it carries the finding that matters most
-for the card's decision 3: **a spoken confirmation executed and wrote one review.** The
-other four are outstanding. Three of them were attempted first and proved nothing — the
-harness could not yet take AV-019's own abstain path — and those attempts are kept in
+**The live layer is complete: all five cases passed** on the pinned AVD on September 17,
+2026, in the owner's own voice, against a disposable AV-002 collection. Three reviews were
+written, each from an explicit confirmation and none any other way; two survive, because
+the third was taken back by AnkiDroid's own Undo in the handoff case. `confirmed` carries
+the finding that matters most for the card's decision 3: **a spoken confirmation executed
+and wrote one review.** Every attempt that proved nothing along the way is kept in
 [`evidence/inconclusive/`](evidence/inconclusive/README.md) rather than deleted.
+
 
 ## Implementation
 
@@ -107,19 +109,21 @@ the outcome controls, and the two write-path properties this card had to wire: a
 rating journalled before the write and settled from the outcome at the right rating, card
 and revision; and a superseded revision's text never journalled against a newer rating.
 
-## Live layer — September 17, 2026, one case of five
 
-Five cases, one per cold boot, driven by `tools/av019-qa/run.py` through
-`ExchangeInstrumentation` on the pinned `AnkiVoice_AV005` AVD against a disposable AV-002
-collection. Three of them write a real review, deliberately.
+## Live layer — September 17, 2026, five of five
 
-| Case | What it must show | Status |
+Five cases, driven by `tools/av019-qa/run.py` through `ExchangeInstrumentation` on the
+pinned `AnkiVoice_AV005` AVD against a disposable AV-002 collection.
+
+| Case | What it must show | Result |
 | --- | --- | --- |
-| `confirmed` | one review, journal settled `confirmed`, the duplicate confirm not offered | **passed** |
-| `corrected` | one review at the corrected rating, journal settled `confirmed` | outstanding |
-| `correction-only` | no review, no journal entry | outstanding |
-| `abandoned` | no review, no journal entry | outstanding |
-| `undo-handoff` | one review, the session stopped, the card re-read afterwards | outstanding |
+| `confirmed` | one review, journal settled `confirmed`, the duplicate confirm not offered | **passed** — spoken confirm, rating 3 |
+| `corrected` | one review at the **corrected** rating, journal settled `confirmed` | **passed** — Again replaced by Hard; Hard is what the revlog records |
+| `correction-only` | no review, no journal entry | **passed** |
+| `abandoned` | no review, no journal entry | **passed** |
+| `undo-handoff` | one write, the session stopped, and AnkiDroid's own Undo | **passed** — Undo was offered, used, and took the review back |
+
+`tools/av019-qa/validate.py` re-derives **170 checks** over the five cases.
 
 ### `confirmed`, in the owner's voice
 
@@ -142,52 +146,129 @@ a real collection**, and it wrote the review it was asked to. The elapsed time s
 was 108,900 ms and the revlog stored 60,000: the deck's own `maxTaken` cap, which
 `ReviewOutcome.timeWasCapped` already models and which is not a unit error.
 
-### What went wrong first, and what was fixed
+### `corrected`: the corrected rating is the one that gets written
 
-`corrected`, `correction-only` and `abandoned` were attempted before the harness knew how
-to take AV-019's abstain path. Two of the three cards graded `uncertain`, so the exchange
-opened as an abstention with **no pending rating** — correct behaviour, and exactly what
-the card requires — and the case scripts, which assumed a grader proposal, had nothing to
-correct and skipped. The third never settled an answer at all. Nothing was written in any
-of them, and the exchange itself was right every time; the gap was in the harness, and in a
-validator lenient enough to let a skipped case pass the no-write checks.
+The rules answered `uncertain`, so the exchange opened as an abstention; `selfGrade` named
+**Again**, announced as `learner` at revision 1; a correction replaced it with **Hard**,
+re-announced at the same revision; and a touched confirmation committed once.
 
-Both were fixed the same day, before any of the three was re-run:
+| | |
+| --- | --- |
+| Announced | abstention (`none`) → Again (`learner`) → Hard (`learner`), all revision 1 |
+| Confirmation | **touch** — "Rating 2 is confirmed for this card." |
+| Outcome | `confirmed`, "Consistent one-review transition", acknowledgement 1 |
+| Revlog | `ease` **2** — Hard, the corrected rating, and **not** the Again it replaced |
+| Journal | entry 1, settled `confirmed`, rating 2, revision 1 |
+| Card | `reps` 4 → 5 |
 
-- `ExchangeInstrumentation.nameRating` takes the abstain path — `selfGrade` opens Announced
-  with the rating announced as learner-named — so a case reaches a pending rating whatever
-  the rules make of the answer, and the abstain path gets live evidence of its own.
-- `validate.py` requires each case to have reached the steps it is named for, so a skipped
-  case cannot pass while demonstrating nothing.
+A rating that was announced and then replaced never reached the collection. That is what
+the card's "correction and confirmation are two separate steps" decision exists for, now
+shown against a real one.
 
-The three attempts are kept in [`evidence/inconclusive/`](evidence/inconclusive/README.md).
-Re-running until one comes back right and keeping only that one is not evidence.
+### `undo-handoff`: AnkiVoice writes, stops, and AnkiDroid takes it back
 
-### Reproducing the rest
+The rules matched here, so **Good** was announced from an exact rule match and confirmed by
+touch. The write landed — the transport was called once and the journal entry settled
+`confirmed` at rating 3 — and the session then **stopped**, not resumable, with the notice
+sending the learner to AnkiDroid's own Undo. The operator reported: *"AnkiDroid offered
+Undo and I used it."*
+
+The collection's net revlog delta is therefore **zero** and the card returned to its prior
+state. That is the handoff working end to end rather than a missing write, and it is the
+one thing no JVM test could show: AnkiVoice has no programmatic undo, and correction after
+commit is genuinely AnkiDroid's.
+
+### `correction-only` and `abandoned`: a correction, and an exchange, that wrote nothing
+
+Both took the abstain path — the rules answered `uncertain`, the learner's own rating was
+named through `selfGrade` and announced as `learner`, and only then was there anything to
+correct or abandon. Both left the collection byte-identical, with no journal entry and no
+call to the transport.
+
+| | `correction-only` | `abandoned` |
+| --- | --- | --- |
+| Answer | settled first attempt | settled on the **third**; two came back empty |
+| Announced | abstention → Again (`learner`) → **Hard** (`learner`), revision 1 | abstention → Again (`learner`), revision 5 |
+| Then | "Session finished. No review was written." | "Paused. The microphone is released and the card is kept." then finished |
+| Result | 0 reviews · 0 journal entries · scheduling unchanged | 0 reviews · 0 journal entries · scheduling unchanged |
+
+`abandoned` is the more useful record, because its two empty captures and the retries that
+followed are in the evidence rather than hidden: AV-012's Try again opens a new revision
+each time, which is why the rating it abandoned sits at revision 5.
+
+## What the run exposed, and what was fixed
+
+Nothing in this section is an exchange fault. The exchange behaved correctly in every
+attempt, including the ones that proved nothing; the gaps were in this card's own harness,
+its validator and its expectations.
+
+**The harness could not take AV-019's own abstain path.** Three early cases assumed a
+grader proposal, so when the rules answered `uncertain` and the exchange correctly opened
+as an abstention with no pending rating, the case scripts had nothing to act on and
+skipped. `ExchangeInstrumentation.nameRating` now names a rating through `selfGrade`, so a
+case reaches a pending rating whatever the rules made of the answer — and the abstain path
+gets live evidence of its own.
+
+**The validator let a skipped case pass.** It now requires each case to have reached the
+steps it is named for, to have had a pending rating at all, and rejects a Pause that was
+refused because the turn had already halted.
+
+**A dropped capture cost a whole case.** It now costs a **Try again** through AV-012's own
+`retry`, up to three attempts, each recorded.
+
+**`undo-handoff` was expected to add a review.** That is only true when the Undo is *not*
+used, and the assumption marked a case that had done exactly what was asked of it as a
+failure. Two questions are now kept apart:
+
+- **Did a write happen?** The transport call and the settled journal entry answer that, and
+  never depend on what the operator did afterwards. The harness judges only this, because
+  the process cannot see AnkiDroid.
+- **Should a review have survived?** The driver answers that from the collection snapshots
+  either side and the operator's own report of what AnkiDroid offered.
+
+The retained records keep both verdicts: `harnessPassed` is what the device concluded, and
+`passed` is the driver's, derived from the collection and the journal rather than from the
+harness's summary.
+
+**The spoken confirm was lost twice** before `corrected` passed — once to `noMatch`, once
+heard as `"confirm good confirm hard"`, a single merged utterance that whole-utterance
+matching correctly rejected. Each time the router refused it and paused with the card kept,
+writing nothing. That is the right answer to an unheard command, and it is why the runbook
+now says to tap the confirmation unless the spoken path is the point of the run.
+
+Every attempt that proved nothing is kept in
+[`evidence/inconclusive/`](evidence/inconclusive/README.md). Re-running until one comes back
+right and keeping only that one is not evidence.
+
+### Reproducing it
 
 Every case needs one spoken answer, and each confirmation is the operator's choice of
 spoken or touched, recorded as it happened. The owner asked on September 16, 2026 that
 spoken evidence be spoken; nothing in the harness synthesizes a voice or attests on the
 operator's behalf. `tools/av019-qa/validate.py` re-derives every claim above from the
-retained snapshots — 94 checks over the three completed cases — and names the two still
-outstanding rather than passing as though the run were done. Reproduce with the
-[runbook](runbook.md).
+retained snapshots — **170 checks over the five cases** — rather than trusting either
+summary. Reproduce with the [runbook](runbook.md).
 
 ## What this does not establish
 
-Three cases are not five. Nothing here yet shows that a **corrected** rating is the one
-that gets written, or that AnkiDroid offers its own Undo after the handoff — those are the
-two cases still to run, and #21 should stay open until they have.
+Five cases on one emulator against one disposable four-card collection is not a study. It
+shows each property once, which is what the card asked for; it does not show how often.
 
-One spoken confirmation is also not a recognition-accuracy estimate. It shows the guarded
+**Undo was offered once, on this AnkiDroid and this card, moments after the review.** That
+is exactly the situation the app's own notice says not to rely on — AnkiDroid may not offer
+it after other activity, or after either app's process is closed — and nothing here tests
+that boundary.
+
+One spoken confirmation is not a recognition-accuracy estimate either. It shows the guarded
 spoken path works on this route at all, which it had never been observed doing; it does not
-say how often it will.
+say how often it will. Capture on this emulator remains unreliable and the cause is still
+not established — it cost several attempts, and it is an AV-025
+([#26](https://github.com/BrockBadeaux14/AnkiVoice/issues/26)) question rather than one this
+card answers.
 
-The offline layer says nothing about recognition quality or about AnkiDroid's real write
-behaviour. It also says nothing about the AI source end to end: the live harness grades on
-device, so the `ai` announcement is exercised only against the fakes — spending the owner's
-OpenRouter credit to re-check a label AV-045 already covers would buy nothing this card
-needs.
+Nothing here covers the `ai` source end to end: the live harness grades on device, so that
+announcement is exercised only against the fakes. Spending the owner's OpenRouter credit to
+re-check a label AV-045 already covers would buy nothing this card needs.
 
 The 30-turn acceptance run, and the manual-intervention count that goes with it, stay in
 [#29](https://github.com/BrockBadeaux14/AnkiVoice/issues/29).

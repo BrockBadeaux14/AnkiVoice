@@ -1,12 +1,24 @@
 {
-  "case": "abandoned",
-  "utc": "2026-09-17T12:53:09Z",
+  "case": "corrected",
+  "utc": "2026-09-17T15:33:24Z",
   "deck": 1789411952529,
-  "expectedReviewsAdded": 0,
-  "reviewsAdded": 0,
+  "expectedReviewsAdded": 1,
+  "reviewsAdded": 1,
   "integrityBefore": "ok",
   "integrityAfter": "ok",
-  "revlogAdded": [],
+  "revlogAdded": [
+    {
+      "id": 1789659202239,
+      "cid": 1789411952537,
+      "usn": -1,
+      "ease": 2,
+      "ivl": -900,
+      "lastIvl": -600,
+      "factor": 2300,
+      "time": 60000,
+      "type": 2
+    }
+  ],
   "cardsBefore": [
     {
       "id": 1789411952535,
@@ -147,11 +159,11 @@
       "ord": 0,
       "type": 3,
       "queue": 1,
-      "due": 1789411892,
+      "due": 1789660233,
       "ivl": 1,
-      "reps": 4,
+      "reps": 5,
       "lapses": 1,
-      "mod": 1789411952
+      "mod": 1789659202
     },
     {
       "id": 1789411952538,
@@ -221,33 +233,29 @@
   ],
   "phases": [
     {
-      "utc": "2026-09-17T12:50:53Z",
+      "utc": "2026-09-17T15:32:16Z",
       "phase": "Answer the card"
     },
     {
-      "utc": "2026-09-17T12:51:12Z",
-      "phase": "Nothing was heard"
-    },
-    {
-      "utc": "2026-09-17T12:51:32Z",
-      "phase": "Nothing was heard"
-    },
-    {
-      "utc": "2026-09-17T12:52:42Z",
+      "utc": "2026-09-17T15:32:38Z",
       "phase": "Speech result"
     },
     {
-      "utc": "2026-09-17T12:52:58Z",
+      "utc": "2026-09-17T15:32:54Z",
       "phase": "No rating was suggested"
     },
     {
-      "utc": "2026-09-17T12:53:08Z",
-      "phase": "Abandoning the exchange"
+      "utc": "2026-09-17T15:33:04Z",
+      "phase": "Correcting the rating"
+    },
+    {
+      "utc": "2026-09-17T15:33:14Z",
+      "phase": "Confirm Hard?"
     }
   ],
   "spokenBy": "the operator; see result.answer.attested for what they confirmed",
   "result": {
-    "case": "abandoned",
+    "case": "corrected",
     "journalPath": "/data/user/0/org.ankivoice/files/av018-session-journal.jsonl",
     "journalBefore": [],
     "microphonePermission": true,
@@ -270,35 +278,19 @@
       "attempts": [
         {
           "attempt": 1,
-          "transcript": "",
-          "status": "failed",
-          "confidence": "absent",
-          "recognizerConfidence": null,
-          "sessionState": "paused"
-        },
-        {
-          "attempt": 2,
-          "transcript": "",
-          "status": "failed",
-          "confidence": "absent",
-          "recognizerConfidence": null,
-          "sessionState": "paused"
-        },
-        {
-          "attempt": 3,
-          "transcript": "Blue Square Blue Square not true blue square",
+          "transcript": "no it is blue but not Square",
           "status": "final",
           "confidence": "sufficient",
-          "recognizerConfidence": 0.8944026,
+          "recognizerConfidence": 0.9721955,
           "sessionState": "grading"
         }
       ],
       "settled": true,
-      "transcript": "Blue Square Blue Square not true blue square",
+      "transcript": "no it is blue but not Square",
       "answerStatus": "final",
       "confidence": "sufficient",
-      "recognizerConfidence": 0.8944026,
-      "transcriptRevision": 5,
+      "recognizerConfidence": 0.9721955,
+      "transcriptRevision": 1,
       "sessionState": "grading",
       "attested": {
         "promptAudible": true,
@@ -312,9 +304,9 @@
         "kind": "announced",
         "rating": null,
         "source": "none",
-        "transcriptRevision": 5,
+        "transcriptRevision": 1,
         "spoken": true,
-        "notice": "No rating was suggested for what I heard (answer version 5) (the rules answered uncertain). Say or tap Again, Hard, Good or Easy to choose one. Nothing is saved until you confirm it."
+        "notice": "No rating was suggested for what I heard (answer version 1) (the rules answered uncertain). Say or tap Again, Hard, Good or Easy to choose one. Nothing is saved until you confirm it."
       },
       "sessionState": "grading"
     },
@@ -327,58 +319,105 @@
           "kind": "announced",
           "rating": 1,
           "source": "learner",
-          "transcriptRevision": 5,
+          "transcriptRevision": 1,
           "spoken": true,
-          "notice": "Again is waiting, because you chose it for what I heard (answer version 5). Say or tap Confirm to save it, or choose a different rating. Nothing is saved yet."
+          "notice": "Again is waiting, because you chose it for what I heard (answer version 1). Say or tap Confirm to save it, or choose a different rating. Nothing is saved yet."
         },
         "sessionState": "proposing"
       },
       {
-        "step": "pause",
+        "step": "correct",
         "outcome": {
-          "kind": "untouched",
-          "notice": "Paused. The microphone is released and the card is kept. Nothing was written."
+          "kind": "announced",
+          "rating": 2,
+          "source": "learner",
+          "transcriptRevision": 1,
+          "spoken": true,
+          "notice": "Hard is waiting, because you chose it for what I heard (answer version 1). Say or tap Confirm to save it, or choose a different rating. Nothing is saved yet."
         },
-        "sessionState": "paused"
+        "sessionState": "proposing",
+        "from": 1,
+        "to": 2
       },
       {
-        "step": "finish",
-        "outcome": {
-          "kind": "untouched",
-          "notice": "Session finished. No review was written."
+        "step": "confirm",
+        "action": "Tap it",
+        "rating": 2,
+        "command": {
+          "kind": "executed",
+          "command": "confirm",
+          "source": "touch",
+          "notice": "Rating 2 is confirmed for this card."
         },
-        "sessionState": "stopped"
+        "confirmationSource": "touch",
+        "outcome": {
+          "kind": "committed",
+          "outcome": "confirmed",
+          "reason": "Consistent one-review transition",
+          "acknowledgement": 1,
+          "announcement": "Saved rating 2.",
+          "notice": "Saved rating 2. Tap Next card to carry on. If Hard was the wrong rating, use AnkiDroid's own Undo \u2014 AnkiVoice cannot take a review back."
+        },
+        "sessionState": "committed"
       }
     ],
     "announcements": [
       {
         "rating": null,
         "source": "none",
-        "transcriptRevision": 5,
+        "transcriptRevision": 1,
         "spoken": true,
-        "text": "No rating was suggested for what I heard (answer version 5) (the rules answered uncertain). Say or tap Again, Hard, Good or Easy to choose one. Nothing is saved until you confirm it."
+        "text": "No rating was suggested for what I heard (answer version 1) (the rules answered uncertain). Say or tap Again, Hard, Good or Easy to choose one. Nothing is saved until you confirm it."
       },
       {
         "rating": 1,
         "source": "learner",
-        "transcriptRevision": 5,
+        "transcriptRevision": 1,
         "spoken": true,
-        "text": "Again is waiting, because you chose it for what I heard (answer version 5). Say or tap Confirm to save it, or choose a different rating. Nothing is saved yet."
+        "text": "Again is waiting, because you chose it for what I heard (answer version 1). Say or tap Confirm to save it, or choose a different rating. Nothing is saved yet."
+      },
+      {
+        "rating": 2,
+        "source": "learner",
+        "transcriptRevision": 1,
+        "spoken": true,
+        "text": "Hard is waiting, because you chose it for what I heard (answer version 1). Say or tap Confirm to save it, or choose a different rating. Nothing is saved yet."
       }
     ],
     "after": {
-      "reps": 4,
+      "reps": 5,
       "cardType": 3,
       "queue": 1,
-      "due": 1789411892,
-      "intervalDays": 1
+      "due": 1789660233,
+      "intervalDays": 1,
+      "lastReviewTimeSecs": 1789659202
     },
-    "stateUnchanged": true,
-    "journalAfter": [],
-    "sessionState": "stopped",
-    "events": "  start             language en-US\n  offer_card        card 1789411952537, ratings [1, 2, 3, 4]\n  ask               In a game, a token is valid only if it is blue and square. A token is blue and round. Is it valid, and why?\n  start_answer      attempt 1\n  paused            noMatch: code 7\n  retry             revision 2; the next window waits for Start answer\n  start_answer      attempt 2\n  paused            noMatch: code 7\n  retry             revision 4; the next window waits for Start answer\n  start_answer      attempt 3\n  listen            Blue Square Blue Square not true blue square\n  grade             uncertain: no rule match; the learner supplies the rating\n  self_grade        learner selected 1\n  propose           rating 1, 125536 ms\n  paused            learner_paused: the learner paused; the card is kept and nothing was written\n  stopped           session_finished: the learner finished the session; nothing was written",
-    "writes": [],
-    "journalEntriesAdded": 0,
+    "stateUnchanged": false,
+    "journalAfter": [
+      {
+        "entryId": 1,
+        "sessionId": "av019-live-corrected",
+        "cardId": 1789411952537,
+        "rating": 2,
+        "transcriptRevision": 1,
+        "transcriptLength": 28,
+        "phase": "settled",
+        "outcomeState": "confirmed",
+        "outcomeReason": "Consistent one-review transition",
+        "acknowledgement": 1,
+        "noticeOutstanding": false
+      }
+    ],
+    "sessionState": "committed",
+    "events": "  start             language en-US\n  offer_card        card 1789411952537, ratings [1, 2, 3, 4]\n  ask               In a game, a token is valid only if it is blue and square. A token is blue and round. Is it valid, and why?\n  start_answer      attempt 1\n  listen            no it is blue but not Square\n  grade             uncertain: no rule match; the learner supplies the rating\n  self_grade        learner selected 1\n  propose           rating 1, 38067 ms\n  correct           rating 2\n  confirm           touch: rating 2\n  commit            confirmed: Consistent one-review transition",
+    "writes": [
+      {
+        "cardId": 1789411952537,
+        "rating": 2,
+        "elapsedMs": 65579
+      }
+    ],
+    "journalEntriesAdded": 1,
     "completed": true,
     "passed": true
   },

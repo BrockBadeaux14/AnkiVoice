@@ -1206,7 +1206,18 @@ session; nothing resumes the stopped one.
 
 The 45 JVM tests prove the exchange, the announcement, the re-prompt rule, the single write
 and the three outcome classes against the fakes, and `studyWriter` puts the shipped wiring
-under test. They say nothing about recognition quality, about AnkiDroid's real write
-behaviour, or about whether AnkiDroid's Undo is offered in practice. The pinned-AVD run in
-[results](../docs/testing/av019/results.md) is what covers those, and the 30-turn
-acceptance run stays in [#29](https://github.com/BrockBadeaux14/AnkiVoice/issues/29).
+under test. They say nothing about recognition quality or about AnkiDroid's real write
+behaviour.
+
+The pinned-AVD run covers those: all five cases passed on September 17, 2026, with
+**170 checks** re-derived from the retained snapshots. Three reviews were written, each
+from an explicit confirmation and none any other way; a corrected rating is the one the
+revlog records, and **not** the rating it replaced; a correction on its own and an abandoned
+exchange each wrote nothing; and after the handoff AnkiDroid's own Undo was offered, used,
+and took the review back. A spoken confirmation executed at raw confidence 0.972, which
+retires this card's decision 3. See [results](../docs/testing/av019/results.md).
+
+Five cases on one emulator and one four-card collection is not a study, and Undo was
+offered once, moments after the review — not in the situation the app's own notice warns
+about. The 30-turn acceptance run stays in
+[#29](https://github.com/BrockBadeaux14/AnkiVoice/issues/29).

@@ -63,7 +63,7 @@ import org.json.JSONObject
  * | `corrected` | announce, correct to another rating, confirm that one | one review at the corrected rating, journal settled `confirmed` |
  * | `correction-only` | announce, correct, finish the session | no review, no journal entry |
  * | `abandoned` | announce, pause, finish the session | no review, no journal entry |
- * | `undo-handoff` | confirm, then hand off to AnkiDroid's Undo | one review, the session stopped, the card re-read afterwards |
+ * | `undo-handoff` | confirm, then hand off to AnkiDroid's Undo | one write, the session stopped, and whatever AnkiDroid's Undo then did, reported by the operator |
  *
  * Reproduce with docs/testing/av019/runbook.md.
  */
@@ -546,6 +546,12 @@ class ExchangeInstrumentation : Instrumentation() {
         val passed = completed && when (case) {
             "correction-only", "abandoned" ->
                 writes.length() == 0 && added == 0 && output.optBoolean("stateUnchanged")
+            // After the handoff the operator uses AnkiDroid's own Undo, which this process
+            // cannot see and must not assume either way. The harness therefore judges only
+            // what it owns — one write reached the transport and the journal settled it from
+            // the writer's outcome — and the driver, which snapshots the collection either
+            // side, decides whether a review should have survived.
+            "undo-handoff" -> writes.length() == 1 && added == 1 && confirmedEntry
             else -> writes.length() == 1 && added == 1 && confirmedEntry && !output.optBoolean("stateUnchanged")
         }
         output.put("completed", completed)

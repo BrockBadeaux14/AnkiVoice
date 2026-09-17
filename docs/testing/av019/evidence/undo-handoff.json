@@ -1,6 +1,6 @@
 {
-  "case": "abandoned",
-  "utc": "2026-09-17T12:53:09Z",
+  "case": "undo-handoff",
+  "utc": "2026-09-17T15:34:48Z",
   "deck": 1789411952529,
   "expectedReviewsAdded": 0,
   "reviewsAdded": 0,
@@ -41,11 +41,11 @@
       "ord": 0,
       "type": 3,
       "queue": 1,
-      "due": 1789411892,
+      "due": 1789660233,
       "ivl": 1,
-      "reps": 4,
+      "reps": 5,
       "lapses": 1,
-      "mod": 1789411952
+      "mod": 1789659202
     },
     {
       "id": 1789411952538,
@@ -147,11 +147,11 @@
       "ord": 0,
       "type": 3,
       "queue": 1,
-      "due": 1789411892,
+      "due": 1789660233,
       "ivl": 1,
-      "reps": 4,
+      "reps": 5,
       "lapses": 1,
-      "mod": 1789411952
+      "mod": 1789659202
     },
     {
       "id": 1789411952538,
@@ -221,43 +221,36 @@
   ],
   "phases": [
     {
-      "utc": "2026-09-17T12:50:53Z",
+      "utc": "2026-09-17T15:33:31Z",
       "phase": "Answer the card"
     },
     {
-      "utc": "2026-09-17T12:51:12Z",
-      "phase": "Nothing was heard"
-    },
-    {
-      "utc": "2026-09-17T12:51:32Z",
-      "phase": "Nothing was heard"
-    },
-    {
-      "utc": "2026-09-17T12:52:42Z",
+      "utc": "2026-09-17T15:33:49Z",
       "phase": "Speech result"
     },
     {
-      "utc": "2026-09-17T12:52:58Z",
-      "phase": "No rating was suggested"
+      "utc": "2026-09-17T15:34:03Z",
+      "phase": "Confirm Good?"
     },
     {
-      "utc": "2026-09-17T12:53:08Z",
-      "phase": "Abandoning the exchange"
+      "utc": "2026-09-17T15:34:10Z",
+      "phase": "Undo it in AnkiDroid"
     }
   ],
   "spokenBy": "the operator; see result.answer.attested for what they confirmed",
   "result": {
-    "case": "abandoned",
+    "case": "undo-handoff",
     "journalPath": "/data/user/0/org.ankivoice/files/av018-session-journal.jsonl",
     "journalBefore": [],
     "microphonePermission": true,
-    "cardId": 1789411952537,
+    "cardId": 1789411952536,
     "before": {
-      "reps": 4,
-      "cardType": 3,
+      "reps": 2,
+      "cardType": 1,
       "queue": 1,
-      "due": 1789411892,
-      "intervalDays": 1
+      "due": 1789647968,
+      "intervalDays": 0,
+      "lastReviewTimeSecs": 1789647277
     },
     "permittedRatings": [
       1,
@@ -270,35 +263,19 @@
       "attempts": [
         {
           "attempt": 1,
-          "transcript": "",
-          "status": "failed",
-          "confidence": "absent",
-          "recognizerConfidence": null,
-          "sessionState": "paused"
-        },
-        {
-          "attempt": 2,
-          "transcript": "",
-          "status": "failed",
-          "confidence": "absent",
-          "recognizerConfidence": null,
-          "sessionState": "paused"
-        },
-        {
-          "attempt": 3,
-          "transcript": "Blue Square Blue Square not true blue square",
+          "transcript": "green blue red",
           "status": "final",
           "confidence": "sufficient",
-          "recognizerConfidence": 0.8944026,
+          "recognizerConfidence": 0.97219545,
           "sessionState": "grading"
         }
       ],
       "settled": true,
-      "transcript": "Blue Square Blue Square not true blue square",
+      "transcript": "green blue red",
       "answerStatus": "final",
       "confidence": "sufficient",
-      "recognizerConfidence": 0.8944026,
-      "transcriptRevision": 5,
+      "recognizerConfidence": 0.97219545,
+      "transcriptRevision": 1,
       "sessionState": "grading",
       "attested": {
         "promptAudible": true,
@@ -307,81 +284,95 @@
       }
     },
     "announced": {
-      "label": "uncertain",
+      "label": "correct",
       "step": {
         "kind": "announced",
-        "rating": null,
-        "source": "none",
-        "transcriptRevision": 5,
+        "rating": 3,
+        "source": "rule",
+        "transcriptRevision": 1,
         "spoken": true,
-        "notice": "No rating was suggested for what I heard (answer version 5) (the rules answered uncertain). Say or tap Again, Hard, Good or Easy to choose one. Nothing is saved until you confirm it."
+        "notice": "Good is waiting, from an exact rule match on what I heard (answer version 1). Say or tap Confirm to save it, or choose a different rating. Nothing is saved yet."
       },
-      "sessionState": "grading"
+      "sessionState": "proposing"
     },
     "steps": [
       {
-        "step": "self-grade",
-        "rating": 1,
-        "proposed": true,
-        "outcome": {
-          "kind": "announced",
-          "rating": 1,
-          "source": "learner",
-          "transcriptRevision": 5,
-          "spoken": true,
-          "notice": "Again is waiting, because you chose it for what I heard (answer version 5). Say or tap Confirm to save it, or choose a different rating. Nothing is saved yet."
+        "step": "confirm",
+        "action": "Tap it",
+        "rating": 3,
+        "command": {
+          "kind": "executed",
+          "command": "confirm",
+          "source": "touch",
+          "notice": "Rating 3 is confirmed for this card."
         },
-        "sessionState": "proposing"
+        "confirmationSource": "touch",
+        "outcome": {
+          "kind": "committed",
+          "outcome": "confirmed",
+          "reason": "Consistent one-review transition",
+          "acknowledgement": 1,
+          "announcement": "Saved rating 3.",
+          "notice": "Saved rating 3. Tap Next card to carry on. If Good was the wrong rating, use AnkiDroid's own Undo \u2014 AnkiVoice cannot take a review back."
+        },
+        "sessionState": "committed"
       },
       {
-        "step": "pause",
-        "outcome": {
-          "kind": "untouched",
-          "notice": "Paused. The microphone is released and the card is kept. Nothing was written."
-        },
-        "sessionState": "paused"
-      },
-      {
-        "step": "finish",
-        "outcome": {
-          "kind": "untouched",
-          "notice": "Session finished. No review was written."
-        },
-        "sessionState": "stopped"
+        "step": "undo-handoff",
+        "reason": "native_undo_handoff",
+        "detail": "use AnkiDroid's Undo, then reload; no programmatic or durable undo is available",
+        "sessionState": "stopped",
+        "resumable": false,
+        "operatorReport": "AnkiDroid offered Undo and I used it"
       }
     ],
     "announcements": [
       {
-        "rating": null,
-        "source": "none",
-        "transcriptRevision": 5,
+        "rating": 3,
+        "source": "rule",
+        "transcriptRevision": 1,
         "spoken": true,
-        "text": "No rating was suggested for what I heard (answer version 5) (the rules answered uncertain). Say or tap Again, Hard, Good or Easy to choose one. Nothing is saved until you confirm it."
-      },
-      {
-        "rating": 1,
-        "source": "learner",
-        "transcriptRevision": 5,
-        "spoken": true,
-        "text": "Again is waiting, because you chose it for what I heard (answer version 5). Say or tap Confirm to save it, or choose a different rating. Nothing is saved yet."
+        "text": "Good is waiting, from an exact rule match on what I heard (answer version 1). Say or tap Confirm to save it, or choose a different rating. Nothing is saved yet."
       }
     ],
     "after": {
-      "reps": 4,
-      "cardType": 3,
+      "reps": 2,
+      "cardType": 1,
       "queue": 1,
-      "due": 1789411892,
-      "intervalDays": 1
+      "due": 1789647968,
+      "intervalDays": 0,
+      "lastReviewTimeSecs": 1789647277
     },
     "stateUnchanged": true,
-    "journalAfter": [],
+    "journalAfter": [
+      {
+        "entryId": 1,
+        "sessionId": "av019-live-undo-handoff",
+        "cardId": 1789411952536,
+        "rating": 3,
+        "transcriptRevision": 1,
+        "transcriptLength": 14,
+        "phase": "settled",
+        "outcomeState": "confirmed",
+        "outcomeReason": "Consistent one-review transition",
+        "acknowledgement": 1,
+        "noticeOutstanding": false
+      }
+    ],
     "sessionState": "stopped",
-    "events": "  start             language en-US\n  offer_card        card 1789411952537, ratings [1, 2, 3, 4]\n  ask               In a game, a token is valid only if it is blue and square. A token is blue and round. Is it valid, and why?\n  start_answer      attempt 1\n  paused            noMatch: code 7\n  retry             revision 2; the next window waits for Start answer\n  start_answer      attempt 2\n  paused            noMatch: code 7\n  retry             revision 4; the next window waits for Start answer\n  start_answer      attempt 3\n  listen            Blue Square Blue Square not true blue square\n  grade             uncertain: no rule match; the learner supplies the rating\n  self_grade        learner selected 1\n  propose           rating 1, 125536 ms\n  paused            learner_paused: the learner paused; the card is kept and nothing was written\n  stopped           session_finished: the learner finished the session; nothing was written",
-    "writes": [],
-    "journalEntriesAdded": 0,
+    "events": "  start             language en-US\n  offer_card        card 1789411952536, ratings [1, 2, 3, 4]\n  ask               Reverse the sequence red, blue, green.\n  start_answer      attempt 1\n  listen            green blue red\n  grade             correct: Exact match with the reference answer.\n  propose           rating 3, 21898 ms\n  confirm           touch: rating 3\n  commit            confirmed: Consistent one-review transition\n  stopped           native_undo_handoff: use AnkiDroid's Undo, then reload; no programmatic or durable undo is available",
+    "writes": [
+      {
+        "cardId": 1789411952536,
+        "rating": 3,
+        "elapsedMs": 37134
+      }
+    ],
+    "journalEntriesAdded": 1,
     "completed": true,
-    "passed": true
+    "passed": false
   },
   "passed": true,
-  "harnessPassed": true
+  "note": "The review was written and then taken back by AnkiDroid's own Undo, which the operator reported using; the net revlog delta of zero is the handoff working. The write itself is evidenced by the transport call and the settled journal entry.",
+  "harnessPassed": false
 }

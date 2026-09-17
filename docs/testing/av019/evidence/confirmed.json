@@ -369,5 +369,6 @@
     "completed": true,
     "passed": true
   },
-  "passed": true
+  "passed": true,
+  "harnessPassed": true
 }
