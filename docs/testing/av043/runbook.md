@@ -16,7 +16,7 @@ Four layers, deliberately separate:
 > for layer 3. `tools/av043-qa/validate.py` and `tools/av017-qa/validate.py` fail if
 > anything key-shaped appears anywhere in the evidence.
 
-Every paid request holds its ceiling — $0.0008192 for the pinned model — in the ledger
+Every paid request holds its ceiling — $0.0024576 for the pinned model — in the ledger
 before it is sent and charges the reply's reported cost afterwards. The runs below record
 their spend in `quota.spend_usd` from the ledger's own charges; report it as measured,
 never as estimated.
@@ -45,7 +45,7 @@ may not carry a variable exported after it started, so use `--no-daemon`.
 cd android
 export OPENROUTER_API_KEY=...     # you type this; it is never written down
 for candidate in \
-  openai/gpt-4.1-nano@openai \
+  deepseek/deepseek-v4.1-flash@deepseek \
   google/gemini-2.5-flash-lite@google-ai-studio \
   mistralai/ministral-8b-2512@mistral; do
   out="$PWD/../docs/testing/av043/evidence/spike-$(date -u +%Y%m%d)/$(echo "$candidate" | tr '/' '_' | tr '@' '_')"

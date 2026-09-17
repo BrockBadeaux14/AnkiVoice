@@ -293,6 +293,15 @@ the public endpoints listing; the bounded spike the card requires — two or thr
 candidates on the AV-017 tuning 20 only — confirms or replaces it, and its result is
 recorded in the AV-043 results page.
 
+> **Repinned September 17, 2026, at the owner's request.** The paid model is now
+> `deepseek/deepseek-v4.1-flash` — *DeepSeek: DeepSeek V4.1 Flash* — through the endpoint
+> tag `deepseek`. The owner asked for it by name; **no grading quality was compared**, and
+> the bounded spike above is still unrecorded and still owns that question. The endpoint
+> prices by the hour — $0.15 / $0.60 per million off peak, double on weekdays 01:00–04:00
+> and 06:00–10:00 UTC — so the pin is the peak rate and the per-request ceiling is
+> **$0.0024576**, three times the previous one. Everything else in this paragraph is
+> unchanged. See [AV-043's results](../testing/av043/results.md#the-pin-moved-on-september-17-2026-at-the-owners-request).
+
 **Also corrected.** The shipped reply check compared the reply's provider *name*
 (`Liquid`) with the pinned endpoint *tag* (`liquid/fp8`) and refused every live reply of
 the free route, so AI grading was inert. Both accepted identities are now read from the

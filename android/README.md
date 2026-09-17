@@ -496,7 +496,7 @@ both the old comparison (refused) and the corrected one (accepted).
 | Route | Pin | Before a session | Before a request | After a reply |
 | --- | --- | --- | --- | --- |
 | Free | `liquid/lfm-2.5-2.6b:free` through `liquid/fp8` | Zero prices on the listing | Session and daily request limits | Pinned model, listed identity, cost exactly zero |
-| Paid | `openai/gpt-4.1-nano` through `openai`, listed at $0.10 / $0.40 per million prompt / completion tokens | The endpoint is listed at or below the pinned prices; a cap above $0; the request's ceiling fits under today's cap | The same limits, then the ceiling held against the cap | Pinned model, listed identity, a numeric `usage.cost`, which is charged |
+| Paid | `deepseek/deepseek-v4.1-flash` through `deepseek`, pinned at $0.30 / $1.20 per million prompt / completion tokens — the endpoint's **peak** rate; it charges half that off peak | The endpoint is listed at or below the pinned prices, **every time-of-day override included**; a cap above $0; the request's ceiling fits under today's cap | The same limits, then the ceiling held against the cap | Pinned model, listed identity, a numeric `usage.cost`, which is charged |
 
 The paid route is tried only after the free route is refused by its guard, unavailable for
 the session, past the 20-second deadline or failed, and after the free route has had its
@@ -508,10 +508,19 @@ another model or provider, or one reporting no cost, is refused as a label, its 
 cost (or the ceiling) is charged, and the paid route is off for the rest of the session.
 A rejected key turns both routes off; a 402 or 429 stops only the route it happened on.
 
+**Time-varying prices.** The pinned endpoint charges by the hour: $0.15 / $0.60 per million
+off peak, doubling on weekdays 01:00–04:00 and 06:00–10:00 UTC, which the listing states as
+a `pricing.overrides` array. The pin is the **peak** rate, so the pinned prices bound a
+request whenever it lands, and `priceCheck` holds **every** window to that pin rather than
+working out which one is in force — the listing is read once per session while a request may
+be sent minutes later, and a price guard that reasoned about the clock would be a second,
+disagreeing source of truth about the time. A window it cannot read refuses the route rather
+than being skipped, and the hour and weekday keys inside a window are not read as money.
+
 ### The budget
 
 `QuotaLedger` records paid reservations with a `hold` — the request's ceiling, 4,096
-prompt tokens plus 1,024 completion tokens at the pinned prices, $0.0008192 for the pinned
+prompt tokens plus 1,024 completion tokens at the pinned prices, $0.0024576 for the pinned
 model — and `charge` entries carrying the reply's reported cost. Today's spend is every
 charge recorded today plus the hold of every paid reservation made today that has no charge
 yet, so a timeout, a crash mid-flight or an unreadable reply counts at its ceiling. When a
