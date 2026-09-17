@@ -92,6 +92,19 @@ class AndroidSpeechPlatform(private val context: Context) : SpeechPlatform {
     @Volatile
     var speechRate: Float = 1f
 
+    /**
+     * Test-only observation of the raw recognizer callbacks, for AV-044's discovery of what
+     * the engine actually puts in each segment bundle. Null in production. It is told what
+     * arrived and can change nothing: the transport never sees it, its exceptions are
+     * swallowed, and no outcome depends on it.
+     */
+    fun interface RecognizerObserver {
+        fun onCallback(generation: Long, callback: String, bundle: Bundle?)
+    }
+
+    @Volatile
+    var recognizerObserver: RecognizerObserver? = null
+
     private fun ensureEngine(): TextToSpeech? {
         synchronized(this) { if (ttsReady) return tts }
         val ready = CountDownLatch(1)
@@ -295,42 +308,60 @@ class AndroidSpeechPlatform(private val context: Context) : SpeechPlatform {
             putExtra(RecognizerIntent.EXTRA_SEGMENTED_SESSION, RecognizerIntent.EXTRA_AUDIO_SOURCE)
         }
 
-    /** Translates the platform callbacks into the transport's generation-tagged ones. */
+    /**
+     * Translates the platform callbacks into the transport's generation-tagged ones. It
+     * accumulates nothing: each segment is handed over with its own score, and the
+     * transport decides what the capture's text and confidence are.
+     */
     private inner class RecognizerBridge(
         private val generation: Long,
         private val listener: RecognitionListener,
     ) : AndroidRecognitionListener {
-        private val segments = mutableListOf<String>()
-
-        override fun onReadyForSpeech(params: Bundle?) = Unit
-        override fun onBeginningOfSpeech() = Unit
+        override fun onReadyForSpeech(params: Bundle?) = observe("onReadyForSpeech", params)
+        override fun onBeginningOfSpeech() = observe("onBeginningOfSpeech", null)
         override fun onRmsChanged(rmsdB: Float) = Unit
         override fun onBufferReceived(buffer: ByteArray?) = Unit
-        override fun onEndOfSpeech() = Unit
-        override fun onEvent(eventType: Int, params: Bundle?) = Unit
+        override fun onEndOfSpeech() = observe("onEndOfSpeech", null)
+        override fun onEvent(eventType: Int, params: Bundle?) = observe("onEvent:$eventType", params)
 
         override fun onPartialResults(partialResults: Bundle?) {
+            observe("onPartialResults", partialResults)
             listener.onPartial(generation, text(partialResults))
         }
 
         override fun onSegmentResults(segmentResults: Bundle) {
-            segments += text(segmentResults)
+            observe("onSegmentResults", segmentResults)
+            listener.onSegment(generation, text(segmentResults), confidence(segmentResults))
         }
 
         override fun onEndOfSegmentedSession() {
-            listener.onFinal(generation, segments.joinToString(" ").trim(), null)
+            observe("onEndOfSegmentedSession", null)
+            listener.onEndOfSegments(generation)
         }
 
         override fun onResults(results: Bundle?) {
+            observe("onResults", results)
             listener.onFinal(generation, text(results), confidence(results))
         }
 
-        override fun onError(error: Int) = listener.onRecognizerError(generation, error)
+        override fun onError(error: Int) {
+            observe("onError:$error", null)
+            listener.onRecognizerError(generation, error)
+        }
+
+        /** Reports the raw callback to the observer, if any. It decides nothing. */
+        private fun observe(callback: String, bundle: Bundle?) {
+            val observer = recognizerObserver ?: return
+            runCatching { observer.onCallback(generation, callback, bundle) }
+        }
 
         private fun text(bundle: Bundle?): String =
             bundle?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull().orEmpty()
 
-        /** Null when the engine supplied no score, so the transport reports it as unknown. */
+        /**
+         * The score for the first hypothesis, which is the text taken above. Null when the
+         * engine supplied none, so the transport reports it as unknown rather than zero.
+         */
         private fun confidence(bundle: Bundle?): Float? =
             bundle?.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES)?.firstOrNull()
     }

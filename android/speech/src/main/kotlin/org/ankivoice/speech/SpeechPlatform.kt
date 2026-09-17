@@ -86,6 +86,18 @@ interface PlaybackListener {
 interface RecognitionListener {
     fun onPartial(generation: Long, text: String)
 
+    /**
+     * One segment of a segmented session, as the engine delivered it: its text and the
+     * first `CONFIDENCE_SCORES` entry, or null when the bundle carried none. AV-044 found
+     * the pinned engine supplies one per segment on this route. A segment never settles
+     * a capture on its own.
+     */
+    fun onSegment(generation: Long, text: String, confidence: Float?)
+
+    /** The segmented session ended: the capture is the segments delivered so far. */
+    fun onEndOfSegments(generation: Long)
+
+    /** A whole-utterance result, on a route without a segmented session. */
     fun onFinal(generation: Long, text: String, confidence: Float?)
 
     /** [code] is the raw `SpeechRecognizer.ERROR_*` value, classified by the transport. */

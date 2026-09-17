@@ -25,3 +25,5 @@ jobs:
       - run: python tools/av017-qa/validate.py
       # AV-043: the paid pin, the tuning-only spike evidence and the disclosure.
       - run: python tools/av043-qa/validate.py
+      # AV-044: every recorded discovery attempt is internally consistent.
+      - run: python tools/av044-qa/validate.py

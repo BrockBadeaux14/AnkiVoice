@@ -130,6 +130,12 @@ The pinned route always sets `EXTRA_SEGMENTED_SESSION`, so every recognition on 
 per-segment scores at all is **untested**. This is an AV-025 (#26) question, not an AV-014
 one, and it is recorded here rather than acted on.
 
+> **Resolved by AV-044 (#67), September 16, 2026.** The engine does supply
+> `CONFIDENCE_SCORES` per segment on this route, and the transport now carries the minimum
+> across the segments that contributed text; see
+> [AV-044's results](../av044/results.md). The rows above are the measurement of the build
+> as it was and are left unchanged.
+
 ### Findings about the vocabulary
 
 - `"rate good"` and `"rate easy"` were misheard as `"great good"` and `"great easy"` on

@@ -142,6 +142,15 @@ records the decision; the [runbook](docs/testing/av043/runbook.md) separates the
 suite from the live model spike, the re-recorded AV-017 pass and the pinned-AVD check,
 which need the owner's key.
 
+See [AV-044: Recognizer confidence on the segmented route](docs/testing/av044/results.md)
+for the discovery that the pinned engine supplies `CONFIDENCE_SCORES` in every segment
+bundle that carries text — measured with the owner's voice on the pinned AVD, every attempt
+kept — and for the transport change that carries the minimum across the segments that
+contributed text, so a clearly heard spoken confirm or rating can pass #15's confidence
+gate. `:core`'s classification and AV-012's answer policy are unchanged, and a score still
+never confirms anything by itself. The [runbook](docs/testing/av044/runbook.md) separates
+the offline segment rule from the discovery and the AV-014 live check.
+
 See [AV-014: Voice commands and safe navigation](android/README.md#voice-commands-and-safe-navigation)
 for the command vocabulary over that loop: context-only disambiguation with no wake word and
 no keyword stripping, a confidence gate on the commands that advance, reveal or rate, a pause
