@@ -292,7 +292,9 @@ private fun CommandCard(state: CommandState, commands: CommandController, deckSe
                 OutlinedButton(onClick = commands::startAnswer, enabled = !state.busy && state.running) {
                     Text("Start answer")
                 }
-                OutlinedButton(onClick = commands::finishAnswer, enabled = !state.busy && state.capturing) {
+                // Done is the control that ends a capture, so it stays live while one is in
+                // flight — the session thread is busy inside exactly that capture.
+                OutlinedButton(onClick = commands::finishAnswer, enabled = state.answering) {
                     Text("Done")
                 }
                 OutlinedButton(onClick = commands::grade, enabled = !state.busy && state.gradable) { Text("Grade") }

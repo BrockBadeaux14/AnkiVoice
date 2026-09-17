@@ -375,6 +375,11 @@ class AnswerTurn(
         captureEndedMs = minOf(now, expiresAtMs)
         stoppedBy = if (now >= expiresAtMs) CaptureStop.WINDOW_EXPIRY else stop
         phase = AnswerPhase.FINALIZING
+        // Whatever ended the window — Done or its expiry — the microphone ends with it.
+        // The attempt stays alive, so this is not a cancel: the recognizer keeps until the
+        // finalization deadline to produce its final. Without this the stop never left
+        // this class, and a transport blocked inside a capture never heard about Done.
+        token?.let { speech.finishAnswer(it) }
     }
 
     private fun transcript(event: CaptureEvent.Transcript): Answer? = when (event.kind) {

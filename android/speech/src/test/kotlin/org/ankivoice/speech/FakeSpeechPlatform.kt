@@ -2,6 +2,7 @@ package org.ankivoice.speech
 
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -46,6 +47,16 @@ class FakeSpeechPlatform : SpeechPlatform {
     var playbackEnqueues = true
     var playback: Playback = Playback.Done
     var captureOpens = true
+
+    /**
+     * Holds [startCapture] until [releaseCaptureOpen], the way a device with wedged audio
+     * input holds the real one. The transport's capture-open deadline is what ends it.
+     */
+    var captureOpenBlocks = false
+    private val openGate = CountDownLatch(1)
+
+    /** Lets a blocked open finish, so a test can see what happens to a late stream. */
+    fun releaseCaptureOpen() = openGate.countDown()
 
     /** Delivered when the capture pipe closes, as the real segmented session does. */
     var recognition: Recognition = Recognition.Final("green blue red")
@@ -96,6 +107,8 @@ class FakeSpeechPlatform : SpeechPlatform {
     ): CaptureStream? {
         captureStarts.incrementAndGet()
         languages += language
+        // Bounded so a failing test cannot hang the suite; the transport gives up first.
+        if (captureOpenBlocks && !openGate.await(5, TimeUnit.SECONDS)) return null
         if (!captureOpens) return null
         this.listener = listener
         this.generation = generation

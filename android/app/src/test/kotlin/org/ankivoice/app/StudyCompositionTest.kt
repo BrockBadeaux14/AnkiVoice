@@ -98,7 +98,17 @@ class StudyCompositionTest {
                     sessionId = "study",
                 )
                 session = opened
-                Result.success(CommandSession(opened, CommandRouter(opened, speechInput), grader, revision) {})
+                Result.success(
+                    CommandSession(
+                        session = opened,
+                        router = CommandRouter(opened, speechInput),
+                        grader = grader,
+                        revision = revision,
+                        speech = speechInput,
+                        language = "en-US",
+                        release = {},
+                    ),
+                )
             },
             direct,
             direct,
@@ -115,10 +125,11 @@ class StudyCompositionTest {
         controller.onForegroundEvent(ForegroundEvent.RESUME)
         controller.start()
         controller.ask()
+        // Start answer runs the capture itself, so the answer is scripted for the
+        // transport rather than delivered to the session by hand.
+        speechInput.script.addLast(FakeSpeechInput.Say(spoken))
         controller.startAnswer()
         val open = checkNotNull(session)
-        val token = checkNotNull(open.answerTurn?.token)
-        open.acceptCapture(CaptureEvent.Transcript(token, spoken, confidence = Confidence.SUFFICIENT))
         assertEquals(SessionState.GRADING, open.state)
         return open
     }

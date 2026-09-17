@@ -15,10 +15,12 @@ import org.ankivoice.core.contracts.Grader
 import org.ankivoice.core.contracts.GraderFailure
 import org.ankivoice.core.contracts.GradingReply
 import org.ankivoice.core.contracts.GradingResult
+import org.ankivoice.core.contracts.OperationToken
 import org.ankivoice.core.contracts.QueueExhausted
 import org.ankivoice.core.contracts.ReviewOutcome
 import org.ankivoice.core.contracts.ScheduledCard
 import org.ankivoice.core.session.Event
+import org.ankivoice.core.contracts.SpeechInput
 import org.ankivoice.core.session.Interruption
 import org.ankivoice.core.session.ReviewSession
 import org.ankivoice.core.session.SessionResult
@@ -40,6 +42,12 @@ internal class CommandSession(
     val router: CommandRouter,
     val grader: Grader,
     val revision: AtomicInteger = AtomicInteger(),
+    /**
+     * The same transport the session holds. Done crosses threads to reach it, because the
+     * session is confined to the thread the capture is blocking.
+     */
+    val speech: SpeechInput,
+    val language: String,
     val release: () -> Unit,
 )
 
@@ -63,6 +71,11 @@ internal data class CommandState(
     /** Those a spoken command could run right now. Empty inside the answer window. */
     val spokenAvailable: List<VoiceCommand> = emptyList(),
     val cardId: Long? = null,
+    /**
+     * True while the transport holds an attempt. Done is the control that ends it, so Done
+     * stays enabled on this snapshot even though the session thread is busy inside it.
+     */
+    val answering: Boolean = false,
     /** What the last command told the learner, in AV-014's own words. */
     val notice: String? = null,
     val failure: Failure? = null,
@@ -131,6 +144,20 @@ internal class CommandController(
 
     /** Touched only on [worker]. */
     private var open: CommandSession? = null
+
+    /**
+     * The attempt Done stops, or null when none is in flight. Written on [worker] around
+     * the blocking capture and read on the main thread, so it is volatile.
+     */
+    @Volatile
+    private var capture: ActiveCapture? = null
+
+    /** Set by a Done on the main thread, read and cleared on [worker] when the capture ends. */
+    @Volatile
+    private var stoppedByOperator = false
+
+    /** The generation of the action [worker] is running, so it can publish mid-action. */
+    private var actionToken = 0L
 
     /**
      * Why the last [start] opened no session. Touched only on [worker], and cleared by the
@@ -216,17 +243,31 @@ internal class CommandController(
         }
     }
 
-    /** The explicit Start answer. Thinking time before it is unbounded. */
+    /**
+     * The explicit Start answer. Thinking time before it is unbounded.
+     *
+     * It opens AV-012's window **and** the microphone: AV-025 defines the call to `listen`
+     * as this touch, and opening the window alone left the surface saying it was capturing
+     * while nothing had asked the transport for anything. The capture then blocks [worker]
+     * for the whole attempt, exactly as playback does, so the open window is published
+     * before it blocks and [finishAnswer] reaches the transport without queueing behind it.
+     */
     fun startAnswer() = act("startAnswer") { current ->
-        val session = current?.session ?: return@act "Start a session first."
-        session.startAnswer()
-        "Listening for your answer. Command words spoken now are part of the answer."
-    }
-
-    /** The explicit Done. It stops the microphone; it is not a verdict about the answer. */
-    fun finishAnswer() = act("finishAnswer") { current ->
-        val session = current?.session ?: return@act "Start a session first."
-        when (val settled = session.finishAnswer()) {
+        val open = current ?: return@act "Start a session first."
+        val token = open.session.startAnswer()
+        capture = ActiveCapture(open.speech, token)
+        publish(open, actionToken, LISTENING_NOTICE, busy = true)
+        val event = try {
+            open.speech.listen(token, open.language)
+        } finally {
+            capture = null
+        }
+        // An operator Done is recorded as AV-012's Done rather than as a window expiry.
+        if (stoppedByOperator) {
+            stoppedByOperator = false
+            open.session.finishAnswer()
+        }
+        when (val settled = open.session.acceptCapture(event)) {
             is SessionResult.Produced -> "Answer settled as ${settled.value.status.specName}."
             is SessionResult.Halted -> "Paused: ${settled.halt.reason}."
             SessionResult.Ignored -> "That capture belonged to an earlier attempt."
@@ -262,6 +303,30 @@ internal class CommandController(
             }
         }
         "Grading this answer: on-device rules first, the AI route only if no rule matches."
+    }
+
+    /**
+     * The explicit Done. It stops the microphone; it is not a verdict about the answer.
+     *
+     * With an attempt in flight it goes straight to the transport, which accepts a stop
+     * from any thread. Queued behind the capture it would be dropped by the busy gate and
+     * do nothing at all, which is what made Done look broken. The turn settles on [worker]
+     * as soon as the capture returns, and that is what repaints the surface.
+     */
+    fun finishAnswer() {
+        capture?.let { active ->
+            stoppedByOperator = true
+            active.speech.finishAnswer(active.token)
+            return
+        }
+        act("finishAnswer") { current ->
+            val session = current?.session ?: return@act "Start a session first."
+            when (val settled = session.finishAnswer()) {
+                is SessionResult.Produced -> "Answer settled as ${settled.value.status.specName}."
+                is SessionResult.Halted -> "Paused: ${settled.halt.reason}."
+                SessionResult.Ignored -> "That capture belonged to an earlier attempt."
+            }
+        }
     }
 
     // -- the commands ----------------------------------------------------------- //
@@ -339,6 +404,7 @@ internal class CommandController(
         val token = ++generation
         publish(state.copy(busy = true))
         worker.execute {
+            actionToken = token
             val notice = try {
                 action(open)
             } catch (e: IllegalStateException) {
@@ -350,15 +416,22 @@ internal class CommandController(
         }
     }
 
-    /** Read the turn on the session thread; publish the immutable snapshot on the main one. */
-    private fun publish(current: CommandSession?, token: Long, notice: String?) {
+    /**
+     * Read the turn on the session thread; publish the immutable snapshot on the main one.
+     *
+     * [busy] stays true for a snapshot published from inside an action that has not
+     * finished — an open capture is the one that matters — so the surface reports the turn
+     * without offering controls the blocked session thread could not run.
+     */
+    private fun publish(current: CommandSession?, token: Long, notice: String?, busy: Boolean = false) {
         val session = current?.session
         val router = current?.router
         // The grading worker reads this to abandon a retry across an edit.
         session?.let { current.revision.set(it.transcriptRevision) }
         val turn = CommandState(
             running = current != null,
-            busy = false,
+            busy = busy,
+            answering = capture != null,
             sessionState = session?.state?.specName,
             answerPhase = session?.answerTurn?.phase?.specName ?: session?.let { AnswerPhase.THINKING.specName },
             context = router?.context() ?: CommandContext.UNAVAILABLE,
@@ -422,6 +495,13 @@ internal class CommandController(
         SessionResult.Ignored -> "That grade belonged to an earlier answer, so it was dropped."
     }
 }
+
+/** What the surface says while the microphone is open, before the attempt settles. */
+private const val LISTENING_NOTICE =
+    "Listening for your answer. Command words spoken now are part of the answer."
+
+/** One capture in flight: what to stop, and which attempt to stop. */
+private class ActiveCapture(val speech: SpeechInput, val token: OperationToken)
 
 /** Why no session could open. Carries AV-007's failure rather than a message alone. */
 internal class CommandSessionUnavailable(val failure: Failure) :

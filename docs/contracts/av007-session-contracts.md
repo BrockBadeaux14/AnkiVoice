@@ -163,6 +163,7 @@ Captures one spoken answer.
 | Operation | Input | Output |
 | --- | --- | --- |
 | `listen` | capture token, language tag | `CaptureEvent(token, kind, text, confidence, failure?)` |
+| `finishAnswer` | capture token | AV-012's Done: the microphone stops, the attempt lives on until its final or its deadline. Called from another thread, because `listen` blocks for the whole attempt |
 | `cancel` | capture token | idempotent cleanup; later events are ignored |
 
 Failures: `permissionDenied`, `recognizerUnavailable`, `recognizerError`,

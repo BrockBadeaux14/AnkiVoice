@@ -6,6 +6,7 @@ import org.ankivoice.core.commands.CommandRouter
 import org.ankivoice.core.commands.VoiceCommand
 import org.ankivoice.core.contracts.*
 import org.ankivoice.core.fakes.*
+import org.ankivoice.core.answer.CaptureStop
 import org.ankivoice.core.session.ReviewSession
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -22,7 +23,30 @@ class CommandControllerTest {
     private val transport = FakeReviewTransport(collection)
     private val capabilities = Capabilities(maxReviewTimeMs = collection.maxReviewTimeMs)
     private val speechOutput = FakeSpeechOutput()
-    private val speechInput = FakeSpeechInput(FakeSpeechInput.Say("Five blocks."))
+
+    /** Every snapshot the surface published while the microphone was open. */
+    private val duringCapture = mutableListOf<CommandState>()
+
+    /** What the operator does mid-capture. The transport blocks there, so tests act there. */
+    private var whileListening: () -> Unit = {}
+
+    /** The transport blocks inside `listen`; this watches the surface from in there. */
+    private inner class ObservedSpeechInput : FakeSpeechInput(FakeSpeechInput.Say("Five blocks.")) {
+        var listened: OperationToken? = null
+
+        /** Stops that arrived before the capture returned; a dropped Done leaves it empty. */
+        var stoppedWhileOpen: List<OperationToken> = emptyList()
+
+        override fun listen(token: OperationToken, language: String): CaptureEvent {
+            listened = token
+            duringCapture += controller.state
+            whileListening()
+            stoppedWhileOpen = stopped.toList()
+            return super.listen(token, language)
+        }
+    }
+
+    private val speechInput: ObservedSpeechInput = ObservedSpeechInput()
     private val grader = FakeGrader(FakeGrader.Answer(GradingResult(GradeLabel.CORRECT, "matched")))
     private var released = 0
 
@@ -48,7 +72,14 @@ class CommandControllerTest {
         {
             failure?.let { return@CommandController Result.failure(CommandSessionUnavailable(it)) }
             Result.success(
-                CommandSession(session, CommandRouter(session, speechInput), grader) { released += 1 },
+                CommandSession(
+                    session = session,
+                    router = CommandRouter(session, speechInput),
+                    grader = grader,
+                    speech = speechInput,
+                    language = "en-US",
+                    release = { released += 1 },
+                ),
             )
         },
         direct,
@@ -110,20 +141,56 @@ class CommandControllerTest {
         assertTrue(wroteNothing)
     }
 
+    /**
+     * Start answer is the call to `listen`, not a window opened beside it. Opening the
+     * window alone left the surface reporting a capture that nothing had asked for, and no
+     * microphone was ever opened.
+     */
+    @Test
+    fun `Start answer opens the microphone for the session language`() {
+        started()
+        controller.ask()
+        controller.startAnswer()
+
+        assertEquals(listOf("en-US"), speechInput.languages)
+        assertEquals(session.answerTurn?.token, speechInput.listened)
+        assertTrue(wroteNothing)
+    }
+
     @Test
     fun `the answer window is visible and offers no spoken command`() {
         started()
         controller.ask()
         controller.startAnswer()
 
-        val state = controller.state
+        // The window as the surface showed it while the microphone was open, not after.
+        val state = duringCapture.single()
         assertTrue(state.capturing)
+        assertTrue(state.answering, "Done had no attempt to stop")
         assertEquals(CommandContext.ANSWER, state.context)
         assertEquals("capturing", state.answerPhase)
         assertEquals(emptyList<VoiceCommand>(), state.spokenAvailable)
         // Touch is still the fallback: pause and skip remain reachable by button.
         assertTrue(VoiceCommand.PAUSE in state.available)
         assertTrue(VoiceCommand.SKIP in state.available)
+        assertTrue(wroteNothing)
+    }
+
+    /**
+     * Done, pressed while the microphone is open. The transport blocks inside `listen` for
+     * the whole attempt, so the touch has to reach it there: queued behind the capture it
+     * is dropped by the busy gate, and the attempt runs on to its window expiry with the
+     * learner watching nothing happen.
+     */
+    @Test
+    fun `Done reaches the transport while the capture is open`() {
+        whileListening = { controller.finishAnswer() }
+        started()
+        controller.ask()
+        controller.startAnswer()
+
+        assertEquals(listOf(speechInput.listened), speechInput.stoppedWhileOpen)
+        assertEquals(CaptureStop.DONE, session.answerTurn?.answer?.stoppedBy)
         assertTrue(wroteNothing)
     }
 
@@ -180,11 +247,9 @@ class CommandControllerTest {
     fun `no control on the surface writes a review`() {
         started()
         controller.ask()
+        // Start answer settles the attempt on the fake's recognizer final, so the ratings
+        // go live and a confirmation becomes possible. The surface never fabricates one.
         controller.startAnswer()
-        // Settle the attempt with a recognizer final, so the ratings go live and a
-        // confirmation becomes possible. The surface never fabricates one.
-        val token = checkNotNull(session.answerTurn?.token)
-        session.acceptCapture(CaptureEvent.Transcript(token, "Five blocks.", confidence = Confidence.SUFFICIENT))
         session.grade()
         controller.run(VoiceCommand.RATE_GOOD)
         assertEquals("proposing", controller.state.sessionState)

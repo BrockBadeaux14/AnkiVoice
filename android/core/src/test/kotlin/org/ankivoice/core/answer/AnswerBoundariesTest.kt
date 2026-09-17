@@ -126,6 +126,28 @@ class AnswerBoundariesTest {
         assertEquals(emptyList<String>(), speech.languages)
     }
 
+    /**
+     * Done has to leave this class. The transport blocks inside one `listen` for the whole
+     * attempt, so a stop that only moved AV-012's own phase left the microphone running and
+     * the learner watching nothing happen until the window ran out.
+     */
+    @Test
+    fun `Done and window expiry both stop the microphone through the contract`() {
+        val done = turn()
+        val doneToken = done.startAnswer()
+        clock.advance(2_000)
+        done.done()
+        assertEquals(listOf(doneToken), speech.stopped)
+        // A stop is not a cancel: the attempt lives on until its final or its deadline.
+        assertEquals(emptyList<OperationToken>(), speech.cancelled)
+
+        val expired = turn()
+        val expiredToken = expired.startAnswer()
+        clock.advance(15_000)
+        assertNull(expired.poll())
+        assertEquals(listOf(doneToken, expiredToken), speech.stopped)
+    }
+
     // Window expiry
 
     @Test

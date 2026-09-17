@@ -480,6 +480,15 @@ class SpeechInput(Protocol):
 
     def listen(self, token: OperationToken, language: str) -> CaptureEvent: ...
 
+    def finish_answer(self, token: OperationToken) -> None:
+        """AV-012's Done: stop the microphone and let the recognizer finish.
+
+        Not a cancel and not a verdict — the attempt stays alive until its final
+        arrives or its deadline expires. ``listen`` blocks for the whole attempt,
+        so this is called from another thread and every binding must accept that.
+        Idempotent; a call for an attempt that is not capturing does nothing.
+        """
+
     def cancel(self, token: OperationToken) -> None: ...
 
 

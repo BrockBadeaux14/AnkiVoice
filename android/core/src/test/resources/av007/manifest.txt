@@ -3,7 +3,7 @@
 # Regenerate with: python tools/av041_manifest.py --write
 contract CardProvider capabilities nextCard readCard
 contract SpeechOutput speak cancel
-contract SpeechInput listen cancel
+contract SpeechInput listen finishAnswer cancel
 contract Grader grade cancel
 contract ReviewWriter commit
 failure CardProvider accessDenied
