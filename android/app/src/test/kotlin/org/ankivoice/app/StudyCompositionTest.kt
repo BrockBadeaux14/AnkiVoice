@@ -5,7 +5,6 @@ import java.math.BigDecimal
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicInteger
 import org.ankivoice.core.answer.AnswerRecovery
-import org.ankivoice.core.commands.CommandRouter
 import org.ankivoice.core.commands.VoiceCommand
 import org.ankivoice.core.contracts.*
 import org.ankivoice.core.exchange.PrecommitExchange
@@ -61,7 +60,8 @@ class StudyCompositionTest {
     }
 
     private val collection = demoCollection()
-    private val cardProvider = FakeCardProvider(collection)
+    private val fakeProvider = FakeCardProvider(collection)
+    private val cardProvider = StudiableCardProvider(fakeProvider, "en-US")
     private val transport = FakeReviewTransport(collection)
     private val capabilities = Capabilities(maxReviewTimeMs = collection.maxReviewTimeMs)
     private val speechInput = FakeSpeechInput()
@@ -86,7 +86,7 @@ class StudyCompositionTest {
     private var session: ReviewSession? = null
 
     private val controller by lazy {
-        CommandController(
+        StudyController(
             {
                 created += 1
                 val revision = AtomicInteger()
@@ -113,13 +113,13 @@ class StudyCompositionTest {
                 opening = opened
                 session = opened
                 Result.success(
-                    CommandSession(
+                    StudySession(
                         session = opened,
-                        router = CommandRouter(opened, speechInput),
                         grader = grader,
                         exchange = PrecommitExchange(opened, speechOutput),
                         revision = revision,
                         gradingSource = grader::sourceOf,
+                        gradingRoute = grader::routeOf,
                         speech = speechInput,
                         language = "en-US",
                         partial = { null },
@@ -131,7 +131,8 @@ class StudyCompositionTest {
             direct,
             Executor { runnable -> gradingWorker.execute(runnable) },
             gate,
-        ) { cardProvider }
+            { cardProvider },
+        ) { sessionId -> journal.entries().filter { it.sessionId == sessionId } }
     }
 
     private val wroteNothing: Boolean get() = transport.calls.isEmpty() && collection.reviews.isEmpty()
@@ -146,9 +147,7 @@ class StudyCompositionTest {
         // transport rather than delivered to the session by hand.
         speechInput.script.addLast(FakeSpeechInput.Say(spoken))
         controller.startAnswer()
-        val open = checkNotNull(session)
-        assertEquals(SessionState.GRADING, open.state)
-        return open
+        return checkNotNull(session)
     }
 
     private fun gradingReady() {
@@ -163,8 +162,6 @@ class StudyCompositionTest {
         settings.dailyLimit = 0
         val open = answered("Five blocks.")
         val cardId = open.card?.identity?.cardId
-
-        controller.grade()
 
         // AV-019 opens the exchange on the rule's rating, which is where #14's advisory
         // suggestion goes: propose() invalidates it, so the announcement is what carries
@@ -183,8 +180,6 @@ class StudyCompositionTest {
         val open = answered("It is a mix of several things")
         val cardId = open.card?.identity?.cardId
 
-        controller.grade()
-
         assertEquals(SessionState.PAUSED, open.state)
         assertTrue(open.lastFailure?.mode is GraderFailure, "${open.lastFailure}")
         assertNull(open.suggestion, "a failure is never a label")
@@ -202,8 +197,6 @@ class StudyCompositionTest {
         credentials.save(key)
         val open = answered("It is a mix of several things")
 
-        controller.grade()
-
         assertEquals(SessionState.PAUSED, open.state)
         assertNull(open.suggestion)
         assertEquals(0, reserved)
@@ -218,8 +211,6 @@ class StudyCompositionTest {
         ledger.stop(LedgerStop.ROUTE_REFUSED)
         val open = answered("It is a mix of several things")
         val cardId = open.card?.identity?.cardId
-
-        controller.grade()
 
         assertEquals(SessionState.PAUSED, open.state)
         assertEquals(GraderFailure.QUOTA_EXHAUSTED, open.lastFailure?.mode)
@@ -238,19 +229,25 @@ class StudyCompositionTest {
         gradingWorker = Executor { held.addLast(it) }
         val open = answered("Five blocks.")
 
-        controller.grade()
-        assertTrue(controller.state.grading)
+        assertTrue(controller.state.gradingInFlight)
         assertEquals(1, held.size, "grading waits on its own worker")
         assertNull(open.suggestion, "nothing is graded on the session thread")
 
-        // The learner edits the transcript while the reply is still on its way.
-        open.correctTranscript("Six blocks.")
-        while (held.isNotEmpty()) held.removeFirst().run()
+        // The learner edits the transcript while the reply is still on its way. The edit
+        // withdraws the request on the grading worker; it does not open a second one.
+        controller.editTranscript("Six blocks.")
+        assertEquals(2, held.size, "the edit did something other than withdraw the first request")
+        held.removeFirst().run()
 
         assertNull(open.suggestion, "a reply for the earlier revision is dropped")
-        assertEquals(SessionState.GRADING, open.state)
         assertTrue(open.events.any { it.step == "stale_grade" })
-        assertFalse(controller.state.grading)
+        // The replaced revision is graded in its turn: a rule miss with no key pauses for a self-grade.
+        assertEquals(2, held.size, "the new revision was not graded after the stale reply")
+        while (held.isNotEmpty()) held.removeFirst().run()
+        assertEquals(SessionState.PAUSED, open.state)
+        assertTrue(open.lastFailure?.mode is GraderFailure, "${open.lastFailure}")
+        assertEquals(2, controller.state.grading?.revision)
+        assertFalse(controller.state.gradingInFlight)
         assertTrue(wroteNothing)
     }
 
@@ -291,12 +288,12 @@ class StudyCompositionTest {
         controller.onForegroundEvent(ForegroundEvent.RESUME)
         controller.start()
         assertTrue(controller.state.running)
-        val reads = cardProvider.reads.size
+        val reads = fakeProvider.reads.size
 
         var again: JournalReport? = null
         gate.open({ error("a reconciled gate does not re-read the journalled card") }) { again = it }
         assertFalse(checkNotNull(again).blocking)
-        assertEquals(reads, cardProvider.reads.size)
+        assertEquals(reads, fakeProvider.reads.size)
     }
 
     /**
@@ -309,7 +306,6 @@ class StudyCompositionTest {
         gradingReady()
         settings.dailyLimit = 0
         val open = answered("Five blocks.")
-        controller.grade()
         assertEquals("rule", controller.state.ratingSource, "the rule route was not named")
         assertEquals(3, controller.state.pendingRating)
         assertTrue(journal.entries().isEmpty(), "a pending rating was journalled")
@@ -335,14 +331,15 @@ class StudyCompositionTest {
         gradingReady()
         settings.dailyLimit = 0
         val open = answered("Five blocks.")
-        controller.grade()
         controller.run(VoiceCommand.RATE_GOOD)
         controller.run(VoiceCommand.CHANGE)
         controller.run(VoiceCommand.RATE_HARD)
         assertEquals(ReviewState.PENDING, open.intent?.state)
 
         for (command in VoiceCommand.entries - VoiceCommand.CONFIRM) controller.run(command)
-        controller.grade()
+        controller.rate(4)
+        controller.editTranscript("Five blocks.")
+        controller.retry()
         controller.stop()
 
         assertTrue(wroteNothing, "a composed path other than Confirm reached the writer")
@@ -367,7 +364,6 @@ class StudyCompositionTest {
         settings.dailyLimit = 0
         transport.anomalies.addLast(WriteAnomaly.ACKNOWLEDGE_WITHOUT_WRITE)
         val open = answered("Five blocks.")
-        controller.grade()
 
         controller.run(VoiceCommand.CONFIRM)
 
@@ -427,17 +423,38 @@ class StudyCompositionTest {
     }
 
     @Test
+    fun `a confirmed turn on the study screen leaves no card content or transcript in diagnostics`() {
+        gradingReady()
+        settings.dailyLimit = 0
+        val open = answered("Five blocks.")
+        controller.run(VoiceCommand.CONFIRM)
+        assertEquals(1, transport.calls.size)
+
+        var evidence: StudyEvidence? = null
+        controller.evidence { evidence = it }
+        val recorded = checkNotNull(evidence)
+        assertEquals("touch", recorded.turns.single().confirmationSource)
+        assertEquals(1, recorded.journal.size)
+        val prompt = checkNotNull(open.card).fields.prompt
+        diagnostics.entries().forEach { entry ->
+            assertFalse(entry.toString().contains("Five blocks"), "$entry")
+            assertFalse(entry.toString().contains(prompt), "$entry")
+        }
+        assertTrue(diagnostics.retainedContent().isEmpty())
+    }
+
+    @Test
     fun `events and outcomes are reachable and no card content reaches diagnostics`() {
         val open = answered("It is a mix of several things")
-        controller.grade()
 
-        var evidence: SessionEvidence? = null
+        var evidence: StudyEvidence? = null
         controller.evidence { evidence = it }
         val recorded = checkNotNull(evidence)
         assertEquals("study", recorded.sessionId)
         assertEquals(open.events, recorded.events)
         assertEquals(open.outcomes, recorded.outcomes)
         assertTrue(recorded.events.any { it.detail.contains("mix of several things") }, "the evidence keeps the turn")
+        assertEquals(GradingRecord.UNAVAILABLE, recorded.turns.single().gradingPath)
 
         val prompt = checkNotNull(open.card).fields.prompt
         diagnostics.entries().forEach { entry ->

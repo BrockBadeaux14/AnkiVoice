@@ -32,7 +32,8 @@ failure each writing nothing with no timeout path, a transcript edit invalidatin
 pending rating and the confirmation collected for it, the three outcome classes, the
 learner-reported reconcile and the Undo handoff.
 
-`:app:testDebugUnitTest` runs `CommandControllerTest` and `StudyCompositionTest`: the
+`:app:testDebugUnitTest` runs `StudyControllerTest` (renamed from `CommandControllerTest` by
+AV-026) and `StudyCompositionTest`: the
 surface fields the announcement produces, the outcome controls, the abstain path through
 the self-grade control, and — the wiring this card had to add — a confirmed rating
 journalled before the write and settled from the outcome, with the settled transcript

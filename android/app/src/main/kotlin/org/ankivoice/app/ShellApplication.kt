@@ -8,16 +8,14 @@ import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 import org.ankivoice.ankidroid.AndroidAccessPlatform
-import org.ankivoice.ankidroid.AnkiDroidCardProvider
 import org.ankivoice.ankidroid.AnkiDroidAccess
+import org.ankivoice.ankidroid.AnkiDroidCardProvider
 import org.ankivoice.ankidroid.AnkiDroidProvisioning
 import org.ankivoice.ankidroid.AnkiDroidReviewTransport
-import org.ankivoice.core.commands.CommandRouter
 import org.ankivoice.core.contracts.Capabilities
 import org.ankivoice.core.contracts.CardProviderFailure
 import org.ankivoice.core.contracts.Failure
 import org.ankivoice.core.contracts.ForegroundEventPort
-import org.ankivoice.core.contracts.Grader
 import org.ankivoice.core.contracts.GuardedReviewWriter
 import org.ankivoice.core.contracts.ReviewOutcome
 import org.ankivoice.core.contracts.ReviewWriter
@@ -40,15 +38,15 @@ class ShellApplication : Application() {
     internal lateinit var provider: ProviderController
         private set
 
-    /** AV-014's debug-grade command surface. #27 replaces it with the real study screen. */
-    internal lateinit var commands: CommandController
+    /** The study surface's controller: one real session over the real collection and transport. */
+    internal lateinit var study: StudyController
         private set
 
     /** Both controllers see every foreground change; neither may miss one. */
     internal val foregroundEvents: ForegroundEventPort
         get() = ForegroundEventPort { event ->
             controller.onForegroundEvent(event)
-            commands.onForegroundEvent(event)
+            study.onForegroundEvent(event)
         }
 
     override fun onCreate() {
@@ -72,7 +70,7 @@ class ShellApplication : Application() {
         // session can open, so the two workers never race for the same entry.
         val reviewJournal = JournalModule.journal(filesDir)
         val journal = JournalAccess(reviewJournal, journalWorker, mainExecutor)
-        // AV-045: one reconciliation gate for the process. The readiness preview and the
+        // AV-045: one reconciliation gate for the process. The readiness check and the
         // study session both go through it, so neither can offer a card around the other.
         val gate = ReconciliationGate(journal, UUID.randomUUID().toString())
         val cards = { settingsStore.selectedDeckId?.let { AnkiDroidCardProvider(platform, it, worker, mainExecutor) } }
@@ -94,14 +92,14 @@ class ShellApplication : Application() {
             worker, mainExecutor,
             gate,
         ) { deckId -> AnkiDroidCardProvider(platform, deckId, worker, mainExecutor) }
-        // AV-014: the command surface drives a real session on a thread of its own, because
+        // AV-026: the study surface drives a real session on a thread of its own, because
         // AV-025's transport blocks its caller for the whole of playback and capture.
-        commands = CommandController(
-            CommandSessionFactory {
+        study = StudyController(
+            StudySessionFactory {
                 // A fresh GradingProvider per session: #17 holds a refused key or route
                 // for the rest of the session and clears it only at the next one.
                 val grading = ProviderModule.grading(credentials, ledger, providerSettings, diagnostics)
-                commandSession(
+                studySession(
                     platform, settingsStore, worker, mainExecutor, applicationContext, reviewJournal,
                 ) { sessionId, revision -> StudyGrader(grading, sessionId, revision, providerWorker) }
             },
@@ -110,7 +108,7 @@ class ShellApplication : Application() {
             providerWorker,
             gate,
             cards,
-        )
+        ) { sessionId -> reviewJournal.entries().filter { it.sessionId == sessionId } }
         provider = ProviderController(
             credentials,
             providerSettings,
@@ -128,12 +126,16 @@ class ShellApplication : Application() {
  * One study session over the real collection, the real AV-025 transport and AV-045's
  * grader: #16's rules on device, then #18's semantic grader on a rule miss.
  *
- * AV-019 completes the write path it was left to wire. The real guarded writer is wrapped
- * in AV-018's [JournaledReviewWriter], so the one place a review can be written journals
- * the intent and flushes it **before** the single dispatch and settles the entry from the
- * outcome that writer returned. Nothing else changes: the guarded writer still performs
- * the pre-commit reads, the single dispatch and the verification, and AV-019 performs no
- * write, re-read or verification of its own.
+ * The card provider is wrapped in AV-010's [StudiableCardProvider], so an unstudiable card
+ * is announced and skipped in memory rather than halting the session, and five in a row
+ * stop it with the recorded summary.
+ *
+ * AV-019 completes the write path. The real guarded writer is wrapped in AV-018's
+ * [JournaledReviewWriter], so the one place a review can be written journals the intent
+ * and flushes it **before** the single dispatch and settles the entry from the outcome
+ * that writer returned. The guarded writer still performs the pre-commit reads, the single
+ * dispatch and the verification, and nothing here performs a write, re-read or
+ * verification of its own.
  *
  * [SettledTranscripts] is the composition root's job because AV-012 owns transcript state
  * and AV-013 owns the turn: the journal may not reach into either. It hands back this
@@ -141,7 +143,7 @@ class ShellApplication : Application() {
  * computed from, and an empty string otherwise, so a superseded revision's text can never
  * be journalled against a newer rating.
  */
-private fun commandSession(
+private fun studySession(
     platform: AndroidAccessPlatform,
     settings: ShellSettings,
     worker: Executor,
@@ -149,14 +151,15 @@ private fun commandSession(
     context: Context,
     journal: ReviewJournal,
     grader: (sessionId: String, revision: AtomicInteger) -> StudyGrader,
-): Result<CommandSession> {
+): Result<StudySession> {
     val deckId = settings.selectedDeckId
-        ?: return Result.failure(CommandSessionUnavailable(Failure(CardProviderFailure.DECK_MISSING, "no deck is selected")))
-    val provider = AnkiDroidCardProvider(platform, deckId, worker, delivery)
-    val capabilities = provider.capabilities()
+        ?: return Result.failure(StudySessionUnavailable(Failure(CardProviderFailure.DECK_MISSING, "no deck is selected")))
+    val cards = AnkiDroidCardProvider(platform, deckId, worker, delivery)
+    val capabilities = cards.capabilities()
     if (capabilities !is Capabilities) {
-        return Result.failure(CommandSessionUnavailable(capabilities as Failure))
+        return Result.failure(StudySessionUnavailable(capabilities as Failure))
     }
+    val provider = StudiableCardProvider(cards, settings.language)
     val speech = SpeechModule.create(context)
     val sessionId = UUID.randomUUID().toString()
     val revision = AtomicInteger()
@@ -179,16 +182,18 @@ private fun commandSession(
     )
     opened = session
     return Result.success(
-        CommandSession(
+        StudySession(
             session = session,
-            router = CommandRouter(session, speech),
             grader = studyGrader,
             exchange = PrecommitExchange(session, speech),
             revision = revision,
             gradingSource = studyGrader::sourceOf,
+            gradingRoute = studyGrader::routeOf,
             speech = speech,
             language = settings.language,
             partial = speech::lastPartial,
+            rawConfidence = speech::lastConfidence,
+            skips = provider::report,
             release = speech::releaseAll,
         ),
     )
