@@ -22,12 +22,23 @@ class FakeSpeechPlatform : SpeechPlatform {
     }
 
     sealed interface Recognition {
+        /** A whole-utterance result: the non-segmented `onResults` path. */
         data class Final(val text: String, val confidence: Float? = null) : Recognition
+
+        /**
+         * The pinned route: each segment with its own score (or none), then the end of the
+         * segmented session — or, with [thenError], a fault after the segments instead.
+         */
+        data class Segments(val segments: List<Segment>, val thenError: Int? = null) : Recognition
+
         data class Error(val code: Int) : Recognition
 
         /** Never calls back, so the finalization deadline can expire. */
         data object Silent : Recognition
     }
+
+    /** One segment as the engine would deliver it. A null score is a bundle without one. */
+    data class Segment(val text: String, val confidence: Float? = null)
 
     var voice: VoiceResolution = VoiceResolution.Resolved(SpeechPins.TTS_VOICE)
     var recognizer: RecognizerResolution = RecognizerResolution.Resolved
@@ -97,9 +108,28 @@ class FakeSpeechPlatform : SpeechPlatform {
     private fun deliver(generation: Long, listener: RecognitionListener) {
         when (val step = recognition) {
             is Recognition.Final -> listener.onFinal(generation, step.text, step.confidence)
+            is Recognition.Segments -> {
+                step.segments.forEach { listener.onSegment(generation, it.text, it.confidence) }
+                if (step.thenError != null) listener.onRecognizerError(generation, step.thenError)
+                else listener.onEndOfSegments(generation)
+            }
             is Recognition.Error -> listener.onRecognizerError(generation, step.code)
             Recognition.Silent -> Unit
         }
+    }
+
+    /** A segment delivered while capture is still live, as the engine does mid-utterance. */
+    fun emitSegment(text: String, confidence: Float? = null) {
+        listener?.onSegment(generation, text, confidence)
+    }
+
+    /** Replays a segment or an end-of-session for a generation the transport has finished with. */
+    fun replaySegment(generation: Long, text: String, confidence: Float?) {
+        listener?.onSegment(generation, text, confidence)
+    }
+
+    fun replayEndOfSegments(generation: Long) {
+        listener?.onEndOfSegments(generation)
     }
 
     /** The microphone stops being ours mid-capture: route gone, or client silenced. */

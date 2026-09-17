@@ -1,0 +1,38 @@
+{
+  "utc": "2026-09-17T03:10:10Z",
+  "host": {
+    "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "machine": "arm64",
+    "macos": "26.6.2",
+    "default_input": "MacBook Pro Microphone",
+    "default_output": "MacBook Pro Speakers",
+    "volume": "output volume:100, input volume:60, alert volume:100, output muted:false",
+    "say_voice": "Samantha",
+    "say_rate": 175
+  },
+  "source": "operator",
+  "emulator": {
+    "version_line": "INFO         | Android emulator version 37.1.11.0 (build_id 15917651) (CL:N/A)",
+    "avd": "AnkiVoice_AV005",
+    "config": {
+      "PlayStore.enabled": "no",
+      "hw.audioInput": "yes",
+      "hw.device.name": "medium_phone",
+      "hw.ramSize": "2G",
+      "image.sysdir.1": "system-images/android-36/google_apis_playstore/arm64-v8a/"
+    },
+    "flags": [
+      "-allow-host-audio",
+      "-no-snapshot",
+      "-no-boot-anim"
+    ]
+  },
+  "device": {
+    "serial": "emulator-5588",
+    "fingerprint": "google/sdk_gphone64_arm64/emu64a:16/BE2A.250530.026.D1/13818094:user/release-keys",
+    "sdk": "36",
+    "tts": [
+      "versionName=googletts.google-speech-apk_20241125.02_p2.702443970"
+    ]
+  }
+}

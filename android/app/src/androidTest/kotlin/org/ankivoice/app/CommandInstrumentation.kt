@@ -146,7 +146,7 @@ class CommandInstrumentation : Instrumentation() {
             // The context rule first, because it leaves a resumable pause behind it.
             output.put("contextRule", contextRule(open, router, card, transport, language))
             if (open.halted) open.resume()
-            output.put("voice", voiceSweep(open, router, language, card))
+            output.put("voice", voiceSweep(open, router, transport, language, card))
             output.put("touch", touchSweep(open, router, card))
 
             // Re-read what the provider actually stores, not the snapshot held above.
@@ -265,6 +265,7 @@ class CommandInstrumentation : Instrumentation() {
     private fun voiceSweep(
         session: ReviewSession,
         router: CommandRouter,
+        speech: SpeechTransport,
         language: String,
         card: ScheduledCard,
     ): JSONArray {
@@ -297,6 +298,7 @@ class CommandInstrumentation : Instrumentation() {
                 log.put(JSONObject().put("command", command.specName).put("action", action))
                 continue
             }
+            val outcome = router.listenForCommand()
             log.put(
                 JSONObject()
                     .put("command", command.specName)
@@ -304,7 +306,10 @@ class CommandInstrumentation : Instrumentation() {
                     .put("context", router.context().specName)
                     .put("offered", offered)
                     .put("position", positioned)
-                    .put("outcome", describe(router.listenForCommand()))
+                    .put("outcome", describe(outcome))
+                    // AV-044: the raw score behind the transport's classification, for the
+                    // record; the router only ever saw the classification.
+                    .put("recognizerConfidence", speech.lastConfidence ?: JSONObject.NULL)
                     .put("sessionState", session.state.specName),
             )
         }

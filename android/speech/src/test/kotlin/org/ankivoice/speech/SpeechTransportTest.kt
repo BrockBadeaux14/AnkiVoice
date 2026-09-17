@@ -466,4 +466,164 @@ class SpeechTransportTest {
         assertEquals(Confidence.LOW, SpeechTransport.classify(0f))
         assertEquals(Confidence.SUFFICIENT, SpeechTransport.classify(0.8f))
     }
+
+    // ------------------------------------------------ segmented sessions (AV-044)
+
+    private fun segments(vararg segments: FakeSpeechPlatform.Segment, thenError: Int? = null) {
+        platform.recognition = FakeSpeechPlatform.Recognition.Segments(segments.toList(), thenError)
+    }
+
+    private fun seg(text: String, confidence: Float? = null) = FakeSpeechPlatform.Segment(text, confidence)
+
+    private fun captureSegments(): CaptureEvent {
+        val capture = listenAsync()
+        awaitCaptureOpen()
+        transport.finishAnswer(token)
+        return capture.value()
+    }
+
+    @Test fun `a segment score above zero classifies as sufficient`() {
+        segments(seg("confirm", 0.97f))
+        val event = captureSegments() as CaptureEvent.Transcript
+
+        assertEquals("confirm", event.text)
+        assertEquals(Confidence.SUFFICIENT, event.confidence)
+        assertEquals(0.97f, transport.lastConfidence)
+    }
+
+    @Test fun `a segment score of zero classifies as low`() {
+        segments(seg("confirm", 0f))
+        val event = captureSegments() as CaptureEvent.Transcript
+
+        assertEquals(Confidence.LOW, event.confidence)
+    }
+
+    @Test fun `a segment without a score classifies as absent`() {
+        segments(seg("green blue red", null))
+        val event = captureSegments() as CaptureEvent.Transcript
+
+        assertEquals("green blue red", event.text)
+        assertEquals(Confidence.ABSENT, event.confidence)
+        assertEquals(null, transport.lastConfidence)
+    }
+
+    @Test fun `the capture carries the minimum score across the segments that contributed text`() {
+        segments(seg("green blue", 0.9f), seg("red", 0.4f), seg("confirm", 0.7f))
+        val event = captureSegments() as CaptureEvent.Transcript
+
+        assertEquals("green blue red confirm", event.text)
+        assertEquals(0.4f, transport.lastConfidence)
+        assertEquals(Confidence.SUFFICIENT, event.confidence)
+    }
+
+    @Test fun `a zero score on one segment makes the whole capture low`() {
+        segments(seg("green blue red", 0.95f), seg("confirm", 0f))
+        val event = captureSegments() as CaptureEvent.Transcript
+
+        assertEquals(Confidence.LOW, event.confidence)
+        assertEquals(0f, transport.lastConfidence)
+    }
+
+    @Test fun `an empty segment contributes neither text nor a score`() {
+        // The engine delivers an empty segment before a no-match, and can deliver one with
+        // a score of its own; neither may drag the capture down or pad its text.
+        segments(seg("", 0f), seg("   ", null), seg("confirm", 0.9f))
+        val event = captureSegments() as CaptureEvent.Transcript
+
+        assertEquals("confirm", event.text)
+        assertEquals(Confidence.SUFFICIENT, event.confidence)
+        assertEquals(0.9f, transport.lastConfidence)
+    }
+
+    @Test fun `a contributing segment without a score makes the capture unknown, not the others' minimum`() {
+        segments(seg("green blue", 0.9f), seg("red", null))
+        val event = captureSegments() as CaptureEvent.Transcript
+
+        assertEquals("green blue red", event.text)
+        assertEquals(Confidence.ABSENT, event.confidence)
+    }
+
+    @Test fun `only empty segments is an empty result, never a transcript`() {
+        segments(seg("", 0.8f), seg(""))
+        val event = captureSegments() as CaptureEvent.Failed
+
+        assertEquals(SpeechInputFailure.NO_MATCH, event.failure.mode)
+        assertEquals(SpeechTransport.EMPTY_RESULT, event.failure.detail)
+    }
+
+    @Test fun `a fault after scored segments is still a failure and carries no transcript`() {
+        segments(seg("confirm", 0.97f), thenError = RecognizerErrors.NETWORK)
+        val event = captureSegments() as CaptureEvent.Failed
+
+        assertEquals(SpeechInputFailure.NETWORK_UNAVAILABLE, event.failure.mode)
+        assertEquals(null, transport.lastConfidence)
+    }
+
+    @Test fun `a lost capture after a scored segment is hardware loss, whatever the score`() {
+        platform.recognition = FakeSpeechPlatform.Recognition.Silent
+        val capture = listenAsync()
+        awaitCaptureOpen()
+        platform.emitSegment("confirm", 0.99f)
+        platform.loseCapture("routed device lost")
+        val event = capture.value() as CaptureEvent.Failed
+
+        assertEquals(SpeechInputFailure.EARLY_CLOSURE, event.failure.mode)
+    }
+
+    @Test fun `a segment never settles the capture on its own`() {
+        platform.recognition = FakeSpeechPlatform.Recognition.Silent
+        val capture = listenAsync()
+        awaitCaptureOpen()
+        platform.emitSegment("green blue red", 0.96f)
+        assertFalse(capture.isDone, "a segment ended the capture")
+
+        transport.cancel(token)
+        assertTrue(capture.value() is CaptureEvent.Failed)
+    }
+
+    @Test fun `a partial result carries no confidence`() {
+        segments(seg("green blue red", 0.96f))
+        val capture = listenAsync()
+        awaitCaptureOpen()
+        platform.emitPartial("green blue")
+
+        assertEquals("green blue", transport.lastPartial)
+        assertEquals(null, transport.lastConfidence)
+        transport.finishAnswer(token)
+        assertEquals(Confidence.SUFFICIENT, (capture.value() as CaptureEvent.Transcript).confidence)
+    }
+
+    @Test fun `segments for a finished generation are dropped and recorded`() {
+        segments(seg("five", 0.9f))
+        val delivered = captureSegments() as CaptureEvent.Transcript
+        val before = transport.staleCallbackLog().size
+
+        platform.replaySegment(1L, "stale", 0.1f)
+        platform.replayEndOfSegments(1L)
+
+        assertEquals("five", delivered.text)
+        assertEquals(before + 2, transport.staleCallbackLog().size)
+    }
+
+    @Test fun `segments from an earlier capture never leak into the next`() {
+        segments(seg("five", 0f))
+        assertEquals(Confidence.LOW, (captureSegments() as CaptureEvent.Transcript).confidence)
+
+        segments(seg("confirm", 0.9f))
+        val next = worker.submit<CaptureEvent> { transport.listen(OperationToken("s1", 1, 2), "en-US") }
+        await("the second capture") { platform.captureStarts.get() == 2 }
+        transport.finishAnswer(OperationToken("s1", 1, 2))
+        val event = next.value() as CaptureEvent.Transcript
+
+        assertEquals("confirm", event.text)
+        assertEquals(Confidence.SUFFICIENT, event.confidence)
+    }
+
+    @Test fun `the aggregate rule is the minimum over contributing segments`() {
+        assertEquals("" to null, SpeechTransport.aggregate(emptyList()))
+        assertEquals("a b" to 0.2f, SpeechTransport.aggregate(listOf("a" to 0.5f, "b" to 0.2f)))
+        assertEquals("a" to 0.5f, SpeechTransport.aggregate(listOf("a" to 0.5f, "" to 0f)))
+        assertEquals("a b" to null, SpeechTransport.aggregate(listOf("a" to 0.5f, "b" to null)))
+        assertEquals("b" to null, SpeechTransport.aggregate(listOf("" to 0.9f, "b" to null)))
+    }
 }

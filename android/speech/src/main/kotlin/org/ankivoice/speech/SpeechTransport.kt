@@ -74,6 +74,18 @@ class SpeechTransport(
     var lastPartial: String? = null
         private set
 
+    /**
+     * The raw score behind the last delivered transcript's classification — the minimum
+     * over the segments that contributed text, or null when any of them came without one.
+     * Observability for the live harness; the classification is what #13 receives.
+     */
+    @Volatile
+    var lastConfidence: Float? = null
+        private set
+
+    /** The segments of the active capture: text and score, in delivery order. */
+    private val segments = mutableListOf<Pair<String, Float?>>()
+
     private val staleCallbacks = mutableListOf<String>()
 
     /** Callbacks rejected because their generation had already moved on. */
@@ -269,6 +281,7 @@ class SpeechTransport(
                 if (outcome.text.isBlank()) {
                     captureFailure(token, SpeechInputFailure.NO_MATCH, EMPTY_RESULT)
                 } else {
+                    lastConfidence = outcome.confidence
                     CaptureEvent.Transcript(token, outcome.text, confidence = classify(outcome.confidence))
                 }
             is Outcome.RecognizerError -> captureFailure(token, classify(outcome.code), "code ${outcome.code}")
@@ -344,6 +357,10 @@ class SpeechTransport(
         activeToken = token
         settled = false
         lastPartial = null
+        // The last capture's score survives a playback that follows it (a spoken notice),
+        // so a harness can still read it; only the next capture replaces it.
+        if (next == Phase.CAPTURE) lastConfidence = null
+        segments.clear()
         val queue = ArrayBlockingQueue<Outcome>(1)
         outcomes = queue
         return queue
@@ -401,6 +418,35 @@ class SpeechTransport(
             }
         }
 
+        /**
+         * A segment is kept, never delivered: only the end of the session, or a failure,
+         * settles the capture. An empty segment is kept too, so the record is complete,
+         * but it contributes neither text nor a score.
+         */
+        override fun onSegment(generation: Long, text: String, confidence: Float?) {
+            synchronized(lock) {
+                if (generation == this@SpeechTransport.generation && !settled) segments += text to confidence
+                else staleCallbacks += "segment for generation $generation"
+            }
+        }
+
+        /**
+         * The capture is the segments' text, and its confidence is the **minimum** over the
+         * segments that contributed text — unknown when any of those came without a score,
+         * because part of the text would then be unverified. AV-012's policy and :core's
+         * classification are untouched: they receive one text and one score, as before.
+         */
+        override fun onEndOfSegments(generation: Long) {
+            val (text, confidence) = synchronized(lock) {
+                if (generation != this@SpeechTransport.generation || settled) {
+                    staleCallbacks += "end of segments for generation $generation"
+                    return
+                }
+                aggregate(segments)
+            }
+            offer(generation, Outcome.Final(text, confidence), null)
+        }
+
         override fun onFinal(generation: Long, text: String, confidence: Float?) =
             offer(generation, Outcome.Final(text, confidence), null)
 
@@ -444,6 +490,19 @@ class SpeechTransport(
             confidence == null -> Confidence.ABSENT
             confidence <= 0f -> Confidence.LOW
             else -> Confidence.SUFFICIENT
+        }
+
+        /**
+         * One capture from its segments: the non-blank texts joined, and the minimum score
+         * over exactly those segments, or null when any of them carried none. Blank
+         * segments contribute neither, and no segments at all is an empty result.
+         */
+        fun aggregate(segments: List<Pair<String, Float?>>): Pair<String, Float?> {
+            val contributing = segments.filter { (text, _) -> text.isNotBlank() }
+            val text = contributing.joinToString(" ") { (text, _) -> text.trim() }
+            val scores = contributing.map { (_, score) -> score }
+            val confidence = if (scores.isEmpty() || scores.any { it == null }) null else scores.filterNotNull().min()
+            return text to confidence
         }
 
         /** Maps a raw recognizer error onto AV-007's SpeechInput taxonomy. */

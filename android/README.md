@@ -746,6 +746,31 @@ hardware fault is never read as the learner staying quiet. Absent recognizer con
 failure writes a review, infers a rating or substitutes another provider — there is no
 second speech implementation and no cloud STT candidate in this module.
 
+### Segment confidence (AV-044)
+
+The pinned route is a segmented session, and AV-044 (#67) measured on the pinned AVD that
+the engine puts `CONFIDENCE_SCORES` in every `onSegmentResults` bundle that carries text
+([results](../docs/testing/av044/results.md)). `AndroidSpeechPlatform` therefore hands
+each segment to the transport with its own score, and `SpeechTransport` decides the
+capture:
+
+| Segments delivered | Capture text | Capture confidence |
+| --- | --- | --- |
+| Every text segment scored | the texts, joined | the **minimum** of their scores, classified as before |
+| A text segment without a score | the texts, joined | `ABSENT` — part of the text is unverified |
+| Empty segments only | — | `NO_MATCH`, `empty result` |
+| A fault after any segments | — | the failure; segments never settle a capture |
+
+An empty segment contributes neither text nor a score, a partial result carries no score,
+and `:core`'s classification is untouched: `null` is `ABSENT`, `<= 0` is `LOW`, anything
+above zero is `SUFFICIENT`. The raw minimum is exposed as `lastConfidence` for the live
+harnesses only. A score gates whether a guarded spoken command may run; it never confirms
+anything by itself, and the explicit confirm intent for the current attempt and revision is
+still required.
+
+`recognizerObserver` is the discovery instrument: a test-only hook that is told each raw
+recognizer callback and decides nothing. It is null in production.
+
 Cancel and `releaseAll` invalidate the generation before cleanup runs, so callbacks
 already in flight are recorded as stale and dropped. Each capture delivers exactly one
 event.
