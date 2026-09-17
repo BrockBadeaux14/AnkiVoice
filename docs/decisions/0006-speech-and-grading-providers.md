@@ -251,3 +251,54 @@ Unit tests exercise cost refusal, request limits and invalid responses.
 Evidence does **not** verify Android cloud integration, real microphone input,
 combined STT/grading, 30-turn study, provider tail latency or generalization to
 human answers. Those limitations remain explicit downstream review gates.
+
+## Addendum — September 16, 2026 (AV-043): a paid grading fallback within a daily cap
+
+- Issue: [#66 — AV-043: Fix the free-route reply check and add a budgeted paid grading fallback](https://github.com/BrockBadeaux14/AnkiVoice/issues/66).
+- Evidence: [AV-043 results](../testing/av043/results.md) and [runbook](../testing/av043/runbook.md);
+  [AV-017 results](../testing/av017/results.md#what-the-ai-path-did-and-the-finding-against-the-route-guard)
+  for the finding that prompted the correction.
+
+This addendum records a change of decision for **grading only**. Nothing above is
+rewritten: its measurements stand as the evidence for the free route, and the
+speech decisions are untouched.
+
+**What changed.** On September 16, 2026 the owner accepted a paid OpenRouter fallback for
+advisory grading, behind a hard daily USD cap. The order is now: (1) AV-015's rules on
+device; (2) the pinned free route above, at a verified zero cost; (3) the pinned paid
+route, only when the free route is refused by its guard, unavailable, past AV-016's
+20-second deadline, or failed. A paid request is never sent while the free route would
+have been tried. This supersedes the clarification above — OpenRouter, free models only,
+paid fallbacks disabled — and the September 14, 2026 statement that no paid-provider
+fallback is authorized, for grading only. Rejected: a paid primary route, and an
+owner-selectable order in settings.
+
+**Budget.** An owner-set daily cap in USD, default **$1.00**, stored in AV-020's private
+settings beside the daily request limit; `$0` disables the paid route. Each paid request
+holds its ceiling — every prompt token up to 4,096 and every completion token up to 1,024
+at the listed prices — in the durable quota ledger before dispatch, and the reply's own
+`usage.cost` replaces the hold. A paid reply that reports no cost is refused as a label
+**and** charged the ceiling, because the money may have been spent. When a request's
+ceiling would take the UTC day past the cap, the paid route stops for the day
+(`BUDGET_EXHAUSTED`) and grading falls back to explicit self-grading, exactly as a
+request-quota stop does. The cap is a ceiling, not a target. Rejected: a lifetime pilot
+ceiling, and two simultaneous limits.
+
+**Pinned paid model.** `openai/gpt-4.1-nano` through the OpenRouter endpoint tag `openai`,
+listed on September 16, 2026 at $0.10 per million prompt tokens and $0.40 per million
+completion tokens, which makes the per-request ceiling $0.0008192. It is subject to the
+same instruction, two-key schema, 20-second deadline and single retry as the free route,
+and to the same 30-request session cap and daily request limit. The pin was chosen from
+the public endpoints listing; the bounded spike the card requires — two or three
+candidates on the AV-017 tuning 20 only — confirms or replaces it, and its result is
+recorded in the AV-043 results page.
+
+**Also corrected.** The shipped reply check compared the reply's provider *name*
+(`Liquid`) with the pinned endpoint *tag* (`liquid/fp8`) and refused every live reply of
+the free route, so AI grading was inert. Both accepted identities are now read from the
+endpoints listing at session start; the zero-cost verification is unchanged.
+
+**Unchanged.** Explicit confirmation of every rating and no automatic acceptance; native
+speech stays free on the pinned route; the credential is the same Keystore-wrapped
+OpenRouter key; diagnostics stay content-free; the app never adds funds or raises a cap or
+budget on its own.

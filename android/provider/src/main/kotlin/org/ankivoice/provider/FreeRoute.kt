@@ -2,9 +2,13 @@ package org.ankivoice.provider
 
 import java.math.BigDecimal
 
-/** The pinned endpoint passed its zero-price check, or the reason it did not. */
+/** The pinned endpoint passed its price check, or the reason it did not. */
 internal sealed interface RouteCheck {
-    data class Allowed(val endpointName: String) : RouteCheck
+    /**
+     * [providers] are the identities the endpoints listing gives the pinned endpoint: its
+     * tag, and its `provider_name` when the listing states one. A reply may report either.
+     */
+    data class Allowed(val endpointName: String, val providers: Set<String> = emptySet()) : RouteCheck
 
     data class Refused(val reason: String) : RouteCheck
 }
@@ -16,7 +20,13 @@ internal sealed interface RouteCheck {
  * price zero, temperature 0, JSON object output and a 1,024-token cap. The guard refuses
  * the route whenever the endpoint's advertised price is changed, nonzero or unreadable,
  * or the reply was not served by the pinned model and provider at a verified zero cost.
- * A refusal disables grading for the session; it never becomes a rating.
+ * A refusal disables this route for the session; it never becomes a rating.
+ *
+ * AV-043 corrected [replyCheck]. OpenRouter's endpoints listing identifies an endpoint by
+ * its **tag** (`liquid/fp8`) and its **provider name** (`Liquid`), and a completion reply
+ * reports the provider by name. The check compared the name with the tag and refused every
+ * live reply (AV-017's finding). Both accepted identities are now read from the listing by
+ * [priceCheck] and passed in; nothing here hard-codes the name.
  *
  * `:provider` carries the request and the reply text. The grading instruction, the reply's
  * content and the label policy belong to #18.
@@ -57,7 +67,11 @@ internal object FreeRoute {
         ),
     )
 
-    /** Ported from `validate_endpoint`: the pinned free endpoint at a zero price, or a refusal. */
+    /**
+     * Ported from `validate_endpoint`: the pinned free endpoint at a zero price, or a
+     * refusal. An allowed check carries the identities a reply may report for this
+     * endpoint: the pinned tag and the listing's `provider_name`.
+     */
     fun priceCheck(body: Any?): RouteCheck {
         val data = body.asObject()?.child("data").asObject() ?: return RouteCheck.Refused("no endpoint data")
         if (data.child("id").asText() != MODEL) return RouteCheck.Refused("the endpoint is not the pinned model")
@@ -73,24 +87,37 @@ internal object FreeRoute {
         for ((name, price) in prices) {
             if (!isZero(price)) return RouteCheck.Refused("nonzero or unknown $name price; no request sent")
         }
-        return RouteCheck.Allowed(endpoint.child("name").asText() ?: endpoint.child("tag").asText().orEmpty())
+        return RouteCheck.Allowed(
+            endpoint.child("name").asText() ?: endpoint.child("tag").asText().orEmpty(),
+            providerIdentities(endpoint, PROVIDER),
+        )
     }
 
     /**
      * The reply must come from the pinned model and provider — a served fallback is a
      * refusal — and report a cost that reads as exactly zero. An absent or unreadable
      * cost is refused too.
+     *
+     * [accepted] are the identities [priceCheck] read from the endpoints listing for this
+     * session: the pinned tag and the provider's listed name. Without a listing only the
+     * tag is accepted, which is the pre-AV-043 behaviour.
      */
-    fun replyCheck(body: Any?): RouteCheck {
+    fun replyCheck(body: Any?, accepted: Set<String> = setOf(PROVIDER)): RouteCheck {
         val reply = body.asObject() ?: return RouteCheck.Refused("unreadable reply")
         val model = reply.child("model").asText()
         if (model != MODEL) return RouteCheck.Refused("served by $model, not the pinned model")
         val provider = reply.child("provider").asText()
-        if (provider != null && provider != PROVIDER) return RouteCheck.Refused("served by $provider, not the pinned provider")
+        if (provider != null && provider !in accepted) return RouteCheck.Refused("served by $provider, not the pinned provider")
         val cost = reply.child("usage").asObject()?.child("cost")
         if (cost == null) return RouteCheck.Refused("no reported cost")
         if (!isZero(cost)) return RouteCheck.Refused("reported cost is not zero")
-        return RouteCheck.Allowed(provider ?: PROVIDER)
+        return RouteCheck.Allowed(provider ?: PROVIDER, setOf(provider ?: PROVIDER))
+    }
+
+    /** The tag plus the listing's `provider_name`, which is what a completion reply reports. */
+    internal fun providerIdentities(endpoint: Map<*, *>, tag: String): Set<String> = buildSet {
+        add(tag)
+        endpoint.child("provider_name").asText()?.trim()?.takeIf { it.isNotEmpty() }?.let(::add)
     }
 
     /** True only for a finite decimal that is exactly zero, however it is spelled. */

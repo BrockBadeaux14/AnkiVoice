@@ -24,6 +24,9 @@ GRADER_SOURCES = (
     "android/provider/src/main/kotlin/org/ankivoice/provider/GradingInstruction.kt",
     "android/provider/src/main/kotlin/org/ankivoice/provider/SemanticGrader.kt",
     "android/provider/src/main/kotlin/org/ankivoice/provider/FreeRoute.kt",
+    # AV-043: the paid fallback and the route order are part of the graded configuration.
+    "android/provider/src/main/kotlin/org/ankivoice/provider/PaidRoute.kt",
+    "android/provider/src/main/kotlin/org/ankivoice/provider/GradingRoute.kt",
 )
 
 CONFIGURATION_FILE = "configuration.json"
@@ -44,6 +47,9 @@ def describe(run):
         "corpus_sha256": sha256(CORPUS),
         "sources": {name: sha256(ROOT / name) for name in GRADER_SOURCES},
         "pinned_route": run["pinned_route"],
+        # AV-043: absent from runs recorded before the paid route existed.
+        "routes": run.get("routes"),
+        "paid_route": run.get("paid_route"),
         "permitted_ratings": [1, 2, 3, 4],
         "rubric_version": 1,
     }

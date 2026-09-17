@@ -28,6 +28,8 @@ internal object Json {
                 require(value.isFinite()) { "not a JSON number" }
                 if (value == value.toLong().toDouble()) out.append(value.toLong()) else out.append(value)
             }
+            // A price or a spend keeps its exact decimal text; a Double would not.
+            is java.math.BigDecimal -> out.append(value.toPlainString())
             is Map<*, *> -> {
                 out.append('{')
                 value.entries.forEachIndexed { index, (key, item) ->
