@@ -27,6 +27,8 @@ import org.ankivoice.ankidroid.ProvisioningStatus
 import org.ankivoice.ankidroid.ProvisioningStep
 import org.ankivoice.core.commands.VoiceCommand
 import org.ankivoice.core.contracts.*
+import org.ankivoice.core.exchange.RatingSource
+import org.ankivoice.core.exchange.ratingName
 
 /** How often the surface asks the transport what it has heard so far. */
 private const val HEARING_POLL_MS = 250L
@@ -244,11 +246,17 @@ private fun UnknownOutcomeCard(state: ShellState, controller: ShellController) {
 /**
  * AV-014's debug-grade command surface.
  *
- * Every command in the vocabulary has a control here, so none of them is voice-only, and
- * **no control on this card submits a review**. It deliberately shows no card text, no
- * transcript and no grade: the readable study surface is
+ * Every command in the vocabulary has a control here, so none of them is voice-only. It
+ * deliberately shows no card text and no grade: the readable study surface is
  * [#27](https://github.com/BrockBadeaux14/AnkiVoice/issues/27)'s, and this one exists to
- * exercise the commands and to verify them on the pinned AVD.
+ * exercise the commands and to verify them on the pinned AVD. It does show the transcript —
+ * the learner's own words, read back so a misrecognition is visible where it happens.
+ *
+ * AV-019 adds the pre-commit exchange's own controls: the Announced position with the
+ * pending rating's source and the answer it was computed from, the self-grade that opens
+ * the exchange when no grader offered a rating, and — after the single write — the outcome,
+ * taken from what the writer returned and from nothing else. **Confirm is the only control
+ * that writes**, and only for a confirmation #14 accepted for this attempt and revision.
  */
 @Composable
 private fun CommandCard(state: CommandState, commands: CommandController, deckSelected: Boolean) {
@@ -256,8 +264,9 @@ private fun CommandCard(state: CommandState, commands: CommandController, deckSe
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text("Voice commands (debug)", style = MaterialTheme.typography.titleLarge)
             Text(
-                "Debug controls for voice commands. Nothing here submits a review, and the " +
-                    "readable study screen is still to come.",
+                "Debug controls for voice commands. Confirm is the one control that writes a " +
+                    "review; everything else leaves your collection alone. The readable study " +
+                    "screen is still to come.",
             )
             if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
 
@@ -300,6 +309,11 @@ private fun CommandCard(state: CommandState, commands: CommandController, deckSe
             state.failure?.let {
                 Text(it.mode.specName, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.error)
             }
+
+            // AV-019: the pre-commit exchange, before and after the single write.
+            AnnouncedPosition(state)
+            SelfGradeControls(state, commands)
+            OutcomeControls(state, commands)
             // AV-045: the start is blocked here too until an unknown outcome is acknowledged.
             state.journalNotices.forEach { Text(it, color = MaterialTheme.colorScheme.error) }
             state.journalOutstanding.forEach { entryId ->
@@ -346,6 +360,132 @@ private fun CommandCard(state: CommandState, commands: CommandController, deckSe
                         enabled = !state.busy && command in state.available,
                     ) { Text(commandLabel(command)) }
                 }
+            }
+        }
+    }
+}
+
+/**
+ * AV-019's Announced position: what is pending, where it came from, and which answer it was
+ * computed from. Nothing here is written, and an abstention is never shown as a rating.
+ */
+@Composable
+private fun AnnouncedPosition(state: CommandState) {
+    val announcement = state.announcement ?: return
+    Card(
+        Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+    ) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                state.pendingRating?.let { "${ratingName(it)} is waiting" } ?: "No rating was suggested",
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Text(announcement, style = MaterialTheme.typography.bodyMedium)
+            Text(
+                "Source: ${sourceLabel(state.ratingSource)} · answer version " +
+                    "${state.announcedRevision ?: 0}",
+                style = MaterialTheme.typography.labelMedium,
+            )
+            if (state.confirmed) {
+                Text("Confirmed for this answer.", style = MaterialTheme.typography.labelMedium)
+            }
+        }
+    }
+}
+
+private fun sourceLabel(source: String?): String = when (source) {
+    RatingSource.RULE.specName -> "an exact rule match"
+    RatingSource.AI.specName -> "the AI grader's suggestion"
+    RatingSource.LEARNER.specName -> "you named it"
+    RatingSource.NONE.specName -> "nobody proposed one"
+    else -> "unknown"
+}
+
+/**
+ * The abstain path. A grading fault takes #15's rating commands out of reach, so this is
+ * how the learner names a rating — and it still only proposes one.
+ */
+@Composable
+private fun SelfGradeControls(state: CommandState, commands: CommandController) {
+    if (state.selfGradable.isEmpty()) return
+    Text("Choose a rating yourself", style = MaterialTheme.typography.labelLarge)
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        state.selfGradable.forEach { rating ->
+            OutlinedButton(onClick = { commands.selfGrade(rating) }, enabled = !state.busy) {
+                Text(ratingName(rating))
+            }
+        }
+    }
+}
+
+/**
+ * What the writer returned, and only that.
+ *
+ * A confirmed review is the only one announced as saved and the only one that offers Next
+ * card; a failed write says plainly that nothing was saved; and an unknown outcome offers
+ * the learner-reported reconcile and never a retry, because AnkiVoice cannot find out on
+ * its own and will not send the review again.
+ */
+@Composable
+private fun OutcomeControls(state: CommandState, commands: CommandController) {
+    val outcome = state.outcomeState ?: return
+    val resolved = state.committed
+    Card(
+        Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = if (resolved) MaterialTheme.colorScheme.surfaceContainer
+            else MaterialTheme.colorScheme.errorContainer,
+        ),
+    ) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(
+                when {
+                    resolved -> "Review saved"
+                    state.reconcileRequired -> "The review could not be confirmed"
+                    else -> "Nothing was saved"
+                },
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Text(outcome, style = MaterialTheme.typography.labelMedium)
+            state.outcomeReason?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
+            when {
+                resolved -> {
+                    Text(
+                        "AnkiVoice cannot take a review back. Correcting this one is AnkiDroid's own " +
+                            "Undo, and AnkiDroid may no longer offer it after other activity in " +
+                            "AnkiDroid, or after either app's process is closed or replaced.",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(onClick = commands::nextCard, enabled = !state.busy) { Text("Next card") }
+                        OutlinedButton(onClick = commands::handOffToUndo, enabled = !state.busy) {
+                            Text("Wrong rating? Undo in AnkiDroid")
+                        }
+                    }
+                }
+                state.reconcileRequired -> {
+                    Text(
+                        "AnkiVoice stopped before it could confirm what it wrote, and it will not " +
+                            "send this review again. Open AnkiDroid, look at this card, then tell " +
+                            "AnkiVoice what you saw.",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(onClick = { commands.reportReconciled(true) }, enabled = !state.busy) {
+                            Text("I checked AnkiDroid: saved")
+                        }
+                        OutlinedButton(onClick = { commands.reportReconciled(false) }, enabled = !state.busy) {
+                            Text("I checked AnkiDroid: not saved")
+                        }
+                    }
+                }
+                else -> Text(
+                    "The card is exactly as it was: nothing was written, buried, suspended or " +
+                        "reordered. Tap Resume to read it again from AnkiDroid, or close the session " +
+                        "and start over.",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
             }
         }
     }
