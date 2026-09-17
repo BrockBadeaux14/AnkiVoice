@@ -276,6 +276,11 @@ private fun CommandCard(state: CommandState, commands: CommandController, deckSe
             state.failure?.let {
                 Text(it.mode.specName, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.error)
             }
+            // AV-045: the start is blocked here too until an unknown outcome is acknowledged.
+            state.journalNotices.forEach { Text(it, color = MaterialTheme.colorScheme.error) }
+            state.journalOutstanding.forEach { entryId ->
+                Button(onClick = { commands.acknowledgeJournalNotice(entryId) }) { Text("I have checked AnkiDroid") }
+            }
 
             // The four controls that reach each command context. #27 replaces them.
             Text("Turn controls", style = MaterialTheme.typography.labelLarge)
@@ -290,6 +295,7 @@ private fun CommandCard(state: CommandState, commands: CommandController, deckSe
                 OutlinedButton(onClick = commands::finishAnswer, enabled = !state.busy && state.capturing) {
                     Text("Done")
                 }
+                OutlinedButton(onClick = commands::grade, enabled = !state.busy && state.gradable) { Text("Grade") }
                 TextButton(onClick = commands::stop, enabled = !state.busy && state.running) { Text("Close session") }
             }
             if (!deckSelected) Text("Choose a study deck above to open a session.")
