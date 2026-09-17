@@ -2,6 +2,7 @@ package org.ankivoice.app
 
 import java.util.concurrent.Executor
 import org.ankivoice.core.commands.CommandContext
+import org.ankivoice.core.answer.CaptureStop
 import org.ankivoice.core.commands.CommandRouter
 import org.ankivoice.core.commands.VoiceCommand
 import org.ankivoice.core.contracts.*
@@ -24,7 +25,33 @@ class CommandControllerTest {
     private val transport = FakeReviewTransport(collection)
     private val capabilities = Capabilities(maxReviewTimeMs = collection.maxReviewTimeMs)
     private val speechOutput = FakeSpeechOutput()
-    private val speechInput = FakeSpeechInput(FakeSpeechInput.Say("Five blocks."))
+
+    /** Every snapshot the surface published while the microphone was open. */
+    private val duringCapture = mutableListOf<CommandState>()
+
+    /** What the operator does mid-capture. The transport blocks there, so tests act there. */
+    private var whileListening: () -> Unit = {}
+
+    /** What the transport has heard so far, as the surface polls it mid-capture. */
+    private var partialText: String? = null
+
+    /** The transport blocks inside `listen`; this watches the surface from in there. */
+    private inner class ObservedSpeechInput : FakeSpeechInput(FakeSpeechInput.Say("Five blocks.")) {
+        var listened: OperationToken? = null
+
+        /** Stops that arrived before the capture returned; a dropped Done leaves it empty. */
+        var stoppedWhileOpen: List<OperationToken> = emptyList()
+
+        override fun listen(token: OperationToken, language: String): CaptureEvent {
+            listened = token
+            duringCapture += controller.state
+            whileListening()
+            stoppedWhileOpen = stopped.toList()
+            return super.listen(token, language)
+        }
+    }
+
+    private val speechInput: ObservedSpeechInput = ObservedSpeechInput()
     private val grader = FakeGrader(FakeGrader.Answer(GradingResult(GradeLabel.CORRECT, "matched")))
     private var released = 0
 
@@ -56,7 +83,11 @@ class CommandControllerTest {
                     grader = grader,
                     exchange = PrecommitExchange(session, speechOutput),
                     gradingSource = { GradingSource.RULE },
-                ) { released += 1 },
+                    speech = speechInput,
+                    language = "en-US",
+                    partial = { partialText },
+                    release = { released += 1 },
+                ),
             )
         },
         direct,
@@ -118,20 +149,91 @@ class CommandControllerTest {
         assertTrue(wroteNothing)
     }
 
+    /**
+     * Start answer is the call to `listen`, not a window opened beside it. Opening the
+     * window alone left the surface reporting a capture that nothing had asked for, and no
+     * microphone was ever opened.
+     */
+    @Test
+    fun `Start answer opens the microphone for the session language`() {
+        started()
+        controller.ask()
+        controller.startAnswer()
+
+        assertEquals(listOf("en-US"), speechInput.languages)
+        assertEquals(session.answerTurn?.token, speechInput.listened)
+        assertTrue(wroteNothing)
+    }
+
+    /**
+     * The learner's own words, shown back to them: the partial while the recognizer is
+     * still making it up, and the final transcript once the attempt settles. Card text and
+     * grades stay off this surface — #27 owns those.
+     */
+    @Test
+    fun `the surface shows what the recognizer heard`() {
+        partialText = "five blo"
+        val hearing = mutableListOf<String?>()
+        whileListening = { hearing += controller.hearing() }
+        started()
+        controller.ask()
+        controller.startAnswer()
+
+        assertEquals(listOf("five blo"), hearing)
+        assertEquals("Five blocks.", controller.state.heard)
+        // Nothing is left over the next attempt: the previous transcript goes before the
+        // microphone opens, and a capture with no transcript leaves the line empty.
+        assertNull(controller.hearing(), "a settled attempt still reports a live partial")
+        assertTrue(wroteNothing)
+    }
+
+    @Test
+    fun `a capture that produced no transcript shows none`() {
+        speechInput.script.clear()
+        speechInput.script.add(FakeSpeechInput.Fail(Failure(SpeechInputFailure.NO_MATCH, "empty result")))
+        started()
+        controller.ask()
+        controller.startAnswer()
+
+        assertNull(controller.state.heard)
+        assertEquals(SpeechInputFailure.NO_MATCH, controller.state.failure?.mode)
+        assertTrue(wroteNothing)
+    }
+
     @Test
     fun `the answer window is visible and offers no spoken command`() {
         started()
         controller.ask()
         controller.startAnswer()
 
-        val state = controller.state
+        // The window as the surface showed it while the microphone was open, not after.
+        val state = duringCapture.single()
         assertTrue(state.capturing)
+        assertTrue(state.answering, "Done had no attempt to stop")
         assertEquals(CommandContext.ANSWER, state.context)
         assertEquals("capturing", state.answerPhase)
         assertEquals(emptyList<VoiceCommand>(), state.spokenAvailable)
         // Touch is still the fallback: pause and skip remain reachable by button.
         assertTrue(VoiceCommand.PAUSE in state.available)
         assertTrue(VoiceCommand.SKIP in state.available)
+        assertTrue(wroteNothing)
+    }
+
+    /**
+     * Done, pressed while the microphone is open. The transport blocks inside `listen` for
+     * the whole attempt, so the touch has to reach it there: queued behind the capture it
+     * is dropped by the busy gate, and the attempt runs on to its window expiry with the
+     * learner watching nothing happen.
+     */
+    @Test
+    fun `Done reaches the transport while the capture is open`() {
+        whileListening = { controller.finishAnswer() }
+        started()
+        controller.ask()
+        controller.startAnswer()
+
+        assertEquals(listOf(speechInput.listened), speechInput.stoppedWhileOpen)
+        assertEquals(CaptureStop.DONE, session.answerTurn?.answer?.stoppedBy)
         assertTrue(wroteNothing)
     }
 
@@ -336,9 +438,9 @@ class CommandControllerTest {
     private fun settled() {
         started()
         controller.ask()
+        // Start answer settles the attempt on the fake's recognizer final, so the ratings
+        // go live and a confirmation becomes possible. The surface never fabricates one.
         controller.startAnswer()
-        val token = checkNotNull(session.answerTurn?.token)
-        session.acceptCapture(CaptureEvent.Transcript(token, "Five blocks.", confidence = Confidence.SUFFICIENT))
     }
 
     /** Settle an attempt and grade it, which opens AV-019's Announced position. */

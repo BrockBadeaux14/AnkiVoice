@@ -35,6 +35,16 @@ interface SpeechOutput {
 interface SpeechInput {
     fun listen(token: OperationToken, language: String): CaptureEvent
 
+    /**
+     * AV-012's Done: stop the microphone for [token] and let the recognizer finish.
+     *
+     * It is not [cancel] and not a verdict — the attempt stays alive until its final
+     * arrives or its deadline expires. [listen] blocks for the whole attempt, so this is
+     * called from another thread and every implementation must accept that. Idempotent,
+     * and a call for an attempt that is not capturing does nothing.
+     */
+    fun finishAnswer(token: OperationToken)
+
     /** Idempotent. Later events for [token] are ignored. */
     fun cancel(token: OperationToken)
 }

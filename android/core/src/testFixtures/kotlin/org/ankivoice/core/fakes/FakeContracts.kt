@@ -188,6 +188,9 @@ open class FakeSpeechInput(vararg steps: Step) : SpeechInput {
     val languages: MutableList<String> = mutableListOf()
     val cancelled: MutableList<OperationToken> = mutableListOf()
 
+    /** Every Done this fake received, so a test can tell a stop from a cancel. */
+    val stopped: MutableList<OperationToken> = mutableListOf()
+
     override fun listen(token: OperationToken, language: String): CaptureEvent {
         languages += language
         return when (val step = script.pop()) {
@@ -199,6 +202,11 @@ open class FakeSpeechInput(vararg steps: Step) : SpeechInput {
             is Fail -> CaptureEvent.Failed(token, step.failure)
             is Say -> CaptureEvent.Transcript(token, step.text, confidence = Confidence.SUFFICIENT)
         }
+    }
+
+    /** This fake answers within [listen], so Done has nothing to stop; it is recorded. */
+    override fun finishAnswer(token: OperationToken) {
+        stopped += token
     }
 
     override fun cancel(token: OperationToken) {

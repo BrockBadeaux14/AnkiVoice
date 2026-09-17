@@ -254,6 +254,7 @@ class FakeSpeechInput:
         self.script: deque = deque(script)
         self.languages: list[str] = []
         self.cancelled: list[OperationToken] = []
+        self.stopped: list[OperationToken] = []
 
     def listen(self, token: OperationToken, language: str) -> CaptureEvent:
         self.languages.append(language)
@@ -266,6 +267,10 @@ class FakeSpeechInput:
         if isinstance(event, Failure):
             return CaptureEvent(token, failure=event)
         return CaptureEvent(token, event, confidence=Confidence.SUFFICIENT)
+
+    def finish_answer(self, token: OperationToken) -> None:
+        """This fake answers inside listen, so Done has nothing to stop; it is recorded."""
+        self.stopped.append(token)
 
     def cancel(self, token: OperationToken) -> None:
         if token not in self.cancelled:

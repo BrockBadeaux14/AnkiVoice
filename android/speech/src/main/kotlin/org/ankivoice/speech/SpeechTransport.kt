@@ -45,6 +45,57 @@ class SpeechTransport(
 
     private enum class Phase { IDLE, PLAYBACK, CAPTURE, FINALIZING }
 
+    /** What [openCapture] found: a live stream, a refusal, or a platform that never answered. */
+    private sealed interface OpenResult {
+        data class Opened(val stream: CaptureStream) : OpenResult
+
+        /** The platform declined the open and said so. */
+        data object Refused : OpenResult
+
+        /** The open did not return within its deadline. */
+        data object TimedOut : OpenResult
+    }
+
+    /**
+     * Ownership of an open that may complete after its deadline. Exactly one side keeps the
+     * stream, and the side that loses the race closes it, so a microphone that opens late is
+     * still released.
+     */
+    private class CaptureHandoff {
+        private val lock = Any()
+        private val opened = ArrayBlockingQueue<OpenResult>(1)
+        private var abandoned = false
+
+        /** Called on the opener thread, with whatever the platform produced. */
+        fun deliver(stream: CaptureStream?) {
+            val late = synchronized(lock) {
+                if (abandoned) {
+                    true
+                } else {
+                    opened.offer(stream?.let { OpenResult.Opened(it) } ?: OpenResult.Refused)
+                    false
+                }
+            }
+            if (late) release(stream)
+        }
+
+        /** Called on the capturing thread. After it times out, nothing later is kept. */
+        fun await(millis: Long): OpenResult {
+            opened.poll(millis, TimeUnit.MILLISECONDS)?.let { return it }
+            val late = synchronized(lock) {
+                abandoned = true
+                opened.poll()
+            }
+            if (late is OpenResult.Opened) release(late.stream)
+            return OpenResult.TimedOut
+        }
+
+        private fun release(stream: CaptureStream?) {
+            stream?.stopMicrophone()
+            stream?.close()
+        }
+    }
+
     private sealed interface Outcome {
         data object PlaybackDone : Outcome
         data class PlaybackError(val detail: String) : Outcome
@@ -191,10 +242,16 @@ class SpeechTransport(
         val remaining = synchronized(lock) { settleUntilMs - clock.nowMs() }
         if (remaining > 0) sleeper.sleepMs(remaining)
 
-        val opened = platform.startCapture(current, language, recognitionListener)
-        if (opened == null) {
-            finishOperation(current)
-            return captureFailure(token, SpeechInputFailure.RECOGNIZER_UNAVAILABLE, CAPTURE_UNAVAILABLE)
+        val opened = when (val open = openCapture(current, language)) {
+            is OpenResult.Opened -> open.stream
+            OpenResult.Refused -> {
+                finishOperation(current)
+                return captureFailure(token, SpeechInputFailure.RECOGNIZER_UNAVAILABLE, CAPTURE_UNAVAILABLE)
+            }
+            OpenResult.TimedOut -> {
+                finishOperation(current)
+                return captureFailure(token, SpeechInputFailure.RECOGNIZER_UNAVAILABLE, CAPTURE_OPEN_DEADLINE)
+            }
         }
         synchronized(lock) {
             if (generation != current) {
@@ -216,11 +273,36 @@ class SpeechTransport(
     }
 
     /**
+     * Opens capture with a deadline of its own.
+     *
+     * Opening the microphone is a call into the platform's audio server, and a device whose
+     * audio input has wedged never returns from it — the AV-017 runbook records exactly that
+     * on the pinned AVD. Every other stage of a turn is bounded; without this one a wedged
+     * open holds this thread, and with it #13's turn and #14's session, for good, while the
+     * surface still reports a live microphone. A stream that arrives after the deadline is
+     * released rather than used, so an abandoned attempt never leaves the microphone open.
+     */
+    private fun openCapture(current: Long, language: String): OpenResult {
+        val handoff = CaptureHandoff()
+        val opener = Thread({
+            val opened = try {
+                platform.startCapture(current, language, recognitionListener)
+            } catch (_: RuntimeException) {
+                null
+            }
+            handoff.deliver(opened)
+        }, "ankivoice-capture-open")
+        opener.isDaemon = true
+        opener.start()
+        return handoff.await(timings.captureOpenMs)
+    }
+
+    /**
      * Done: the learner finished speaking, or #13's answer window expired. Stops the
      * microphone, appends the pinned trailing silence and closes the pipe. It is not a
      * verdict about the answer, and it never re-arms capture.
      */
-    fun finishAnswer(token: OperationToken) {
+    override fun finishAnswer(token: OperationToken) {
         synchronized(lock) {
             if (activeToken != token || phase != Phase.CAPTURE) return
             beginFinalization()
@@ -475,6 +557,7 @@ class SpeechTransport(
         const val OVERLAPPING_CAPTURE = "capture already active"
         const val PERMISSION_MISSING = "RECORD_AUDIO not granted"
         const val CAPTURE_UNAVAILABLE = "microphone or recognizer would not open"
+        const val CAPTURE_OPEN_DEADLINE = "the microphone did not open within the deadline"
         const val CANCELLED = "cancelled"
         const val RELEASED = "transport released"
         const val EMPTY_RESULT = "empty result"

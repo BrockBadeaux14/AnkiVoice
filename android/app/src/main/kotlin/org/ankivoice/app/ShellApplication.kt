@@ -186,6 +186,9 @@ private fun commandSession(
             exchange = PrecommitExchange(session, speech),
             revision = revision,
             gradingSource = studyGrader::sourceOf,
+            speech = speech,
+            language = settings.language,
+            partial = speech::lastPartial,
             release = speech::releaseAll,
         ),
     )

@@ -20,6 +20,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 import org.ankivoice.ankidroid.AndroidAccessPlatform
 import org.ankivoice.ankidroid.ProvisioningReport
 import org.ankivoice.ankidroid.ProvisioningStatus
@@ -28,6 +29,9 @@ import org.ankivoice.core.commands.VoiceCommand
 import org.ankivoice.core.contracts.*
 import org.ankivoice.core.exchange.RatingSource
 import org.ankivoice.core.exchange.ratingName
+
+/** How often the surface asks the transport what it has heard so far. */
+private const val HEARING_POLL_MS = 250L
 
 class MainActivity : ComponentActivity() {
     private val root get() = application as ShellApplication
@@ -243,9 +247,10 @@ private fun UnknownOutcomeCard(state: ShellState, controller: ShellController) {
  * AV-014's debug-grade command surface.
  *
  * Every command in the vocabulary has a control here, so none of them is voice-only. It
- * deliberately shows no card text, no transcript and no grade: the readable study surface
- * is [#27](https://github.com/BrockBadeaux14/AnkiVoice/issues/27)'s, and this one exists to
- * exercise the commands and to verify them on the pinned AVD.
+ * deliberately shows no card text and no grade: the readable study surface is
+ * [#27](https://github.com/BrockBadeaux14/AnkiVoice/issues/27)'s, and this one exists to
+ * exercise the commands and to verify them on the pinned AVD. It does show the transcript —
+ * the learner's own words, read back so a misrecognition is visible where it happens.
  *
  * AV-019 adds the pre-commit exchange's own controls: the Announced position with the
  * pending rating's source and the answer it was computed from, the self-grade that opens
@@ -280,6 +285,26 @@ private fun CommandCard(state: CommandState, commands: CommandController, deckSe
                     color = MaterialTheme.colorScheme.primary,
                 )
             }
+            // What the recognizer makes of the answer, while it is still making it up. It is
+            // progress, not a result: AV-012 settles on the final alone, and the line is
+            // labelled so a partial is never read as what the attempt recorded.
+            if (state.answering) {
+                var hearing by remember { mutableStateOf<String?>(null) }
+                LaunchedEffect(state.answering) {
+                    while (true) {
+                        hearing = commands.hearing()
+                        delay(HEARING_POLL_MS)
+                    }
+                }
+                Text(
+                    hearing?.let { "Hearing: $it" } ?: "Hearing: (nothing yet)",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
+            state.heard?.let {
+                Text("Heard: “$it”", style = MaterialTheme.typography.bodyLarge)
+            }
             state.notice?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
             state.failure?.let {
                 Text(it.mode.specName, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.error)
@@ -305,7 +330,9 @@ private fun CommandCard(state: CommandState, commands: CommandController, deckSe
                 OutlinedButton(onClick = commands::startAnswer, enabled = !state.busy && state.running) {
                     Text("Start answer")
                 }
-                OutlinedButton(onClick = commands::finishAnswer, enabled = !state.busy && state.capturing) {
+                // Done is the control that ends a capture, so it stays live while one is in
+                // flight — the session thread is busy inside exactly that capture.
+                OutlinedButton(onClick = commands::finishAnswer, enabled = state.answering) {
                     Text("Done")
                 }
                 OutlinedButton(onClick = commands::grade, enabled = !state.busy && state.gradable) { Text("Grade") }

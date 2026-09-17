@@ -723,10 +723,19 @@ Playback completes, the settle interval opens, and capture opens **only** when #
 at most one capture is active, and the transport never re-arms after a result. Thinking
 time, the answer window, the transcript and every retry decision stay with #13.
 
-`finishAnswer` is Done. It stops the microphone, lets the pump append the trailing
-silence and close the pipe, then starts the finalization deadline. It is not a verdict
-about the answer. `answerWindowMs` exists only as a backstop for a stop that never
-arrives; reaching it behaves exactly like Done, so an in-flight final is still delivered.
+`finishAnswer` is Done, and it is part of AV-007's `SpeechInput` contract rather than an
+extra on this class: `listen` blocks for the whole attempt, so the stop arrives from
+another thread, and #13 calls it whenever its window ends. It stops the microphone, lets
+the pump append the trailing silence and close the pipe, then starts the finalization
+deadline. It is not a verdict about the answer. `answerWindowMs` exists only as a backstop
+for a stop that never arrives; reaching it behaves exactly like Done, so an in-flight
+final is still delivered.
+
+Opening capture has a deadline of its own, `captureOpenMs` (8,000 ms). Opening the
+microphone is a call into the platform's audio server, and a device whose audio input has
+wedged never returns from it; the open is made on its own thread and abandoned when the
+deadline passes, with a stream that arrives late released rather than used. Without it
+that one stage was unbounded and a wedged open held #13's turn and #14's session for good.
 
 The transport receives an `Utterance` and never a `ScheduledCard`, so Extra has no path
 into question audio through this module and the Prompt-only rule stays in
@@ -1053,8 +1062,22 @@ command is voice-only.
 `CommandController` in `:app` is the debug-grade surface decision 3 of the card calls for,
 modelled on AV-023's shell controls. It runs the session on a thread of its own, because
 AV-025's transport blocks its caller for the whole of playback and capture. It shows no
-card text, no transcript and no grade: #27 owns the readable study surface and replaces
-this one.
+card text and no grade: #27 owns the readable study surface and replaces this one.
+
+It does show the transcript. While an attempt is open the surface polls
+`SpeechTransport.lastPartial` through `CommandController.hearing()` and shows it as
+**Hearing**, labelled so a partial is never read as a result; when the attempt settles the
+recognizer's final is shown as **Heard**, and an attempt that produced none leaves the
+line off rather than showing an empty one. A new Start answer clears the previous
+transcript before the microphone opens. This is display only: what reaches disk is still
+what AV-022's journal and the diagnostics toggle decide.
+
+Start answer runs the attempt: it opens AV-012's window and then calls `listen`, which is
+what AV-025 defines that touch to be. It publishes the open window before it blocks, so
+the surface reports a capture only while one is actually running, and Done stays live
+while every other control is held. Done reaches the transport directly, from the main
+thread, because the session thread is blocked inside the capture it would stop; queued
+behind that capture it would be dropped at the busy gate.
 
 ### What this does not establish
 
