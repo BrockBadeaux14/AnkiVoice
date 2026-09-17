@@ -62,8 +62,8 @@ tries the routes in that order, giving each one #18's attempt and single retry, 
 
 | | Free route | Paid route |
 | --- | --- | --- |
-| Pin | `liquid/lfm-2.5-2.6b:free` through `liquid/fp8` | **`openai/gpt-4.1-nano` through `openai`** — provisional, see the spike below |
-| Listed prices | $0 / $0 | $0.10 per million prompt tokens, $0.40 per million completion tokens (public listing, September 16, 2026) |
+| Pin | `liquid/lfm-2.5-2.6b:free` through `liquid/fp8` | **`deepseek/deepseek-v4.1-flash` through `deepseek`** — the owner's choice of September 17, 2026; provisional, see the spike below |
+| Listed prices | $0 / $0 | **Pinned at the peak rate:** $0.30 per million prompt tokens, $1.20 per million completion tokens. The endpoint's base rate is half that — $0.15 / $0.60 — and it doubles on weekdays 01:00–04:00 and 06:00–10:00 UTC (public listing, September 17, 2026) |
 | Envelope | AV-006's, unchanged | The same: `only=[tag]`, `allow_fallbacks=false`, `require_parameters=true`, temperature 0, `json_object`, 1,024-token cap; `max_price` set to the pinned prices per million so a repriced endpoint is declined, not paid |
 | Before a session | Zero prices on the listing | The endpoint is listed at or below the pinned prices (a per-request price must be zero, a reasoning price at most the completion price, a cache-read price at most the prompt price); the cap is above $0; one request's ceiling fits under today's cap |
 | Before a request | Session and daily request limits | The same limits, then the request's ceiling held against the cap |
@@ -71,8 +71,10 @@ tries the routes in that order, giving each one #18's attempt and single retry, 
 | Refused reply | Route stopped for the day (`COST_NOT_VERIFIED`) | Refused as a label; the reported cost — or the ceiling, when none was reported — is charged; the route is off for the session |
 
 The ceiling is every prompt token up to 4,096 and every completion token up to 1,024 at
-the pinned prices: **$0.0008192** per request for the pinned model, against AV-006's
-measured ~295 prompt tokens per request. It is an upper bound, not an estimate. The
+the pinned prices: **$0.0024576** per request for the pinned model, against AV-006's
+measured ~295 prompt tokens per request. It is an upper bound, not an estimate — and with
+a time-varying endpoint it is a generous one, because the pin is the peak rate and an
+off-peak request holds the same amount before being charged what the reply reports. The
 learner sees the paid route's failure when it dispatched and the free route's when it did
 not, and a paid label is bound to the transcript revision and mapped exactly like a free
 one. One key serves both routes, so a rejected key turns both off; a 402 or 429 stops only
@@ -111,7 +113,7 @@ and `max_tokens`:
 
 | Candidate | Endpoint tag | Prompt / completion, USD per million tokens | Why |
 | --- | --- | --- | --- |
-| `openai/gpt-4.1-nano` | `openai` | 0.10 / 0.40 | One first-party endpoint, 99.99% uptime over 30 minutes, strict JSON mode; **provisionally pinned** |
+| `openai/gpt-4.1-nano` | `openai` | 0.10 / 0.40 | One first-party endpoint, 99.99% uptime over 30 minutes, strict JSON mode; **pinned from September 16 until September 17, 2026** |
 | `google/gemini-2.5-flash-lite` | `google-ai-studio` | 0.10 / 0.40 | The same price from a second first-party provider; the `/flex` tier is half price but queued |
 | `mistralai/ministral-8b-2512` | `mistral` | 0.15 / 0.15 | The cheapest completion price on the shortlist from a first-party endpoint |
 
@@ -121,9 +123,10 @@ natural substitute if one of the three is refused by the price check. `openai/gp
 was excluded because it does not accept `temperature`, and multi-provider open models
 because a pin is one endpoint tag.
 
-At the pinned prices the whole spike — 20 tuning answers, at most two dispatches each, on
-three candidates — is bounded by 3 × 20 × 2 × $0.0008192 ≈ **$0.10** of holds and is
-expected to cost well under $0.02 in reported charges. The spike tooling:
+At the September 16 prices the whole spike — 20 tuning answers, at most two dispatches
+each, on three candidates — was bounded by 3 × 20 × 2 × $0.0008192 ≈ **$0.10** of holds. At
+the pin's current peak rate the same shape holds 3 × 20 × 2 × $0.0024576 ≈ **$0.30**, and is
+still expected to cost well under $0.05 in reported charges. The spike tooling:
 
 - `-Pav043.spike=<model>@<tag>` makes `GradingEvaluationTest` run the paid candidate on
   its own, through the shipped provider and grader, and **refuses any split but tuning**
@@ -137,9 +140,43 @@ expected to cost well under $0.02 in reported charges. The spike tooling:
 **Exit criterion, still open.** When the spike runs, one model is pinned in `PaidRoute.kt`
 with its listed prices and this page records the comparison table and the reason; if none
 returns a usable two-key label, the paid route ships with the cap default at `$0` and the
-finding is raised on #27 and #29. Until then the pin is `openai/gpt-4.1-nano` through
-`openai`, chosen from the listing, and `tools/av043-qa/validate.py` fails if the code and
-this page disagree about it.
+finding is raised on #27 and #29. Until then the pin is the owner's choice below, and
+`tools/av043-qa/validate.py` fails if the code and this page disagree about it.
+
+## The pin moved on September 17, 2026, at the owner's request
+
+The owner asked for `deepseek/deepseek-v4.1-flash` — *DeepSeek: DeepSeek V4.1 Flash* — in
+place of `openai/gpt-4.1-nano`. It is pinned through DeepSeek's own endpoint tag
+`deepseek`, which the public listing gave as the only occurrence of that tag, at 99.999%
+uptime over 30 minutes, supporting `response_format`, `temperature` and `max_tokens`.
+
+**This is a choice, not a measurement.** No grading quality was compared: the AV-043 spike
+is still unrecorded, and nothing here says the new model grades as well as the old one, or
+well enough. The exit criterion above is unchanged and still owns that question.
+
+Two things the swap forced, both recorded rather than papered over:
+
+- **The endpoint charges by the hour.** $0.15 / $0.60 per million off peak, doubling to
+  $0.30 / $1.20 on weekdays 01:00–04:00 and 06:00–10:00 UTC, as a `pricing.overrides` array
+  on the endpoint. The pin is the **peak** rate, so the pinned prices bound a request
+  whenever it lands. That raises the per-request ceiling from $0.0008192 to **$0.0024576**,
+  three times what the previous pin held. At the $1.00 default cap that is ~406 requests a
+  day rather than ~1,221 — well above the 50-request default daily limit, so the limit and
+  not the cap is still what stops a runaway session. Off-peak requests hold the peak
+  ceiling and are then charged what the reply reports, which is the conservative direction.
+- **`PaidRoute.priceCheck` could not read an override at all.** It walked every key in the
+  endpoint's `pricing` and refused on anything that was not a number, so a `pricing.overrides`
+  array refused the route outright — the paid route would have been dead on arrival. The
+  guard now holds **every** window to the same pin rather than working out which is in
+  force: the listing is read once per session while a request may be sent minutes later, and
+  a price guard that reasoned about the clock would be a second, disagreeing source of truth
+  about the time. A window it cannot read still refuses the route rather than being skipped,
+  and the hour and weekday keys inside a window are not read as money. `PaidRouteTest` covers
+  all of that, including the endpoint's own listing as it stood on the day, and fails without
+  the guard change.
+
+The candidates below were the September 16 shortlist and are kept as the record of what was
+compared then. They were not re-measured for this swap.
 
 <!-- av043:spike:begin — replaced by tools/av043-qa/spike.py output when the spike is recorded -->
 _Spike not yet recorded._
