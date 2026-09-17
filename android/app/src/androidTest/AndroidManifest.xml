@@ -38,4 +38,8 @@
     <instrumentation
         android:name="org.ankivoice.app.ExchangeInstrumentation"
         android:targetPackage="org.ankivoice" />
+
+    <instrumentation
+        android:name="org.ankivoice.app.StudyInstrumentation"
+        android:targetPackage="org.ankivoice" />
 </manifest>

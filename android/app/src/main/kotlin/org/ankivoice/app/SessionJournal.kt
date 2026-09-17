@@ -69,9 +69,25 @@ internal data class JournalReport(
     /** True while an unknown outcome has not been shown to the learner. No card may be offered. */
     val blocking: Boolean get() = outstanding.isNotEmpty()
 
-    /** Only unknown outcomes are announced; a provable non-write needs no warning banner. */
+    /**
+     * Only unknown outcomes are announced; a provable non-write needs no warning banner.
+     *
+     * An outcome the writer itself settled as unknown in an earlier run is outstanding
+     * without a reconciliation of its own, so its notice is built from the entry: the
+     * learner is owed the same words whichever path recorded the doubt.
+     */
     val notices: List<String>
-        get() = reconciliations.filter { it.resolution == JournalResolution.OUTCOME_UNKNOWN }.map { it.notice }
+        get() {
+            val reconciled = reconciliations.filter { it.resolution == JournalResolution.OUTCOME_UNKNOWN }
+            val covered = reconciled.map { it.entry.entryId }.toSet()
+            val settled = outstanding.filter { it.entryId !in covered }.map { entry ->
+                Reconciliation(
+                    entry, JournalResolution.OUTCOME_UNKNOWN,
+                    entry.outcomeReason.ifBlank { "The write's outcome was recorded as unknown." },
+                ).notice
+            }
+            return reconciled.map { it.notice } + settled
+        }
 }
 
 /**
@@ -137,7 +153,7 @@ internal class JournalAccess(
  *
  * Called and answered on [JournalAccess]'s delivery thread — the main thread in the app.
  */
-internal class ReconciliationGate(
+internal open class ReconciliationGate(
     private val journal: JournalAccess,
     private val sessionId: String,
 ) {
@@ -160,7 +176,7 @@ internal class ReconciliationGate(
      * Reconcile if this process has not, then answer. [JournalReport.blocking] means no
      * card may be offered yet. [cards] is read only by the first, reconciling call.
      */
-    fun open(cards: () -> CardProvider?, callback: (JournalReport) -> Unit) {
+    open fun open(cards: () -> CardProvider?, callback: (JournalReport) -> Unit) {
         report?.let { return callback(it) }
         waiting?.let {
             it += callback

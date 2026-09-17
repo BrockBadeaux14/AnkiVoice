@@ -5,15 +5,15 @@
   (native Kotlin, one Gradle build, five modules).
 - Specification: [AV-007: Integration contracts and review lifecycle](../docs/contracts/av007-session-contracts.md).
 
-This is the Gradle build and the Kotlin copy of the AV-007 contracts that every Android
-card builds on. AV-023 (#24) adds the Compose shell, AnkiDroid access preflight and deck
-selection, permission onboarding, app-private settings, and a debug sample-session
-preview. See the [AV-023 results](../docs/testing/av023/results.md) and
-[runbook](../docs/testing/av023/runbook.md). AV-039 (#10) adds VoiceQA note type
-provisioning behind an explicit setup action: see the
-[AV-039 results](../docs/testing/av039/results.md) and
-[runbook](../docs/testing/av039/runbook.md). Real card access, speech, network access and
-ReviewSession integration belong to #25, #26, #17 and #14.
+This is the Gradle build for the AnkiVoice Android app: the Kotlin port of the AV-007
+contracts and the session rules in `:core`, the AnkiDroid, speech and grading-provider
+adapters, and the `:app` composition root with its setup screen and study screen. The
+sections below record each card's part of it in the order they landed; the study screen a
+learner actually uses is described in [The study surface](#the-study-surface). AV-023 (#24)
+added the Compose shell, access preflight, deck selection and onboarding — see its
+[results](../docs/testing/av023/results.md) and [runbook](../docs/testing/av023/runbook.md) —
+and AV-039 (#10) the VoiceQA note type provisioning behind an explicit setup action — see
+its [results](../docs/testing/av039/results.md) and [runbook](../docs/testing/av039/runbook.md).
 
 ## Build
 
@@ -98,18 +98,13 @@ flowchart TD
   provider --> core
 ```
 
-| Module | Kind | Contents now | Owner of what comes next |
-| --- | --- | --- | --- |
-| `:core` | Kotlin/JVM, no Android plugin or dependency | The AV-007 contract port in `org.ankivoice.core.contracts`; AV-013's session state machine in `org.ankivoice.core.session`; the fakes in its `testFixtures` source set | #16/#18, #15, #20 |
-| `:ankidroid` | Android library | Access preflight; `decks` reads and verified `selected_deck` updates; AV-039 VoiceQA provisioning with read-back | #25 |
-| `:speech` | Android library | AV-025's speech transport: the pinned TTS/recognizer route, the app-owned microphone pipe, and the ordering, cancellation and failure rules behind both AV-007 speech contracts | #13 |
-| `:provider` | Android library | A marker object; no platform calls or network access | #17, #18 |
-| `:app` | Android application | Single-activity shell, onboarding, the VoiceQA setup action and its full-sync disclosure, private settings, lifecycle delivery and debug sample session | #27, #17 |
-| `:core` | Kotlin/JVM, no Android plugin or dependency | The AV-007 contract port in `org.ankivoice.core.contracts`; AV-012's answer policy in `org.ankivoice.core.answer`; AV-015's rule-based grading in `org.ankivoice.core.grading`; AV-013's session state machine in `org.ankivoice.core.session`; AV-018's journal port and reconciliation policy in `org.ankivoice.core.journal`; AV-014's command vocabulary and router in `org.ankivoice.core.commands`; AV-019's pre-commit exchange in `org.ankivoice.core.exchange`; the fakes in its `testFixtures` source set | #27 |
-| `:ankidroid` | Android library | Access preflight; `decks` reads and verified `selected_deck` updates | #25, #10 |
-| `:speech` | Android library | AV-025's speech transport: the pinned TTS/recognizer route, the app-owned microphone pipe, and the ordering, cancellation and failure rules behind both AV-007 speech contracts | #13 |
-| `:provider` | Android library | AV-020's credential store, free-route guard, durable quota ledger, content-free diagnostics and the one HTTPS seam; AV-016's semantic grader; AV-043's paid fallback route and daily budget | #27 |
-| `:app` | Android application | Single-activity shell, onboarding, private settings, lifecycle delivery, debug sample session and AV-018's durable journal store | #27 |
+| Module | Kind | Contents |
+| --- | --- | --- |
+| `:core` | Kotlin/JVM, no Android plugin or dependency | The AV-007 contract port in `org.ankivoice.core.contracts`; AV-012's answer policy in `org.ankivoice.core.answer`; AV-015's rule-based grading in `org.ankivoice.core.grading`; AV-010's eligibility in `org.ankivoice.core.eligibility`; AV-013's session state machine in `org.ankivoice.core.session`; AV-018's journal port and reconciliation policy in `org.ankivoice.core.journal`; AV-014's command vocabulary and router in `org.ankivoice.core.commands`; AV-019's pre-commit exchange in `org.ankivoice.core.exchange`; the fakes in its `testFixtures` source set |
+| `:ankidroid` | Android library | Access preflight; `decks` reads and verified `selected_deck` updates; AV-039 VoiceQA provisioning with read-back; AV-024's card provider, review transport and eligibility traversal |
+| `:speech` | Android library | AV-025's speech transport: the pinned TTS/recognizer route, the app-owned microphone pipe, and the ordering, cancellation and failure rules behind both AV-007 speech contracts; AV-044's segment confidence |
+| `:provider` | Android library | AV-020's credential store, free-route guard, durable quota ledger, content-free diagnostics and the one HTTPS seam; AV-016's semantic grader; AV-043's paid fallback route and daily budget |
+| `:app` | Android application | The setup screen (onboarding, the VoiceQA setup action and its full-sync disclosure, deck selection, AV-020's provider settings, private settings), AV-018's durable journal store, AV-045's composition and reconciliation gate, and AV-026's study screen and its controller |
 
 `checkModuleBoundaries` fails the build when:
 
@@ -132,10 +127,9 @@ testImplementation(testFixtures(project(":core")))  // in :core this is automati
 debugImplementation(testFixtures(project(":core")))  // what :app declares
 ```
 
-`:app` proves both sides. Its `src/debug` composition root reads the demo collection from
-the fakes. Its `src/release` counterpart supplies no card provider: study is unavailable
-while onboarding and deck selection remain usable. The release APK contains no
-`org.ankivoice.core.fakes` classes.
+`:app` declares the fixtures for debug builds and JVM tests only, and the release APK
+contains no `org.ankivoice.core.fakes` classes. Since AV-024 both build types compose the
+real AnkiDroid provider, and no `:app` source set differs between them.
 
 ## The contract port
 
@@ -553,9 +547,9 @@ for what has and has not been recorded.
   bounded spike, the re-recorded AV-017 pass and the pinned-AVD check all need the owner's
   OpenRouter key and are recorded in the AV-043 results page as they happen; until the
   spike is recorded the pin is the leading candidate, not a measured choice.
-- The study session still grades with on-device rules only (`RuleOnlyGrader` in
-  `ShellApplication`); wiring `SemanticGrader` into the session is #68 (AV-045). On the
-  device, both routes are exercised end to end from the settings screen's test requests.
+- AV-045 wired `SemanticGrader` into the study session through `StudyGrader`, rules first
+  and the routes in this order on a rule miss. On the device, both routes are also
+  exercised end to end from the settings screen's test requests.
 - The offline suite proves the order, the guards and the accounting against fake
   transports, not what either endpoint returns live.
 
@@ -662,7 +656,8 @@ ID, compares identity/state/content, rechecks ratings and cancellation, writes
 once, and verifies the same card. Only an acknowledged consistent one-review
 transition confirms. Unknown outcomes cannot replay. Outcomes carry the evidence
 needed by #20; nothing here persists a journal. `FakeReviewWriter` is available
-in test fixtures. Session orchestration and full UI wiring remain #14/#27.
+in test fixtures. AV-013 supplies the session orchestration over it, and AV-026 the
+study screen.
 
 Both debug and release shell paths now use the real provider. Start reports
 Card ready or Queue exhausted for the selected deck; no review writer is exposed
@@ -944,10 +939,11 @@ resolve to `outcome-unknown` and hand the learner to #14's halt, which is where 
 meet.
 
 An `outcome-unknown` resolution blocks the session until the learner acknowledges it, and a
-restart does not erase the obligation. The shell shows it on the debug-grade surface until
-#15 owns the command surface and #27 the study surface: it names the card and the rating,
-says plainly that the app cannot prove the review is its own, hands off to AnkiDroid, and
-offers no retry — because no branch here retries.
+restart does not erase the obligation. The setup screen and the study screen both show
+it: it names the card and the rating, says plainly that the app cannot prove the review is
+its own, hands off to AnkiDroid, and offers no retry — because no branch here retries.
+AV-026 added the same notice for an outcome the writer itself settled as unknown in an
+earlier run, which is outstanding without a reconciliation of its own.
 
 ### What it stores, and the disclosure that moved with it
 
@@ -1059,13 +1055,14 @@ Touch is the fallback for all of them, and it is deliberately **not** filtered b
 tapping Pause or Skip during an attempt is the escape hatch. Only resume is touch-only; no
 command is voice-only.
 
-`CommandController` in `:app` is the debug-grade surface decision 3 of the card calls for,
-modelled on AV-023's shell controls. It runs the session on a thread of its own, because
-AV-025's transport blocks its caller for the whole of playback and capture. It shows no
-card text and no grade: #27 owns the readable study surface and replaces this one.
+`StudyController` in `:app` — AV-014's `CommandController`, renamed and grown by AV-026 into
+the study screen's controller — runs the session on a thread of its own, because AV-025's
+transport blocks its caller for the whole of playback and capture. It gives every command a
+touch control and the learner-opened command capture a button; see
+[The study surface](#the-study-surface).
 
 It does show the transcript. While an attempt is open the surface polls
-`SpeechTransport.lastPartial` through `CommandController.hearing()` and shows it as
+`SpeechTransport.lastPartial` through `StudyController.hearing()` and shows it as
 **Hearing**, labelled so a partial is never read as a result; when the attempt settles the
 recognizer's final is shown as **Heard**, and an attempt that produced none leaves the
 line off rather than showing an empty one. A new Start answer clears the previous
@@ -1244,3 +1241,94 @@ Five cases on one emulator and one four-card collection is not a study, and Undo
 offered once, moments after the review — not in the situation the app's own notice warns
 about. The 30-turn acceptance run stays in
 [#29](https://github.com/BrockBadeaux14/AnkiVoice/issues/29).
+
+## The study surface
+
+AV-026 (#27) replaces AV-014's debug command surface with the screen a learner studies on,
+and verifies the composed app — the real activity, controller, session, grader, transport
+and journaled writer — as one flow.
+
+- Issue: [#27 — AV-026: Build the real study surface and verify the integrated mobile flow](https://github.com/BrockBadeaux14/AnkiVoice/issues/27).
+- Evidence: [results](../docs/testing/av026/results.md) and [runbook](../docs/testing/av026/runbook.md).
+
+### One screen, derived from the session
+
+`StudyController` publishes `StudyState`, an immutable snapshot read from AV-013's session,
+AV-019's exchange and AV-014's router on the session's own thread after every action, and
+`StudyScreen` renders that and nothing else. There is no second copy of the turn anywhere:
+
+| Shown | Derived from |
+| --- | --- |
+| The card's Prompt, its id and the permitted ratings | `session.card` |
+| The state in the learner's words | `session.state`, AV-012's phase, a grade in flight, or the halt's explanation |
+| The settled transcript, its answer version and whether the recognizer vouched for it | `session.answer`, `session.transcriptRevision` |
+| The grading status — rule match, AI label with its reason and route, or "rate it yourself" | the last reply, shown only while its revision and card are the session's |
+| The Announced position: pending rating, source, answer version | `PrecommitExchange.position` |
+| The outcome of the single write | `PrecommitExchange.settled` |
+| What AV-010 skipped, and its five-card summary | `StudiableCardProvider.report()` |
+| The controls | the session state, `recoveryOptions`, `router.available()`, `router.spokenAvailable()` |
+
+### What each state offers
+
+`StudyState.controls` names every control that applies, and the screen enables no other.
+Every AV-014 command, every AV-012 answer control, the transcript editor and AV-019's
+confirm, change, self-grade, Next card, Undo-handoff and reconcile controls are reachable by
+touch; spoken commands go through the learner-opened command capture. **Confirm is the one
+control that writes**, and it reaches the writer only through the exchange.
+
+| State | Controls |
+| --- | --- |
+| Card offered | Play prompt · Pause · Skip · Finish |
+| Thinking | Start answer · Repeat · Pause · Skip · Finish · Speak a command |
+| Capturing | Done · Cancel — and nothing else, because the session thread is inside the capture |
+| Graded, a rating waiting | Confirm · Change · the other ratings · Edit transcript · Try again · Repeat · Show answer · Pause · Skip · Finish · Speak a command |
+| Saved | Next card · Wrong rating? Undo in AnkiDroid · Finish |
+| Paused after a speech fault or Cancel | Try again · Edit transcript · Resume · Finish (· Speak a command) |
+| Paused after a grading fault | the same, plus Rate it yourself |
+| Paused by the learner, or skipped | Resume · Finish (· Speak a command) |
+| The write could not be confirmed | I checked AnkiDroid: saved / not saved — nothing else |
+| Stopped, exhausted, unsupported | Reload · Finish |
+| Interrupted, finished, handed off, reconciled | Reload (or Start again) · Back to setup |
+
+No halted state offers a control that writes; `StudyControllerTest` and
+`StudyScenariosTest` assert the set for each of them.
+
+### Automatic grading
+
+The debug surface had a Grade button. The study screen grades as soon as an answer settles
+as gradable and again after every transcript edit — rules on device first, the AI route
+only on a rule miss and only when the learner has configured it — and the suggestion is
+still advisory. An edit made while a request is in flight withdraws it; when the stale
+reply arrives the session drops it and the controller grades the replaced revision. A
+grading fault pauses the turn with the card kept and the self-grade as the way on.
+
+### Interruptions and Reload
+
+Leaving the foreground and locking the screen — told apart through `PowerManager.isInteractive`
+in `MainActivity.onPause` — each interrupt the session, release the microphone and require
+Reload. A capture in flight is cancelled through the transport from the main thread at once,
+so the microphone is released now rather than when the answer window would have expired; the
+blocked session thread applies the interruption when the transport returns and the late
+transcript is never delivered. A grading reply or a spoken command that lands after teardown
+runs nothing. Reload is `start()` again: it consults AV-045's gate before any card is
+offered, and opens a fresh session — nothing resumes the interrupted one.
+
+### Evidence for #29
+
+`StudyController.evidence` exports the session's `events` and `outcomes`, AV-018's journal
+entries for the session, and per turn the grading path (`rule`, `ai-free`, `ai-paid`,
+`abstain`, `unavailable`), every settled attempt with its status, confidence and raw score,
+the retry and edit counts, the self-grade, the rating corrections, the confirmation source
+and the touch actions and spoken commands. It is kept for the last closed session, so a
+turn that ended by finishing can still be exported. It carries study content and goes to
+the caller that asked; it is never recorded in AV-020's diagnostics, which a test holds.
+
+### What this does not establish
+
+The 67 JVM tests prove the derivation, the controls and the write discipline against the
+fakes, and `StudyCompositionTest` keeps AV-045's composition under the new surface. They
+say nothing about recognition quality, AnkiDroid's real write behaviour under this screen,
+or how the screen reads on a device. Those are the [runbook](../docs/testing/av026/runbook.md)'s
+ten-turn live check on the pinned AVD, driven by the owner on the app's own screen and
+recorded in [results](../docs/testing/av026/results.md) as it lands; the 30-turn human run
+stays in [#29](https://github.com/BrockBadeaux14/AnkiVoice/issues/29).

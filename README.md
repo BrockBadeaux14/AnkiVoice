@@ -1,161 +1,176 @@
 # AnkiVoice
 
-An Android-first college project for voice-based Anki study using a dedicated
-VoiceQA note type, with cloud speech and AI grading allowed and the app kept in
-the foreground.
+Voice-first review for [Anki](https://apps.ankiweb.net/) flashcards on Android. AnkiVoice
+reads a card's question aloud, listens to your spoken answer, grades it on the device
+first and with an AI grader only when the rules cannot decide, and writes the review to
+AnkiDroid only after you explicitly confirm the rating. Nothing is ever rated for you.
 
-The repository contains planning documentation and repeatable synthetic Anki
-fixtures. Implementation and runtime validation are tracked on the
-[project board](https://github.com/users/BrockBadeaux14/projects/2).
+It is a single-owner coursework project built and verified against a pinned Android
+emulator. Every claim in the documentation is backed by a recorded run or a test, and the
+documentation says plainly what has not been verified.
 
-See [AV-001: Platform and pilot constraints](docs/decisions/0001-platform-and-pilot.md)
-for the selected platform, test environment, deadline, pilot constraints, and
-Android-first dependency plan.
+## How it works
 
-See [AV-002: VoiceQA test collection](docs/testing/voiceqa-fixtures.md) to generate
-disposable collections, run the fixture checks, and reset or back up a test run.
+- **Your cards stay in Anki.** AnkiVoice studies a dedicated `VoiceQA` note type through
+  AnkiDroid's public content provider. It never opens the collection file, never syncs, and
+  writes exactly one thing: the review you confirm.
+- **Native speech, on device.** The question is spoken by Android's text-to-speech engine
+  and your answer is captured by Android's recognizer through an app-owned microphone pipe,
+  with a bounded answer window, an explicit Done, and a Try again that never re-arms on its
+  own.
+- **Rules first, AI second, you last.** Deterministic rules on the device match your
+  transcript against the card's answers with no network call. Only when they cannot decide
+  is the transcript sent to a pinned grading model, free route first and a budgeted paid
+  route only if the free one fails, and only if you have entered your own OpenRouter key
+  and acknowledged what is sent. Every suggestion is advisory: you confirm, change or name
+  the rating yourself, and a transcript edit retires any earlier suggestion.
+- **One write, journalled.** A confirmed rating is written once, after freshness checks, and
+  verified by reading the card back. The intent is recorded in an app-private journal before
+  the write and settled from the writer's own evidence, so a crash mid-write is reconciled on
+  the next start rather than retried or assumed. An unconfirmable write is reported to you,
+  never resubmitted.
+- **Interruptions stop, they do not guess.** Leaving the app or locking the screen ends the
+  session and releases the microphone; you reload, and pending writes are reconciled first.
 
-See [AV-004: AnkiDroid review access](docs/testing/av004-ankidroid-review-access.md)
-for the pinned emulator investigation, captured evidence, reproducible probe, and
-constraints on submission verification.
+## Repository layout
 
-See [AV-005: Foreground speech](docs/testing/av005-foreground-speech.md) for the
-constrained-go result on emulator speech, the full sixteen-scenario matrix and its
-measurements, and the limits of that evidence. The
-[runbook](docs/testing/av005/runbook.md) explains how to run the twelve-turn loop
-with your own voice, which is the one thing the recorded matrix could not supply.
+| Path | Contents |
+| --- | --- |
+| [`android/`](android/README.md) | The Kotlin app: one Gradle build, five modules, and the module-by-module record of how it was built and verified |
+| [`docs/decisions/`](docs/decisions/) | The platform, provider and implementation decisions, with the measurements behind them |
+| [`docs/contracts/`](docs/contracts/av007-session-contracts.md) | The five session contracts, the card-identity and capability rules, and the review lifecycle |
+| [`docs/testing/`](docs/testing/) | Results and runbooks for every verified piece, with the retained evidence beside them |
+| [`tools/`](tools/) | The Python reference binding of the contracts, fixture generation, and the emulator drivers and evidence validators |
+| [`tests/`](tests/) | The Python suite: the reference binding's scenarios, the drift guards that hold the Kotlin port to it, and the evidence validators |
+| [`fixtures/`](fixtures/) | The `VoiceQA` note type and the synthetic grading and collection fixtures |
 
-See [AV-006: Speech and grading providers](docs/decisions/0006-speech-and-grading-providers.md)
-for the measured native speech/OpenRouter comparison, free-only provider decision,
-fallback requirements, and reproducible evidence.
+## Building
 
-See [AV-040: Live microphone and interruptions](docs/testing/av040-live-microphone.md)
-for the bounded human investigation, its no-go result, raw evidence and measured
-policy limits. Its original #13/#26 gate is superseded for the narrowed MVP by
-the AV-042 decision below.
+Requirements: a JDK 17 or newer to run Gradle, the Android SDK with `platforms;android-36`
+and `build-tools;36.0.0` (point `ANDROID_HOME` at it or set `sdk.dir` in
+`android/local.properties`), and Python 3.13 for the fixtures and validators.
 
-See [AV-042: Live human voice input](docs/testing/av042/results.md) for the owner's
-subsequent scope change to a voice-input-only MVP, the emulator microphone failure
-diagnosis, and the confirmed “green blue red” and “five” transcripts. The broader
-interruption requirements are deferred for this scope; the prior failures remain
-recorded. The [unblock decision](docs/testing/av042/results.md#downstream-unblock-decision)
-satisfies the #26 (AV-025) and #13 (AV-012) capability prerequisite on acceptance
-and supplies their initial implementation policy. The
-[runbook](docs/testing/av042/runbook.md) reproduces the working probe.
+```sh
+cd android && ./gradlew checkModuleBoundaries :core:test assembleDebug
+```
 
-See [AV-007: Integration contracts and review lifecycle](docs/contracts/av007-session-contracts.md)
-for the five session contracts, the card-identity and capability rules bound to AV-004's
-measurements, and the five-state review lifecycle. The
-[scripted transcripts](docs/contracts/av007/transcripts.md) show the in-memory fakes
-driving every state and failure mode with no emulator and no network, including
-explicit spoken/touch confirmation, transcript edits, stale callbacks and manual
-self-grading fallback.
+```sh
+cd android && ./gradlew :ankidroid:testDebugUnitTest :provider:testDebugUnitTest :speech:testDebugUnitTest :app:testDebugUnitTest :app:assembleDebugAndroidTest :app:assembleRelease :app:lintDebug
+```
 
-See [AV-022: Android implementation](docs/decisions/0022-android-implementation.md)
-for the scored Kotlin-versus-Flutter decision, the pinned build/support baseline,
-component ownership across the five AV-007 contracts, and the implementation
-breakdown for the Android cards.
+```sh
+python3 -m venv .venv && .venv/bin/python -m pip install -r requirements-fixtures.txt && .venv/bin/python -m unittest discover -s tests
+```
 
-See [AV-041: Android build](android/README.md) for the `android/` Gradle build, its
-pins and five modules, and the Kotlin port of the AV-007 contract types and fakes. That
-page also covers the drift guard that keeps the port in step with the Python binding.
+No test opens a network connection or needs an emulator. Continuous integration runs the
+same commands on every push. Every version is pinned; see the
+[Android build notes](android/README.md#pins) for the pins and the reasons behind them.
 
-See [AV-023: Mobile shell and permission onboarding](docs/testing/av023/results.md)
-for the Compose shell, deck selection, debug sample-session controls, private settings,
-and the pinned-emulator evidence. The [runbook](docs/testing/av023/runbook.md) reproduces
-the onboarding and lifecycle checks without submitting any reviews.
+## Running the demo
 
-See [AV-039: VoiceQA note type provisioning](docs/testing/av039/results.md)
-for the explicit setup action, the reuse/refuse and demo-content policy, the confirmed
-AnkiDroid 2.24.1 provider route, and the pinned-emulator evidence that no review was
-added or altered. The [runbook](docs/testing/av039/runbook.md) reproduces every
-provisioning scenario on a disposable collection.
+The demo is the study screen on an Android emulator, with a disposable collection so
+nothing you own is touched. It takes one emulator and about fifteen minutes the first time.
 
-See [AV-020: Provider credentials, usage controls and diagnostics](android/README.md#provider-credentials-usage-controls-and-diagnostics)
-for the Keystore-wrapped runtime credential, the free-only route guard, the durable quota
-ledger, the retention disclosure and the content-free diagnostics. Its
-[runbook](docs/testing/av020/runbook.md) records the one live smoke request.
+1. **Create the emulator.** Use the pinned image, signed out of Google so the speech engine
+   stays at its pinned version, and boot it with host audio so the guest microphone hears
+   yours:
 
-See [AV-015: Rule-based grading](android/README.md#rule-based-grading) for the on-device
-policy. It suggests Good only on an exact normalized match or a one-letter slip in a long
-word that is not a number, negation or unit. Otherwise it defers to the AI grader or an
-explicit self-grade.
+   ```sh
+   export ANDROID_SDK_ROOT="$HOME/Library/Android/sdk"
+   echo no | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager" create avd --name AnkiVoice_AV005 --package 'system-images;android-36;google_apis_playstore;arm64-v8a' --device medium_phone
+   ```
 
-See [AV-012: Answer boundaries and transcript policy](android/README.md#answer-boundaries-and-transcript-policy)
-for the bounded answer window, the separate finalization deadline, the six transcript
-states and the revision rules that keep a stale transcript or grade off the screen.
+   ```sh
+   "$ANDROID_SDK_ROOT/emulator/emulator" -avd AnkiVoice_AV005 -port 5588 -allow-host-audio -no-snapshot -no-boot-anim
+   ```
 
-See [AV-016: Semantic grading and optional rubrics](android/README.md#semantic-grading-and-optional-rubrics)
-for the policy layer between those rules and the free route: the pinned AV-006 instruction,
-the strict two-key reply schema, the 20-second deadline with one quota-consuming retry, and
-the binding of every suggestion to the transcript revision that produced it.
+   Once it has booted, turn the host microphone on and grant the app's microphone permission:
 
-See [AV-024: AnkiDroid adapter and review safeguards](docs/testing/av024/results.md)
-for the real scheduled-card provider, single-shot guarded writer, and per-rating
-emulator evidence. The shell checks real deck readiness without submitting reviews.
+   ```sh
+   adb -s emulator-5588 emu avd hostmicon
+   ```
 
-See [AV-010: Card eligibility and bounded skipping](docs/testing/av010/results.md)
-for VoiceQA and language validation, visible rejection reasons, and read-only
-queue traversal that stops after five consecutive unstudiable cards.
+2. **Install AnkiDroid 2.24.1 and a disposable collection.** Generate the synthetic
+   collection, then follow the [fixtures guide](docs/testing/voiceqa-fixtures.md) to import
+   its `collection.colpkg` into AnkiDroid on the emulator and enable AnkiDroid's API under
+   Settings → Advanced:
 
-See [AV-025: Mobile speech and audio routing](android/README.md#speech-transport) for the
-speech transport: the pinned TTS and recognizer route, the app-owned microphone pipe, the
-playback-to-capture ordering, and the cancellation and failure rules behind both AV-007
-speech contracts. Its [runbook](docs/testing/av025/runbook.md) separates the offline rule
-checks from the live check on the pinned AVD, and
-[results](docs/testing/av025/results.md) records what has and has not been verified.
+   ```sh
+   .venv/bin/python tools/voiceqa_fixtures.py build --output build/voiceqa
+   ```
 
-See [AV-018: Session journal and recovery](android/README.md#session-journal-and-recovery)
-for the durable record of a review intent: journalled and flushed before dispatch, settled
-only from the guarded writer's own evidence, and reconciled after process loss to `failed`
-or `outcome-unknown` — never to a confirmed write this app cannot prove it made. Its
-[results](docs/testing/av018/results.md) record two real force-stops on the pinned AVD, one
-in each specified window, neither of which added a second review; the
-[runbook](docs/testing/av018/runbook.md) reproduces them.
+3. **Build and install AnkiVoice.**
 
-See [AV-013: Session state machine](android/README.md#session-state-machine) for the
-deterministic turn loop: the explicit states, the token rules that reject late callbacks,
-the invalidate-then-clean-up teardown, main-thread confinement, and the rule that only an
-explicit learner confirmation reaches the writer. Its 53-scenario conformance suite is
-ported from the Python binding and held to it by a drift guard. The
-[runbook](docs/testing/av013/runbook.md) separates the offline suite from the live check
-on the pinned AVD, and [results](docs/testing/av013/results.md) records what has and has
-not been verified. Both live criteria passed on September 16, 2026: AV-025's absorbed
-speech check, and one spoken answer carried through explicit confirmation to a verified
-guarded write.
+   ```sh
+   cd android && ./gradlew :app:installDebug
+   ```
 
-See [AV-017: Advisory grading evaluation](docs/testing/av017/results.md) for the
-60-answer labeled corpus over the AV-002 baseline package, the offline harness that replays
-it through the shipped rule and semantic graders without an emulator, the frozen-configuration
-and held-out discipline, and the measured error and abstention rates. The measurement is
-advisory quality evidence with no pass/fail threshold: it gates nothing, authorises no
-automatic acceptance, and changes neither grader. Its
-[runbook](docs/testing/av017/runbook.md) separates the offline scoring run from the live
-STT capture and the one recorded provider pass.
+   ```sh
+   adb -s emulator-5588 shell pm grant org.ankivoice android.permission.RECORD_AUDIO
+   ```
 
-See [AV-043: Paid grading fallback](docs/testing/av043/results.md) for the correction of
-the free-route reply check that AV-017 found refusing every live reply, and for the paid
-OpenRouter fallback behind a daily USD cap: free first, paid only when the free route is
-refused, unavailable, timed out or failed, with the cost, the cap and the day's stop shown
-in settings. The [AV-006 addendum](docs/decisions/0006-speech-and-grading-providers.md#addendum--september-16-2026-av-043-a-paid-grading-fallback-within-a-daily-cap)
-records the decision; the [runbook](docs/testing/av043/runbook.md) separates the offline
-suite from the live model spike, the re-recorded AV-017 pass and the pinned-AVD check,
-which need the owner's key.
+4. **Set up, on the app's setup screen.** Allow AnkiDroid access when asked, tap **Check
+   setup** and then **Set up VoiceQA** if the note type is missing, and choose the
+   `AV002 Baseline` deck. AI grading is optional: to try it, enter your own OpenRouter key,
+   read the disclosure and turn it on. Without a key the rules grade exact matches and you
+   rate everything else yourself.
 
-See [AV-044: Recognizer confidence on the segmented route](docs/testing/av044/results.md)
-for the discovery that the pinned engine supplies `CONFIDENCE_SCORES` in every segment
-bundle that carries text — measured with the owner's voice on the pinned AVD, every attempt
-kept — and for the transport change that carries the minimum across the segments that
-contributed text, so a clearly heard spoken confirm or rating can pass #15's confidence
-gate. `:core`'s classification and AV-012's answer policy are unchanged, and a score still
-never confirms anything by itself. The [runbook](docs/testing/av044/runbook.md) separates
-the offline segment rule from the discovery and the AV-014 live check.
+5. **Study.** Tap **Start studying**, then on the study screen: **Play prompt** to hear the
+   question, **Start answer** and speak, **Done**, and when the rating is announced tap
+   **Confirm** or tap **Speak a command** and say "confirm". **Next card** continues.
+   Everything else on the screen — Try again, Edit transcript, the ratings, Pause, Skip,
+   Show answer, Repeat, Finish — is reachable by touch, and nothing but Confirm writes.
 
-See [AV-014: Voice commands and safe navigation](android/README.md#voice-commands-and-safe-navigation)
-for the command vocabulary over that loop: context-only disambiguation with no wake word and
-no keyword stripping, a confidence gate on the commands that advance, reveal or rate, a pause
-that releases the recognizer and a touch-only resume that re-queries a fresh card, and a skip
-that halts without any write. No command path reaches the writer. Its
-[runbook](docs/testing/av014/runbook.md) separates the offline suite, the unattended touch
-sweep and the operator voice check on the pinned AVD, and
-[results](docs/testing/av014/results.md) records what has and has not been verified.
+The same walk-through, with the ten turns that verify it and the emulator's known audio
+faults, is the [study runbook](docs/testing/av026/runbook.md). Two notes from the recorded
+runs: the emulator's audio backend exits after two or three microphone opens per boot, so
+cold-boot between long sessions, and a capture that comes back empty is retried with
+**Try again**, not treated as a wrong answer.
+
+## Documentation
+
+**Decisions**
+
+- [Platform and pilot constraints](docs/decisions/0001-platform-and-pilot.md): Android
+  first, the emulator as the test environment, and the pilot's scope.
+- [Speech and grading providers](docs/decisions/0006-speech-and-grading-providers.md): the
+  measured native-speech and grading-model comparison, the free-only route and the later
+  budgeted paid fallback.
+- [Android implementation](docs/decisions/0022-android-implementation.md): Kotlin over
+  Flutter, the pinned build baseline and the module ownership.
+
+**The session and its contracts**
+
+- [Session contracts and review lifecycle](docs/contracts/av007-session-contracts.md), with
+  [scripted transcripts](docs/contracts/av007/transcripts.md) of every state and failure mode
+  against in-memory fakes.
+- The [Android build notes](android/README.md) describe each layer: answer boundaries,
+  rule-based and semantic grading, provider credentials and budgets, the speech transport,
+  the session state machine, the journal, voice commands, the pre-commit exchange, and the
+  study surface.
+
+**Verification on the pinned emulator**, each with a results page and a runbook
+
+| Area | Results |
+| --- | --- |
+| AnkiDroid review access and write safeguards | [access](docs/testing/av004-ankidroid-review-access.md) · [adapter](docs/testing/av024/results.md) |
+| Speech in the foreground, live microphone, human voice input | [foreground speech](docs/testing/av005-foreground-speech.md) · [live microphone](docs/testing/av040-live-microphone.md) · [voice input](docs/testing/av042/results.md) |
+| Shell, onboarding and note type provisioning | [shell](docs/testing/av023/results.md) · [provisioning](docs/testing/av039/results.md) |
+| Card eligibility and skipping | [eligibility](docs/testing/av010/results.md) |
+| Speech transport and recognizer confidence | [transport](docs/testing/av025/results.md) · [confidence](docs/testing/av044/results.md) |
+| Session state machine, voice commands, journal and recovery | [session](docs/testing/av013/results.md) · [commands](docs/testing/av014/results.md) · [journal](docs/testing/av018/results.md) |
+| Grading quality and the paid fallback | [evaluation](docs/testing/av017/results.md) · [paid fallback](docs/testing/av043/results.md) |
+| Rating confirmation and the single write | [exchange](docs/testing/av019/results.md) |
+| The study screen and the integrated flow | [study surface](docs/testing/av026/results.md) |
+
+Work is tracked on the [project board](https://github.com/users/BrockBadeaux14/projects/2).
+
+## Scope and limits
+
+The current release studies one deck at a time, in the foreground, on Android, in English,
+with the `VoiceQA` note type. Offline use, locked-screen study, general card compatibility,
+direct sync and other platforms are out of scope. All device evidence comes from one pinned
+emulator configuration; physical devices, Bluetooth audio and phone calls are unverified.
+The emulator's own audio backend is unreliable after a few microphone opens per boot, and
+the cause of some empty captures is not yet established; the app treats an empty capture as
+something to retry, never as a wrong answer.

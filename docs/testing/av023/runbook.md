@@ -109,6 +109,11 @@ has appeared; do not infer state from it.
 
 ## Deck, session and settings matrix
 
+> Since AV-026 the session panel's **Start**, **Stop** and **Resume** buttons belong to the
+> study screen. The read-only readiness check below is the setup screen's **Check deck**
+> button, and its status lines read *Deck check: …*. The steps record the surface as it was
+> when this evidence was taken.
+
 - Before selecting a deck, capture the notice that selection changes AnkiDroid's
   current deck without submitting a review. Choose **AV002 Baseline**. The adapter
   updates only `selected_deck`, checks the deck still exists, and reads back the

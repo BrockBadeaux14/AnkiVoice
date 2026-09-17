@@ -24,7 +24,8 @@ cd android
 ```
 
 `:core:test` runs `VoiceCommandParserTest` and `CommandRouterTest`; `:app:testDebugUnitTest`
-runs `CommandControllerTest`. `tests/test_av014_commands.py` fails if the Kotlin vocabulary,
+runs `StudyControllerTest` (AV-026 renamed `CommandControllerTest` when the debug surface
+became the study screen). `tests/test_av014_commands.py` fails if the Kotlin vocabulary,
 the touch-only rule, the guarded set or the false-trigger corpus drift from what the card
 decided.
 

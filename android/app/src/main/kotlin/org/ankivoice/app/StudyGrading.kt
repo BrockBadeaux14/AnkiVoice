@@ -8,6 +8,7 @@ import org.ankivoice.core.contracts.GradingRequest
 import org.ankivoice.core.grading.GradingSource
 import org.ankivoice.core.grading.RuleGrader
 import org.ankivoice.provider.GradingProvider
+import org.ankivoice.provider.GradingRoute
 import org.ankivoice.provider.SemanticGrader
 
 /**
@@ -24,15 +25,16 @@ import org.ankivoice.provider.SemanticGrader
  * on it with the card kept, and the learner self-grades; nothing here turns it into a
  * label or a rating.
  *
- * [grade] blocks for up to two provider attempts, so it is only ever called on the
- * grading worker. [cancel] is called on the session thread and is handed to that same
+ * [grade] blocks for up to two provider attempts per route, so it is only ever called on
+ * the grading worker. [cancel] is called on the session thread and is handed to that same
  * worker, because [SemanticGrader] is not thread-safe; a reply that lands before the
  * withdrawal does is still dropped by the session's revision check.
  *
  * AV-019 announces where a pending rating came from, and this class is the only place
- * that knows: it chose the route. [sourceOf] reports it for the request it last answered
- * and for no other, so a source can never be attached to a label this grader did not
- * produce. Read it on the grading worker, in the same step that took the reply.
+ * that knows: it chose the route. [sourceOf] reports the policy and [routeOf] the AV-043
+ * route for the request it last answered and for no other, so a source can never be
+ * attached to a label this grader did not produce. Read them on the grading worker, in the
+ * same step that took the reply.
  */
 internal class StudyGrader(
     private val provider: GradingProvider,
@@ -48,9 +50,11 @@ internal class StudyGrader(
     /** The request [answeredBy] belongs to. Touched only on the grading worker. */
     private var answered: GradingRequest? = null
     private var answeredBy: GradingSource? = null
+    private var answeredOver: GradingRoute? = null
 
     override fun grade(request: GradingRequest): GradingReply {
         answered = request
+        answeredOver = null
         RuleGrader.grade(request.context)?.let {
             answeredBy = GradingSource.RULE
             return GradingReply(request, it)
@@ -60,12 +64,18 @@ internal class StudyGrader(
             routeChecked = true
             provider.startSession(sessionId)
         }
-        return semantic.grade(request)
+        val reply = semantic.grade(request)
+        answeredOver = semantic.lastRoute
+        return reply
     }
 
     /** Which policy answered [request], or null when this grader did not answer it. */
     fun sourceOf(request: GradingRequest): GradingSource? =
         answeredBy.takeIf { answered == request }
+
+    /** Which AV-043 route the AI leg ended on for [request], or null for a rule match or another request. */
+    fun routeOf(request: GradingRequest): GradingRoute? =
+        answeredOver.takeIf { answered == request }
 
     override fun cancel(request: GradingRequest) {
         gradingWorker.execute { semantic.cancel(request) }

@@ -5,42 +5,68 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.PowerManager
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.delay
 import org.ankivoice.ankidroid.AndroidAccessPlatform
 import org.ankivoice.ankidroid.ProvisioningReport
 import org.ankivoice.ankidroid.ProvisioningStatus
 import org.ankivoice.ankidroid.ProvisioningStep
-import org.ankivoice.core.commands.VoiceCommand
-import org.ankivoice.core.contracts.*
-import org.ankivoice.core.exchange.RatingSource
-import org.ankivoice.core.exchange.ratingName
+import org.ankivoice.core.contracts.CardProviderFailure
+import org.ankivoice.core.contracts.Failure
+import org.ankivoice.core.contracts.FailureMode
+import org.ankivoice.core.contracts.ForegroundEvent
+import org.ankivoice.core.contracts.SpeechInputFailure
 
-/** How often the surface asks the transport what it has heard so far. */
-private const val HEARING_POLL_MS = 250L
-
+/**
+ * The single activity: the setup screen — AnkiDroid access, the microphone, the VoiceQA
+ * note type, the deck, AI grading and its budget — and the study screen it leads to.
+ *
+ * Leaving the foreground for any reason interrupts an open study session: AV-007's
+ * single-active-reviewer precondition is broken, the microphone is released and nothing
+ * is written. A screen lock is told apart from an app switch so the record says which.
+ */
 class MainActivity : ComponentActivity() {
     private val root get() = application as ShellApplication
     private val controller get() = root.controller
     private val provider get() = root.provider
-    private val commands get() = root.commands
+    private val study get() = root.study
     private var screen by mutableStateOf(ShellState())
     private var providerScreen by mutableStateOf(ProviderState())
-    private var commandScreen by mutableStateOf(CommandState())
+    private var studyScreen by mutableStateOf(StudyState())
     private val requestPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
         controller.refresh()
     }
@@ -55,19 +81,30 @@ class MainActivity : ComponentActivity() {
         controller.observer = { screen = it }
         providerScreen = provider.state
         provider.observer = { providerScreen = it }
-        commandScreen = commands.state
-        commands.observer = { commandScreen = it }
+        studyScreen = study.state
+        study.observer = { studyScreen = it }
         setContent {
             MaterialTheme(colorScheme = lightColorScheme(
                 primary = Color(0xFF14695F), onPrimary = Color.White,
                 background = Color(0xFFF6F8F6), surface = Color(0xFFF6F8F6),
                 surfaceContainer = Color(0xFFEAF0EA),
             )) {
-                ShellScreen(
-                    screen, providerScreen, commandScreen,
-                    controller, provider, commands,
-                    ::correctAccess, ::openAppSettings,
-                )
+                var studying by rememberSaveable { mutableStateOf(false) }
+                if (studying) {
+                    StudyScreen(studyScreen, study) {
+                        study.stop()
+                        studying = false
+                    }
+                } else {
+                    SetupScreen(
+                        screen, providerScreen,
+                        controller, provider,
+                        ::correctAccess, ::openAppSettings,
+                    ) {
+                        studying = true
+                        study.start()
+                    }
+                }
             }
         }
     }
@@ -78,7 +115,11 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onPause() {
-        if (!isChangingConfigurations) root.foregroundEvents.onForegroundEvent(ForegroundEvent.PAUSE)
+        if (!isChangingConfigurations) {
+            // A screen that is no longer interactive locked; anything else is an app switch.
+            if (!getSystemService(PowerManager::class.java).isInteractive) study.onScreenLocked()
+            root.foregroundEvents.onForegroundEvent(ForegroundEvent.PAUSE)
+        }
         super.onPause()
     }
 
@@ -90,7 +131,7 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         controller.observer = null
         provider.observer = null
-        commands.observer = null
+        study.observer = null
         super.onDestroy()
     }
 
@@ -116,16 +157,16 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+/** The setup screen: everything a study session needs, and the door to it. */
 @Composable
-private fun ShellScreen(
+private fun SetupScreen(
     state: ShellState,
     providerState: ProviderState,
-    commandState: CommandState,
     controller: ShellController,
     provider: ProviderController,
-    commands: CommandController,
     correctAccess: (FailureMode) -> Unit,
     openAppSettings: () -> Unit,
+    onStudy: () -> Unit,
 ) {
     Surface(Modifier.fillMaxSize()) {
         Column(
@@ -170,24 +211,7 @@ private fun ShellScreen(
                 }
             }
 
-            Card(Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("Session", style = MaterialTheme.typography.titleLarge)
-                    Text(statusText(if (failure != null && state.status == PreviewStatus.Idle) PreviewStatus.Paused(failure) else state.status), style = MaterialTheme.typography.titleMedium)
-                    Text(PREVIEW_DESCRIPTION, style = MaterialTheme.typography.bodyMedium)
-                    state.skipped.forEach { Text(it.announcement.text) }
-                    state.skipSummary?.let { Text(it) }
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Button(
-                            onClick = controller::start,
-                            enabled = !state.checking && failure == null && state.selectedDeckId != null,
-                        ) { Text(if (state.status is PreviewStatus.Paused) "Resume" else "Start") }
-                        OutlinedButton(onClick = controller::stop) { Text("Stop") }
-                    }
-                }
-            }
-
-            CommandCard(commandState, commands, state.selectedDeckId != null)
+            StudyCard(state, failure, controller, onStudy)
 
             ProviderSettingsCard(providerState, provider)
             if (providerState.keyPresent && !providerState.disclosureAcknowledged) {
@@ -212,12 +236,43 @@ private fun ShellScreen(
 }
 
 /**
- * AV-018's debug-grade notice, until #15 owns the command surface and #27 the study one.
- *
- * It names the card and the rating, says plainly that the app cannot prove the review is
- * its own, and hands the learner to AnkiDroid. There is no retry button, because no
- * branch of this card retries a write, and no success message, because the outcome is by
- * definition not known.
+ * The door to the study screen, and AV-023's read-only deck check beside it. Neither
+ * submits a review: the check reads the queue and reports what it found, and studying
+ * writes only through the study screen's own Confirm.
+ */
+@Composable
+private fun StudyCard(state: ShellState, failure: Failure?, controller: ShellController, onStudy: () -> Unit) {
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text("Study", style = MaterialTheme.typography.titleLarge)
+            Text(
+                "Voice study on the selected deck: hear the question, say your answer, confirm the rating. " +
+                    "Every rating needs your confirmation before it is saved.",
+            )
+            if (state.status != PreviewStatus.Idle) {
+                Text(statusText(state.status), style = MaterialTheme.typography.titleMedium)
+            }
+            state.skipped.forEach { Text(it.announcement.text, style = MaterialTheme.typography.bodySmall) }
+            state.skipSummary?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
+            val ready = !state.checking && failure == null && state.selectedDeckId != null
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Button(onClick = onStudy, enabled = ready) { Text("Start studying") }
+                OutlinedButton(onClick = controller::start, enabled = ready) { Text("Check deck") }
+            }
+            if (state.selectedDeckId == null) Text("Choose a study deck above first.", style = MaterialTheme.typography.bodySmall)
+            Text(
+                "Check deck reads the selected deck and reports whether a card is due. It submits no review.",
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+    }
+}
+
+/**
+ * AV-018's notice on the setup screen. It names the card and the rating, says plainly that
+ * the app cannot prove the review is its own, and hands the learner to AnkiDroid. There is
+ * no retry button, because no branch of that card retries a write, and no success message,
+ * because the outcome is by definition not known.
  */
 @Composable
 private fun UnknownOutcomeCard(state: ShellState, controller: ShellController) {
@@ -241,269 +296,6 @@ private fun UnknownOutcomeCard(state: ShellState, controller: ShellController) {
             }
         }
     }
-}
-
-/**
- * AV-014's debug-grade command surface.
- *
- * Every command in the vocabulary has a control here, so none of them is voice-only. It
- * deliberately shows no card text and no grade: the readable study surface is
- * [#27](https://github.com/BrockBadeaux14/AnkiVoice/issues/27)'s, and this one exists to
- * exercise the commands and to verify them on the pinned AVD. It does show the transcript —
- * the learner's own words, read back so a misrecognition is visible where it happens.
- *
- * AV-019 adds the pre-commit exchange's own controls: the Announced position with the
- * pending rating's source and the answer it was computed from, the self-grade that opens
- * the exchange when no grader offered a rating, and — after the single write — the outcome,
- * taken from what the writer returned and from nothing else. **Confirm is the only control
- * that writes**, and only for a confirmation #14 accepted for this attempt and revision.
- */
-@Composable
-private fun CommandCard(state: CommandState, commands: CommandController, deckSelected: Boolean) {
-    Card(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("Voice commands (debug)", style = MaterialTheme.typography.titleLarge)
-            Text(
-                "Debug controls for voice commands. Confirm is the one control that writes a " +
-                    "review; everything else leaves your collection alone. The readable study " +
-                    "screen is still to come.",
-            )
-            if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
-
-            val status = if (state.running) {
-                "Session ${state.sessionState} · ${state.context.specName} context" +
-                    (state.answerPhase?.let { " · answer $it" } ?: "") +
-                    (state.cardId?.let { " · card $it" } ?: "")
-            } else {
-                "No session open"
-            }
-            Text(status, style = MaterialTheme.typography.titleMedium)
-            if (state.capturing) {
-                Text(
-                    "The microphone is capturing your answer. Command words spoken now are part " +
-                        "of the answer, not commands.",
-                    color = MaterialTheme.colorScheme.primary,
-                )
-            }
-            // What the recognizer makes of the answer, while it is still making it up. It is
-            // progress, not a result: AV-012 settles on the final alone, and the line is
-            // labelled so a partial is never read as what the attempt recorded.
-            if (state.answering) {
-                var hearing by remember { mutableStateOf<String?>(null) }
-                LaunchedEffect(state.answering) {
-                    while (true) {
-                        hearing = commands.hearing()
-                        delay(HEARING_POLL_MS)
-                    }
-                }
-                Text(
-                    hearing?.let { "Hearing: $it" } ?: "Hearing: (nothing yet)",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-            }
-            state.heard?.let {
-                Text("Heard: “$it”", style = MaterialTheme.typography.bodyLarge)
-            }
-            state.notice?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
-            state.failure?.let {
-                Text(it.mode.specName, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.error)
-            }
-
-            // AV-019: the pre-commit exchange, before and after the single write.
-            AnnouncedPosition(state)
-            SelfGradeControls(state, commands)
-            OutcomeControls(state, commands)
-            // AV-045: the start is blocked here too until an unknown outcome is acknowledged.
-            state.journalNotices.forEach { Text(it, color = MaterialTheme.colorScheme.error) }
-            state.journalOutstanding.forEach { entryId ->
-                Button(onClick = { commands.acknowledgeJournalNotice(entryId) }) { Text("I have checked AnkiDroid") }
-            }
-
-            // The four controls that reach each command context. #27 replaces them.
-            Text("Turn controls", style = MaterialTheme.typography.labelLarge)
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(onClick = commands::start, enabled = !state.busy && !state.running && deckSelected) {
-                    Text("Start session")
-                }
-                OutlinedButton(onClick = commands::ask, enabled = !state.busy && state.running) { Text("Play prompt") }
-                OutlinedButton(onClick = commands::startAnswer, enabled = !state.busy && state.running) {
-                    Text("Start answer")
-                }
-                // Done is the control that ends a capture, so it stays live while one is in
-                // flight — the session thread is busy inside exactly that capture.
-                OutlinedButton(onClick = commands::finishAnswer, enabled = state.answering) {
-                    Text("Done")
-                }
-                OutlinedButton(onClick = commands::grade, enabled = !state.busy && state.gradable) { Text("Grade") }
-                TextButton(onClick = commands::stop, enabled = !state.busy && state.running) { Text("Close session") }
-            }
-            if (!deckSelected) Text("Choose a study deck above to open a session.")
-
-            Text("Commands", style = MaterialTheme.typography.labelLarge)
-            Text(
-                if (state.spokenAvailable.isEmpty()) {
-                    "No command can be spoken right now. Every command still has a button."
-                } else {
-                    "Say one of: ${state.spokenAvailable.joinToString(", ") { it.specName }}."
-                },
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            Button(
-                onClick = commands::listenForCommand,
-                enabled = !state.busy && state.spokenAvailable.isNotEmpty(),
-            ) { Text("Speak a command") }
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                VoiceCommand.entries.forEach { command ->
-                    OutlinedButton(
-                        onClick = { commands.run(command) },
-                        enabled = !state.busy && command in state.available,
-                    ) { Text(commandLabel(command)) }
-                }
-            }
-        }
-    }
-}
-
-/**
- * AV-019's Announced position: what is pending, where it came from, and which answer it was
- * computed from. Nothing here is written, and an abstention is never shown as a rating.
- */
-@Composable
-private fun AnnouncedPosition(state: CommandState) {
-    val announcement = state.announcement ?: return
-    Card(
-        Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-    ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(
-                state.pendingRating?.let { "${ratingName(it)} is waiting" } ?: "No rating was suggested",
-                style = MaterialTheme.typography.titleMedium,
-            )
-            Text(announcement, style = MaterialTheme.typography.bodyMedium)
-            Text(
-                "Source: ${sourceLabel(state.ratingSource)} · answer version " +
-                    "${state.announcedRevision ?: 0}",
-                style = MaterialTheme.typography.labelMedium,
-            )
-            if (state.confirmed) {
-                Text("Confirmed for this answer.", style = MaterialTheme.typography.labelMedium)
-            }
-        }
-    }
-}
-
-private fun sourceLabel(source: String?): String = when (source) {
-    RatingSource.RULE.specName -> "an exact rule match"
-    RatingSource.AI.specName -> "the AI grader's suggestion"
-    RatingSource.LEARNER.specName -> "you named it"
-    RatingSource.NONE.specName -> "nobody proposed one"
-    else -> "unknown"
-}
-
-/**
- * The abstain path. A grading fault takes #15's rating commands out of reach, so this is
- * how the learner names a rating — and it still only proposes one.
- */
-@Composable
-private fun SelfGradeControls(state: CommandState, commands: CommandController) {
-    if (state.selfGradable.isEmpty()) return
-    Text("Choose a rating yourself", style = MaterialTheme.typography.labelLarge)
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        state.selfGradable.forEach { rating ->
-            OutlinedButton(onClick = { commands.selfGrade(rating) }, enabled = !state.busy) {
-                Text(ratingName(rating))
-            }
-        }
-    }
-}
-
-/**
- * What the writer returned, and only that.
- *
- * A confirmed review is the only one announced as saved and the only one that offers Next
- * card; a failed write says plainly that nothing was saved; and an unknown outcome offers
- * the learner-reported reconcile and never a retry, because AnkiVoice cannot find out on
- * its own and will not send the review again.
- */
-@Composable
-private fun OutcomeControls(state: CommandState, commands: CommandController) {
-    val outcome = state.outcomeState ?: return
-    val resolved = state.committed
-    Card(
-        Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = if (resolved) MaterialTheme.colorScheme.surfaceContainer
-            else MaterialTheme.colorScheme.errorContainer,
-        ),
-    ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(
-                when {
-                    resolved -> "Review saved"
-                    state.reconcileRequired -> "The review could not be confirmed"
-                    else -> "Nothing was saved"
-                },
-                style = MaterialTheme.typography.titleMedium,
-            )
-            Text(outcome, style = MaterialTheme.typography.labelMedium)
-            state.outcomeReason?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
-            when {
-                resolved -> {
-                    Text(
-                        "AnkiVoice cannot take a review back. Correcting this one is AnkiDroid's own " +
-                            "Undo, and AnkiDroid may no longer offer it after other activity in " +
-                            "AnkiDroid, or after either app's process is closed or replaced.",
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Button(onClick = commands::nextCard, enabled = !state.busy) { Text("Next card") }
-                        OutlinedButton(onClick = commands::handOffToUndo, enabled = !state.busy) {
-                            Text("Wrong rating? Undo in AnkiDroid")
-                        }
-                    }
-                }
-                state.reconcileRequired -> {
-                    Text(
-                        "AnkiVoice stopped before it could confirm what it wrote, and it will not " +
-                            "send this review again. Open AnkiDroid, look at this card, then tell " +
-                            "AnkiVoice what you saw.",
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Button(onClick = { commands.reportReconciled(true) }, enabled = !state.busy) {
-                            Text("I checked AnkiDroid: saved")
-                        }
-                        OutlinedButton(onClick = { commands.reportReconciled(false) }, enabled = !state.busy) {
-                            Text("I checked AnkiDroid: not saved")
-                        }
-                    }
-                }
-                else -> Text(
-                    "The card is exactly as it was: nothing was written, buried, suspended or " +
-                        "reordered. Tap Resume to read it again from AnkiDroid, or close the session " +
-                        "and start over.",
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-            }
-        }
-    }
-}
-
-private fun commandLabel(command: VoiceCommand): String = when (command) {
-    VoiceCommand.REPEAT -> "Repeat"
-    VoiceCommand.REVEAL -> "Show answer"
-    VoiceCommand.PAUSE -> "Pause"
-    VoiceCommand.RESUME -> "Resume"
-    VoiceCommand.FINISH_SESSION -> "Finish session"
-    VoiceCommand.SKIP -> "Skip"
-    VoiceCommand.RATE_AGAIN -> "Again"
-    VoiceCommand.RATE_HARD -> "Hard"
-    VoiceCommand.RATE_GOOD -> "Good"
-    VoiceCommand.RATE_EASY -> "Easy"
-    VoiceCommand.CONFIRM -> "Confirm"
-    VoiceCommand.CHANGE -> "Change"
 }
 
 /**
@@ -626,13 +418,13 @@ private fun AccessCard(failure: Failure, correct: () -> Unit, retry: () -> Unit,
 }
 
 private fun statusText(status: PreviewStatus): String = when (status) {
-    PreviewStatus.Idle -> "Ready to start"
+    PreviewStatus.Idle -> "Ready to check"
     PreviewStatus.Starting -> "Checking access and deck…"
-    PreviewStatus.CardReady -> "Card ready"
-    PreviewStatus.Exhausted -> "Queue exhausted"
-    is PreviewStatus.Paused -> status.failure?.let { "Paused · ${it.mode.specName}" } ?: "Paused · Tap Resume to continue"
-    PreviewStatus.Stopped -> "Stopped"
+    PreviewStatus.CardReady -> "Deck check: a card is ready"
+    PreviewStatus.Exhausted -> "Deck check: queue exhausted"
+    is PreviewStatus.Paused -> status.failure?.let { "Deck check paused · ${it.mode.specName}" } ?: "Deck check paused · check again"
+    PreviewStatus.Stopped -> "Deck check stopped"
     PreviewStatus.Unavailable -> "Study unavailable"
-    PreviewStatus.IneligibleLimit -> "Stopped · too many unstudiable cards"
-    PreviewStatus.OutcomeUnknown -> "Stopped · an earlier review could not be confirmed"
+    PreviewStatus.IneligibleLimit -> "Deck check stopped · too many unstudiable cards"
+    PreviewStatus.OutcomeUnknown -> "Blocked · an earlier review could not be confirmed"
 }

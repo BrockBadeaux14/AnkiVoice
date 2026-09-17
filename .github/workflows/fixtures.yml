@@ -30,3 +30,6 @@ jobs:
       # AV-019: every live review was written from an explicit confirmation, and the two
       # cases that must not write left the collection alone.
       - run: python tools/av019-qa/validate.py
+      # AV-026: every live study turn is judged from the collection's own revlog and the
+      # controller's evidence export, and no-write turns left the card alone.
+      - run: python tools/av026-qa/validate.py
