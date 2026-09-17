@@ -132,6 +132,17 @@ samples zero, the zeros being the HAL's own 16 ms silence inserts — so the pat
 stuttering rather than dead, which is also what an intermittently dropped spoken capture
 would look like from the app's side.
 
+Probe 3's guest log gives that stutter a shape in time. The HAL inserted silence for the
+first 200 ms after the stream opened (12:45:52.9), then delivered frames on time for about
+three seconds with no inserts at all (12:45:53–56), then at 12:45:56.7 hit its first I/O
+error and from there inserted silence about 62 times a second — continuously, 16 ms at a
+time — until the stream stopped at 12:46:01. The host path opened, ran for three seconds,
+and died in the middle of the window. A phrase spoken before that point would have arrived
+whole and one spoken after it would have arrived as nothing, which is the signature the
+AV-019 drops had from the app's side. Throughout, macOS reported the headset's input at
+16 kHz, its hands-free profile, so the host had switched the headset to its microphone; what
+it then fed the emulator's input voice is what died.
+
 What it does not yet say is **why** the host path delivered nothing on that boot. The
 host's default input device was the Bluetooth headset for both probes, whereas every
 earlier run that received audio used the MacBook Pro microphone; `-allow-host-audio` was
