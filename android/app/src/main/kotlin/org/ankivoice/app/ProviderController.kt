@@ -1,13 +1,16 @@
 package org.ankivoice.app
 
+import java.math.BigDecimal
 import java.util.concurrent.Executor
 import org.ankivoice.provider.CredentialStore
 import org.ankivoice.provider.Diagnostics
 import org.ankivoice.provider.GradingProvider
+import org.ankivoice.provider.GradingRoute
 import org.ankivoice.provider.LedgerStop
 import org.ankivoice.provider.ProviderOutcome
 import org.ankivoice.provider.ProviderSettings
 import org.ankivoice.provider.QuotaLedger
+import org.ankivoice.provider.RouteStart
 import org.ankivoice.provider.SessionStart
 
 /** The learner's provider settings, held in `:app`'s private preferences. */
@@ -23,6 +26,10 @@ internal data class ProviderState(
     val sessionRemaining: Int = QuotaLedger.SESSION_LIMIT,
     val dailyRemaining: Int = QuotaLedger.DEFAULT_DAILY_LIMIT,
     val stop: LedgerStop? = null,
+    /** AV-043: the paid route's day — the owner's cap, what is spent so far, and any paid-only stop. */
+    val dailyCapUsd: BigDecimal = QuotaLedger.DEFAULT_DAILY_CAP_USD,
+    val spentTodayUsd: BigDecimal = BigDecimal.ZERO,
+    val paidStop: LedgerStop? = null,
     val retainContent: Boolean = false,
     val diagnostics: List<String> = emptyList(),
     val busy: Boolean = false,
@@ -31,11 +38,15 @@ internal data class ProviderState(
 ) {
     /** Grading needs a key and an acknowledged disclosure; self-grading never does. */
     val gradingConfigured: Boolean get() = keyPresent && disclosureAcknowledged
+
+    /** A cap of zero turns the paid route off. */
+    val paidEnabled: Boolean get() = dailyCapUsd.signum() > 0
 }
 
 /**
  * AV-020's settings surface: runtime credential entry, the retention disclosure, the
- * configurable daily limit and the content-free diagnostics.
+ * configurable daily limit and the content-free diagnostics. AV-043 adds the paid route's
+ * daily cap, today's spend and the paid route's own stop reason.
  *
  * Network work runs on [worker] and results come back on [delivery], as in AV-023's deck
  * access. Nothing here submits or implies a rating, and no state ever holds the key: the
@@ -59,7 +70,8 @@ internal class ProviderController(
     }
 
     fun refresh(message: String? = null, busy: Boolean = false) {
-        val allowance = ledger.allowance(SETTINGS_SESSION, settings.dailyLimit)
+        val allowance = ledger.allowance(SETTINGS_SESSION, settings.dailyLimit, GradingRoute.FREE)
+        val budget = ledger.budget(settings.dailyCapUsd)
         publish(
             ProviderState(
                 keyPresent = credentials.present(),
@@ -68,6 +80,10 @@ internal class ProviderController(
                 sessionRemaining = allowance.sessionRemaining,
                 dailyRemaining = allowance.dailyRemaining,
                 stop = allowance.stop,
+                dailyCapUsd = settings.dailyCapUsd,
+                spentTodayUsd = budget.spentTodayUsd,
+                // A stop that applies to every route is already shown beside the request counters.
+                paidStop = budget.stop?.takeIf { it != allowance.stop },
                 retainContent = settings.retainContent,
                 diagnostics = diagnostics.entries().map(Diagnostics.Entry::toString),
                 busy = busy,
@@ -113,6 +129,21 @@ internal class ProviderController(
         refresh("Daily limit set to $limit requests.")
     }
 
+    /** AV-043: the paid route's daily cap in USD. Zero turns the paid route off. */
+    fun setDailyCap(entered: String) {
+        val cap = QuotaLedger.parseDailyCap(entered)
+        if (cap == null) {
+            refresh("Choose a daily paid budget from \$0 to \$${QuotaLedger.formatUsd(QuotaLedger.MAX_DAILY_CAP_USD)}, in dollars and cents.")
+            return
+        }
+        settings.dailyCapUsd = cap
+        diagnostics.record("dailyCapSet", detail = "usd=${QuotaLedger.formatUsd(cap)}")
+        refresh(
+            if (cap.signum() == 0) "Paid route off: the daily budget is \$0. The free route and self-grading stay available."
+            else "Daily paid budget set to \$${QuotaLedger.formatUsd(cap)}. It is a ceiling, not a target; the free route is always tried first.",
+        )
+    }
+
     fun setRetainContent(retain: Boolean) {
         settings.retainContent = retain
         diagnostics.retainContent = retain
@@ -128,26 +159,51 @@ internal class ProviderController(
         refresh("Diagnostics cleared.")
     }
 
-    /** The pre-session zero-price check. It is not a grading request and reserves nothing. */
+    /** The pre-session price checks for both routes. They are not grading requests and reserve nothing. */
     fun checkRoute() = background {
         when (val start = grading.startSession(SETTINGS_SESSION)) {
-            is SessionStart.Ready -> "Free route verified: ${start.endpointName}. ${start.allowance.dailyRemaining} requests left today."
-            is SessionStart.Unavailable -> listOf(start.cause.reason, start.detail).filter { it.isNotEmpty() }.joinToString(" ")
+            is SessionStart.Ready -> {
+                val budget = grading.budget()
+                describe(start.routes) + " ${start.allowance.dailyRemaining} requests left today; " +
+                    "\$${QuotaLedger.formatUsd(budget.spentTodayUsd, 4)} of \$${QuotaLedger.formatUsd(budget.capUsd)} spent."
+            }
+            is SessionStart.Unavailable ->
+                if (start.routes.isEmpty()) listOf(start.cause.reason, start.detail).filter { it.isNotEmpty() }.joinToString(" ")
+                else describe(start.routes)
         }
     }
 
     /**
-     * One live request with a fixed sample, for the recorded smoke run. It carries no
-     * card, transcript or collection data, and it consumes the ledger like any request.
+     * One live request with a fixed sample over [route], for the recorded smoke runs. It
+     * carries no card, transcript or collection data, and it consumes the ledger — and,
+     * on the paid route, the budget — like any request.
      */
-    fun sendSmokeRequest() = background {
+    fun sendSmokeRequest(route: GradingRoute = GradingRoute.FREE) = background {
         when (val start = grading.startSession(SETTINGS_SESSION)) {
             is SessionStart.Unavailable -> listOf(start.cause.reason, start.detail).filter { it.isNotEmpty() }.joinToString(" ")
-            is SessionStart.Ready -> when (val outcome = grading.request(SETTINGS_SESSION, SMOKE_SYSTEM, SMOKE_USER)) {
-                is ProviderOutcome.Content -> "The route answered at a verified zero cost. ${outcome.text.take(80)}"
-                is ProviderOutcome.Failed -> "No grade: ${outcome.failure}. Self-grading stays available."
+            is SessionStart.Ready -> {
+                val before = grading.budget().spentTodayUsd
+                when (val outcome = grading.request(SETTINGS_SESSION, SMOKE_SYSTEM, SMOKE_USER, route = route)) {
+                    is ProviderOutcome.Content -> {
+                        val cost = when (outcome.route) {
+                            GradingRoute.FREE -> "at a verified zero cost"
+                            GradingRoute.PAID -> "for \$${QuotaLedger.formatUsd(grading.budget().spentTodayUsd - before, 4)}"
+                        }
+                        "The ${outcome.route.specName} route answered $cost. ${outcome.text.take(80)}"
+                    }
+                    is ProviderOutcome.Failed -> "No grade from the ${route.specName} route: ${outcome.failure}. Self-grading stays available."
+                }
             }
         }
+    }
+
+    private fun describe(routes: List<RouteStart>): String = routes.joinToString(" ") { route ->
+        val name = when (route.route) {
+            GradingRoute.FREE -> "Free route"
+            GradingRoute.PAID -> "Paid route"
+        }
+        if (route.ready) "$name verified: ${route.endpointName}."
+        else listOf("$name off:", route.cause?.reason.orEmpty(), route.detail).filter { it.isNotEmpty() }.joinToString(" ")
     }
 
     private fun background(operation: () -> String) {

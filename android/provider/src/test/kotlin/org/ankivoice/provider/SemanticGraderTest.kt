@@ -1,5 +1,6 @@
 package org.ankivoice.provider
 
+import java.math.BigDecimal
 import org.ankivoice.core.contracts.Failure
 import org.ankivoice.core.contracts.GradeLabel
 import org.ankivoice.core.contracts.GraderFailure
@@ -22,7 +23,8 @@ import java.io.File
  *
  * Every rejection is a #7 `Grader` failure that keeps the card and falls back to an
  * explicit self-grade. Nothing in this file writes a review or proposes a rating the
- * card does not permit.
+ * card does not permit. AV-043's route tests are at the end: the paid route is tried
+ * only after the free route is refused, unavailable, timed out or failed.
  */
 class SemanticGraderTest {
     @TempDir
@@ -33,66 +35,101 @@ class SemanticGraderTest {
     private var revision = 1
     private val token = OperationToken("session-a", turn = 1, sequence = 4)
     private val permitted = listOf(1, 2, 3, 4)
+    private val pin = PaidRoute.PINNED
 
     private class FakeSettings(
         override var dailyLimit: Int = 50,
         override var disclosureAcknowledged: Boolean = true,
+        override var dailyCapUsd: BigDecimal = BigDecimal.ZERO,
     ) : ProviderSettings
 
-    /** A scripted sequence of completions; the last one repeats once the script runs out. */
+    /**
+     * Scripted completions per route; the last one repeats once a script runs out. Posts
+     * are told apart by the model in the body, so a paid dispatch is always visible.
+     */
     private class FakeTransport(
-        private val completions: MutableList<HttpResult>,
+        private val free: MutableList<HttpResult>,
+        private val paid: MutableList<HttpResult> = mutableListOf(paidGrade("correct")),
         var priceCheck: HttpResult = ok(ENDPOINTS),
+        var paidPriceCheck: HttpResult = ok(PAID_ENDPOINTS),
         val onPost: () -> Unit = {},
     ) : HttpTransport {
-        constructor(vararg completions: HttpResult, onPost: () -> Unit = {}) :
-            this(completions.toMutableList(), onPost = onPost)
+        constructor(vararg free: HttpResult, onPost: () -> Unit = {}) :
+            this(free.toMutableList(), onPost = onPost)
 
         val posts = mutableListOf<String>()
         val deadlines = mutableListOf<Int>()
 
-        override fun get(url: String, key: String, timeoutMs: Int): HttpResult = priceCheck
+        fun freePosts() = posts.filter { it.contains(""""model":"${FreeRoute.MODEL}"""") }
+        fun paidPosts() = posts.filter { it.contains(""""model":"${PaidRoute.PINNED.model}"""") }
+
+        override fun get(url: String, key: String, timeoutMs: Int): HttpResult =
+            if (url == FreeRoute.endpointsUrl) priceCheck else paidPriceCheck
 
         override fun post(url: String, key: String, body: String, timeoutMs: Int): HttpResult {
             posts += body
             deadlines += timeoutMs
             onPost()
-            return if (completions.size > 1) completions.removeAt(0) else completions.first()
+            val script = if (body.contains(""""model":"${FreeRoute.MODEL}"""")) free else paid
+            return if (script.size > 1) script.removeAt(0) else script.first()
         }
 
         companion object {
             fun ok(body: String) = HttpResult.Response(200, body)
 
             val ENDPOINTS = """{"data":{"id":"${FreeRoute.MODEL}","endpoints":[
-                {"name":"Liquid | fp8","tag":"${FreeRoute.PROVIDER}","pricing":{"prompt":"0","completion":"0"}}]}}"""
+                {"name":"Liquid | fp8","provider_name":"Liquid","tag":"${FreeRoute.PROVIDER}","pricing":{"prompt":"0","completion":"0"}}]}}"""
+
+            val PAID_ENDPOINTS = """{"data":{"id":"${PaidRoute.PINNED.model}","endpoints":[
+                {"name":"OpenAI | paid","provider_name":"OpenAI","tag":"${PaidRoute.PINNED.provider}",
+                 "pricing":{"prompt":"${PaidRoute.PINNED.promptUsdPerToken.toPlainString()}",
+                            "completion":"${PaidRoute.PINNED.completionUsdPerToken.toPlainString()}"}}]}}"""
 
             /** An envelope #17 accepts, carrying [content] as the model's reply text. */
-            fun reply(content: String, finish: String = "stop") =
+            fun reply(content: String, finish: String = "stop", provider: String = "Liquid") =
                 ok(
-                    """{"model":"${FreeRoute.MODEL}","provider":"${FreeRoute.PROVIDER}","usage":{"cost":0},
+                    """{"model":"${FreeRoute.MODEL}","provider":"$provider","usage":{"cost":0},
                        "choices":[{"finish_reason":"$finish","message":{"content":${Json.write(content)}}}]}""",
                 )
 
             fun grade(label: String, reason: String = "the learner named all three colours") =
                 reply(Json.write(linkedMapOf("label" to label, "reason" to reason)))
+
+            fun paidReply(content: String, finish: String = "stop", usage: String = """{"cost":0.0000318}""", model: String = PaidRoute.PINNED.model) =
+                ok(
+                    """{"model":"$model","provider":"OpenAI","usage":$usage,
+                       "choices":[{"finish_reason":"$finish","message":{"content":${Json.write(content)}}}]}""",
+                )
+
+            fun paidGrade(label: String, reason: String = "the paid grader read the same answer", usage: String = """{"cost":0.0000318}""") =
+                paidReply(Json.write(linkedMapOf("label" to label, "reason" to reason)), usage = usage)
         }
     }
 
+    /**
+     * A session with the free route alone, which is AV-016's policy as it was before
+     * AV-043; the route tests pass a cap to turn the paid fallback on.
+     */
     private fun session(
         transport: FakeTransport,
         settings: FakeSettings = FakeSettings(),
     ): Pair<SemanticGrader, FakeTransport> {
-        val ledger = QuotaLedger(File(directory, "ledger.jsonl")) { now }
-        val provider = GradingProvider(
-            InMemoryCredentialStore(key),
-            ledger,
-            settings,
-            transport,
-            Diagnostics(clock = { now }),
-        ) { now * 1_000_000 }
+        val provider = provider(transport, settings)
         provider.startSession("s1")
         return SemanticGrader(provider, "s1") { revision } to transport
     }
+
+    private fun provider(transport: FakeTransport, settings: FakeSettings = FakeSettings()): GradingProvider =
+        GradingProvider(
+            InMemoryCredentialStore(key),
+            QuotaLedger(File(directory, "ledger.jsonl")) { now },
+            settings,
+            transport,
+            Diagnostics(clock = { now }),
+            { now * 1_000_000 },
+        )
+
+    private fun withPaid(cap: String = "1.00") = FakeSettings(dailyCapUsd = BigDecimal(cap))
 
     private fun context(
         learnerAnswer: String = "It is a mix of several things",
@@ -105,7 +142,9 @@ class SemanticGraderTest {
     private fun request(context: GradingContext = context(), revision: Int = this.revision) =
         GradingRequest(token, revision, context)
 
-    private fun reserved(): Int = QuotaLedger(File(directory, "ledger.jsonl")) { now }.counts("s1")["reservedTotal"] ?: 0
+    private fun ledger() = QuotaLedger(File(directory, "ledger.jsonl")) { now }
+
+    private fun reserved(): Int = ledger().counts("s1")["reservedTotal"] ?: 0
 
     private fun assertGraded(grading: TurnGrading): GradingSuggestion {
         assertTrue(grading is TurnGrading.Graded, "expected a label, got $grading")
@@ -130,13 +169,14 @@ class SemanticGraderTest {
 
     @Test
     fun `a rule-matched transcript issues no request and reserves no quota`() {
-        val (grader, transport) = session(FakeTransport(FakeTransport.grade("incorrect")))
+        val (grader, transport) = session(FakeTransport(FakeTransport.grade("incorrect")), withPaid())
         val suggestion = assertGraded(grader.suggest(request(context(learnerAnswer = "Green blue red")), permitted))
         assertEquals(GradingSource.RULE, suggestion.source)
         assertEquals(GradeLabel.CORRECT, suggestion.result.label)
         assertEquals(3, suggestion.proposedRating)
         assertEquals(emptyList<String>(), transport.posts)
         assertEquals(0, reserved())
+        assertNull(grader.lastRoute)
     }
 
     @Test
@@ -146,6 +186,7 @@ class SemanticGraderTest {
         assertEquals(GradingSource.AI, suggestion.source)
         assertEquals(1, transport.posts.size)
         assertEquals(1, reserved())
+        assertEquals(GradingRoute.FREE, grader.lastRoute)
     }
 
     // The request
@@ -346,10 +387,11 @@ class SemanticGraderTest {
 
     @Test
     fun `a rejected key is terminal and is never retried`() {
-        val (grader, transport) = session(FakeTransport(HttpResult.Response(401, "denied")))
+        val (grader, transport) = session(FakeTransport(HttpResult.Response(401, "denied")), withPaid())
         val failure = assertUngraded(grader.suggest(request(), permitted))
         assertEquals(GraderFailure.PROVIDER_ERROR, failure.mode)
         assertEquals(1, transport.posts.size)
+        assertEquals(emptyList<String>(), transport.paidPosts(), "one key serves both routes")
         assertEquals(GradingUnavailable.KEY_REJECTED, grader.unavailable)
     }
 
@@ -375,10 +417,11 @@ class SemanticGraderTest {
     @Test
     fun `a transcript edited mid-flight abandons the attempt instead of retrying it`() {
         val transport = FakeTransport(mutableListOf(HttpResult.Timeout), onPost = { revision += 1 })
-        val (grader, _) = session(transport)
+        val (grader, _) = session(transport, withPaid())
         val graded = grader.suggest(request(revision = 1), permitted)
         assertEquals(TurnGrading.Superseded, graded)
         assertEquals(1, transport.posts.size)
+        assertEquals(emptyList<String>(), transport.paidPosts(), "an edit is not carried to the paid route")
         assertEquals(1, reserved())
     }
 
@@ -397,12 +440,155 @@ class SemanticGraderTest {
 
     @Test
     fun `a withdrawn request is never dispatched`() {
-        val (grader, transport) = session(FakeTransport(FakeTransport.grade("correct")))
+        val (grader, transport) = session(FakeTransport(FakeTransport.grade("correct")), withPaid())
         val withdrawn = request()
         grader.cancel(withdrawn)
         val failure = assertUngraded(grader.suggest(withdrawn, permitted))
         assertEquals(GraderFailure.PROVIDER_ERROR, failure.mode)
         assertEquals(emptyList<String>(), transport.posts)
         assertEquals(0, reserved())
+    }
+
+    // AV-043: free first, paid only after the free route is refused, unavailable, timed out or failed
+
+    @Test
+    fun `the paid route is not attempted while the free route succeeds`() {
+        val (grader, transport) = session(FakeTransport(FakeTransport.grade("partial")), withPaid())
+        val suggestion = assertGraded(grader.suggest(request(), permitted))
+        assertEquals(GradeLabel.PARTIAL, suggestion.result.label)
+        assertEquals(GradingRoute.FREE, grader.lastRoute)
+        assertEquals(1, transport.freePosts().size)
+        assertEquals(emptyList<String>(), transport.paidPosts())
+        assertEquals(1, reserved())
+        assertTrue(ledger().budget(BigDecimal("1.00")).spentTodayUsd.signum() == 0)
+    }
+
+    @Test
+    fun `the paid route is tried after the free guard refuses a reply`() {
+        val foreign = FakeTransport.grade("correct").let { it.copy(body = it.body.replace(""""provider":"Liquid"""", """"provider":"novita"""")) }
+        val (grader, transport) = session(FakeTransport(mutableListOf(foreign)), withPaid())
+        val suggestion = assertGraded(grader.suggest(request(), permitted))
+        assertEquals(GradingSource.AI, suggestion.source)
+        assertEquals("the paid grader read the same answer", suggestion.result.reason)
+        assertEquals(GradingRoute.PAID, grader.lastRoute)
+        assertEquals(1, transport.freePosts().size, "a guard refusal is terminal for the free route: no free retry")
+        assertEquals(1, transport.paidPosts().size)
+        assertNull(grader.unavailable, "grading stays available through the paid route")
+        assertEquals(LedgerStop.COST_NOT_VERIFIED, ledger().stopToday(GradingRoute.FREE))
+    }
+
+    @Test
+    fun `the paid route is tried when the free route was unavailable at session start`() {
+        val changed = """{"data":{"id":"${FreeRoute.MODEL}","endpoints":[
+            {"name":"n","tag":"${FreeRoute.PROVIDER}","pricing":{"prompt":"0.2","completion":"0"}}]}}"""
+        val transport = FakeTransport(mutableListOf(FakeTransport.grade("correct")), priceCheck = FakeTransport.ok(changed))
+        val (grader, _) = session(transport, withPaid())
+        assertEquals(GradeLabel.CORRECT, assertGraded(grader.suggest(request(), permitted)).result.label)
+        assertEquals(emptyList<String>(), transport.freePosts())
+        assertEquals(1, transport.paidPosts().size)
+        assertEquals(GradingRoute.PAID, grader.lastRoute)
+    }
+
+    @Test
+    fun `the paid route is tried after the free route times out twice`() {
+        val (grader, transport) = session(FakeTransport(HttpResult.Timeout), withPaid())
+        assertEquals(GradeLabel.CORRECT, assertGraded(grader.suggest(request(), permitted)).result.label)
+        // The free route had its attempt and its one retry before any paid request was sent.
+        assertEquals(2, transport.freePosts().size)
+        assertEquals(1, transport.paidPosts().size)
+        assertEquals(listOf(FreeRoute.MODEL, FreeRoute.MODEL, pin.model), transport.posts.map { Json.parse(it).asObject()?.child("model") })
+        assertEquals(3, reserved())
+    }
+
+    @Test
+    fun `the paid route is tried after two invalid free replies and after a free rate limit`() {
+        val (invalid, transport) = session(FakeTransport(FakeTransport.reply("not json")), withPaid())
+        assertGraded(invalid.suggest(request(), permitted))
+        assertEquals(2, transport.freePosts().size)
+        assertEquals(1, transport.paidPosts().size)
+
+        File(directory, "ledger.jsonl").delete()
+        val (limited, limitedTransport) = session(FakeTransport(HttpResult.Response(429, "slow down")), withPaid())
+        assertGraded(limited.suggest(request(), permitted))
+        assertEquals(1, limitedTransport.freePosts().size, "a 429 is terminal for the free route")
+        assertEquals(1, limitedTransport.paidPosts().size)
+        assertEquals(LedgerStop.RATE_LIMITED, ledger().stopToday(GradingRoute.FREE))
+        assertNull(ledger().stopToday(GradingRoute.PAID))
+    }
+
+    @Test
+    fun `the paid route has its own single retry and a turn never exceeds four reservations`() {
+        val recovered = FakeTransport(mutableListOf(HttpResult.Timeout), paid = mutableListOf(HttpResult.Timeout, FakeTransport.paidGrade("incorrect")))
+        val (grader, _) = session(recovered, withPaid())
+        assertEquals(GradeLabel.INCORRECT, assertGraded(grader.suggest(request(), permitted)).result.label)
+        assertEquals(2, recovered.freePosts().size)
+        assertEquals(2, recovered.paidPosts().size)
+        assertEquals(listOf(20_000, 20_000, 20_000, 20_000), recovered.deadlines)
+        assertEquals(4, reserved())
+
+        File(directory, "ledger.jsonl").delete()
+        val exhausted = FakeTransport(mutableListOf(HttpResult.Timeout), paid = mutableListOf(HttpResult.Timeout))
+        val (failing, _) = session(exhausted, withPaid())
+        val failure = assertUngraded(failing.suggest(request(), permitted))
+        assertEquals(GraderFailure.GRADER_TIMEOUT, failure.mode)
+        assertEquals(GradingRoute.PAID, failing.lastRoute)
+        assertEquals(4, exhausted.posts.size)
+        assertEquals(4, reserved())
+        // Both timed-out paid attempts keep their holds as spend.
+        assertTrue(ledger().budget(BigDecimal("1.00")).spentTodayUsd.compareTo(pin.ceilingUsd * BigDecimal(2)) == 0)
+    }
+
+    @Test
+    fun `a zero cap disables the paid route and the free failure is what the learner sees`() {
+        val (grader, transport) = session(FakeTransport(HttpResult.Timeout), FakeSettings(dailyCapUsd = BigDecimal.ZERO))
+        val failure = assertUngraded(grader.suggest(request(), permitted))
+        assertEquals(GraderFailure.GRADER_TIMEOUT, failure.mode)
+        assertEquals(GradingRoute.FREE, grader.lastRoute)
+        assertEquals(2, transport.freePosts().size)
+        assertEquals(emptyList<String>(), transport.paidPosts())
+        assertEquals(2, reserved())
+    }
+
+    @Test
+    fun `a spent budget stops the paid route without a dispatch`() {
+        val costly = FakeTransport(
+            mutableListOf(HttpResult.Response(429, "no")),
+            paid = mutableListOf(FakeTransport.paidGrade("correct", usage = """{"cost":0.0095}""")),
+        )
+        val (grader, _) = session(costly, withPaid("0.01"))
+        // First turn: the free route is rate-limited, the paid route grades at $0.0095.
+        assertEquals(GradeLabel.CORRECT, assertGraded(grader.suggest(request(), permitted)).result.label)
+        assertTrue(ledger().budget(BigDecimal("0.01")).spentTodayUsd.compareTo(BigDecimal("0.0095")) == 0)
+        // Second turn: another paid request would pass the cap, so nothing is dispatched anywhere.
+        val failure = assertUngraded(grader.suggest(request(), permitted))
+        assertEquals(GraderFailure.QUOTA_EXHAUSTED, failure.mode)
+        assertEquals(1, costly.paidPosts().size)
+        assertEquals(1, costly.freePosts().size)
+        assertEquals(LedgerStop.BUDGET_EXHAUSTED, ledger().stopToday(GradingRoute.PAID))
+        assertEquals(GradingUnavailable.QUOTA, grader.unavailable, "every route is off for this session")
+    }
+
+    @Test
+    fun `a paid reply from another model is refused, charged, and never a label`() {
+        val wrongModel = FakeTransport.paidGrade("correct").let { it.copy(body = it.body.replace(""""model":"${pin.model}"""", """"model":"openai/gpt-4.1-mini"""")) }
+        val transport = FakeTransport(mutableListOf(HttpResult.Response(429, "no")), paid = mutableListOf(wrongModel))
+        val (grader, _) = session(transport, withPaid())
+        val failure = assertUngraded(grader.suggest(request(), permitted))
+        assertEquals(GraderFailure.PROVIDER_ERROR, failure.mode)
+        assertTrue(failure.detail.contains("not the pinned paid model"), failure.detail)
+        assertEquals(1, transport.paidPosts().size, "a refused paid reply is terminal for the route")
+        assertTrue(ledger().budget(BigDecimal("1.00")).spentTodayUsd.compareTo(BigDecimal("0.0000318")) == 0)
+        assertEquals(GradingRoute.PAID, grader.lastRoute)
+    }
+
+    @Test
+    fun `a paid label is bound to the revision and mapped like any other`() {
+        val transport = FakeTransport(mutableListOf(HttpResult.Response(429, "no")), paid = mutableListOf(FakeTransport.paidGrade("partial")))
+        val (grader, _) = session(transport, withPaid())
+        val suggestion = assertGraded(grader.suggest(request(), permitted))
+        assertEquals(GradingSource.AI, suggestion.source)
+        assertEquals(GradeLabel.PARTIAL, suggestion.result.label)
+        assertNull(suggestion.proposedRating, "partial proposes nothing on either route")
+        assertEquals(1, suggestion.transcriptRevision)
     }
 }

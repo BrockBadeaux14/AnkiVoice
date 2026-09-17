@@ -47,9 +47,11 @@ aapt2 dump xmltree --file AndroidManifest.xml app/build/outputs/apk/release/app-
 
 ## 3. Check the route, then send one request
 
-1. Press **Check the free route**. This is the pre-session zero-price check: it sends no
-   grading request and reserves nothing. Capture `route-check.png` and copy the reported
-   endpoint name into `smoke-request.json`.
+1. Press **Check the routes** (labelled **Check the free route** before AV-043). This is
+   the pre-session zero-price check: it sends no grading request and reserves nothing.
+   Since AV-043 it also checks the paid route's listed prices, and the line names both
+   routes. Capture `route-check.png` and copy the reported free endpoint name into
+   `smoke-request.json`.
 2. Copy the ledger before the request:
 
    ```sh
@@ -57,8 +59,10 @@ aapt2 dump xmltree --file AndroidManifest.xml app/build/outputs/apk/release/app-
      > docs/testing/av020/evidence/ledger-before.jsonl
    ```
 
-3. Press **Send one test request**. It sends a fixed sample — no card, transcript or
-   collection data — and consumes exactly one reservation.
+3. Press **Send one free test request** (**Send one test request** before AV-043). It
+   sends a fixed sample — no card, transcript or collection data — and consumes exactly
+   one reservation. The paid test request beside it is AV-043's and is not part of this
+   run.
 4. Capture `smoke-result.png`, then copy the ledger again to `ledger-after.jsonl`.
 5. Write `smoke-request.json` with the observed values:
 

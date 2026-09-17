@@ -2,6 +2,7 @@ package org.ankivoice.app
 
 import android.app.Application
 import android.content.Context
+import java.math.BigDecimal
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import org.ankivoice.ankidroid.AndroidAccessPlatform
@@ -179,6 +180,13 @@ private class PrivateProviderSettings(context: Context) : AppProviderSettings {
     override var disclosureAcknowledged: Boolean
         get() = preferences.getBoolean("disclosure_acknowledged", false)
         set(value) { preferences.edit().putBoolean("disclosure_acknowledged", value).apply() }
+    // AV-043: the paid route's daily cap, kept as its exact decimal text; an unreadable
+    // value falls back to the default rather than to an unbounded budget.
+    override var dailyCapUsd: BigDecimal
+        get() = preferences.getString("daily_cap_usd", null)?.let(QuotaLedger::parseDailyCap) ?: QuotaLedger.DEFAULT_DAILY_CAP_USD
+        set(value) {
+            if (QuotaLedger.isValidDailyCap(value)) preferences.edit().putString("daily_cap_usd", value.toPlainString()).apply()
+        }
     override var retainContent: Boolean
         get() = preferences.getBoolean("retain_content", false)
         set(value) { preferences.edit().putBoolean("retain_content", value).apply() }

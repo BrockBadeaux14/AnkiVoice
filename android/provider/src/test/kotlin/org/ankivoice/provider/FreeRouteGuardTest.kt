@@ -13,8 +13,11 @@ class FreeRouteGuardTest {
         tag: String = FreeRoute.PROVIDER,
         pricing: String = """{"prompt":"0","completion":"0","request":"0","image":"0"}""",
         extra: String = "",
+        providerName: String? = "Liquid",
     ) = Json.parse(
-        """{"data":{"id":"$id","endpoints":[{"name":"Liquid | fp8","tag":"$tag","pricing":$pricing}$extra]}}""",
+        """{"data":{"id":"$id","endpoints":[{"name":"Liquid | fp8",""" +
+            (providerName?.let { """"provider_name":"$it",""" } ?: "") +
+            """"tag":"$tag","pricing":$pricing}$extra]}}""",
     )
 
     private fun reply(
@@ -24,6 +27,11 @@ class FreeRouteGuardTest {
     ) = Json.parse("""{"model":"$model","provider":"$provider","usage":$usage,"choices":[]}""")
 
     private fun refusal(check: RouteCheck): String = assertInstanceOf(RouteCheck.Refused::class.java, check).reason
+
+    private fun allowed(check: RouteCheck): RouteCheck.Allowed = assertInstanceOf(RouteCheck.Allowed::class.java, check)
+
+    /** The identities the listing gives the pinned endpoint: what a session passes to the reply check. */
+    private val listed: Set<String> get() = allowed(FreeRoute.priceCheck(endpoints())).providers
 
     @Test
     fun `the payload pins the free model, provider and output limits`() {
@@ -66,9 +74,14 @@ class FreeRouteGuardTest {
     }
 
     @Test
-    fun `a zero-priced pinned endpoint is allowed`() {
-        assertEquals(RouteCheck.Allowed("Liquid | fp8"), FreeRoute.priceCheck(endpoints()))
-        assertEquals(RouteCheck.Allowed("Liquid | fp8"), FreeRoute.priceCheck(endpoints(pricing = """{"prompt":0,"completion":0.0}""")))
+    fun `a zero-priced pinned endpoint is allowed and carries the listing's identities`() {
+        val check = allowed(FreeRoute.priceCheck(endpoints()))
+        assertEquals("Liquid | fp8", check.endpointName)
+        // The tag is the pin; the provider name is what a completion reply reports. Both come from the listing.
+        assertEquals(setOf(FreeRoute.PROVIDER, "Liquid"), check.providers)
+        assertEquals("Liquid | fp8", allowed(FreeRoute.priceCheck(endpoints(pricing = """{"prompt":0,"completion":0.0}"""))).endpointName)
+        // A listing without a provider name leaves only the tag, which is the pre-AV-043 behaviour.
+        assertEquals(setOf(FreeRoute.PROVIDER), allowed(FreeRoute.priceCheck(endpoints(providerName = null))).providers)
     }
 
     @Test
@@ -97,16 +110,28 @@ class FreeRouteGuardTest {
     }
 
     @Test
+    fun `a reply is accepted whether the provider is reported by name or by tag`() {
+        // AV-017's finding: OpenRouter reports the provider *name* on a reply and the shipped
+        // check compared it with the endpoint *tag*. Both identities now come from the listing.
+        assertEquals("Liquid", allowed(FreeRoute.replyCheck(reply(provider = "Liquid"), listed)).endpointName)
+        assertEquals(FreeRoute.PROVIDER, allowed(FreeRoute.replyCheck(reply(provider = FreeRoute.PROVIDER), listed)).endpointName)
+        // Without the listing's identities only the tag is accepted: the defect, kept as a
+        // documented regression rather than a second hard-coded name.
+        assertEquals("served by Liquid, not the pinned provider", refusal(FreeRoute.replyCheck(reply(provider = "Liquid"))))
+    }
+
+    @Test
     fun `a reply served by a fallback model or provider refuses the route`() {
-        assertTrue(refusal(FreeRoute.replyCheck(reply(model = "openai/gpt-4o"))).contains("not the pinned model"))
+        assertTrue(refusal(FreeRoute.replyCheck(reply(model = "openai/gpt-4o"), listed)).contains("not the pinned model"))
+        assertTrue(refusal(FreeRoute.replyCheck(reply(provider = "novita"), listed)).contains("not the pinned provider"))
         assertTrue(refusal(FreeRoute.replyCheck(reply(provider = "novita"))).contains("not the pinned provider"))
     }
 
     @Test
     fun `a reply without a verified zero cost refuses the route`() {
-        assertEquals("no reported cost", refusal(FreeRoute.replyCheck(reply(usage = """{"total_tokens":12}"""))))
-        assertEquals("reported cost is not zero", refusal(FreeRoute.replyCheck(reply(usage = """{"cost":0.000004}"""))))
-        assertEquals("reported cost is not zero", refusal(FreeRoute.replyCheck(reply(usage = """{"cost":"unknown"}"""))))
-        assertEquals(RouteCheck.Allowed(FreeRoute.PROVIDER), FreeRoute.replyCheck(reply(usage = """{"cost":"0.0"}""")))
+        assertEquals("no reported cost", refusal(FreeRoute.replyCheck(reply(usage = """{"total_tokens":12}"""), listed)))
+        assertEquals("reported cost is not zero", refusal(FreeRoute.replyCheck(reply(usage = """{"cost":0.000004}"""), listed)))
+        assertEquals("reported cost is not zero", refusal(FreeRoute.replyCheck(reply(usage = """{"cost":"unknown"}"""), listed)))
+        assertEquals(FreeRoute.PROVIDER, allowed(FreeRoute.replyCheck(reply(usage = """{"cost":"0.0"}"""), listed)).endpointName)
     }
 }

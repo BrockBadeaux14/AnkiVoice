@@ -11,6 +11,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import org.ankivoice.provider.CredentialPolicy
+import org.ankivoice.provider.GradingRoute
 import org.ankivoice.provider.ProviderModule
 import org.ankivoice.provider.QuotaLedger
 
@@ -26,9 +27,26 @@ internal val DISCLOSURE_NEVER_SENT = listOf(
     "Card or note IDs, deck names, or anything else from your collection",
 )
 
+/**
+ * AV-043: which requests may cost money, the cap, and that a stop never rates a card. The
+ * route names come from the pinned constants, so this text cannot describe a route the
+ * build does not ship.
+ */
+internal val DISCLOSURE_COST: List<String>
+    get() = listOf(
+        "The free route (${ProviderModule.freeRouteDescription}) is always tried first and costs nothing.",
+        "If the free route is refused, unavailable, times out or fails, one paid request may be sent to " +
+            "${ProviderModule.paidRouteDescription}. It is charged to your OpenRouter credits.",
+        "Paid requests stop for the UTC day at the budget you set below: the default is " +
+            "\$${QuotaLedger.formatUsd(QuotaLedger.DEFAULT_DAILY_CAP_USD)}, and \$0 turns the paid route off. " +
+            "Each paid request holds its maximum cost before it is sent, and the reply's own cost replaces the hold.",
+        "A stop — a used-up allowance, a spent budget, or a refused route — never rates a card. You grade yourself instead.",
+    )
+
 internal val DISCLOSURE_LIMITS = listOf(
     "OpenRouter says prompt and output storage is opt-in, and it keeps request metadata.",
     "Liquid's policy permits training on inputs and outputs and promises no fixed short retention.",
+    "The paid route's provider, named above, has its own data policy; its retention was not established by this project.",
     "Speech recognition is Android's own service, signed out. Its retention was not established.",
 )
 
@@ -123,6 +141,8 @@ internal fun DisclosureCard(state: ProviderState, controller: ProviderController
             DISCLOSURE_SENT.forEach { Text("• $it") }
             Text("Never sent:", style = MaterialTheme.typography.titleMedium)
             DISCLOSURE_NEVER_SENT.forEach { Text("• $it") }
+            Text("What may cost money:", style = MaterialTheme.typography.titleMedium)
+            DISCLOSURE_COST.forEach { Text("• $it") }
             Text("Kept on this device:", style = MaterialTheme.typography.titleMedium)
             DISCLOSURE_STORED_ON_DEVICE.forEach { Text("• $it") }
             Text("What is not established:", style = MaterialTheme.typography.titleMedium)
@@ -151,7 +171,7 @@ internal fun QuotaCard(state: ProviderState, controller: ProviderController) {
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 label = { Text("Daily limit") },
-                supportingText = { Text("0 to ${QuotaLedger.MAX_DAILY_LIMIT} requests per UTC day. The default is ${QuotaLedger.DEFAULT_DAILY_LIMIT}.") },
+                supportingText = { Text("0 to ${QuotaLedger.MAX_DAILY_LIMIT} requests per UTC day, free and paid together. The default is ${QuotaLedger.DEFAULT_DAILY_LIMIT}.") },
                 modifier = Modifier.fillMaxWidth(),
             )
             if (limit.toIntOrNull() != state.dailyLimit) {
@@ -160,18 +180,52 @@ internal fun QuotaCard(state: ProviderState, controller: ProviderController) {
                     enabled = limit.isNotBlank() && !state.busy,
                 ) { Text("Save limit") }
             }
+
+            // AV-043: today's paid spend beside the request counters, and the cap that bounds it.
             Text(
-                "Requests are counted before they are sent, so a timed-out request still counts. " +
-                    "Deleting the app's data does not give you more free requests, and AnkiVoice never adds funds, " +
-                    "raises a cap or switches to a paid model.",
+                "Paid fallback: \$${QuotaLedger.formatUsd(state.spentTodayUsd, 4)} of " +
+                    "\$${QuotaLedger.formatUsd(state.dailyCapUsd)} spent today (UTC)." +
+                    if (state.paidEnabled) "" else " The paid route is off.",
+            )
+            state.paidStop?.let { Text(it.reason, color = MaterialTheme.colorScheme.error) }
+            var cap by rememberSaveable(state.dailyCapUsd.toPlainString()) { mutableStateOf(QuotaLedger.formatUsd(state.dailyCapUsd)) }
+            OutlinedTextField(
+                value = cap,
+                onValueChange = { cap = it.filter { c -> c.isDigit() || c == '.' }.take(7) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                label = { Text("Daily paid budget (USD)") },
+                supportingText = {
+                    Text(
+                        "\$0 turns the paid route off. Up to \$${QuotaLedger.formatUsd(QuotaLedger.MAX_DAILY_CAP_USD)} per UTC day; " +
+                            "the default is \$${QuotaLedger.formatUsd(QuotaLedger.DEFAULT_DAILY_CAP_USD)}. The free route is always tried first.",
+                    )
+                },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            if (QuotaLedger.parseDailyCap(cap)?.compareTo(state.dailyCapUsd) != 0) {
+                TextButton(
+                    onClick = { controller.setDailyCap(cap) },
+                    enabled = cap.isNotBlank() && !state.busy,
+                ) { Text("Save budget") }
+            }
+            Text(
+                "Requests are counted before they are sent, so a timed-out request still counts, and a paid request " +
+                    "holds its maximum cost until the reply reports the real one. Deleting the app's data does not give " +
+                    "you more requests or budget. AnkiVoice never adds funds, and never raises this limit or budget on " +
+                    "its own: the paid route is used only within the budget you set here.",
                 style = MaterialTheme.typography.bodySmall,
             )
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedButton(onClick = controller::checkRoute, enabled = !state.busy) { Text("Check the free route") }
-                OutlinedButton(onClick = controller::sendSmokeRequest, enabled = state.gradingConfigured && !state.busy) {
-                    Text("Send one test request")
+                OutlinedButton(onClick = controller::checkRoute, enabled = !state.busy) { Text("Check the routes") }
+                OutlinedButton(onClick = { controller.sendSmokeRequest(GradingRoute.FREE) }, enabled = state.gradingConfigured && !state.busy) {
+                    Text("Send one free test request")
                 }
             }
+            OutlinedButton(
+                onClick = { controller.sendSmokeRequest(GradingRoute.PAID) },
+                enabled = state.gradingConfigured && state.paidEnabled && !state.busy,
+            ) { Text("Send one paid test request") }
             if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
         }
     }
@@ -182,7 +236,7 @@ internal fun DiagnosticsCard(state: ProviderState, controller: ProviderControlle
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text("Diagnostics", style = MaterialTheme.typography.titleLarge)
-            Text("Timings, failure names and request counts only. No secrets, card text, transcripts or audio.", style = MaterialTheme.typography.bodySmall)
+            Text("Timings, failure names, request counts and reported costs only. No secrets, card text, transcripts or audio.", style = MaterialTheme.typography.bodySmall)
             if (state.diagnostics.isEmpty()) {
                 Text("Nothing recorded yet.")
             } else {

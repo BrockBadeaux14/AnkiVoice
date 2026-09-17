@@ -181,24 +181,34 @@ export OPENROUTER_API_KEY=...     # you type this; it is never written down
   --tests '*GradingEvaluationTest*' \
   -Pav017.mode=record \
   -Pav017.out=$PWD/../docs/testing/av017/evidence/<run> \
-  -Pav017.dailyLimit=200
+  -Pav017.dailyLimit=200 \
+  -Pav017.dailyCapUsd=1.00
 ```
 
-**If the run reports `costNotVerified` and every AI answer is ungraded with "served by
-Liquid, not the pinned provider":** that is the shipped route guard comparing the reply's
-provider *name* with the pinned endpoint *tag*, recorded in [results.md](results.md) as a
-finding for #17. It is not an evaluation failure and must not be worked around here —
-neither by loosening `FreeRoute.replyCheck` on this branch nor by editing a transcript.
-Correct it in #17, which changes the frozen configuration, then record a fresh pass in a
-new evidence directory.
+**The route guard finding, and what became of it.** The pass recorded on September 16,
+2026 reported `costNotVerified` on its first reply, with every AI answer ungraded as "served
+by Liquid, not the pinned provider": the shipped guard compared the reply's provider *name*
+with the pinned endpoint *tag*. It is recorded in [results.md](results.md) as a finding, and
+AV-043 (#66) corrected it — both identities are now read from the endpoints listing. Because
+`FreeRoute.kt` is part of the frozen configuration, that correction needs a **new evidence
+directory and a new recorded pass**; the frozen `ai-20260916` run stays as the measurement
+of the build as it was. Never work around a guard here, by loosening a check on an
+evaluation branch or by editing a transcript.
 
-**Quota.** The run reserves one request per answer the rules do not match, through the
-shipped `QuotaLedger`, into `av017-quota-ledger-record.jsonl` in the evidence directory.
-The harness opens a fresh grading session every 14 requests so it stays inside the shipped
-30-request session cap rather than raising it. The **daily** limit is the one you must
-decide: either spread the run across more than one UTC day, or raise
-`-Pav017.dailyLimit` explicitly. Record which you did in `results.md`. Free route only;
-never raise a cap to make a run succeed, and never enable a paid fallback.
+**Quota and budget.** The run reserves one request per dispatch, through the shipped
+`QuotaLedger`, into `av017-quota-ledger-record.jsonl` in the evidence directory. The harness
+opens a fresh grading session every 7 requests so it stays inside the shipped 30-request
+session cap rather than raising it: since AV-043 a turn may dispatch #18's attempt and
+retry on the free route and again on the paid route. The **daily** request limit is the one
+you must decide: either spread the run across more than one UTC day, or raise
+`-Pav017.dailyLimit` explicitly. Record which you did in `results.md`.
+
+Since AV-043 the shipped grader falls through to the pinned paid route when the free route
+is refused, unavailable, timed out or failed, within the cap you pass as
+`-Pav017.dailyCapUsd` (the shipped default is `1.00`; `0` measures the free route alone).
+A recorded pass therefore **can spend money** — the run's `quota.spend_usd` records exactly
+how much, from the ledger's own charges — and the held-out 40 is scored once per freeze
+with whichever cap you chose. Never raise a cap or a budget to make a run succeed.
 
 ## 4. Freeze, replay and score once
 
@@ -212,8 +222,10 @@ Freeze the graded configuration **before** the held-out 40 is scored:
 
 The configuration hash covers the corpus and the shipped sources that decide a label:
 `RuleGrader.kt`, `Suggestions.kt`, `Grading.kt`, `GradingInstruction.kt`,
-`SemanticGrader.kt` and `FreeRoute.kt`. Change any of them and the hash changes, and
-`score.py` refuses to score the held-out answers against the old freeze.
+`SemanticGrader.kt`, `FreeRoute.kt` and, since AV-043, `PaidRoute.kt` and
+`GradingRoute.kt`, plus the route order and the paid pin the run reports. Change any of
+them and the hash changes, and `score.py` refuses to score the held-out answers against
+the old freeze.
 
 Reproduce the scoring offline, with no network, from the recorded transcript:
 

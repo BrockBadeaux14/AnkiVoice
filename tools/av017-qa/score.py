@@ -68,6 +68,11 @@ def measure(answers, label):
     abstentions = [a for a in answers if a["proposedRating"] is None]
     latencies = [a["latencyMs"] for a in answers if a["latencyMs"] is not None]
     agreed = [a for a in answers if a["graderLabel"] == a["humanLabel"]]
+    # AV-043: which route the AI leg ended on. Absent from runs recorded before it existed.
+    routes = {
+        name: sum(1 for a in answers if a.get("route") == name)
+        for name in ("free", "paid")
+    }
 
     return {
         "path": label,
@@ -114,6 +119,7 @@ def measure(answers, label):
             "p50": percentile(latencies, 0.50),
             "p95": percentile(latencies, 0.95),
         },
+        "routes": routes,
     }
 
 
@@ -195,6 +201,14 @@ def score(run, evidence, freeze_now, label, note):
             ),
         },
         "quota": run["quota"],
+        # AV-043: what the paid fallback cost this run, in USD, from the ledger's own record.
+        "spend": {
+            "daily_cap_usd": run["quota"].get("daily_cap_usd"),
+            "spend_usd": run["quota"].get("spend_usd"),
+            "budget_stop": run["quota"].get("budget_stop"),
+            "routes": run.get("routes"),
+            "paid_route": run.get("paid_route"),
+        },
         "gates": {
             "target_error_rate": None,
             "pass_fail": None,

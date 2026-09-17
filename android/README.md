@@ -108,7 +108,7 @@ flowchart TD
 | `:core` | Kotlin/JVM, no Android plugin or dependency | The AV-007 contract port in `org.ankivoice.core.contracts`; AV-012's answer policy in `org.ankivoice.core.answer`; AV-015's rule-based grading in `org.ankivoice.core.grading`; AV-013's session state machine in `org.ankivoice.core.session`; AV-018's journal port and reconciliation policy in `org.ankivoice.core.journal`; the fakes in its `testFixtures` source set | #15, #27 |
 | `:ankidroid` | Android library | Access preflight; `decks` reads and verified `selected_deck` updates | #25, #10 |
 | `:speech` | Android library | AV-025's speech transport: the pinned TTS/recognizer route, the app-owned microphone pipe, and the ordering, cancellation and failure rules behind both AV-007 speech contracts | #13 |
-| `:provider` | Android library | AV-020's credential store, free-route guard, durable quota ledger, content-free diagnostics and the one HTTPS seam | #18 |
+| `:provider` | Android library | AV-020's credential store, free-route guard, durable quota ledger, content-free diagnostics and the one HTTPS seam; AV-016's semantic grader; AV-043's paid fallback route and daily budget | #27 |
 | `:app` | Android application | Single-activity shell, onboarding, private settings, lifecycle delivery, debug sample session and AV-018's durable journal store | #27 |
 
 `checkModuleBoundaries` fails the build when:
@@ -380,18 +380,19 @@ a grade: #18 owns the grading instruction, the reply's content and the label pol
 | Part | What it does |
 | --- | --- |
 | `KeystoreCredentialStore` | The key is entered at runtime, wrapped by a non-exportable Android Keystore AES/GCM key, and held in app-private storage. It is in no `BuildConfig` field, resource, asset or log, and the UI only ever reports *that* a key is saved. It can be replaced or cleared. |
-| `FreeRoute` | AV-006's ported guard. `liquid/lfm-2.5-2.6b:free` through `liquid/fp8`, `allow_fallbacks=false`, zero maximum prompt/completion/request prices, temperature 0, JSON object output, a 1,024-token cap, and no tools, plugins, search or router. Before each session it checks the pinned endpoint for zero prices; changed, nonzero or unknown prices refuse the route. A reply served by another model or provider, or without a verified zero cost, is refused too. |
+| `FreeRoute` | AV-006's ported guard. `liquid/lfm-2.5-2.6b:free` through `liquid/fp8`, `allow_fallbacks=false`, zero maximum prompt/completion/request prices, temperature 0, JSON object output, a 1,024-token cap, and no tools, plugins, search or router. Before each session it checks the pinned endpoint for zero prices; changed, nonzero or unknown prices refuse the route. A reply served by another model or provider, or without a verified zero cost, is refused too. AV-043 corrected the provider comparison: the listing's tag **and** provider name are both accepted, because a reply reports the name (see [Paid grading fallback](#paid-grading-fallback)). |
 | `HttpsUrlTransport` | HTTPS only, and a 3xx is a refusal: the pinned endpoint cannot be moved by a reply. The key travels in the Authorization header and nowhere else. |
-| `QuotaLedger` | Durable, append-only, flushed to the filesystem **before** dispatch, so a timeout or process death still consumes the allowance. At most 30 requests per session and a configurable daily limit, default 50 per UTC day, settable only between 0 and 1,000. A 402, a 429, an unverified cost or a refused route stops grading for the rest of the UTC day. Nothing retries automatically. |
+| `QuotaLedger` | Durable, append-only, flushed to the filesystem **before** dispatch, so a timeout or process death still consumes the allowance. At most 30 requests per session and a configurable daily limit, default 50 per UTC day, settable only between 0 and 1,000, counting free and paid requests together. A 402, a 429, an unverified cost or a refused route stops the route it happened on for the rest of the UTC day; a request-limit stop applies to both. AV-043 adds the paid route's USD spend and cap to the same file. Nothing retries automatically. |
 | `Diagnostics` | Timings, failure names, request and reservation counts, and the reported cost. Every detail passes through `CredentialPolicy.redact`. Keeping transcripts and card text for #29's report is an explicit opt-in, off by default and clearable. No `:provider` API accepts audio bytes, which a test enforces. |
-| `GradingProvider` | Ties them together. A missing key, an unacknowledged disclosure, a guard refusal, an exhausted allowance, a 401/403, a 402/429, a timeout or a provider error each becomes a #7 `Grader` failure (`quotaExhausted`, `providerError`, `graderTimeout`, `outputTruncated`, `unparsableResponse`) or unavailable grading. None is ever a rating; self-grading always remains. |
+| `GradingProvider` | Ties them together, per route. A missing key, an unacknowledged disclosure, a guard refusal, an exhausted allowance or budget, a 401/403, a 402/429, a timeout or a provider error each becomes a #7 `Grader` failure (`quotaExhausted`, `providerError`, `graderTimeout`, `outputTruncated`, `unparsableResponse`) or unavailable grading for that route. None is ever a rating; self-grading always remains. |
 
 `:app` adds the screens to AV-023's shell and its private settings store: credential
-entry, the retention disclosure, the allowance with its configurable daily limit, and the
-diagnostics card. The disclosure lists what is sent (the answer text, Prompt,
-ReferenceAnswer, RequiredConcepts, AcceptedAnswers), what is never sent (audio, Extra,
-card or note IDs, collection data) and the limits AV-006 recorded, and grading stays off
-until it is acknowledged. Replacing the key re-arms it. The wrapped key and the ledger are
+entry, the retention disclosure, the allowance with its configurable daily limit, the
+paid route's daily budget and spend (AV-043), and the diagnostics card. The disclosure
+lists what is sent (the answer text, Prompt, ReferenceAnswer, RequiredConcepts,
+AcceptedAnswers), what is never sent (audio, Extra, card or note IDs, collection data),
+which requests may cost money and the cap that bounds them, that a stop never rates a
+card, and the limits AV-006 recorded, and grading stays off until it is acknowledged. Replacing the key re-arms it. The wrapped key and the ledger are
 excluded from backup and device transfer by
 [`data_extraction_rules.xml`](app/src/main/res/xml/data_extraction_rules.xml), on top of
 `allowBackup="false"`.
@@ -425,12 +426,12 @@ label only ever applies to a transcript the rules could not match.
 | --- | --- |
 | Request | Built from the closed `GradingContext` alone: Prompt, ReferenceAnswer, RequiredConcepts, AcceptedAnswers, language, then `learner_answer` last. Extra, card and note identifiers, deck names and the key are structurally absent rather than filtered out. |
 | Instruction | AV-006's pass-2 text verbatim, then one rubric sentence: with RequiredConcepts every listed concept must be present; without them the answer is graded against ReferenceAnswer and AcceptedAnswers. No deck edit and no new note field is needed. |
-| Decoding | #17's pinned route unchanged: `liquid/lfm-2.5-2.6b:free` through `liquid/fp8`, temperature 0, JSON object output, a 1,024-token cap. |
+| Decoding | #17's pinned route unchanged: `liquid/lfm-2.5-2.6b:free` through `liquid/fp8`, temperature 0, JSON object output, a 1,024-token cap. AV-043's paid route uses the same settings with its own pinned model and prices. |
 | Reply | Accepted only as exactly `{"label", "reason"}` with one of the four labels and a nonblank reason. Empty, malformed, truncated, non-terminating, extra-field, unknown-field and trailing-content replies are rejected. A rejected reply is not a grade: it never becomes `incorrect` or `uncertain`. |
 | Deadline | 20 seconds per attempt, against AV-006's 12.253-second observed maximum. |
 | Retry | Exactly one, automatic, only on a timeout or an invalid reply. |
 | Mapping | The existing `GradeLabel.automaticProposal`: `correct` proposes Good, `incorrect` proposes Again, `partial` and `uncertain` propose nothing. A proposal outside the card's `permittedRatings` is dropped, never substituted. |
-| Failure | Any `GradingUnavailable` cause or `Grader` failure keeps the card and falls back to an explicit self-grade. Nothing writes a review, and no failure switches to a paid or alternative provider. |
+| Failure | Any `GradingUnavailable` cause or `Grader` failure keeps the card and falls back to an explicit self-grade. Nothing writes a review. Since AV-043 a free-route failure falls through to the pinned paid route within the owner's daily cap, and to nothing else; see [Paid grading fallback](#paid-grading-fallback). |
 
 **Card text and transcripts are content, never instructions.** They travel as JSON string
 values, so nothing in them can close the envelope or add a field, and the reply schema is
@@ -445,11 +446,13 @@ choice. Its consequences were accepted on the card before it was implemented:
 - It **reserves from the ledger like any other request**. It is not exempt from the
   30-request session cap or the daily limit, and a retry the allowance refuses is not
   attempted — the turn falls back to self-grading.
-- Worst-case learner-visible latency for one graded turn is about **40 seconds**, and a
-  fully AI-graded session can exhaust the session cap in **15 turns**. #29's 30-turn run
-  must expect self-grading to carry part of the run; that is accepted, not a defect.
-- It never fires on a well-formed grade, a 401/403, a route refusal or a quota stop, all
-  of which are terminal for the turn or the session. `GradingProvider.unavailableCause`
+- Worst-case learner-visible latency for one graded turn is about **40 seconds** on the
+  free route alone, and about **80 seconds** when the paid fallback is on and both routes
+  time out twice (AV-043). A fully AI-graded session can exhaust the session cap in
+  **15 turns**, or in **7** if every turn fails on both routes. #29's 30-turn run must
+  expect self-grading to carry part of the run; that is accepted, not a defect.
+- It never fires on a well-formed grade, a 401/403, a route refusal or a quota or budget
+  stop, all of which are terminal for the turn or the route. `GradingProvider.unavailableCause(route)`
   holds that state, and the grader reads it rather than guessing from a message.
 - It re-sends the **same transcript revision**. If the transcript changed while the first
   attempt was in flight the attempt is abandoned, not retried.
@@ -471,6 +474,90 @@ allowance refuses, terminal 401/402/429 and route refusals, a transcript edited
 mid-flight, a stale reply after a new revision, and a withdrawn request. No live call is
 made, in CI or locally. What a JVM test cannot show is the live route, which is #17's
 recorded smoke run; #29 owns integrated acceptance.
+
+## Paid grading fallback
+
+- Issue: [#66 — AV-043: Fix the free-route reply check and add a budgeted paid grading fallback](https://github.com/BrockBadeaux14/AnkiVoice/issues/66).
+- Decision: the dated [AV-006 addendum](../docs/decisions/0006-speech-and-grading-providers.md#addendum--september-16-2026-av-043-a-paid-grading-fallback-within-a-daily-cap).
+- Evidence: [results](../docs/testing/av043/results.md) and [runbook](../docs/testing/av043/runbook.md);
+  the finding in [AV-017's results](../docs/testing/av017/results.md#what-the-ai-path-did-and-the-finding-against-the-route-guard).
+
+### The correction
+
+OpenRouter's endpoints listing identifies an endpoint by its **tag** (`liquid/fp8`) and its
+**provider name** (`Liquid`), and a completion reply reports the provider by name. The
+shipped `FreeRoute.replyCheck` compared the name with the tag, so the first grading reply
+of every session was refused as `costNotVerified`, the ledger stopped the UTC day, and AI
+grading was inert. `FreeRoute.priceCheck` now returns both identities from the listing,
+`GradingProvider` keeps them for the session, and the reply check accepts either. Nothing
+hard-codes the name, and the zero-cost verification is unchanged. `FreeRouteRegressionTest`
+replays the recorded AV-017 listing and reply and all 24 AV-006 grading replies through
+both the old comparison (refused) and the corrected one (accepted).
+
+### Free first, paid only afterwards
+
+`GradingRoute.ORDER` is `FREE, PAID`. `SemanticGrader` tries the routes in that order, and
+`GradingProvider.request(…, route)` refuses what a route may not do:
+
+| Route | Pin | Before a session | Before a request | After a reply |
+| --- | --- | --- | --- | --- |
+| Free | `liquid/lfm-2.5-2.6b:free` through `liquid/fp8` | Zero prices on the listing | Session and daily request limits | Pinned model, listed identity, cost exactly zero |
+| Paid | `openai/gpt-4.1-nano` through `openai`, listed at $0.10 / $0.40 per million prompt / completion tokens | The endpoint is listed at or below the pinned prices; a cap above $0; the request's ceiling fits under today's cap | The same limits, then the ceiling held against the cap | Pinned model, listed identity, a numeric `usage.cost`, which is charged |
+
+The paid route is tried only after the free route is refused by its guard, unavailable for
+the session, past the 20-second deadline or failed, and after the free route has had its
+single retry. It carries the same instruction, the same two-key validation, the same
+deadline and its own single retry, so one turn can dispatch at most four requests. When
+the paid route never dispatches — off, blocked for the session, or refused by the ledger —
+the learner sees the free route's failure, which is what happened. A paid reply from
+another model or provider, or one reporting no cost, is refused as a label, its reported
+cost (or the ceiling) is charged, and the paid route is off for the rest of the session.
+A rejected key turns both routes off; a 402 or 429 stops only the route it happened on.
+
+### The budget
+
+`QuotaLedger` records paid reservations with a `hold` — the request's ceiling, 4,096
+prompt tokens plus 1,024 completion tokens at the pinned prices, $0.0008192 for the pinned
+model — and `charge` entries carrying the reply's reported cost. Today's spend is every
+charge recorded today plus the hold of every paid reservation made today that has no charge
+yet, so a timeout, a crash mid-flight or an unreadable reply counts at its ceiling. When a
+request's ceiling would take the day past the cap, the ledger writes a `BUDGET_EXHAUSTED`
+stop for the paid route and refuses; the free route is untouched, and a new UTC day clears
+both the spend and the stop, like the request counter. Stops now carry the route they apply
+to; entries written before AV-043 read as free-route entries, and the request-limit stops
+still apply to everything.
+
+The cap lives in AV-020's private settings as `daily_cap_usd`: dollars and cents from `$0`
+to `$10.00`, default `$1.00`, and `$0` turns the paid route off without writing a stop. The
+allowance card shows today's spend against the cap, the paid route's own stop reason, a
+field for the cap, a **Check the routes** button that runs both pre-session price checks,
+and one test request per route. The disclosure gained a **What may cost money** section
+built from the pinned constants, and says plainly that a stop never rates a card.
+
+### Evaluation and the spike
+
+`GradingEvaluationTest` records and replays the shipped route order under
+`-Pav017.dailyCapUsd` (default `$1.00`; `0` measures the free route alone), reports the
+route each AI answer ended on and what it cost, and now opens a fresh session every 7
+requests so four dispatches per turn stay inside the 30-request session cap. With
+`-Pav043.spike=<model>@<tag>` it runs one paid candidate on the **tuning 20 only**, with
+the free route off, and refuses any other split; `tools/av043-qa/spike.py` compares the
+candidates and `tools/av043-qa/validate.py` guards the evidence. `PaidRoute.kt` and
+`GradingRoute.kt` are part of AV-017's frozen configuration, so the AI path needs a new
+freeze and a new evidence directory; see the [AV-043 results](../docs/testing/av043/results.md)
+for what has and has not been recorded.
+
+### What this does not establish
+
+- The pinned paid model was chosen from the public listing on September 16, 2026. The
+  bounded spike, the re-recorded AV-017 pass and the pinned-AVD check all need the owner's
+  OpenRouter key and are recorded in the AV-043 results page as they happen; until the
+  spike is recorded the pin is the leading candidate, not a measured choice.
+- The study session still grades with on-device rules only (`RuleOnlyGrader` in
+  `ShellApplication`); wiring `SemanticGrader` into the session is #68 (AV-045). On the
+  device, both routes are exercised end to end from the settings screen's test requests.
+- The offline suite proves the order, the guards and the accounting against fake
+  transports, not what either endpoint returns live.
 
 ## Drift guard
 

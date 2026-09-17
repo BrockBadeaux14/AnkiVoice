@@ -133,6 +133,15 @@ automatic acceptance, and changes neither grader. Its
 [runbook](docs/testing/av017/runbook.md) separates the offline scoring run from the live
 STT capture and the one recorded provider pass.
 
+See [AV-043: Paid grading fallback](docs/testing/av043/results.md) for the correction of
+the free-route reply check that AV-017 found refusing every live reply, and for the paid
+OpenRouter fallback behind a daily USD cap: free first, paid only when the free route is
+refused, unavailable, timed out or failed, with the cost, the cap and the day's stop shown
+in settings. The [AV-006 addendum](docs/decisions/0006-speech-and-grading-providers.md#addendum--september-16-2026-av-043-a-paid-grading-fallback-within-a-daily-cap)
+records the decision; the [runbook](docs/testing/av043/runbook.md) separates the offline
+suite from the live model spike, the re-recorded AV-017 pass and the pinned-AVD check,
+which need the owner's key.
+
 See [AV-014: Voice commands and safe navigation](android/README.md#voice-commands-and-safe-navigation)
 for the command vocabulary over that loop: context-only disambiguation with no wake word and
 no keyword stripping, a confidence gate on the commands that advance, reveal or rate, a pause
