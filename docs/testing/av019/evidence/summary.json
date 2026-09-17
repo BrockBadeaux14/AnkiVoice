@@ -1,0 +1,20 @@
+{
+  "utc": "2026-09-17T12:31:57Z",
+  "avd": "AnkiVoice_AV005",
+  "flags": [
+    "-allow-host-audio",
+    "-no-snapshot",
+    "-no-boot-anim"
+  ],
+  "deck": "AV002 Baseline",
+  "cases": [
+    {
+      "case": "confirmed",
+      "utc": "2026-09-17T12:14:40Z",
+      "reviewsAdded": 1,
+      "expectedReviewsAdded": 1,
+      "journalEntriesAdded": 1,
+      "passed": true
+    }
+  ]
+}

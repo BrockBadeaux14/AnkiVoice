@@ -3,6 +3,8 @@
 It re-derives every claim the results page makes from the retained snapshots rather than
 trusting the harness summary:
 
+- each case actually performed the steps it is named for, so a run the harness skipped
+  cannot pass as one that proved something;
 - each case added exactly the reviews it promised, counted from the collection's own
   revlog rather than from the app's report of what it did;
 - every review that was added has a journal entry beside it, settled from the writer's own
@@ -15,8 +17,11 @@ trusting the harness summary:
 - the operator's attestation is theirs: nothing in the evidence claims a spoken answer the
   operator did not confirm saying.
 
-Before the live run there is nothing to validate, and it says so rather than passing
-silently on an empty directory.
+It validates every case the run has completed and names the ones still outstanding. A
+partial run is reported as partial rather than passed: the exit status stays zero while
+cases are outstanding, because an unfinished run is not a regression, but a case that is
+present and unsound fails the script. Attempts that proved nothing live in
+`evidence/inconclusive/` and are deliberately not read here; see the README beside them.
 """
 import json
 from pathlib import Path
@@ -29,6 +34,17 @@ CASES = {
     "correction-only": 0,
     "abandoned": 0,
     "undo-handoff": 1,
+}
+
+# The steps a case has to have actually reached. Without this a case the harness skipped —
+# because the rules abstained and nothing was pending — passes the no-write checks while
+# demonstrating nothing at all.
+REQUIRED_STEPS = {
+    "confirmed": ("confirm", "duplicate-confirm"),
+    "corrected": ("correct", "confirm"),
+    "correction-only": ("correct", "finish"),
+    "abandoned": ("pause", "finish"),
+    "undo-handoff": ("confirm", "undo-handoff"),
 }
 checks = 0
 
@@ -85,6 +101,13 @@ def validate(name, record):
         check(attested.get("source") == "operator-touch", f"{name}: the attestation is not the operator's")
 
     steps = result.get("steps", [])
+    taken = [step.get("step") for step in steps if step.get("step")]
+    # A skipped case writes nothing and would otherwise sail through the no-write checks.
+    check(not any("skipped" in step for step in steps), f"{name}: the harness skipped a step: {steps}")
+    check(taken, f"{name}: the case ran no steps at all")
+    for required in REQUIRED_STEPS[name]:
+        check(required in taken, f"{name}: never reached the {required} step; ran {taken}")
+
     confirmations = [step for step in steps if step.get("step") == "confirm"]
     if expected:
         check(len(confirmations) == 1, f"{name}: {len(confirmations)} confirmations for one write")
@@ -127,19 +150,29 @@ def validate(name, record):
 
 
 def main():
-    if not EVIDENCE.is_dir() or not any(EVIDENCE.glob("*.json")):
+    if not EVIDENCE.is_dir() or not (EVIDENCE / "summary.json").is_file():
         print("AV-019: no live evidence retained yet; run tools/av019-qa/run.py on the pinned AVD.")
         return 0
     summary = json.loads((EVIDENCE / "summary.json").read_text())
-    recorded = {entry["case"] for entry in summary["cases"]}
-    missing = set(CASES) - recorded
-    if missing:
-        raise SystemExit(f"AV-019: the summary is missing {sorted(missing)}")
-    for name in CASES:
-        validate(name, json.loads((EVIDENCE / f"{name}.json").read_text()))
+    recorded = [entry["case"] for entry in summary["cases"]]
+    unknown = [name for name in recorded if name not in CASES]
+    if unknown:
+        raise SystemExit(f"AV-019: the summary names cases that do not exist: {unknown}")
+
+    for name in recorded:
+        path = EVIDENCE / f"{name}.json"
+        if not path.is_file():
+            raise SystemExit(f"AV-019: {name} is in the summary but its evidence is missing")
+        validate(name, json.loads(path.read_text()))
+
+    outstanding = [name for name in CASES if name not in recorded]
     total = sum(entry["reviewsAdded"] for entry in summary["cases"])
-    print(f"AV-019 evidence: {checks} checks over {len(CASES)} cases; "
-          f"{total} reviews written, all from an explicit confirmation.")
+    done = f"{checks} checks over {len(recorded)} of {len(CASES)} cases; " \
+           f"{total} reviews written, all from an explicit confirmation."
+    if outstanding:
+        print(f"AV-019 evidence (incomplete): {done} Still to run: {', '.join(outstanding)}.")
+    else:
+        print(f"AV-019 evidence: {done}")
     return 0
 
 

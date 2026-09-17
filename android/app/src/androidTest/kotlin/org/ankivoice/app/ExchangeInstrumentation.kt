@@ -31,6 +31,7 @@ import org.ankivoice.core.exchange.ratingName
 import org.ankivoice.core.grading.RuleGrader
 import org.ankivoice.core.journal.JournalEntry
 import org.ankivoice.core.journal.ReviewJournal
+import org.ankivoice.core.session.ProposalOutcome
 import org.ankivoice.core.session.ReviewSession
 import org.ankivoice.core.session.SessionState
 import org.ankivoice.core.session.transcriptText
@@ -250,6 +251,11 @@ class ExchangeInstrumentation : Instrumentation() {
         card: ScheduledCard,
     ): JSONArray {
         val log = JSONArray()
+        // The rules abstain on plenty of real answers, and AV-019's abstain path is the
+        // route a rating gets named at all when they do. Take it rather than skipping the
+        // case: the exchange still requires a separate confirmation afterwards, which is
+        // the property every write case is here to exercise.
+        if (session.state == SessionState.GRADING) log.put(nameRating(session, exchange, card))
         if (session.state != SessionState.PROPOSING && case != "abandoned") {
             return log.put(JSONObject().put("skipped", "no rating is pending: ${session.state.specName}"))
         }
@@ -286,6 +292,32 @@ class ExchangeInstrumentation : Instrumentation() {
             else -> log.put(JSONObject().put("error", "unknown case $case"))
         }
         return log
+    }
+
+    /**
+     * AV-019's abstain path, live: the rules offered nothing, so the learner names a rating
+     * and the exchange announces it as learner-named. Naming is not confirming — a separate
+     * explicit confirmation is still required, and nothing is written here.
+     */
+    private fun nameRating(
+        session: ReviewSession,
+        exchange: PrecommitExchange,
+        card: ScheduledCard,
+    ): JSONObject {
+        val result = JSONObject().put("step", "self-grade")
+        val chosen = card.permittedRatings.firstOrNull()
+            ?: return result.put("skipped", "this card offered no rating")
+        ui?.show(
+            "No rating was suggested",
+            "The rules offered nothing for that answer, so nothing is pending. Naming " +
+                "${ratingName(chosen)} as your own rating — it still has to be confirmed " +
+                "separately, and nothing is written yet.",
+        )
+        val proposed = session.selfGrade(chosen)
+        result.put("rating", chosen)
+        result.put("proposed", proposed is ProposalOutcome.Proposed)
+        return result.put("outcome", describe(exchange.announceLearnerRating()))
+            .put("sessionState", session.state.specName)
     }
 
     /** Replace the pending rating with one the operator picks. Nothing is written. */

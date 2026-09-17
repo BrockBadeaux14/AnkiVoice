@@ -1,4 +1,4 @@
-# AV-019: pre-commit exchange implemented; live verification pending
+# AV-019: pre-commit exchange implemented; one live case of five
 
 Issue [#21 — Make rating correction predictable](https://github.com/BrockBadeaux14/AnkiVoice/issues/21).
 Branch `codex/av-019-rating-correction`. Review remains pending.
@@ -6,9 +6,14 @@ Branch `codex/av-019-rating-correction`. Review remains pending.
 The exchange, the announcement, the re-prompt rule, the commit step and the outcome
 handling are in `:core`; the writer wiring, the surface controls and the live harness are
 in `:app`. **The offline layer passed on September 16, 2026**: 45 new JVM tests across
-`:core` and `:app`, with no emulator and no network. **The live layer has not run yet** —
-every one of its five cases needs a person speaking into the AVD, and this page records no
-live result until they have.
+`:core` and `:app`, with no emulator and no network.
+
+**The live layer is one case of five.** `confirmed` passed on the pinned AVD on
+September 17, 2026, in the owner's own voice, and it carries the finding that matters most
+for the card's decision 3: **a spoken confirmation executed and wrote one review.** The
+other four are outstanding. Three of them were attempted first and proved nothing — the
+harness could not yet take AV-019's own abstain path — and those attempts are kept in
+[`evidence/inconclusive/`](evidence/inconclusive/README.md) rather than deleted.
 
 ## Implementation
 
@@ -102,7 +107,7 @@ the outcome controls, and the two write-path properties this card had to wire: a
 rating journalled before the write and settled from the outcome at the right rating, card
 and revision; and a superseded revision's text never journalled against a newer rating.
 
-## Live layer — not run
+## Live layer — September 17, 2026, one case of five
 
 Five cases, one per cold boot, driven by `tools/av019-qa/run.py` through
 `ExchangeInstrumentation` on the pinned `AnkiVoice_AV005` AVD against a disposable AV-002
@@ -110,26 +115,81 @@ collection. Three of them write a real review, deliberately.
 
 | Case | What it must show | Status |
 | --- | --- | --- |
-| `confirmed` | one review, journal settled `confirmed`, the duplicate confirm not offered | not run |
-| `corrected` | one review at the corrected rating, journal settled `confirmed` | not run |
-| `correction-only` | no review, no journal entry | not run |
-| `abandoned` | no review, no journal entry | not run |
-| `undo-handoff` | one review, the session stopped, the card re-read afterwards | not run |
+| `confirmed` | one review, journal settled `confirmed`, the duplicate confirm not offered | **passed** |
+| `corrected` | one review at the corrected rating, journal settled `confirmed` | outstanding |
+| `correction-only` | no review, no journal entry | outstanding |
+| `abandoned` | no review, no journal entry | outstanding |
+| `undo-handoff` | one review, the session stopped, the card re-read afterwards | outstanding |
+
+### `confirmed`, in the owner's voice
+
+| | |
+| --- | --- |
+| Card | `1789411952536`, deck `AV002 Baseline` |
+| Heard | "green blue red" — `final`, classified `sufficient`, raw score **0.972** |
+| Announced | **Good**, source `rule`, answer version 1, spoken through `SpeechOutput` |
+| Announcement | "Good is waiting, from an exact rule match on what I heard (answer version 1). Say or tap Confirm to save it, or choose a different rating. Nothing is saved yet." |
+| Confirmation | **Speak it** — executed, source `spoken` |
+| Outcome | `confirmed`, "Consistent one-review transition", acknowledgement 1 |
+| Write | 1 · revlog `ease` 3 · card `reps` 1 → 2 |
+| Journal | entry 1, phase `settled`, `outcomeState` `confirmed`, 14 transcript characters |
+| Duplicate confirm | not offered — "confirm is not available while the session is committed" |
+
+**Decision 3 is retired.** The card said spoken confirmation was touch-only on the pinned
+route until AV-044 landed. AV-044 (#67) measured that the engine does supply confidence;
+this run is the first time a guarded command has been **observed executing by voice against
+a real collection**, and it wrote the review it was asked to. The elapsed time submitted
+was 108,900 ms and the revlog stored 60,000: the deck's own `maxTaken` cap, which
+`ReviewOutcome.timeWasCapped` already models and which is not a unit error.
+
+### What went wrong first, and what was fixed
+
+`corrected`, `correction-only` and `abandoned` were attempted before the harness knew how
+to take AV-019's abstain path. Two of the three cards graded `uncertain`, so the exchange
+opened as an abstention with **no pending rating** — correct behaviour, and exactly what
+the card requires — and the case scripts, which assumed a grader proposal, had nothing to
+correct and skipped. The third never settled an answer at all. Nothing was written in any
+of them, and the exchange itself was right every time; the gap was in the harness, and in a
+validator lenient enough to let a skipped case pass the no-write checks.
+
+Both were fixed the same day, before any of the three was re-run:
+
+- `ExchangeInstrumentation.nameRating` takes the abstain path — `selfGrade` opens Announced
+  with the rating announced as learner-named — so a case reaches a pending rating whatever
+  the rules make of the answer, and the abstain path gets live evidence of its own.
+- `validate.py` requires each case to have reached the steps it is named for, so a skipped
+  case cannot pass while demonstrating nothing.
+
+The three attempts are kept in [`evidence/inconclusive/`](evidence/inconclusive/README.md).
+Re-running until one comes back right and keeping only that one is not evidence.
+
+### Reproducing the rest
 
 Every case needs one spoken answer, and each confirmation is the operator's choice of
 spoken or touched, recorded as it happened. The owner asked on September 16, 2026 that
 spoken evidence be spoken; nothing in the harness synthesizes a voice or attests on the
-operator's behalf. `tools/av019-qa/validate.py` re-derives every claim this section will
-make from the retained snapshots, and reports that there is nothing to validate until the
-run has happened. Reproduce with the [runbook](runbook.md).
+operator's behalf. `tools/av019-qa/validate.py` re-derives every claim above from the
+retained snapshots — 31 checks over the one completed case — and names the four still
+outstanding rather than passing as though the run were done. Reproduce with the
+[runbook](runbook.md).
 
 ## What this does not establish
 
-The offline layer says nothing about recognition quality, about AnkiDroid's real write
-behaviour, or about whether AnkiDroid's Undo is offered in practice after a handoff. It
-also says nothing about the AI source end to end: the live harness grades on device, so the
-`ai` announcement is exercised only against the fakes — spending the owner's OpenRouter
-credit to re-check a label AV-045 already covers would buy nothing this card needs.
+One confirmed turn is not the four outstanding ones. Nothing here yet shows that a
+**corrected** rating is the one that gets written, that a correction or an abandoned
+exchange writes nothing against a real collection, or that AnkiDroid offers its own Undo
+after the handoff — those are the four cases still to run, and #21 should stay open until
+they have.
+
+One spoken confirmation is also not a recognition-accuracy estimate. It shows the guarded
+spoken path works on this route at all, which it had never been observed doing; it does not
+say how often it will.
+
+The offline layer says nothing about recognition quality or about AnkiDroid's real write
+behaviour. It also says nothing about the AI source end to end: the live harness grades on
+device, so the `ai` announcement is exercised only against the fakes — spending the owner's
+OpenRouter credit to re-check a label AV-045 already covers would buy nothing this card
+needs.
 
 The 30-turn acceptance run, and the manual-intervention count that goes with it, stay in
 [#29](https://github.com/BrockBadeaux14/AnkiVoice/issues/29).

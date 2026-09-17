@@ -56,9 +56,15 @@ None of this touches a device. That is the next section.
 
 Each confirmation is the operator's choice of **Speak it** or **Tap it**, and the source is
 recorded as it happened. AV-044 ([#67](https://github.com/BrockBadeaux14/AnkiVoice/issues/67))
-established that the pinned engine does supply confidence, so a spoken confirm should
-execute rather than be refused `low-confidence`; if it is refused, the re-prompt rule is
-what should be recorded, not worked around.
+established that the pinned engine does supply confidence, and on September 17, 2026 a
+spoken confirm **executed** at raw score 0.972 and wrote its review; if one is refused
+instead, the re-prompt rule is what should be recorded, not worked around.
+
+The rules abstain on plenty of real answers. When they do, the exchange opens Announced
+with **no** pending rating and the harness takes AV-019's abstain path — `selfGrade` names
+the card's first permitted rating and announces it as learner-named — so every case reaches
+a pending rating whatever the grade was. That is a feature of the run, not a fallback: it
+is the only live evidence for the abstain path. The screen says so when it happens.
 
 ### Prerequisites
 
@@ -76,6 +82,13 @@ what should be recorded, not worked around.
 
 One case per boot. The emulator's coreaudio backend leaks a listener per microphone open
 and exits on the second or third of a boot, which would take the run down with it.
+
+Check which AVD a serial actually is before assuming — `adb -s <serial> emu avd name`. On
+September 17, 2026 `AnkiVoice_AV005` was already running on the **default** port 5554, and
+starting a second copy failed with "Running multiple emulators with the same AVD". `sync`,
+`emu kill` the stray instance, and let the driver cold-boot on 5588. The AnkiDroid install,
+its database permission and the AV002 collection all survive between sessions; only the
+APKs need reinstalling.
 
 ### Build and install
 
@@ -139,11 +152,17 @@ AV-019 live check complete
 ```
 
 A subset re-runs on its own, which is how a case interrupted by an emulator fault is
-repeated:
+repeated. The summary is rebuilt from every retained case file, so re-running one does not
+drop the others:
 
 ```sh
 python3 tools/av019-qa/run.py build/av019/deck.json --cases corrected
 ```
+
+**Keep an attempt that came back wrong.** Re-running until one comes back right and
+retaining only that one is not evidence. Move it to `evidence/inconclusive/` with a line
+saying what happened and why it proved nothing, as
+[the three from September 17, 2026](evidence/inconclusive/README.md) are kept.
 
 ### The Undo handoff
 
@@ -166,9 +185,12 @@ revlog, each one is matched to a journal entry settled `confirmed` at the same r
 card, the two no-write cases are checked for byte-identical card scheduling, every
 announced rating is checked for a source and a transcript revision, and each confirmation's
 recorded source is checked to be one the operator actually gave.
+It also requires each case to have reached the steps it is named for, so a case the harness
+skipped cannot pass the no-write checks while demonstrating nothing.
 `tests/test_av019_evidence.py` runs it with the rest of the Python suite, and CI runs it on
-every push. Before the live run it reports that there is nothing to validate rather than
-passing silently.
+every push. A partial run is reported as partial — the outstanding cases are named and the
+exit status stays zero — and before the live run it reports that there is nothing to
+validate rather than passing silently.
 
 Full collection copies stay under ignored `build/av019/`; only the synthetic JSON evidence
 in `docs/testing/av019/evidence/` is retained.

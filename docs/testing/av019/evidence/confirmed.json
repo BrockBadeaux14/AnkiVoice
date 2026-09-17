@@ -1,0 +1,373 @@
+{
+  "case": "confirmed",
+  "utc": "2026-09-17T12:14:40Z",
+  "deck": 1789411952529,
+  "expectedReviewsAdded": 1,
+  "reviewsAdded": 1,
+  "integrityBefore": "ok",
+  "integrityAfter": "ok",
+  "revlogAdded": [
+    {
+      "id": 1789647277972,
+      "cid": 1789411952536,
+      "usn": -1,
+      "ease": 3,
+      "ivl": -600,
+      "lastIvl": -60,
+      "factor": 0,
+      "time": 60000,
+      "type": 0
+    }
+  ],
+  "cardsBefore": [
+    {
+      "id": 1789411952535,
+      "nid": 1789411952535,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 0,
+      "queue": 0,
+      "due": 1,
+      "ivl": 0,
+      "reps": 0,
+      "lapses": 0,
+      "mod": 1789411952
+    },
+    {
+      "id": 1789411952536,
+      "nid": 1789411952536,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 1,
+      "queue": 1,
+      "due": 1789411892,
+      "ivl": 0,
+      "reps": 1,
+      "lapses": 0,
+      "mod": 1789411952
+    },
+    {
+      "id": 1789411952537,
+      "nid": 1789411952537,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 3,
+      "queue": 1,
+      "due": 1789411892,
+      "ivl": 1,
+      "reps": 4,
+      "lapses": 1,
+      "mod": 1789411952
+    },
+    {
+      "id": 1789411952538,
+      "nid": 1789411952538,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 2,
+      "queue": 2,
+      "due": 90,
+      "ivl": 30,
+      "reps": 3,
+      "lapses": 0,
+      "mod": 1789411952
+    },
+    {
+      "id": 1789411952539,
+      "nid": 1789411952539,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 0,
+      "queue": -1,
+      "due": 5,
+      "ivl": 0,
+      "reps": 0,
+      "lapses": 0,
+      "mod": 1789411952
+    },
+    {
+      "id": 1789411952540,
+      "nid": 1789411952540,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 0,
+      "queue": 0,
+      "due": 6,
+      "ivl": 0,
+      "reps": 0,
+      "lapses": 0,
+      "mod": 1789411952
+    },
+    {
+      "id": 1789411952541,
+      "nid": 1789411952541,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 0,
+      "queue": 0,
+      "due": 7,
+      "ivl": 0,
+      "reps": 0,
+      "lapses": 0,
+      "mod": 1789411952
+    },
+    {
+      "id": 1789411952542,
+      "nid": 1789411952542,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 2,
+      "queue": 2,
+      "due": 97,
+      "ivl": 30,
+      "reps": 3,
+      "lapses": 0,
+      "mod": 1789411952
+    }
+  ],
+  "cardsAfter": [
+    {
+      "id": 1789411952535,
+      "nid": 1789411952535,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 0,
+      "queue": 0,
+      "due": 1,
+      "ivl": 0,
+      "reps": 0,
+      "lapses": 0,
+      "mod": 1789411952
+    },
+    {
+      "id": 1789411952536,
+      "nid": 1789411952536,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 1,
+      "queue": 1,
+      "due": 1789647968,
+      "ivl": 0,
+      "reps": 2,
+      "lapses": 0,
+      "mod": 1789647278
+    },
+    {
+      "id": 1789411952537,
+      "nid": 1789411952537,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 3,
+      "queue": 1,
+      "due": 1789411892,
+      "ivl": 1,
+      "reps": 4,
+      "lapses": 1,
+      "mod": 1789411952
+    },
+    {
+      "id": 1789411952538,
+      "nid": 1789411952538,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 2,
+      "queue": 2,
+      "due": 90,
+      "ivl": 30,
+      "reps": 3,
+      "lapses": 0,
+      "mod": 1789411952
+    },
+    {
+      "id": 1789411952539,
+      "nid": 1789411952539,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 0,
+      "queue": -1,
+      "due": 5,
+      "ivl": 0,
+      "reps": 0,
+      "lapses": 0,
+      "mod": 1789411952
+    },
+    {
+      "id": 1789411952540,
+      "nid": 1789411952540,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 0,
+      "queue": 0,
+      "due": 6,
+      "ivl": 0,
+      "reps": 0,
+      "lapses": 0,
+      "mod": 1789411952
+    },
+    {
+      "id": 1789411952541,
+      "nid": 1789411952541,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 0,
+      "queue": 0,
+      "due": 7,
+      "ivl": 0,
+      "reps": 0,
+      "lapses": 0,
+      "mod": 1789411952
+    },
+    {
+      "id": 1789411952542,
+      "nid": 1789411952542,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 2,
+      "queue": 2,
+      "due": 97,
+      "ivl": 30,
+      "reps": 3,
+      "lapses": 0,
+      "mod": 1789411952
+    }
+  ],
+  "phases": [
+    {
+      "utc": "2026-09-17T12:12:49Z",
+      "phase": "Answer the card"
+    },
+    {
+      "utc": "2026-09-17T12:13:17Z",
+      "phase": "Speech result"
+    },
+    {
+      "utc": "2026-09-17T12:13:32Z",
+      "phase": "Confirm Good?"
+    }
+  ],
+  "spokenBy": "the operator; see result.answer.attested for what they confirmed",
+  "result": {
+    "case": "confirmed",
+    "journalPath": "/data/user/0/org.ankivoice/files/av018-session-journal.jsonl",
+    "journalBefore": [],
+    "microphonePermission": true,
+    "cardId": 1789411952536,
+    "before": {
+      "reps": 1,
+      "cardType": 1,
+      "queue": 1,
+      "due": 1789411892,
+      "intervalDays": 0
+    },
+    "permittedRatings": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "answer": {
+      "action": "Start answer",
+      "transcript": "green blue red",
+      "answerStatus": "final",
+      "confidence": "sufficient",
+      "recognizerConfidence": 0.97219545,
+      "transcriptRevision": 1,
+      "sessionState": "grading",
+      "attested": {
+        "promptAudible": true,
+        "spokeExpectedPhrase": true,
+        "source": "operator-touch"
+      }
+    },
+    "announced": {
+      "label": "correct",
+      "step": {
+        "kind": "announced",
+        "rating": 3,
+        "source": "rule",
+        "transcriptRevision": 1,
+        "spoken": true,
+        "notice": "Good is waiting, from an exact rule match on what I heard (answer version 1). Say or tap Confirm to save it, or choose a different rating. Nothing is saved yet."
+      },
+      "sessionState": "proposing"
+    },
+    "steps": [
+      {
+        "step": "confirm",
+        "action": "Speak it",
+        "rating": 3,
+        "recognizerConfidence": 0.97219545,
+        "command": {
+          "kind": "executed",
+          "command": "confirm",
+          "source": "spoken",
+          "notice": "Rating 3 is confirmed for this card."
+        },
+        "confirmationSource": "spoken",
+        "outcome": {
+          "kind": "committed",
+          "outcome": "confirmed",
+          "reason": "Consistent one-review transition",
+          "acknowledgement": 1,
+          "announcement": "Saved rating 3.",
+          "notice": "Saved rating 3. Tap Next card to carry on. If Good was the wrong rating, use AnkiDroid's own Undo \u2014 AnkiVoice cannot take a review back."
+        },
+        "sessionState": "committed"
+      },
+      {
+        "step": "duplicate-confirm",
+        "offered": false,
+        "outcome": {
+          "kind": "untouched",
+          "notice": "confirm is not available while the session is committed."
+        }
+      }
+    ],
+    "announcements": [
+      {
+        "rating": 3,
+        "source": "rule",
+        "transcriptRevision": 1,
+        "spoken": true,
+        "text": "Good is waiting, from an exact rule match on what I heard (answer version 1). Say or tap Confirm to save it, or choose a different rating. Nothing is saved yet."
+      }
+    ],
+    "after": {
+      "reps": 2,
+      "cardType": 1,
+      "queue": 1,
+      "due": 1789647968,
+      "intervalDays": 0,
+      "lastReviewTimeSecs": 1789647277
+    },
+    "stateUnchanged": false,
+    "journalAfter": [
+      {
+        "entryId": 1,
+        "sessionId": "av019-live-confirmed",
+        "cardId": 1789411952536,
+        "rating": 3,
+        "transcriptRevision": 1,
+        "transcriptLength": 14,
+        "phase": "settled",
+        "outcomeState": "confirmed",
+        "outcomeReason": "Consistent one-review transition",
+        "acknowledgement": 1,
+        "noticeOutstanding": false
+      }
+    ],
+    "sessionState": "committed",
+    "events": "  start             language en-US\n  offer_card        card 1789411952536, ratings [1, 2, 3, 4]\n  ask               Reverse the sequence red, blue, green.\n  start_answer      attempt 1\n  listen            green blue red\n  grade             correct: Exact match with the reference answer.\n  propose           rating 3, 32602 ms\n  confirm           spoken: rating 3\n  commit            confirmed: Consistent one-review transition",
+    "writes": [
+      {
+        "cardId": 1789411952536,
+        "rating": 3,
+        "elapsedMs": 108900
+      }
+    ],
+    "journalEntriesAdded": 1,
+    "completed": true,
+    "passed": true
+  },
+  "passed": true
+}

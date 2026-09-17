@@ -220,6 +220,29 @@ def case(name, deck, log_path, reboot):
 CARD_FIELDS = ("id", "nid", "did", "ord", "type", "queue", "due", "ivl", "reps", "lapses", "mod")
 
 
+def summarize(deck_name):
+    """Rebuild the summary from every retained case, not only the ones this run drove.
+
+    A case is re-run on its own after an emulator fault, so a summary written from one
+    invocation's records would quietly drop the cases that already passed.
+    """
+    cases = []
+    for name in CASES:
+        path = OUT / f"{name}.json"
+        if not path.is_file():
+            continue
+        record = json.loads(path.read_text())
+        cases.append({"case": name, "utc": record["utc"],
+                      "reviewsAdded": record["reviewsAdded"],
+                      "expectedReviewsAdded": record["expectedReviewsAdded"],
+                      "journalEntriesAdded": record["result"].get("journalEntriesAdded"),
+                      "passed": record["passed"]})
+    (OUT / "summary.json").write_text(json.dumps({
+        "utc": utc(), "avd": AVD, "flags": FLAGS, "deck": deck_name, "cases": cases,
+    }, indent=2) + "\n")
+    return cases
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -254,16 +277,7 @@ def main():
         log_path = BUILD / f"emulator-boot-{index:02d}.log"
         records.append(case(name, deck_id, log_path, reboot=not arguments.no_boot))
 
-    (OUT / "summary.json").write_text(json.dumps({
-        "utc": utc(),
-        "avd": AVD,
-        "flags": FLAGS,
-        "deck": deck_name,
-        "cases": [{"case": r["case"], "reviewsAdded": r["reviewsAdded"],
-                   "expectedReviewsAdded": r["expectedReviewsAdded"],
-                   "journalEntriesAdded": r["result"].get("journalEntriesAdded"),
-                   "passed": r["passed"]} for r in records],
-    }, indent=2) + "\n")
+    summarize(deck_name)
     failed = [r["case"] for r in records if not r["passed"]]
     print("\nAV-019 live check complete" if not failed else f"\nAV-019 live check: {failed} did not pass")
     return 1 if failed else 0
