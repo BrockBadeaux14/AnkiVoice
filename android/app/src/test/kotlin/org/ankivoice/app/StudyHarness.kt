@@ -12,6 +12,7 @@ import org.ankivoice.core.contracts.GradeLabel
 import org.ankivoice.core.contracts.GradingResult
 import org.ankivoice.core.contracts.GuardedReviewWriter
 import org.ankivoice.core.contracts.OperationToken
+import org.ankivoice.core.exchange.AutomaticGrading
 import org.ankivoice.core.exchange.PrecommitExchange
 import org.ankivoice.core.fakes.FakeCardProvider
 import org.ankivoice.core.fakes.FakeClock
@@ -71,6 +72,8 @@ internal class StudyHarness(
     val gate: ReconciliationGate? = null,
     /** Grading work the test releases by hand, to put an edit or an interruption between request and reply. */
     val holdGrading: Boolean = false,
+    /** AV-047's option, as the setup screen would have left it for this session. */
+    val automatic: AutomaticGrading = AutomaticGrading.OFF,
 ) {
     val collection = demoCollection()
     val provider = FakeCardProvider(collection)
@@ -83,6 +86,9 @@ internal class StudyHarness(
     val journalStore = FakeJournalStore()
     val journal = ReviewJournal(journalStore)
     val held = ArrayDeque<Runnable>()
+
+    /** AV-047's cancel window, under the test's own hand rather than a clock's. */
+    val scheduler = ManualScheduler()
 
     /** What the recognizer has heard so far, as the surface polls it mid-capture. */
     var partialText: String? = null
@@ -122,7 +128,7 @@ internal class StudyHarness(
                 StudySession(
                     session = opened,
                     grader = grader,
-                    exchange = PrecommitExchange(opened, speechOutput),
+                    exchange = PrecommitExchange(opened, speechOutput, automatic),
                     revision = AtomicInteger(),
                     gradingSource = { gradingSource },
                     gradingRoute = { gradingRoute },
@@ -139,6 +145,7 @@ internal class StudyHarness(
         if (holdGrading) Executor { held.addLast(it) } else direct,
         gate,
         { cards },
+        scheduler,
     ) { sessionId -> journal.entries().filter { it.sessionId == sessionId } }
 
     init {
@@ -192,6 +199,48 @@ internal class StudyHarness(
     /** A card the fixture shapes would refuse: a Basic note, delivered straight from the queue. */
     fun rejectedCard(id: Long) = collection.scheduled(collection.order.first()).let { card ->
         card.copy(identity = card.identity.copy(cardId = id, noteId = id, model = "Basic"))
+    }
+}
+
+/**
+ * AV-047's cancel window under a test's own hand.
+ *
+ * Nothing here waits. [elapse] is every open window running out at once; [release] is the
+ * instant a real timer hands a task over, before anything can call it back, which is the
+ * one race a stopped window still has to survive.
+ */
+internal class ManualScheduler : DelayScheduler {
+    private val windows = ArrayDeque<Window>()
+
+    /** The window length each arming asked for, oldest first. */
+    val delays = mutableListOf<Long>()
+
+    /** True while a window is open and has not been stopped. */
+    val armed: Boolean get() = windows.any { !it.cancelled }
+
+    override fun schedule(delayMs: Long, task: Runnable): ScheduledWindow {
+        delays += delayMs
+        val window = Window(task)
+        windows.addLast(window)
+        return ScheduledWindow { window.cancelled = true }
+    }
+
+    /** Run every window that is still open, oldest first. A stopped one is dropped, as a timer drops it. */
+    fun elapse() {
+        while (windows.isNotEmpty()) {
+            val window = windows.removeFirst()
+            if (!window.cancelled) window.task.run()
+        }
+    }
+
+    /** Take the oldest window's task out, so the test can run it after a cancellation. */
+    fun release(): Runnable {
+        check(windows.isNotEmpty()) { "no window is open" }
+        return windows.removeFirst().task
+    }
+
+    private class Window(val task: Runnable) {
+        var cancelled = false
     }
 }
 

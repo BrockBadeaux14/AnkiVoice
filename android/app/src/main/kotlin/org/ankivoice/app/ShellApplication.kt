@@ -6,6 +6,8 @@ import java.math.BigDecimal
 import java.util.UUID
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import org.ankivoice.ankidroid.AndroidAccessPlatform
 import org.ankivoice.ankidroid.AnkiDroidAccess
@@ -19,6 +21,7 @@ import org.ankivoice.core.contracts.ForegroundEventPort
 import org.ankivoice.core.contracts.GuardedReviewWriter
 import org.ankivoice.core.contracts.ReviewOutcome
 import org.ankivoice.core.contracts.ReviewWriter
+import org.ankivoice.core.exchange.AutomaticGrading
 import org.ankivoice.core.exchange.PrecommitExchange
 import org.ankivoice.core.journal.JournaledReviewWriter
 import org.ankivoice.core.journal.ReviewJournal
@@ -92,6 +95,11 @@ class ShellApplication : Application() {
             worker, mainExecutor,
             gate,
         ) { deckId -> AnkiDroidCardProvider(platform, deckId, worker, mainExecutor) }
+        // AV-047: the cancel window's clock. One daemon timer for the process; it only ever
+        // hands the expiry back to the study worker, and never touches the session itself.
+        val windowTimer = Executors.newSingleThreadScheduledExecutor { runnable ->
+            Thread(runnable, "ankivoice-auto-commit").apply { isDaemon = true }
+        }
         // AV-026: the study surface drives a real session on a thread of its own, because
         // AV-025's transport blocks its caller for the whole of playback and capture.
         study = StudyController(
@@ -108,6 +116,7 @@ class ShellApplication : Application() {
             providerWorker,
             gate,
             cards,
+            timerScheduler(windowTimer),
         ) { sessionId -> reviewJournal.entries().filter { it.sessionId == sessionId } }
         provider = ProviderController(
             credentials,
@@ -120,6 +129,19 @@ class ShellApplication : Application() {
         )
         provider.refresh()
     }
+}
+
+/**
+ * AV-047's cancel window over a real timer.
+ *
+ * `Future.cancel(false)` is the whole of it: a task that has not started is dropped, and
+ * one that has already started is left alone, which is exactly the guarantee
+ * [StudyController] is written against — it refuses a released task itself rather than
+ * relying on the timer to recall it.
+ */
+private fun timerScheduler(timer: ScheduledExecutorService): DelayScheduler = DelayScheduler { delayMs, task ->
+    val future = timer.schedule(task, delayMs, TimeUnit.MILLISECONDS)
+    ScheduledWindow { future.cancel(false) }
 }
 
 /**
@@ -185,7 +207,10 @@ private fun studySession(
         StudySession(
             session = session,
             grader = studyGrader,
-            exchange = PrecommitExchange(session, speech),
+            // AV-047: the option is read once, here, when the session is built. The study
+            // screen cannot be reached without leaving the setup screen, so a session never
+            // sees the setting change underneath it.
+            exchange = PrecommitExchange(session, speech, AutomaticGrading(settings.automaticGrading)),
             revision = revision,
             gradingSource = studyGrader::sourceOf,
             gradingRoute = studyGrader::routeOf,
@@ -244,6 +269,12 @@ private class PrivateShellSettings(context: Context) : ShellSettings {
     override var language: String
         get() = preferences.getString("language", "en-US") ?: "en-US"
         set(value) { preferences.edit().putString("language", value).apply() }
+
+    // AV-047: off unless this device's learner turned it on. A missing key is off, so a
+    // first run, a cleared store and an upgrade from before the option all study manually.
+    override var automaticGrading: Boolean
+        get() = preferences.getBoolean("automatic_grading", false)
+        set(value) { preferences.edit().putBoolean("automatic_grading", value).apply() }
 }
 
 /**

@@ -2,6 +2,7 @@ package org.ankivoice.core.journal
 
 import org.ankivoice.core.contracts.CardIdentity
 import org.ankivoice.core.contracts.CardState
+import org.ankivoice.core.contracts.ConfirmationSource
 import org.ankivoice.core.contracts.MonotonicClock
 import org.ankivoice.core.contracts.ReviewOutcome
 import org.ankivoice.core.contracts.ReviewState
@@ -78,6 +79,9 @@ class ReviewJournal(
         fields["revision"] = request.transcriptRevision
         fields["transcript"] = if (capped) request.transcript.take(retention.maxTranscriptChars) else request.transcript
         fields["transcriptTruncated"] = capped
+        // AV-047: what authorized the write, recorded before it is handed over, so an
+        // automatic commit is readable back as one even from a process that then died.
+        fields["confirmation"] = request.confirmationSource?.specName
         putState(fields, "pre", request.preState)
         fields["monotonicMs"] = clock.nowMs()
         fields["wallMs"] = wallClock()
@@ -239,6 +243,7 @@ class ReviewJournal(
         transcriptRevision = 0,
         transcript = "",
         transcriptTruncated = false,
+        confirmationSource = null,
         preState = CardState(reps = 0, cardType = 0, queue = 0, due = 0, intervalDays = 0),
         monotonicMs = 0,
         wallClockMs = 0,
@@ -259,6 +264,10 @@ class ReviewJournal(
             transcriptRevision = (fields["revision"] as? Long)?.toInt() ?: 0,
             transcript = fields["transcript"] as? String ?: "",
             transcriptTruncated = fields["transcriptTruncated"] as? Boolean ?: false,
+            // A line written before AV-047 has no such field, and says so by staying null
+            // rather than being read as a learner confirmation it never recorded.
+            confirmationSource = (fields["confirmation"] as? String)
+                ?.let { name -> ConfirmationSource.entries.firstOrNull { it.specName == name } },
             preState = preState,
             monotonicMs = fields["monotonicMs"] as? Long ?: 0,
             wallClockMs = fields["wallMs"] as? Long ?: 0,

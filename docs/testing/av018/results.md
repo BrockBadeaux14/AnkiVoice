@@ -87,15 +87,21 @@ ceiling of 700,000 bytes:
 
 | Transcript shape | Per entry | 50 settled entries |
 | --- | --- | --- |
-| Plain ASCII | 2,718 bytes | 135,982 bytes |
-| Words and punctuation | 2,718 bytes | 135,982 bytes |
-| Four-byte UTF-8 throughout | 4,718 bytes | 235,982 bytes |
-| Every character escaped (the absolute ceiling) | 12,718 bytes | 635,982 bytes |
+| Plain ASCII | 2,738 bytes | 136,982 bytes |
+| Words and punctuation | 2,738 bytes | 136,982 bytes |
+| Four-byte UTF-8 throughout | 4,738 bytes | 236,982 bytes |
+| Every character escaped (the absolute ceiling) | 12,738 bytes | 636,982 bytes |
 
 The cap is what makes that a bound: a recognizer transcript is short, but a typed
 correction has no length of its own, so the journal cuts the stored text and records that
-it did. An eight-times-over-long transcript produces the same file size. The live run's own
-two-record file was **775 bytes**.
+it did. An eight-times-over-long transcript produces the same file size.
+
+**Re-measured on September 17, 2026**, after [AV-047](../av047/results.md) added
+`confirmation` to the dispatch record so an automatic commit is readable back as one. The
+field costs 20 bytes per entry — the figures above are the new ones, 1,000 bytes higher at
+the 50-entry bound in every shape, and still a long way under the 700,000-byte ceiling.
+The figures before it were 2,718 / 2,718 / 4,718 / 12,718 bytes per entry. The live run's
+own two-record file, measured before that field existed, was **775 bytes**.
 
 ## Live verification — September 16, 2026 UTC
 

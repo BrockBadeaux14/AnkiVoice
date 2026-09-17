@@ -57,6 +57,9 @@ class JournaledReviewWriter(
                 transcriptRevision = intent.transcriptRevision,
                 transcript = transcripts.textFor(intent),
                 preState = snapshot.state,
+                // AV-047: read off the intent, not decided here. A confirmation the guard
+                // will reject is still recorded as what the intent carried.
+                confirmationSource = intent.confirmation?.source,
             ),
         )
         val outcome = delegate.commit(intent)

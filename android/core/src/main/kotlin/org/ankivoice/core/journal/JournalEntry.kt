@@ -2,6 +2,7 @@ package org.ankivoice.core.journal
 
 import org.ankivoice.core.contracts.CardIdentity
 import org.ankivoice.core.contracts.CardState
+import org.ankivoice.core.contracts.ConfirmationSource
 import org.ankivoice.core.contracts.Failure
 import org.ankivoice.core.contracts.OperationToken
 import org.ankivoice.core.contracts.ReviewState
@@ -64,6 +65,16 @@ data class JournalEntry(
     val transcript: String,
     /** True when [transcript] was cut to [JournalRetention.maxTranscriptChars] on store. */
     val transcriptTruncated: Boolean,
+    /**
+     * AV-047: what authorized this write — `spoken`, `touch` or `auto` — as the intent
+     * carried it at dispatch, or null for a line written before this field existed.
+     *
+     * It is recorded because the journal is the only record of a write that survives the
+     * process, and an automatic commit the learner never confirmed must be readable back
+     * as one. Recording it is not re-deriving it: the writer's own guard is what decides
+     * whether the confirmation authorizes anything.
+     */
+    val confirmationSource: ConfirmationSource?,
     val preState: CardState,
     val monotonicMs: Long,
     val wallClockMs: Long,
@@ -98,6 +109,7 @@ data class JournalEntry(
      */
     fun summary(): String = buildString {
         append("entry $entryId, card ${identity.cardId}, rating $rating, revision $transcriptRevision, ")
+        confirmationSource?.let { append("confirmed by ${it.specName}, ") }
         append("phase ${phase.specName}")
         outcomeState?.let { append(", outcome ${it.specName}") }
         resolution?.let { append(", reconciled ${it.specName}") }
@@ -144,6 +156,8 @@ data class JournalRequest(
     val transcriptRevision: Int,
     val transcript: String,
     val preState: CardState,
+    /** AV-047: the confirmation's source as the intent carried it, or null when it had none. */
+    val confirmationSource: ConfirmationSource? = null,
 )
 
 /**

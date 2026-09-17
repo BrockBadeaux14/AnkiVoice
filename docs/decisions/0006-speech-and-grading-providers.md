@@ -22,6 +22,22 @@ grading instruction produced four false-correct labels. The revision matched
 correction and require an explicit user rating/confirmation. #19 owns held-out
 evaluation and any future automation threshold; none is approved here.
 
+> **Overridden in part, September 17, 2026, by the owner
+> ([AV-047](https://github.com/BrockBadeaux14/AnkiVoice/issues/76)).** The owner asked for
+> an **Automatic grading** option and, on being shown this no-go and AV-007's
+> correction-before-commit rule, chose it anyway. The measurements above are not
+> withdrawn: this decision's reading of them was that a wrong label should not be able to
+> write, and the owner's is that they will accept that risk on their own collection. What
+> the override covers is narrow — a rating **the grader proposed**, saved after a
+> five-second cancel window, only while the learner has turned the option on, and off on
+> first run. What it does not cover is everything else this paragraph asked for: the
+> transcript is still displayed for correction, a grading failure and an abstention still
+> require an explicit rating, a rating the learner named still requires their own
+> confirmation, and the writer's confirmation guard is unchanged. No automation
+> *threshold* is approved by this: the option is a learner's choice, not a measured
+> confidence bar, and #19's held-out evaluation still owns that question. See
+> [AV-007's amendment](../contracts/av007-session-contracts.md#automatic-grading-the-september-17-2026-reversal).
+
 There is **no verified cloud STT backup**. NVIDIA's free route advertised audio
 input but returned requests for an audio file and then a provider error. Gemma's
 free route returned HTTP 429 in both bounded attempts. Neither is selected.

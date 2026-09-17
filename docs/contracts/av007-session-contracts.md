@@ -2,6 +2,10 @@
 
 - Issue: [#7 — Specify the integration contracts and review lifecycle](https://github.com/BrockBadeaux14/AnkiVoice/issues/7).
 - Date: September 14, 2026. Status: ready for review; acceptance pending.
+- **Amended September 17, 2026** by [AV-047](https://github.com/BrockBadeaux14/AnkiVoice/issues/76),
+  which reverses the confirmation rule for grader proposals when the learner turns
+  **Automatic grading** on. See [Automatic grading](#automatic-grading-the-september-17-2026-reversal);
+  every rule below holds unchanged while that option is off, which is how it ships.
 - Dependencies: #1, #4, #5 and #6 are closed. The [AV-004 capability matrix](../testing/av004-ankidroid-review-access.md)
   is the normative input; these contracts are bound to what it measured, not to an idealized API.
 - Scope: specification and in-memory fakes only. No AnkiDroid transport, no provider
@@ -37,6 +41,12 @@ re-litigate them.
   confirmation; a suggestion, silence or elapsed time never submits. Transcript
   edits invalidate prior suggestions and confirmations. Action source and correction
   events are recorded so #29 can count manual interventions.
+  **Amended September 17, 2026 (AV-047):** with **Automatic grading** on, a rating
+  *the grader proposed* is confirmed by the session itself once a cancel window
+  expires, and is recorded with the confirmation source `auto`. A suggestion, silence
+  and elapsed time still never submit while the option is off, and a rating the
+  **learner** named never submits without their own confirmation either way. See
+  [Automatic grading](#automatic-grading-the-september-17-2026-reversal).
 - **No skip.** AV-004 found no non-mutating skip operation. Bury and suspend both
   change scheduling. A skip request pauses or exits the session **without any write**.
   Skip is never emulated by rating, burying, suspending or reordering another queue.
@@ -191,7 +201,10 @@ Failures: `quotaExhausted`, `providerError`, `graderTimeout`, `unparsableRespons
 A label maps to a **proposal**, not a commit: `correct` proposes Good, `incorrect`
 proposes Again, and `partial` and `uncertain` propose nothing and ask for a spoken
 or touch self-grade. AV-006 recorded a no-go for unattended rating; #19 evaluates
-suggestion quality and does not waive explicit confirmation. When grading fails the
+suggestion quality and does not waive explicit confirmation. **AV-047 waives it, for
+grader proposals alone and only while the learner has turned the option on** — see
+[Automatic grading](#automatic-grading-the-september-17-2026-reversal); a `partial` or
+`uncertain` label still proposes nothing and still asks for a self-grade. When grading fails the
 session pauses with no rating. An explicit `selfGrade(rating)` action resumes this
 answer with a learner-selected proposal, which still needs confirmation. A transcript
 edit is another explicit recovery route. No failure itself supplies a rating.
@@ -207,7 +220,9 @@ credentials and quota enforcement; #18 validates responses. A malformed, empty,
 truncated or timed-out response produces a failure, never a recovered grade from a
 partial payload. Manual/self-grade fallback remains available by explicit action.
 The fixture schema's historical `initial_auto_ratings` names describe suggestions
-only; they grant no permission for unattended writes.
+only; they grant no permission for unattended writes. The one thing that does is the
+learner's own **Automatic grading** setting, added by AV-047 on September 17, 2026, and
+it is off unless they turn it on.
 
 ### ReviewWriter
 
@@ -216,8 +231,10 @@ Commits one review and classifies the outcome. Its required algorithm is:
 1. Reject a rating outside the ratings offered for this card. **A rejected rating is
    never converted to Again.**
 2. Reject a negative elapsed time.
-3. Require a current explicit confirmation bound to this intent, identity, rating and
-   transcript revision. A missing or invalid event is `confirmationRequired`.
+3. Require a current confirmation bound to this intent, identity, rating and
+   transcript revision. A missing or invalid event is `confirmationRequired`. AV-047
+   added `auto` to the sources such an event may carry; it **did not** relax this step,
+   and the binding checked for an `auto` event is the binding checked for the other two.
 4. Re-query the scheduled card and card by ID. A read failure is `precommitReadFailed`;
    no write is attempted. A withdrawn scheduled card is stale.
 5. Reject on any identity, stored-state or VoiceQA-content difference as `staleIdentity`.
@@ -269,10 +286,13 @@ that the write was cancelled.
   **before** requesting speech/grader cleanup. Resume is explicit and obtains a fresh
   card. A stopped session requires reload/new session. No callback resumes it.
 - `RatingConfirmation(token, identity, rating, transcriptRevision, source, final,
-  confidence)` is a distinct learner event. Source is spoken or touch. A spoken
-  command must be final and sufficiently confident; no partial, no-match, error,
+  confidence)` is a distinct event. Source is spoken, touch or — since AV-047 — `auto`.
+  A spoken command must be final and sufficiently confident; no partial, no-match, error,
   timeout, low/absent confidence, silence or answer transcript is a confirmation.
-  Touch is an explicit gesture and has no recognition confidence requirement.
+  Touch is an explicit gesture and has no recognition confidence requirement. `auto` is
+  not a recognition event either and has none; it is minted only by the pre-commit
+  exchange, only for a rating the grader proposed, and only while the learner has
+  **Automatic grading** on.
 - Proposing a rating never creates a confirmation. Rating corrections issue a new
   intent token and clear confirmation, including when changed back. `confirm(event)`
   validates the event; `commit` is permitted only afterwards. A successful event
@@ -294,6 +314,48 @@ and an active recognizer attempt must remain distinguishable. This specification
 chooses no silence duration, retry count, confidence threshold or focus-loss duration.
 Ordinary internal playback-to-capture handoff is not an external interruption; #45
 must measure how to distinguish them. #23 chooses framework/ownership independently.
+
+## Automatic grading: the September 17, 2026 reversal
+
+[AV-047](https://github.com/BrockBadeaux14/AnkiVoice/issues/76) adds an **Automatic
+grading** option to the app's setup screen at the owner's request on September 17, 2026.
+It is **off on first run and off unless the learner turns it on**, and while it is off
+nothing above changes — the offline suites for the exchange, the guard and the writer pass
+unmodified, which is the evidence for that claim.
+
+While it is **on**, this is what changes and nothing else:
+
+- A rating **the grader proposed** — `RatingSource.RULE` or `RatingSource.AI` — opens a
+  cancel window of five seconds instead of waiting indefinitely. When that window expires
+  the pre-commit exchange mints a `RatingConfirmation` with the source `auto`, bound to
+  exactly the same intent, identity, rating and transcript revision a spoken or touched
+  confirmation would be bound to, and takes the same single-write path.
+- The announcement says a write is coming, how long there is to stop it, and that only
+  AnkiDroid's own Undo can take a saved review back. The study screen shows the option's
+  state for the whole session, counts the window down, and offers **Keep it manual** as
+  the one control that stops it.
+
+What it does **not** change:
+
+- **The writer's guard.** Step 3 of the `ReviewWriter` algorithm is unchanged. `auto` is a
+  name for a source, not an exemption: an `auto` event that does not match the intent,
+  identity, rating or revision is `confirmationRequired` like any other, and a correction,
+  a transcript edit or a cancellation clears it like any other.
+- **What still waits for the learner.** A grader failure, an abstention (`partial`,
+  `uncertain`, `RatingSource.NONE`) and a rating the learner named themselves
+  (`RatingSource.LEARNER`) all still require their own confirmation. AV-007's "no failure
+  itself supplies a rating" holds exactly as written.
+- **Correction before commit only.** There is still no in-app undo after a commit. This is
+  the cost of the option and the reason the cancel window exists: with it on, a wrong AI
+  rating that the learner does not stop in time is correctable in AnkiDroid alone.
+- **The record.** Every commit carries its confirmation source into the session record and
+  into AV-018's journal `dispatch` line, so an automatic commit is readable back as one —
+  including from a process that died before it could settle the entry, and including by
+  #29 when it counts manual interventions. A journal line written before this field exists
+  reads back with no source rather than being read as a confirmation it never recorded.
+
+Verified offline by `AutomaticGradingTest` (`:core`) and `AutomaticStudyTest` (`:app`), and
+live on the pinned AVD by [AV-047's runbook](../testing/av047/runbook.md).
 
 ## Question, reveal and grading criteria
 

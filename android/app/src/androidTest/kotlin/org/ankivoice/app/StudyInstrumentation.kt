@@ -55,6 +55,24 @@ import org.json.JSONObject
  * | `route-refused-self-grade` | with the daily limit at 0, answers in other words, names a rating, confirms | path `unavailable`, a self-grade; one review |
  *
  * Reproduce with docs/testing/av026/runbook.md.
+ *
+ * ## AV-047's turns, on the same screen
+ *
+ * AV-047 put an **Automatic grading** option on the setup screen. Its live check is a turn
+ * of this same real screen, so it lives here rather than in a harness of its own, and it
+ * takes `-e confirm AV047_LIVE_AUTOMATIC`. The option is the **operator's** to set on the
+ * setup screen before the turn: nothing here writes that preference, because a check that
+ * set the toggle itself would not have checked the toggle.
+ *
+ * | Turn | The operator does | What must hold |
+ * | --- | --- | --- |
+ * | `automatic-rule` | with the option **on**, answers with the reference answer and then touches nothing | a window opened; the review is saved with no confirmation; `auto` in the record and the journal |
+ * | `automatic-cancelled` | with the option **on**, answers, taps **Keep it manual**, finishes | a window opened and was stopped; nothing written; the rating still waiting |
+ * | `automatic-abstain` | with the option **on**, answers so the grader abstains, names a rating, confirms | path `abstain`; **no** window; one review confirmed by touch or voice |
+ * | `automatic-unavailable` | with the option **on** and the daily limit at 0, answers in other words, names a rating, confirms | path `unavailable`; **no** window; one review confirmed by touch or voice |
+ * | `automatic-off` | with the option **off**, answers with the reference answer, confirms | **no** window; one review confirmed by touch or voice |
+ *
+ * Reproduce with docs/testing/av047/runbook.md.
  */
 class StudyInstrumentation : Instrumentation() {
     private lateinit var args: Bundle
@@ -72,7 +90,11 @@ class StudyInstrumentation : Instrumentation() {
             check(Build.FINGERPRINT.contains("generic") || Build.MODEL.contains("sdk")) {
                 "The live check runs on the pinned emulator only"
             }
-            check(args.getString("confirm") == "AV026_LIVE_STUDY") { "Explicit confirmation required" }
+            // One token per card, so an AV-026 invocation can never start an AV-047 turn or
+            // the other way round, and neither runs without the operator naming which.
+            val requested = args.getString("turn")
+            val token = if (requested in AUTOMATIC_TURNS) "AV047_LIVE_AUTOMATIC" else "AV026_LIVE_STUDY"
+            check(args.getString("confirm") == token) { "Explicit confirmation required: -e confirm $token" }
             val platform = AndroidAccessPlatform(targetContext)
             val deckId = checkNotNull(args.getString("deck")) { "A disposable AV-002 deck is required" }.toLong()
             val deck = if (platform.databasePermissionGranted() && platform.apiEnabled() != false) {
@@ -89,14 +111,20 @@ class StudyInstrumentation : Instrumentation() {
                 // the app's own setting. Selecting a deck is not a claim about a review.
                 preferences.edit().putLong("selected_deck", deckId).commit()
                 output.put("mode", "prepare").put("selectedDeck", deckId).put("passed", true)
+                // Reported, never written: AV-047's option is the operator's to set on the
+                // setup screen, and a harness that set it would not have checked it.
+                output.put("automaticGradingSetting", preferences.getBoolean("automatic_grading", false))
                 return report(output)
             }
             check(preferences.getLong("selected_deck", -1) == deckId) {
                 "The app has a different deck selected; run mode=prepare or choose the AV002 deck in setup"
             }
-            val turn = checkNotNull(args.getString("turn")) { "-e turn <name> is required" }
+            val turn = checkNotNull(requested) { "-e turn <name> is required" }
             check(turn in TURNS) { "Unknown turn $turn; choose from $TURNS" }
             output.put("turn", turn)
+            // What the setup screen's toggle was left on before this turn, as evidence. The
+            // judgement below uses what the session actually ran with, not this.
+            output.put("automaticGradingSetting", preferences.getBoolean("automatic_grading", false))
 
             val journalFile = File(targetContext.filesDir, JournalModule.FILE)
             output.put("journalBefore", entries(ReviewJournal(FileJournalStore(journalFile))))
@@ -212,12 +240,20 @@ class StudyInstrumentation : Instrumentation() {
         val confirmed = (0 until outcomes.length()).count { outcomes.getJSONObject(it).optString("state") == ReviewState.CONFIRMED.specName }
         val journal = evidence.optJSONArray("journal") ?: JSONArray()
         val journalConfirmed = (0 until journal.length()).count { journal.getJSONObject(it).optString("outcomeState") == ReviewState.CONFIRMED.specName }
-        val wroteOne = confirmed == 1 && journalConfirmed == 1 && first.optString("outcome") == ReviewState.CONFIRMED.specName &&
-            first.optString("confirmationSource") in setOf("spoken", "touch") && !output.optBoolean("stateUnchanged")
+        fun wroteOneBy(sources: Set<String>) = confirmed == 1 && journalConfirmed == 1 &&
+            first.optString("outcome") == ReviewState.CONFIRMED.specName &&
+            first.optString("confirmationSource") in sources && !output.optBoolean("stateUnchanged") &&
+            (0 until journal.length()).all { journal.getJSONObject(it).optString("confirmationSource") in sources }
+        val wroteOne = wroteOneBy(setOf("spoken", "touch"))
         val wroteNothing = outcomes.length() == 0 && journal.length() == 0 && output.optBoolean("stateUnchanged")
         val touches = strings(first.optJSONArray("touchActions"))
         val halts = strings(first.optJSONArray("halts"))
         val path = first.optString("gradingPath")
+        // AV-047, from the snapshots the session actually published: whether it ran with the
+        // option on, and whether a cancel window was ever open on the screen.
+        val snapshots = output.optJSONArray("snapshots") ?: JSONArray()
+        val ranAutomatic = (0 until snapshots.length()).any { snapshots.getJSONObject(it).optBoolean("automaticGrading") }
+        val sawWindow = (0 until snapshots.length()).any { !snapshots.getJSONObject(it).isNull("autoCommitWindowMs") }
         return when (turn) {
             "rule-match" -> wroteOne && path == GradingRecord.RULE
             "ai-labelled" -> wroteOne && path in setOf(GradingRecord.AI_FREE, GradingRecord.AI_PAID)
@@ -240,6 +276,19 @@ class StudyInstrumentation : Instrumentation() {
             "undo-handoff" -> confirmed == 1 && journalConfirmed == 1 && first.optString("outcome") == ReviewState.CONFIRMED.specName &&
                 evidence.optString("closed") == "undo-handoff"
             "route-refused-self-grade" -> wroteOne && path == GradingRecord.UNAVAILABLE && !first.isNull("selfGrade")
+            // AV-047. The commit case is the only one in this file that may pass with a
+            // review the operator never confirmed, and it must show that it never asked:
+            // no confirm among the touches, and `auto` in both the turn and the journal.
+            "automatic-rule" -> ranAutomatic && sawWindow && wroteOneBy(setOf("auto")) &&
+                path == GradingRecord.RULE && first.optBoolean("automaticGrading") &&
+                "confirm" !in touches && !first.optBoolean("automaticCancelled")
+            "automatic-cancelled" -> ranAutomatic && sawWindow && wroteNothing &&
+                first.optBoolean("automaticCancelled") && "keep it manual" in touches
+            "automatic-abstain" -> ranAutomatic && !sawWindow && wroteOne &&
+                path == GradingRecord.ABSTAIN && !first.isNull("selfGrade")
+            "automatic-unavailable" -> ranAutomatic && !sawWindow && wroteOne &&
+                path == GradingRecord.UNAVAILABLE && !first.isNull("selfGrade")
+            "automatic-off" -> !ranAutomatic && !sawWindow && wroteOne && path == GradingRecord.RULE
             else -> false
         }
     }
@@ -266,6 +315,9 @@ class StudyInstrumentation : Instrumentation() {
         .put("ratingSource", state.ratingSource ?: JSONObject.NULL)
         .put("announcedRevision", state.announcedRevision ?: JSONObject.NULL)
         .put("confirmed", state.confirmed)
+        .put("automaticGrading", state.automaticGrading)
+        .put("autoCommitWindowMs", state.autoCommitWindowMs ?: JSONObject.NULL)
+        .put("autoCommitCancelled", state.autoCommitCancelled)
         .put("outcomeState", state.outcomeState ?: JSONObject.NULL)
         .put("haltKind", state.halt?.kind ?: JSONObject.NULL)
         .put("haltReason", state.halt?.reason ?: JSONObject.NULL)
@@ -327,6 +379,8 @@ class StudyInstrumentation : Instrumentation() {
         .put("selfGrade", turn.selfGrade ?: JSONObject.NULL)
         .put("ratingCorrections", JSONArray(turn.ratingCorrections.map { JSONObject().put("from", it.from).put("to", it.to) }))
         .put("confirmationSource", turn.confirmationSource ?: JSONObject.NULL)
+        .put("automaticGrading", turn.automaticGrading)
+        .put("automaticCancelled", turn.automaticCancelled)
         .put("outcome", turn.outcome ?: JSONObject.NULL)
         .put("rating", turn.rating ?: JSONObject.NULL)
         .put("touchActions", JSONArray(turn.touchActions))
@@ -340,6 +394,7 @@ class StudyInstrumentation : Instrumentation() {
         .put("rating", entry.rating)
         .put("transcriptRevision", entry.transcriptRevision)
         .put("transcript", entry.transcript)
+        .put("confirmationSource", entry.confirmationSource?.specName ?: JSONObject.NULL)
         .put("phase", entry.phase.specName)
         .put("outcomeState", entry.outcomeState?.specName ?: JSONObject.NULL)
         .put("outcomeReason", entry.outcomeReason)
@@ -359,18 +414,25 @@ class StudyInstrumentation : Instrumentation() {
     /** Every attempt is written out, whether or not it came back the way it should. */
     private fun report(output: JSONObject) {
         output.put("completed", !output.has("error"))
-        File(targetContext.filesDir, "av026-result.json").writeText(output.toString(2))
+        val card = if (output.optString("turn") in AUTOMATIC_TURNS) "av047" else "av026"
+        File(targetContext.filesDir, "$card-result.json").writeText(output.toString(2))
         finish(
             if (output.optBoolean("passed")) Activity.RESULT_OK else Activity.RESULT_CANCELED,
-            Bundle().apply { putString("av026", output.toString()) },
+            Bundle().apply { putString(card, output.toString()) },
         )
     }
 
     private companion object {
+        /** AV-047's turns, which take their own confirmation token and write their own result. */
+        val AUTOMATIC_TURNS = listOf(
+            "automatic-rule", "automatic-cancelled", "automatic-abstain",
+            "automatic-unavailable", "automatic-off",
+        )
+
         val TURNS = listOf(
             "rule-match", "ai-labelled", "abstain-self-grade", "corrected-confirmed", "transcript-edit",
             "skip", "pause-resume", "interruption-reload", "undo-handoff", "route-refused-self-grade",
-        )
+        ) + AUTOMATIC_TURNS
         const val POLL_MS = 250L
 
         /** Long enough for a slow turn with retries; a timeout is recorded, never passed. */

@@ -57,6 +57,10 @@ TEST = "org.ankivoice.test"
 ENTRY = f"{TEST}/org.ankivoice.app.StudyInstrumentation"
 JOURNAL_ENTRY = f"{TEST}/org.ankivoice.app.JournalInstrumentation"
 CONFIRMATION = "AV026_LIVE_STUDY"
+# Which card this run belongs to. AV-047's turns run on the same harness and the same real
+# study screen, so its driver reuses everything here and overrides this and the constants
+# below rather than forking 370 lines; see tools/av047-qa/run.py.
+CARD = "av026"
 AVD = "AnkiVoice_AV005"
 DEVICE = "emulator-5588"
 PORT = 5588
@@ -222,14 +226,14 @@ def attempt(turn, deck):
             print(f"    on screen: {phase}", flush=True)
     process.wait(timeout=1500)
     text = "".join(raw)
-    match = re.search(r"INSTRUMENTATION_RESULT: av026=(\{.*\})", text)
+    match = re.search(rf"INSTRUMENTATION_RESULT: {CARD}=(\{{.*\}})", text)
     try:
         result = json.loads(match.group(1)) if match else {"error": "no instrumentation result"}
     except json.JSONDecodeError as error:
         result = {"error": f"unparseable instrumentation result: {error}"}
     if not match:
         # The bundle is also written to the app's files; a truncated stdout is not lost evidence.
-        stored = adb("exec-out", "run-as", APP, "cat", "files/av026-result.json", check=False).decode(errors="replace")
+        stored = adb("exec-out", "run-as", APP, "cat", f"files/{CARD}-result.json", check=False).decode(errors="replace")
         try:
             result = json.loads(stored)
         except json.JSONDecodeError:

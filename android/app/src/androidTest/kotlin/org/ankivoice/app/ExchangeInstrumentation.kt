@@ -470,6 +470,9 @@ class ExchangeInstrumentation : Instrumentation() {
                 .put("reason", step.outcome.reason)
                 .put("acknowledgement", step.outcome.acknowledgement ?: JSONObject.NULL)
                 .put("announcement", step.announcement?.text ?: JSONObject.NULL)
+            // AV-047's own; unreachable here, because this harness never turns the option on.
+            is ExchangeStep.KeptManual -> put("kind", "kept-manual")
+                .put("rating", step.announcement.rating ?: JSONObject.NULL)
             is ExchangeStep.Untouched -> put("kind", "untouched")
         }
         put("notice", step.notice)

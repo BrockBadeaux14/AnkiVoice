@@ -30,6 +30,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.lightColorScheme
@@ -38,6 +39,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -213,6 +215,8 @@ private fun SetupScreen(
 
             StudyCard(state, failure, controller, onStudy)
 
+            AutomaticGradingCard(state, controller)
+
             ProviderSettingsCard(providerState, provider)
             if (providerState.keyPresent && !providerState.disclosureAcknowledged) {
                 DisclosureCard(providerState, provider)
@@ -246,8 +250,13 @@ private fun StudyCard(state: ShellState, failure: Failure?, controller: ShellCon
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text("Study", style = MaterialTheme.typography.titleLarge)
             Text(
-                "Voice study on the selected deck: hear the question, say your answer, confirm the rating. " +
-                    "Every rating needs your confirmation before it is saved.",
+                if (state.automaticGrading) {
+                    "Voice study on the selected deck: hear the question, say your answer, and a rating " +
+                        "the grader proposes is saved on its own. Automatic grading is on."
+                } else {
+                    "Voice study on the selected deck: hear the question, say your answer, confirm the rating. " +
+                        "Every rating needs your confirmation before it is saved."
+                },
             )
             if (state.status != PreviewStatus.Idle) {
                 Text(statusText(state.status), style = MaterialTheme.typography.titleMedium)
@@ -262,6 +271,65 @@ private fun StudyCard(state: ShellState, failure: Failure?, controller: ShellCon
             if (state.selectedDeckId == null) Text("Choose a study deck above first.", style = MaterialTheme.typography.bodySmall)
             Text(
                 "Check deck reads the selected deck and reports whether a card is due. It submits no review.",
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+    }
+}
+
+/**
+ * AV-047's **Automatic grading** option, at the owner's request on September 17, 2026.
+ *
+ * Off on first run, off until it is turned on here, and stated plainly: while it is on, a
+ * rating the grader proposes is saved **without** a confirmation, and AV-007's
+ * correction-before-commit rule means a saved review can then only be undone in AnkiDroid.
+ * The card says both of those before the switch, not after it, and turning it on changes
+ * nothing in the collection by itself.
+ *
+ * It takes effect for the **next** study session; a session already running keeps the
+ * setting it opened with, and the study screen cannot be reached without leaving this one.
+ */
+@Composable
+private fun AutomaticGradingCard(state: ShellState, controller: ShellController) {
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text("Automatic grading", style = MaterialTheme.typography.titleLarge)
+            Text(
+                "While this is on, a rating the grader proposes — an exact rule match, or the AI " +
+                    "grader's suggestion — is saved without your confirmation, a few seconds after it " +
+                    "is announced. You can stop each one during those seconds.",
+            )
+            Text(
+                "Once a review is saved, AnkiVoice cannot take it back: only AnkiDroid's own Undo can, " +
+                    "and only for a while.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error,
+            )
+            Text(
+                "A rating you name yourself, and a turn the grader could not grade or would not " +
+                    "rate, still wait for your confirmation whatever this says.",
+                style = MaterialTheme.typography.bodySmall,
+            )
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Switch(
+                    checked = state.automaticGrading,
+                    onCheckedChange = controller::setAutomaticGrading,
+                )
+                Text(
+                    if (state.automaticGrading) {
+                        "On: ratings the grader proposes are saved without confirmation."
+                    } else {
+                        "Off: every rating waits for your confirmation."
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            Text(
+                "It applies to the next session you start.",
                 style = MaterialTheme.typography.bodySmall,
             )
         }
