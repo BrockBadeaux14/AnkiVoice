@@ -20,12 +20,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 import org.ankivoice.ankidroid.AndroidAccessPlatform
 import org.ankivoice.ankidroid.ProvisioningReport
 import org.ankivoice.ankidroid.ProvisioningStatus
 import org.ankivoice.ankidroid.ProvisioningStep
 import org.ankivoice.core.commands.VoiceCommand
 import org.ankivoice.core.contracts.*
+
+/** How often the surface asks the transport what it has heard so far. */
+private const val HEARING_POLL_MS = 250L
 
 class MainActivity : ComponentActivity() {
     private val root get() = application as ShellApplication
@@ -271,6 +275,26 @@ private fun CommandCard(state: CommandState, commands: CommandController, deckSe
                         "of the answer, not commands.",
                     color = MaterialTheme.colorScheme.primary,
                 )
+            }
+            // What the recognizer makes of the answer, while it is still making it up. It is
+            // progress, not a result: AV-012 settles on the final alone, and the line is
+            // labelled so a partial is never read as what the attempt recorded.
+            if (state.answering) {
+                var hearing by remember { mutableStateOf<String?>(null) }
+                LaunchedEffect(state.answering) {
+                    while (true) {
+                        hearing = commands.hearing()
+                        delay(HEARING_POLL_MS)
+                    }
+                }
+                Text(
+                    hearing?.let { "Hearing: $it" } ?: "Hearing: (nothing yet)",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
+            state.heard?.let {
+                Text("Heard: “$it”", style = MaterialTheme.typography.bodyLarge)
             }
             state.notice?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
             state.failure?.let {

@@ -30,6 +30,9 @@ class CommandControllerTest {
     /** What the operator does mid-capture. The transport blocks there, so tests act there. */
     private var whileListening: () -> Unit = {}
 
+    /** What the transport has heard so far, as the surface polls it mid-capture. */
+    private var partialText: String? = null
+
     /** The transport blocks inside `listen`; this watches the surface from in there. */
     private inner class ObservedSpeechInput : FakeSpeechInput(FakeSpeechInput.Say("Five blocks.")) {
         var listened: OperationToken? = null
@@ -78,6 +81,7 @@ class CommandControllerTest {
                     grader = grader,
                     speech = speechInput,
                     language = "en-US",
+                    partial = { partialText },
                     release = { released += 1 },
                 ),
             )
@@ -154,6 +158,41 @@ class CommandControllerTest {
 
         assertEquals(listOf("en-US"), speechInput.languages)
         assertEquals(session.answerTurn?.token, speechInput.listened)
+        assertTrue(wroteNothing)
+    }
+
+    /**
+     * The learner's own words, shown back to them: the partial while the recognizer is
+     * still making it up, and the final transcript once the attempt settles. Card text and
+     * grades stay off this surface — #27 owns those.
+     */
+    @Test
+    fun `the surface shows what the recognizer heard`() {
+        partialText = "five blo"
+        val hearing = mutableListOf<String?>()
+        whileListening = { hearing += controller.hearing() }
+        started()
+        controller.ask()
+        controller.startAnswer()
+
+        assertEquals(listOf("five blo"), hearing)
+        assertEquals("Five blocks.", controller.state.heard)
+        // Nothing is left over the next attempt: the previous transcript goes before the
+        // microphone opens, and a capture with no transcript leaves the line empty.
+        assertNull(controller.hearing(), "a settled attempt still reports a live partial")
+        assertTrue(wroteNothing)
+    }
+
+    @Test
+    fun `a capture that produced no transcript shows none`() {
+        speechInput.script.clear()
+        speechInput.script.add(FakeSpeechInput.Fail(Failure(SpeechInputFailure.NO_MATCH, "empty result")))
+        started()
+        controller.ask()
+        controller.startAnswer()
+
+        assertNull(controller.state.heard)
+        assertEquals(SpeechInputFailure.NO_MATCH, controller.state.failure?.mode)
         assertTrue(wroteNothing)
     }
 

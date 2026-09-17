@@ -1060,8 +1060,15 @@ command is voice-only.
 `CommandController` in `:app` is the debug-grade surface decision 3 of the card calls for,
 modelled on AV-023's shell controls. It runs the session on a thread of its own, because
 AV-025's transport blocks its caller for the whole of playback and capture. It shows no
-card text, no transcript and no grade: #27 owns the readable study surface and replaces
-this one.
+card text and no grade: #27 owns the readable study surface and replaces this one.
+
+It does show the transcript. While an attempt is open the surface polls
+`SpeechTransport.lastPartial` through `CommandController.hearing()` and shows it as
+**Hearing**, labelled so a partial is never read as a result; when the attempt settles the
+recognizer's final is shown as **Heard**, and an attempt that produced none leaves the
+line off rather than showing an empty one. A new Start answer clears the previous
+transcript before the microphone opens. This is display only: what reaches disk is still
+what AV-022's journal and the diagnostics toggle decide.
 
 Start answer runs the attempt: it opens AV-012's window and then calls `listen`, which is
 what AV-025 defines that touch to be. It publishes the open window before it blocks, so

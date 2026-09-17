@@ -158,6 +158,7 @@ private fun commandSession(
             revision = revision,
             speech = speech,
             language = settings.language,
+            partial = speech::lastPartial,
             release = speech::releaseAll,
         ),
     )

@@ -106,6 +106,7 @@ class StudyCompositionTest {
                         revision = revision,
                         speech = speechInput,
                         language = "en-US",
+                        partial = { null },
                         release = {},
                     ),
                 )
