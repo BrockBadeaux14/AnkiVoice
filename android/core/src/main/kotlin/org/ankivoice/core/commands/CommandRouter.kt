@@ -88,9 +88,11 @@ sealed interface CommandOutcome {
  *
  * It owns the command **context** rule, dispatch and the touch fallbacks. It owns no
  * session state: every effect is an existing [ReviewSession] call, and there is no code
- * path from here to [ReviewSession.commit], so **no command writes a review**. A spoken
- * rating is a proposal and a spoken confirmation only authorizes one; submitting it is
- * #27's step.
+ * path from here to [ReviewSession.commit], so **no command in this file writes a
+ * review**. A spoken rating is a proposal and a spoken confirmation only authorizes one.
+ * AV-019's `PrecommitExchange` sits above this router and runs the commit an accepted
+ * confirmation earns; an earlier comment here left that step to #27, which the owner
+ * superseded on September 16, 2026.
  *
  * Capture is requested through AV-007's [SpeechInput] and nothing else, so no platform
  * type appears here. A command capture is tagged as one by its namespaced token, never
@@ -398,7 +400,8 @@ class CommandRouter(
      *
      * A spoken confirmation below [Confidence.SUFFICIENT] is not a confirmation, which
      * [org.ankivoice.core.contracts.ReviewIntent.hasConfirmation] enforces independently of
-     * this router's own gate. Authorizing is not submitting: no command path commits.
+     * this router's own gate. Authorizing is still not submitting **here**: nothing in this
+     * file commits, and AV-019's exchange is what acts on the accepted confirmation.
      */
     private fun confirm(source: ConfirmationSource, confidence: Confidence): CommandOutcome {
         val intent = session.intent
@@ -425,8 +428,7 @@ class CommandRouter(
             executed(
                 VoiceCommand.CONFIRM,
                 source,
-                "Rating ${intent.rating} is confirmed for this card. Nothing is written until the " +
-                    "review is submitted.",
+                "Rating ${intent.rating} is confirmed for this card.",
             )
         } else {
             refuse(

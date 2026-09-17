@@ -27,3 +27,6 @@ jobs:
       - run: python tools/av043-qa/validate.py
       # AV-044: every recorded discovery attempt is internally consistent.
       - run: python tools/av044-qa/validate.py
+      # AV-019: every live review was written from an explicit confirmation, and the two
+      # cases that must not write left the collection alone.
+      - run: python tools/av019-qa/validate.py

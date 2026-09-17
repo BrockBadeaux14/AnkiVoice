@@ -3,8 +3,8 @@ package org.ankivoice.app
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicInteger
 import org.ankivoice.core.answer.AnswerPhase
+import org.ankivoice.core.answer.AnswerRecovery
 import org.ankivoice.core.commands.CommandContext
-import org.ankivoice.core.commands.CommandOutcome
 import org.ankivoice.core.commands.CommandRouter
 import org.ankivoice.core.commands.VoiceCommand
 import org.ankivoice.core.contracts.CardProvider
@@ -14,14 +14,22 @@ import org.ankivoice.core.contracts.ForegroundEventPort
 import org.ankivoice.core.contracts.Grader
 import org.ankivoice.core.contracts.GraderFailure
 import org.ankivoice.core.contracts.GradingReply
+import org.ankivoice.core.contracts.GradingRequest
 import org.ankivoice.core.contracts.GradingResult
 import org.ankivoice.core.contracts.QueueExhausted
 import org.ankivoice.core.contracts.ReviewOutcome
+import org.ankivoice.core.contracts.ReviewState
 import org.ankivoice.core.contracts.ScheduledCard
+import org.ankivoice.core.exchange.PrecommitExchange
+import org.ankivoice.core.exchange.RatingSource
+import org.ankivoice.core.exchange.ratingName
+import org.ankivoice.core.grading.GradingSource
 import org.ankivoice.core.session.Event
 import org.ankivoice.core.session.Interruption
+import org.ankivoice.core.session.ProposalOutcome
 import org.ankivoice.core.session.ReviewSession
 import org.ankivoice.core.session.SessionResult
+import org.ankivoice.core.session.SessionState
 
 /**
  * One debug session: the turn loop, the command layer over it, the grader behind it, and
@@ -34,12 +42,19 @@ import org.ankivoice.core.session.SessionResult
  * grading worker rather than through [ReviewSession.grade], which would block the session
  * thread for the whole provider round trip. [revision] mirrors the session's transcript
  * revision for that worker, which may not read the session directly.
+ *
+ * [exchange] is AV-019's pre-commit exchange over the same session, built on the same
+ * thread. [gradingSource] names the policy that answered one grading request, which only
+ * the grader that chose the route can state; it is read on the grading worker in the same
+ * step that took the reply, and a grader that will not say reports null.
  */
 internal class CommandSession(
     val session: ReviewSession,
     val router: CommandRouter,
     val grader: Grader,
+    val exchange: PrecommitExchange,
     val revision: AtomicInteger = AtomicInteger(),
+    val gradingSource: (GradingRequest) -> GradingSource? = { null },
     val release: () -> Unit,
 )
 
@@ -72,12 +87,35 @@ internal data class CommandState(
     val journalNotices: List<String> = emptyList(),
     /** The journal entries those notices belong to, so the learner can acknowledge them. */
     val journalOutstanding: List<Long> = emptyList(),
+    /** AV-019: the Announced position, in the words it was spoken in. Null when none is open. */
+    val announcement: String? = null,
+    /** The pending rating, or null for an abstention and outside the exchange. */
+    val pendingRating: Int? = null,
+    /** Where [pendingRating] came from: rule, ai, learner, or none for the abstention. */
+    val ratingSource: String? = null,
+    /** The AV-012 transcript revision the announcement was computed from. */
+    val announcedRevision: Int? = null,
+    /** True once the pending rating carries a current confirmation, before the write runs. */
+    val confirmed: Boolean = false,
+    /** The ratings this card offers while the learner may still name one. Empty otherwise. */
+    val selfGradable: List<Int> = emptyList(),
+    /** AV-019: the writer's own outcome for the committed attempt, or null before one. */
+    val outcomeState: String? = null,
+    /** The writer's own reason, shown as-is for a write that failed or could not be confirmed. */
+    val outcomeReason: String? = null,
 ) {
     /** True only while AV-012 has an attempt in flight. */
     val capturing: Boolean get() = context == CommandContext.ANSWER
 
     /** True while the session holds a settled answer that has not been graded yet. */
     val gradable: Boolean get() = sessionState == "grading" && !grading
+
+    /** AV-019: a confirmed review, so Next card and the native-Undo handoff are offered. */
+    val committed: Boolean get() = outcomeState == ReviewState.CONFIRMED.specName &&
+        sessionState == SessionState.COMMITTED.specName
+
+    /** AV-019: the write could not be confirmed, so only the learner can say what happened. */
+    val reconcileRequired: Boolean get() = sessionState == SessionState.OUTCOME_UNKNOWN.specName
 }
 
 /**
@@ -111,9 +149,13 @@ internal data class SessionEvidence(
  * none opens while an unknown outcome is unacknowledged. [cards] is what reconciliation
  * re-reads the journalled card through.
  *
- * **Nothing here submits a review.** There is no commit control and no code path from a
- * command to [ReviewSession.commit]; a confirmed rating stays pending until #21 builds the
- * step that submits it.
+ * AV-019: an accepted confirmation **does** submit, here, on [worker]. Every command goes
+ * through [PrecommitExchange], which announces the pending rating and its source, applies
+ * the re-prompt rule, and runs [ReviewSession.commit] exactly once for an attempt whose
+ * confirmation #14 accepted. There is still no other path to the writer: a rating command,
+ * a correction, a self-grade, a pause and a skip all leave the collection untouched, and
+ * the only announcement of a saved review is made from the [ReviewOutcome] the writer
+ * returned.
  */
 internal class CommandController(
     private val factory: CommandSessionFactory,
@@ -253,11 +295,13 @@ internal class CommandController(
                 // A grader that throws has not graded. It is a failure, never a label.
                 GradingReply(request, Failure(GraderFailure.PROVIDER_ERROR, "grading could not run: ${e.javaClass.simpleName}"))
             }
+            // Read in the same step that took the reply, on the worker that owns the grader.
+            val source = turn.gradingSource(request)
             worker.execute {
                 // A session closed or replaced while grading was in flight gets nothing.
                 if (open !== turn) return@execute
                 grading = false
-                val notice = describeGrade(turn.session.acceptGrade(reply), turn)
+                val notice = openExchange(turn, turn.session.acceptGrade(reply), source)
                 publish(open, generation, notice)
             }
         }
@@ -266,21 +310,88 @@ internal class CommandController(
 
     // -- the commands ----------------------------------------------------------- //
 
-    /** The touch equivalent for [command]. Every command in the vocabulary has one. */
+    /**
+     * The touch equivalent for [command]. Every command in the vocabulary has one.
+     *
+     * AV-019: the outcome goes through the exchange, which re-announces a corrected rating
+     * and commits an accepted confirmation. An explicit gesture carries no recognition
+     * confidence, so a touched Confirm is the route that always works.
+     */
     fun run(command: VoiceCommand) = act("run ${command.specName}") { current ->
-        val router = current?.router ?: return@act "Start a session first."
-        router.touch(command).notice
+        val turn = current ?: return@act "Start a session first."
+        turn.exchange.onCommand(turn.router.touch(command)).notice
     }
 
     /** One learner-opened command capture, through AV-025's transport. */
     fun listenForCommand() = act("listenForCommand") { current ->
-        val router = current?.router ?: return@act "Start a session first."
-        when (val outcome = router.listenForCommand()) {
-            is CommandOutcome.Executed -> outcome.notice
-            is CommandOutcome.Refused -> outcome.notice
-            // Unreachable: a command capture is refused inside the answer window.
-            is CommandOutcome.AnswerText -> outcome.notice
+        val turn = current ?: return@act "Start a session first."
+        turn.exchange.onCommand(turn.router.listenForCommand()).notice
+    }
+
+    // -- AV-019: the pre-commit exchange's own controls ------------------------ //
+
+    /**
+     * The learner's own rating when no grader offered one, or after a grading fault.
+     *
+     * It is the abstain path: naming a rating opens Announced with it announced as
+     * learner-named, and a separate explicit confirmation is still required.
+     */
+    fun selfGrade(rating: Int) = act("selfGrade $rating") { current ->
+        val turn = current ?: return@act "Start a session first."
+        when (turn.session.selfGrade(rating)) {
+            is ProposalOutcome.Proposed -> turn.exchange.announceLearnerRating().notice
+            is ProposalOutcome.Rejected ->
+                "This card did not offer ${ratingName(rating)}, so nothing was proposed."
         }
+    }
+
+    /** Only a confirmed review advances, and the next card is read from AnkiDroid afresh. */
+    fun nextCard() = act("nextCard") { current ->
+        val turn = current ?: return@act "Start a session first."
+        turn.session.advance()
+        describeOffer(turn.session.offerCard())
+    }
+
+    /**
+     * AV-007's post-commit correction: AnkiDroid's own Undo, and nothing else.
+     *
+     * The session stops and is released, so the way back in is a fresh one that re-reads
+     * the card and its scheduling. Nothing here undoes, re-rates or compensates for the
+     * review that was written.
+     */
+    fun handOffToUndo() = act("undoHandoff") { current ->
+        val turn = current ?: return@act "No session is open."
+        turn.session.requestCorrectionAfterCommit()
+        turn.release()
+        open = null
+        grading = false
+        "Open AnkiDroid and use its own Undo. AnkiVoice cannot take a review back and will not " +
+            "re-rate it or write a correcting review. AnkiDroid's Undo may no longer offer this " +
+            "review after other activity in AnkiDroid, or after either app's process is closed " +
+            "or replaced. This session is closed: starting again reads the card and its " +
+            "scheduling from AnkiDroid afresh, and nothing resumes the stopped one."
+    }
+
+    /**
+     * The learner reports what AnkiDroid shows after an unknown outcome.
+     *
+     * It resolves nothing on its own and never resubmits: it records what the learner saw
+     * and closes the session so the collection is read again from scratch. AV-018's
+     * journal entry stays outstanding until it is acknowledged on a surface.
+     */
+    fun reportReconciled(saved: Boolean) = act("reconcile") { current ->
+        val turn = current ?: return@act "No session is open."
+        turn.session.reconcile(saved)
+        turn.release()
+        open = null
+        grading = false
+        val seen = if (saved) {
+            "Recorded: you saw the review in AnkiDroid."
+        } else {
+            "Recorded: the review is not in AnkiDroid. AnkiVoice will not send it again on its " +
+                "own; rate the card in AnkiDroid, or study it here again."
+        }
+        "$seen This session is closed: start again to reload the collection."
     }
 
     /** End the debug session and let the recognizer and synthesizer go. */
@@ -290,7 +401,8 @@ internal class CommandController(
         current.release()
         open = null
         grading = false
-        "Session closed. No review was submitted from this screen."
+        "Session closed. Closing wrote nothing: a review you confirmed was already saved, and " +
+            "a rating you left waiting was discarded unwritten."
     }
 
     /**
@@ -356,6 +468,11 @@ internal class CommandController(
         val router = current?.router
         // The grading worker reads this to abandon a retry across an edit.
         session?.let { current.revision.set(it.transcriptRevision) }
+        // AV-019: the Announced position as the exchange derives it right now. A superseded
+        // revision, a cancelled intent or a committed attempt all leave it null, so the
+        // surface can never show a rating that is no longer waiting.
+        val position = current?.exchange?.position
+        val committed = current?.exchange?.settled
         val turn = CommandState(
             running = current != null,
             busy = false,
@@ -368,6 +485,14 @@ internal class CommandController(
             notice = notice,
             failure = session?.lastFailure ?: unavailable,
             grading = grading,
+            announcement = position?.text,
+            pendingRating = position?.rating,
+            ratingSource = position?.source?.specName,
+            announcedRevision = position?.transcriptRevision,
+            confirmed = session?.intent?.hasConfirmation() == true,
+            selfGradable = selfGradable(session),
+            outcomeState = committed?.state?.specName,
+            outcomeReason = committed?.reason,
         )
         delivery.execute {
             if (token != generation) return@execute
@@ -407,20 +532,57 @@ internal class CommandController(
         SessionResult.Ignored -> "Nothing was offered."
     }
 
-    /** The label and what it proposes. Never the grader's reason, which may quote the answer. */
-    private fun describeGrade(graded: SessionResult<GradingResult>, turn: CommandSession): String = when (graded) {
+    /**
+     * AV-019: open the pre-commit exchange from what the grader answered.
+     *
+     * A label that proposes a rating this card offers opens Announced with that rating and
+     * the policy that produced it. Everything else — `partial`, `uncertain`, a rating the
+     * card withdrew, a grading fault, an exhausted quota — opens Announced with **no**
+     * pending rating, which is announced as an abstention and never as a rating. A grader
+     * that will not name its route is treated the same way: AV-019 shows no rating whose
+     * source it cannot state.
+     *
+     * The grader's own reason is never announced or shown, because it may quote the answer.
+     */
+    private fun openExchange(
+        turn: CommandSession,
+        graded: SessionResult<GradingResult>,
+        source: GradingSource?,
+    ): String = when (graded) {
         is SessionResult.Produced -> {
             val permitted = turn.session.card?.permittedRatings.orEmpty()
             val rating = graded.value.proposedRating(permitted)
-            "Suggested ${graded.value.label.specName}. " + (
-                rating?.let { "It proposes rating $it; nothing is proposed until you rate and confirm." }
-                    ?: "It proposes no rating: choose one yourself."
-                )
+            val label = graded.value.label.specName
+            when {
+                rating == null -> turn.exchange.abstain("the grader answered $label")
+                source == null -> turn.exchange.abstain("the grader did not say which policy answered")
+                else -> turn.exchange.openWithProposal(rating, source.asRatingSource())
+            }.notice
         }
-        is SessionResult.Halted ->
-            "No grade (${graded.halt.reason}). The card is kept; choose a rating yourself."
+        is SessionResult.Halted -> turn.exchange.abstain("no grade: ${graded.halt.reason}").notice
         SessionResult.Ignored -> "That grade belonged to an earlier answer, so it was dropped."
     }
+
+    /**
+     * The ratings the learner may name right now.
+     *
+     * Empty unless the turn holds a gradable answer and no rating is pending: after a
+     * grading fault [ReviewSession.selfGrade] is the only way to name one, because #15's
+     * rating commands are not executable from a pause.
+     */
+    private fun selfGradable(session: ReviewSession?): List<Int> {
+        if (session == null || session.answer?.gradable != true) return emptyList()
+        if (session.intent?.state == ReviewState.PENDING) return emptyList()
+        val namable = session.state == SessionState.GRADING ||
+            AnswerRecovery.SELF_GRADE in session.recoveryOptions
+        return if (namable) session.card?.permittedRatings.orEmpty() else emptyList()
+    }
+}
+
+/** AV-016's policy names, in AV-019's words. The two enums are deliberately separate. */
+private fun GradingSource.asRatingSource(): RatingSource = when (this) {
+    GradingSource.RULE -> RatingSource.RULE
+    GradingSource.AI -> RatingSource.AI
 }
 
 /** Why no session could open. Carries AV-007's failure rather than a message alone. */

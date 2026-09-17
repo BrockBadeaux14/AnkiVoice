@@ -8,7 +8,9 @@ import org.ankivoice.core.answer.AnswerRecovery
 import org.ankivoice.core.commands.CommandRouter
 import org.ankivoice.core.commands.VoiceCommand
 import org.ankivoice.core.contracts.*
+import org.ankivoice.core.exchange.PrecommitExchange
 import org.ankivoice.core.fakes.*
+import org.ankivoice.core.journal.JournalPhase
 import org.ankivoice.core.journal.JournalRequest
 import org.ankivoice.core.journal.ReviewJournal
 import org.ankivoice.core.session.ProposalOutcome
@@ -63,6 +65,7 @@ class StudyCompositionTest {
     private val transport = FakeReviewTransport(collection)
     private val capabilities = Capabilities(maxReviewTimeMs = collection.maxReviewTimeMs)
     private val speechInput = FakeSpeechInput()
+    private val speechOutput = FakeSpeechOutput()
     private val direct = Executor { it.run() }
 
     private val settings = Settings()
@@ -74,7 +77,9 @@ class StudyCompositionTest {
     private val held = ArrayDeque<Runnable>()
     private var gradingWorker: Executor = direct
 
-    private val journal = ReviewJournal(FakeJournalStore())
+    /** Kept, so a test can build the journal a later process would read over the same file. */
+    private val journalStore = FakeJournalStore()
+    private val journal = ReviewJournal(journalStore)
     private val gate = ReconciliationGate(JournalAccess(journal, direct, direct), "study-test")
 
     private var created = 0
@@ -87,18 +92,36 @@ class StudyCompositionTest {
                 val revision = AtomicInteger()
                 val grading = ProviderModule.grading(credentials, ledger, settings, diagnostics)
                 val grader = StudyGrader(grading, "study", revision, gradingWorker)
+                // The same writer the composition root builds: AV-018's journal around
+                // AV-024's guarded writer, with the settled transcript supplied for the
+                // revision the rating was computed from and for no other.
+                var opening: ReviewSession? = null
                 val opened = ReviewSession(
                     provider = cardProvider,
-                    speechOutput = FakeSpeechOutput(),
+                    speechOutput = speechOutput,
                     speechInput = speechInput,
                     grader = grader,
-                    writer = GuardedReviewWriter(cardProvider, transport, capabilities),
+                    writer = studyWriter(
+                        GuardedReviewWriter(cardProvider, transport, capabilities),
+                        journal,
+                        "study",
+                    ) { opening },
                     capabilities = capabilities,
                     clock = FakeClock(),
                     sessionId = "study",
                 )
+                opening = opened
                 session = opened
-                Result.success(CommandSession(opened, CommandRouter(opened, speechInput), grader, revision) {})
+                Result.success(
+                    CommandSession(
+                        session = opened,
+                        router = CommandRouter(opened, speechInput),
+                        grader = grader,
+                        exchange = PrecommitExchange(opened, speechOutput),
+                        revision = revision,
+                        gradingSource = grader::sourceOf,
+                    ) {},
+                )
             },
             direct,
             direct,
@@ -138,8 +161,12 @@ class StudyCompositionTest {
 
         controller.grade()
 
-        assertEquals(GradeLabel.CORRECT, open.suggestion?.label)
-        assertEquals(3, open.suggestion?.proposedRating(open.card!!.permittedRatings))
+        // AV-019 opens the exchange on the rule's rating, which is where #14's advisory
+        // suggestion goes: propose() invalidates it, so the announcement is what carries
+        // the label's proposal forward from here.
+        assertEquals(3, controller.state.pendingRating)
+        assertEquals("rule", controller.state.ratingSource)
+        assertEquals(SessionState.PROPOSING, open.state)
         assertEquals(0, reserved, "a rule match reserves no quota")
         assertTrue(diagnostics.entries().isEmpty(), "a rule match reaches no provider: ${diagnostics.entries()}")
         assertEquals(cardId, open.card?.identity?.cardId)
@@ -267,20 +294,131 @@ class StudyCompositionTest {
         assertEquals(reads, cardProvider.reads.size)
     }
 
+    /**
+     * AV-019: the one path to the writer, end to end through the composition — and the
+     * journal entry AV-018 requires around it, flushed before the write and settled from
+     * what the writer returned.
+     */
     @Test
-    fun `nothing in the composition reaches the writer`() {
+    fun `a confirmed rating is journalled before the write and settled from the outcome`() {
         gradingReady()
+        settings.dailyLimit = 0
+        val open = answered("Five blocks.")
+        controller.grade()
+        assertEquals("rule", controller.state.ratingSource, "the rule route was not named")
+        assertEquals(3, controller.state.pendingRating)
+        assertTrue(journal.entries().isEmpty(), "a pending rating was journalled")
+
+        controller.run(VoiceCommand.CONFIRM)
+
+        assertEquals(1, transport.calls.size, "the single write was not single")
+        assertEquals(ReviewState.CONFIRMED, open.intent?.state)
+        val entry = journal.entries().single()
+        assertEquals(JournalPhase.SETTLED, entry.phase)
+        assertEquals(ReviewState.CONFIRMED, entry.outcomeState)
+        assertEquals(3, entry.rating)
+        assertEquals(open.transcriptRevision, entry.transcriptRevision)
+        assertEquals("Five blocks.", entry.transcript, "the settled transcript was not journalled")
+        assertEquals("study", entry.sessionId)
+        assertTrue(journal.unsettled().isEmpty())
+        assertEquals(0, reserved, "a rule match reserved quota on the way to the writer")
+    }
+
+    /** Nothing short of an accepted confirmation reaches the writer, and none is journalled. */
+    @Test
+    fun `no other composed path reaches the writer`() {
+        gradingReady()
+        settings.dailyLimit = 0
         val open = answered("Five blocks.")
         controller.grade()
         controller.run(VoiceCommand.RATE_GOOD)
-        controller.run(VoiceCommand.CONFIRM)
-        assertTrue(open.intent?.hasConfirmation() == true, "the confirmation was not recorded")
+        controller.run(VoiceCommand.CHANGE)
+        controller.run(VoiceCommand.RATE_HARD)
         assertEquals(ReviewState.PENDING, open.intent?.state)
 
-        for (command in VoiceCommand.entries) controller.run(command)
+        for (command in VoiceCommand.entries - VoiceCommand.CONFIRM) controller.run(command)
         controller.grade()
         controller.stop()
-        assertTrue(wroteNothing, "a composed path reached the writer")
+
+        assertTrue(wroteNothing, "a composed path other than Confirm reached the writer")
+        assertTrue(journal.entries().isEmpty(), "an unwritten rating was journalled")
+    }
+
+    /**
+     * An unknown outcome from this card's own commit, end to end.
+     *
+     * The session halts, the surface offers only the learner's report, and the journal
+     * entry settles `outcome-unknown` and stays outstanding — so the notice AV-018 shows at
+     * the next process start is still owed. The report records what the learner saw and
+     * closes the session; it resolves the entry no more than it resubmits the review.
+     *
+     * AV-045's gate reconciles once per **process**, so nothing here re-blocks this one;
+     * within the session it is #14's halt, not the gate, that keeps the learner from
+     * studying on.
+     */
+    @Test
+    fun `an unknown outcome halts the session and leaves the notice owed to the next run`() {
+        gradingReady()
+        settings.dailyLimit = 0
+        transport.anomalies.addLast(WriteAnomaly.ACKNOWLEDGE_WITHOUT_WRITE)
+        val open = answered("Five blocks.")
+        controller.grade()
+
+        controller.run(VoiceCommand.CONFIRM)
+
+        assertEquals(SessionState.OUTCOME_UNKNOWN, open.state)
+        assertEquals(ReviewState.OUTCOME_UNKNOWN.specName, controller.state.outcomeState)
+        assertTrue(controller.state.reconcileRequired)
+        assertFalse(controller.state.committed)
+        val entry = journal.entries().single()
+        assertEquals(ReviewState.OUTCOME_UNKNOWN, entry.outcomeState)
+        assertTrue(entry.noticeOutstanding)
+
+        controller.reportReconciled(saved = true)
+
+        assertFalse(controller.state.running, "the halted session was left open")
+        assertEquals("reconcile", open.events.last().step)
+        assertEquals(1, transport.calls.size, "the report resubmitted the review")
+        // Still owed: the settle recorded what the writer returned and resolved nothing.
+        assertTrue(journal.entries().single().noticeOutstanding)
+        assertEquals(
+            listOf(entry.entryId),
+            ReviewJournal(journalStore).outstandingNotices().map { it.entryId },
+            "a later process would not be shown the notice",
+        )
+    }
+
+    /**
+     * The journal may not reach into the session for the text, so the composition root
+     * hands it over — and only for the revision the rating was computed from.
+     */
+    @Test
+    fun `the settled transcript is supplied only for the revision the rating came from`() {
+        gradingReady()
+        settings.dailyLimit = 0
+        val open = answered("Five blocks.")
+        val card = checkNotNull(open.card)
+        val writer = studyWriter(FakeReviewWriter(cardProvider, transport, capabilities), journal, "study") { open }
+
+        val current = ReviewIntent(card, 3, 1_000, OperationToken("study", 1, 9), open.transcriptRevision)
+        current.confirm(
+            RatingConfirmation(
+                checkNotNull(current.token), card.identity, 3, open.transcriptRevision,
+                ConfirmationSource.TOUCH,
+            ),
+        )
+        writer.commit(current)
+        assertEquals("Five blocks.", journal.entries().single().transcript)
+
+        val stale = ReviewIntent(card, 3, 1_000, OperationToken("study", 1, 10), open.transcriptRevision - 1)
+        writer.commit(stale)
+
+        val journalled = journal.entries().last()
+        assertEquals(open.transcriptRevision - 1, journalled.transcriptRevision)
+        assertEquals("", journalled.transcript, "a superseded revision's text was journalled")
+        // Unconfirmed, so the guarded writer refused it before any dispatch.
+        assertEquals(ReviewState.FAILED, journalled.outcomeState)
+        assertEquals(1, transport.calls.size)
     }
 
     @Test

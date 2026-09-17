@@ -105,7 +105,7 @@ flowchart TD
 | `:speech` | Android library | AV-025's speech transport: the pinned TTS/recognizer route, the app-owned microphone pipe, and the ordering, cancellation and failure rules behind both AV-007 speech contracts | #13 |
 | `:provider` | Android library | A marker object; no platform calls or network access | #17, #18 |
 | `:app` | Android application | Single-activity shell, onboarding, the VoiceQA setup action and its full-sync disclosure, private settings, lifecycle delivery and debug sample session | #27, #17 |
-| `:core` | Kotlin/JVM, no Android plugin or dependency | The AV-007 contract port in `org.ankivoice.core.contracts`; AV-012's answer policy in `org.ankivoice.core.answer`; AV-015's rule-based grading in `org.ankivoice.core.grading`; AV-013's session state machine in `org.ankivoice.core.session`; AV-018's journal port and reconciliation policy in `org.ankivoice.core.journal`; the fakes in its `testFixtures` source set | #15, #27 |
+| `:core` | Kotlin/JVM, no Android plugin or dependency | The AV-007 contract port in `org.ankivoice.core.contracts`; AV-012's answer policy in `org.ankivoice.core.answer`; AV-015's rule-based grading in `org.ankivoice.core.grading`; AV-013's session state machine in `org.ankivoice.core.session`; AV-018's journal port and reconciliation policy in `org.ankivoice.core.journal`; AV-014's command vocabulary and router in `org.ankivoice.core.commands`; AV-019's pre-commit exchange in `org.ankivoice.core.exchange`; the fakes in its `testFixtures` source set | #27 |
 | `:ankidroid` | Android library | Access preflight; `decks` reads and verified `selected_deck` updates | #25, #10 |
 | `:speech` | Android library | AV-025's speech transport: the pinned TTS/recognizer route, the app-owned microphone pipe, and the ordering, cancellation and failure rules behind both AV-007 speech contracts | #13 |
 | `:provider` | Android library | AV-020's credential store, free-route guard, durable quota ledger, content-free diagnostics and the one HTTPS seam; AV-016's semantic grader; AV-043's paid fallback route and daily budget | #27 |
@@ -1038,9 +1038,11 @@ buried, suspended or reordered to emulate one, and no command invents a rating.
 ### Nothing here writes a review
 
 `CommandRouter` has no code path to `ReviewSession.commit`. A rating command is a
-*proposal* and confirm only *authorizes* one; submitting it is #27's step. The sweep in
-`CommandRouterTest` runs every command from every position a session can reach, by touch
-and by voice, and asserts the transport is never called.
+*proposal* and confirm only *authorizes* one. The sweep in `CommandRouterTest` runs every
+command from every position a session can reach, by touch and by voice, and asserts the
+transport is never called. An earlier note here left the submitting step to #27; the owner
+superseded that on September 16, 2026, and AV-019's exchange — a layer above this router —
+is what runs the commit an accepted confirmation earns.
 
 ### Every command has a touch control
 
@@ -1072,3 +1074,139 @@ touch control. `RecognizerBridge.onEndOfSegmentedSession` in `:speech` discards 
 unconditionally, which is an AV-025 (#26) question rather than an AV-014 one. One session
 per command is not a recognition-accuracy estimate, and the 30-turn acceptance run stays in
 [#29](https://github.com/BrockBadeaux14/AnkiVoice/issues/29).
+
+## The pre-commit exchange and the single write
+
+AV-019 (#21) owns the exchange between a rating being proposed and a review being written:
+what is announced, what the learner may do about it, what counts as a confirmation, and the
+commit step an accepted confirmation runs. Per AV-022 it is a `:core` state machine with no
+platform types, in `org.ankivoice.core.exchange`, over AV-013's session and below AV-014's
+router — it consumes already-parsed commands and never parses an utterance itself.
+
+- Issue: [#21 — AV-019: Make rating correction predictable](https://github.com/BrockBadeaux14/AnkiVoice/issues/21).
+- Evidence: [results](../docs/testing/av019/results.md) and [runbook](../docs/testing/av019/runbook.md).
+
+### Two positions, and a correction is not a commit
+
+| Position | What the learner may do | What commits |
+| --- | --- | --- |
+| **Announced** — a pending rating (or none) is on screen and spoken, with its source and the answer version it came from | confirm · correct to a different rating · edit the transcript · repeat · reveal · pause · finish | nothing |
+| **Confirmed** — an explicit confirm intent for *this* attempt and *this* revision | — | the pending rating, through AV-018's journal to AV-024's writer |
+
+A correction returns the exchange to Announced with the new rating and **re-announces it**.
+Correcting is unlimited and free; only a confirmation advances. `PrecommitExchange.position`
+is derived from the session rather than remembered, so a superseded revision, a cancelled
+intent or a committed attempt all leave it empty — an announcement can never outlive what
+it describes, and an old suggestion can never be re-announced against a new revision.
+
+There is **no exchange timeout**. A pending rating waits for an explicit action and never
+expires into a write or a discard; `resume()` discards the turn and re-queries, so no pause
+could preserve one anyway, and the microphone is closed throughout the exchange.
+
+### Every rating is announced with where it came from
+
+| Source | Where it comes from |
+| --- | --- |
+| `rule` | AV-016's deterministic rules matched on device, with no request |
+| `ai` | AV-018's grader suggested it over AV-020's route, after the rules matched nothing |
+| `learner` | A rating command, or an explicit `selfGrade` |
+| `none` | Nobody proposed one: the abstention |
+
+Only the grader that chose the route can state which one answered, so `StudyGrader.sourceOf`
+reports it for the request it last answered and for no other, read on the grading worker in
+the same step that took the reply. A rating whose provenance cannot be stated is not shown
+at all: the exchange opens as an abstention instead, because AV-019 never presents a rating
+without its source.
+
+A `partial` or `uncertain` label, a rating the card withdrew, a grading fault and an
+exhausted quota all open Announced with **no pending rating**, announced as an abstention
+and never as a rating. The learner names one — by a rating command, or by the self-grade
+control that a grading fault makes the only route — and then still confirms it. The absence
+of a suggestion never shortens the path.
+
+Announcements are spoken through `SpeechOutput` on a token namespaced away from the
+session's own playback, so one is never mistaken for question or reveal audio and never
+resolves the session's playback; and they are refused outright while AV-012 has an attempt
+in flight, because AV-025 forbids playing into an open microphone. A synthesizer fault does
+not halt the turn and does not discard the pending rating: the announcement is on screen
+too, and it is recorded as unspoken rather than reported as spoken.
+
+### The re-prompt rule
+
+A spoken confirmation below `Confidence.SUFFICIENT`, an ambiguous phrase heard where a
+confirmation was expected, and a confirmation that did not match this attempt are all
+re-prompted **once**; the second refusal in the same Announced position stops asking and
+points at the touch control. Neither refusal commits anything and neither clears the
+pending rating. A correction opens a new position and starts the count over.
+
+Decision 3 of the card — "spoken confirmation is touch-only on the pinned route" — is
+retired by AV-044 ([#67](https://github.com/BrockBadeaux14/AnkiVoice/issues/67)): the
+pinned engine does supply confidence scores, and a spoken confirm executes rather than
+being refused. The gate and its classification are unchanged, and each live confirmation's
+source is recorded as it happened.
+
+### One write, from one accepted confirmation
+
+`ReviewSession.commit()` runs on the session thread, exactly once per attempt, and only for
+an intent AV-013 accepted a current confirmation for. The exchange enforces one committed
+rating per attempt by intent identity; after commit the session is `committed`, so
+`CommandRouter.executable` already refuses confirm, change and every rating command, and a
+duplicate, delayed or out-of-order confirmation cannot reach the writer at all.
+
+The composition root supplies the writer, and it is the only one a study session may use:
+
+```
+JournaledReviewWriter( GuardedReviewWriter(provider, transport, capabilities), journal, sessionId, transcripts )
+```
+
+`studyWriter` in `ShellApplication.kt` builds it and the JVM tests use that same function, so
+the wiring under test is the wiring that ships. AV-018 journals the intent and flushes it
+**before** the guarded writer's pre-commit reads and its single dispatch, and settles the
+entry from the `ReviewOutcome` that writer returned and from nothing else. AV-019 performs
+no write, re-read or verification of its own.
+
+`SettledTranscripts` lives in the composition root because AV-012 owns transcript state and
+AV-013 owns the turn: the journal may not reach into either. It hands over the session's
+settled answer **only** when that answer's revision is the one the intent was computed from,
+and an empty string otherwise, so a superseded revision's text can never be journalled
+against a newer rating.
+
+The journal is now reached from two workers — its own I/O executor for reconciliation and
+pruning, and the session's worker for the commit. `ReviewJournal` serializes its own fold,
+and AV-045's gate finishes reconciliation before any session can open, so the two never race
+for the same entry.
+
+### The outcome, and only the outcome
+
+Everything the learner is told after the write comes from the returned `ReviewOutcome`:
+
+| Outcome | What is said | What is offered |
+| --- | --- | --- |
+| `confirmed` | `announceResult`, spoken and shown — the only announcement of a saved review | Next card (`advance`), and the native-Undo handoff |
+| `failed` | Nothing was saved, with the writer's own reason; the session's pause or stop stands | The existing Resume or Close-session controls |
+| `outcome-unknown` | The write could not be confirmed and will not be sent again | The learner-reported reconcile: "I checked AnkiDroid: saved / not saved" |
+
+There is no success message before the final state is known, and a writer that returns a
+non-terminal state is treated as unknown rather than as success. The reconcile calls
+`reconcile(learnerConfirmedSaved)` and closes the session so the collection is read again;
+it resolves the journal entry no more than it resubmits the review, so AV-018 still owes the
+learner that notice at the next process start.
+
+### Correction after commit is AnkiDroid's own Undo
+
+After a confirmed review, the only correction on offer is
+`requestCorrectionAfterCommit()`, which **stops** the session. The notice sends the learner
+to AnkiDroid's native Undo and says plainly that AnkiDroid may no longer offer it after
+other activity there, or after either app's process is closed or replaced. There is no
+programmatic undo, no automatic re-rate and no compensating review. The session is released
+with the stop, so returning to AnkiVoice reads the card and its scheduling through a fresh
+session; nothing resumes the stopped one.
+
+### What this does not establish
+
+The 45 JVM tests prove the exchange, the announcement, the re-prompt rule, the single write
+and the three outcome classes against the fakes, and `studyWriter` puts the shipped wiring
+under test. They say nothing about recognition quality, about AnkiDroid's real write
+behaviour, or about whether AnkiDroid's Undo is offered in practice. The pinned-AVD run in
+[results](../docs/testing/av019/results.md) is what covers those, and the 30-turn
+acceptance run stays in [#29](https://github.com/BrockBadeaux14/AnkiVoice/issues/29).

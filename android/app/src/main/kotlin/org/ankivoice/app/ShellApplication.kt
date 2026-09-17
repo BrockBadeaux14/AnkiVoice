@@ -19,6 +19,12 @@ import org.ankivoice.core.contracts.Failure
 import org.ankivoice.core.contracts.ForegroundEventPort
 import org.ankivoice.core.contracts.Grader
 import org.ankivoice.core.contracts.GuardedReviewWriter
+import org.ankivoice.core.contracts.ReviewOutcome
+import org.ankivoice.core.contracts.ReviewWriter
+import org.ankivoice.core.exchange.PrecommitExchange
+import org.ankivoice.core.journal.JournaledReviewWriter
+import org.ankivoice.core.journal.ReviewJournal
+import org.ankivoice.core.journal.SettledTranscripts
 import org.ankivoice.core.session.ReviewSession
 import org.ankivoice.provider.Diagnostics
 import org.ankivoice.provider.ProviderModule
@@ -60,7 +66,12 @@ class ShellApplication : Application() {
         // run on the main thread, and never share the collection's serial worker either,
         // so a flush cannot delay a deck read.
         val journalWorker = Executors.newSingleThreadExecutor()
-        val journal = JournalAccess(JournalModule.journal(filesDir), journalWorker, mainExecutor)
+        // AV-019 wires the same journal into the study session's writer, where it is
+        // reached from the session's own worker rather than this one. ReviewJournal
+        // serializes its own fold, and AV-045's gate finishes reconciliation before any
+        // session can open, so the two workers never race for the same entry.
+        val reviewJournal = JournalModule.journal(filesDir)
+        val journal = JournalAccess(reviewJournal, journalWorker, mainExecutor)
         // AV-045: one reconciliation gate for the process. The readiness preview and the
         // study session both go through it, so neither can offer a card around the other.
         val gate = ReconciliationGate(journal, UUID.randomUUID().toString())
@@ -90,9 +101,9 @@ class ShellApplication : Application() {
                 // A fresh GradingProvider per session: #17 holds a refused key or route
                 // for the rest of the session and clears it only at the next one.
                 val grading = ProviderModule.grading(credentials, ledger, providerSettings, diagnostics)
-                commandSession(platform, settingsStore, worker, mainExecutor, applicationContext) { sessionId, revision ->
-                    StudyGrader(grading, sessionId, revision, providerWorker)
-                }
+                commandSession(
+                    platform, settingsStore, worker, mainExecutor, applicationContext, reviewJournal,
+                ) { sessionId, revision -> StudyGrader(grading, sessionId, revision, providerWorker) }
             },
             Executors.newSingleThreadExecutor(),
             mainExecutor,
@@ -117,9 +128,18 @@ class ShellApplication : Application() {
  * One study session over the real collection, the real AV-025 transport and AV-045's
  * grader: #16's rules on device, then #18's semantic grader on a rule miss.
  *
- * The **real** guarded writer is wired in deliberately. No command path reaches it, and
- * that is the property the pinned-AVD check is meant to demonstrate — a writer that could
- * not write would prove nothing. #21 wraps it in the journal when it adds the commit step.
+ * AV-019 completes the write path it was left to wire. The real guarded writer is wrapped
+ * in AV-018's [JournaledReviewWriter], so the one place a review can be written journals
+ * the intent and flushes it **before** the single dispatch and settles the entry from the
+ * outcome that writer returned. Nothing else changes: the guarded writer still performs
+ * the pre-commit reads, the single dispatch and the verification, and AV-019 performs no
+ * write, re-read or verification of its own.
+ *
+ * [SettledTranscripts] is the composition root's job because AV-012 owns transcript state
+ * and AV-013 owns the turn: the journal may not reach into either. It hands back this
+ * session's settled answer text **only** when its revision is the one the intent was
+ * computed from, and an empty string otherwise, so a superseded revision's text can never
+ * be journalled against a newer rating.
  */
 private fun commandSession(
     platform: AndroidAccessPlatform,
@@ -127,7 +147,8 @@ private fun commandSession(
     worker: Executor,
     delivery: Executor,
     context: Context,
-    grader: (sessionId: String, revision: AtomicInteger) -> Grader,
+    journal: ReviewJournal,
+    grader: (sessionId: String, revision: AtomicInteger) -> StudyGrader,
 ): Result<CommandSession> {
     val deckId = settings.selectedDeckId
         ?: return Result.failure(CommandSessionUnavailable(Failure(CardProviderFailure.DECK_MISSING, "no deck is selected")))
@@ -140,20 +161,68 @@ private fun commandSession(
     val sessionId = UUID.randomUUID().toString()
     val revision = AtomicInteger()
     val studyGrader = grader(sessionId, revision)
+    // Written once, on this thread, before the session can reach the writer at all.
+    var opened: ReviewSession? = null
     val session = ReviewSession(
         provider = provider,
         speechOutput = speech,
         speechInput = speech,
         grader = studyGrader,
-        writer = GuardedReviewWriter(provider, AnkiDroidReviewTransport(platform), capabilities),
+        writer = studyWriter(
+            GuardedReviewWriter(provider, AnkiDroidReviewTransport(platform), capabilities),
+            journal,
+            sessionId,
+        ) { opened },
         capabilities = capabilities,
         language = settings.language,
         sessionId = sessionId,
     )
+    opened = session
     return Result.success(
-        CommandSession(session, CommandRouter(session, speech), studyGrader, revision, speech::releaseAll),
+        CommandSession(
+            session = session,
+            router = CommandRouter(session, speech),
+            grader = studyGrader,
+            exchange = PrecommitExchange(session, speech),
+            revision = revision,
+            gradingSource = studyGrader::sourceOf,
+            release = speech::releaseAll,
+        ),
     )
 }
+
+/**
+ * AV-019: the one writer a study session may use, and the only place a review is written.
+ *
+ * AV-018's journal wraps AV-024's guarded writer rather than replacing it: the intent is
+ * recorded and flushed before the guarded writer's pre-commit reads and its single
+ * dispatch, and the entry is settled from the [ReviewOutcome] that writer returned and
+ * from nothing else. Nothing here re-reads, re-verifies or retries a write.
+ *
+ * [session] is read at commit time rather than captured, because the session cannot exist
+ * before the writer it is built with. It is set once, on the session's own thread, before
+ * that session can reach the writer at all.
+ *
+ * The transcript rule is the whole reason this lives in the composition root: AV-012 owns
+ * transcript state and AV-013 owns the turn, so the journal may not reach into either for
+ * the text. It is handed the settled answer **only** when that answer's revision is the
+ * one the intent was computed from, and an empty string otherwise, so a superseded
+ * revision's text can never be journalled against a newer rating.
+ */
+internal fun studyWriter(
+    guarded: ReviewWriter,
+    journal: ReviewJournal,
+    sessionId: String,
+    session: () -> ReviewSession?,
+): ReviewWriter = JournaledReviewWriter(
+    guarded,
+    journal,
+    sessionId,
+    SettledTranscripts { intent ->
+        val settled = session()?.answer
+        if (settled != null && settled.transcriptRevision == intent.transcriptRevision) settled.text else ""
+    },
+)
 
 private class PrivateShellSettings(context: Context) : ShellSettings {
     private val preferences = context.getSharedPreferences("shell", Context.MODE_PRIVATE)
