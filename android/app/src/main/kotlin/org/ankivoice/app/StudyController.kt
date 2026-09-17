@@ -21,10 +21,12 @@ import org.ankivoice.core.contracts.GradingRequest
 import org.ankivoice.core.contracts.GradingResult
 import org.ankivoice.core.contracts.OperationToken
 import org.ankivoice.core.contracts.QueueExhausted
+import org.ankivoice.core.contracts.ReviewIntent
 import org.ankivoice.core.contracts.ReviewOutcome
 import org.ankivoice.core.contracts.ReviewState
 import org.ankivoice.core.contracts.ScheduledCard
 import org.ankivoice.core.contracts.SpeechInput
+import org.ankivoice.core.exchange.ExchangeStep
 import org.ankivoice.core.exchange.PrecommitExchange
 import org.ankivoice.core.exchange.RatingSource
 import org.ankivoice.core.exchange.ratingName
@@ -90,6 +92,26 @@ internal fun interface StudySessionFactory {
     fun create(): Result<StudySession>
 }
 
+/** One AV-047 cancel window that has not fired yet. */
+internal fun interface ScheduledWindow {
+    /** Stop it if it has not fired. Idempotent, and it never blocks the caller. */
+    fun cancel()
+}
+
+/**
+ * AV-047's cancel window, as the surface measures it.
+ *
+ * A seam rather than a timer of the controller's own, so a JVM test can run a window to
+ * its end, or leave it running across an edit or an interruption, without waiting on a
+ * real clock. Stopping a window is best-effort by design: a scheduler cannot recall a task
+ * it has already released, so [StudyController] also refuses a released task that no longer
+ * applies rather than trusting the cancellation alone.
+ */
+internal fun interface DelayScheduler {
+    /** Run [task] after [delayMs]. It may run on any thread; the task itself hops to the worker. */
+    fun schedule(delayMs: Long, task: Runnable): ScheduledWindow
+}
+
 /** Why no session could open. Carries AV-007's failure rather than a message alone. */
 internal class StudySessionUnavailable(val failure: Failure) : IllegalStateException(failure.toString())
 
@@ -97,6 +119,9 @@ internal class StudySessionUnavailable(val failure: Failure) : IllegalStateExcep
  * The controls the study screen may offer right now. Every one of them is reachable by
  * touch, and none of them writes except [CONFIRM], which reaches the writer only through
  * AV-019's exchange for a confirmation AV-013 accepted.
+ *
+ * AV-047 adds one control that stops a write rather than making one: [CANCEL_AUTOMATIC]
+ * is offered only while an automatic commit is armed, and it writes nothing.
  */
 internal enum class StudyControl {
     PLAY_PROMPT, START_ANSWER, DONE, CANCEL_ANSWER, TRY_AGAIN, EDIT_TRANSCRIPT,
@@ -104,6 +129,9 @@ internal enum class StudyControl {
     RATE,
     REPEAT, REVEAL, PAUSE, RESUME, SKIP, FINISH, CONFIRM, CHANGE,
     NEXT_CARD, UNDO_HANDOFF, REPORT_RECONCILED, RELOAD, SPEAK_COMMAND,
+
+    /** AV-047: stop the automatic commit and keep this card's turn manual. */
+    CANCEL_AUTOMATIC,
 }
 
 /**
@@ -217,6 +245,15 @@ internal data class StudyState(
     val announcedRevision: Int? = null,
     /** True once the pending rating carries a current confirmation, before the write runs. */
     val confirmed: Boolean = false,
+    /** AV-047: whether the open session saves grader proposals without a confirmation. */
+    val automaticGrading: Boolean = false,
+    /**
+     * How long the learner has to stop the armed automatic commit, or null when none is
+     * armed. Non-null only for a grader proposal, and only while automatic grading is on.
+     */
+    val autoCommitWindowMs: Long? = null,
+    /** True once the learner kept this card's turn manual, while that rating is still waiting. */
+    val autoCommitCancelled: Boolean = false,
     /** AV-019: the writer's own outcome for the committed attempt, or null before one. */
     val outcomeState: String? = null,
     /** The writer's own reason, shown as-is for a write that failed or could not be confirmed. */
@@ -280,8 +317,12 @@ internal data class TurnEvidence(
     /** The rating the learner named when none was pending, or null. */
     val selfGrade: Int?,
     val ratingCorrections: List<RatingCorrection>,
-    /** `spoken` or `touch` once a confirmation was accepted, or null. */
+    /** `spoken`, `touch` or AV-047's `auto` once a confirmation was accepted, or null. */
     val confirmationSource: String?,
+    /** AV-047: whether the option was on for this turn, whatever the turn then did. */
+    val automaticGrading: Boolean,
+    /** AV-047: the learner stopped an armed automatic commit on this turn. */
+    val automaticCancelled: Boolean,
     /** The writer's outcome for this turn, or null when nothing was committed. */
     val outcome: String?,
     val rating: Int?,
@@ -346,6 +387,11 @@ internal class StudyController(
     private val gradingWorker: Executor,
     private val gate: ReconciliationGate? = null,
     private val cards: () -> CardProvider? = { null },
+    /**
+     * AV-047: the clock behind the cancel window. Nothing here measures time itself, so a
+     * test can run a window out, or leave it running, without a real delay.
+     */
+    private val scheduler: DelayScheduler,
     /** AV-018's entries for one session, read on [worker] when evidence is exported. */
     private val journalEntries: (sessionId: String) -> List<JournalEntry> = { emptyList() },
 ) : ForegroundEventPort {
@@ -379,6 +425,25 @@ internal class StudyController(
      */
     @Volatile
     private var pendingInterrupt: Interruption? = null
+
+    /**
+     * AV-047: the automatic-commit window in flight, or null.
+     *
+     * Written on [worker] when one is armed and cleared from either thread when one is
+     * stopped, so the fired task can tell a window that still applies from one that was
+     * cancelled or superseded while its timer was running.
+     */
+    @Volatile
+    private var autoWindow: AutoWindow? = null
+
+    /**
+     * The pending rating the learner kept manual, or null.
+     *
+     * Held by identity rather than as a flag, so it cannot outlive the rating it describes:
+     * a retry, an advance and a fresh proposal all mint a **new** intent, and the surface
+     * then stops claiming the learner stopped anything. Touched only on [worker].
+     */
+    private var keptManual: ReviewIntent? = null
 
     /** The generation of the action [worker] is running, so it can publish mid-action. */
     private var actionToken = 0L
@@ -496,6 +561,7 @@ internal class StudyController(
         lastFailure = null
         lastGrade = null
         lastSeenHalt = null
+        keptManual = null
         turns.clear()
         sessionActions = mutableListOf("start")
         val study = factory.create().getOrElse { error ->
@@ -722,6 +788,31 @@ internal class StudyController(
     /** The learner's own rating when no grader offered one. Kept for the debug-era name; see [rate]. */
     fun selfGrade(rating: Int) = rate(rating)
 
+    /**
+     * AV-047's Keep it manual: stop the automatic commit and hand this card back.
+     *
+     * The timer is stopped from the calling thread **first**, so a window it has not
+     * released yet can no longer run at all. The window it may already have released is
+     * stopped by the same call marking it, and that mark is what the released task reads
+     * before it reaches the writer — so a cancel that arrives after the timer fired, but
+     * before its queued task runs, still writes nothing.
+     *
+     * Nothing about the option itself changes: the pending rating stays on screen, stays
+     * correctable, and the next card is offered automatically again.
+     */
+    fun cancelAutomaticCommit() {
+        stopAutomaticWindow()
+        act("keep it manual") { current ->
+            val opened = current ?: return@act NO_SESSION
+            val step = opened.exchange.cancelAutomatic()
+            if (step is ExchangeStep.KeptManual) {
+                keptManual = opened.session.intent
+                currentTurn(opened).automaticCancelled = true
+            }
+            step.notice
+        }
+    }
+
     /** Only a confirmed review advances, and the next card is read from AnkiDroid afresh. */
     fun nextCard() = act("next card") { current ->
         val opened = current ?: return@act NO_SESSION
@@ -816,6 +907,9 @@ internal class StudyController(
     private fun interrupt(kind: Interruption) {
         if (pendingInterrupt == null) pendingInterrupt = kind
         capture?.let { it.speech.cancel(it.token) }
+        // AV-047: the microphone and the cancel window are both released from here, so an
+        // interruption cannot be followed by an automatic write into a stopped session.
+        stopAutomaticWindow()
         val token = ++generation
         worker.execute {
             val current = open ?: run {
@@ -892,6 +986,9 @@ internal class StudyController(
                 grading = false
                 val accepted = session.acceptGrade(reply)
                 val notice = openExchange(opened, request, accepted, source, route)
+                // AV-047: a grader proposal is the only thing that arms a window, so this
+                // is the one place that starts one.
+                armAutomatic(opened)
                 // A reply the session dropped as stale means the transcript moved on while
                 // it was in flight; the revision that replaced it is graded now.
                 if (accepted is SessionResult.Ignored && session.state == SessionState.GRADING) startGrading(opened)
@@ -899,6 +996,48 @@ internal class StudyController(
             }
         }
         return "Checking your answer: on-device rules first, the AI route only if no rule matches."
+    }
+
+    /**
+     * AV-047: start the cancel window for whatever the exchange armed. Runs on [worker].
+     *
+     * The controller owns the clock and the exchange owns whether there is anything left
+     * to save, so the fired task asks it again rather than acting on what was true when
+     * the window opened. Three things must all still hold when it runs: this window is
+     * still the current one, nothing stopped it, and the session is the one it was armed
+     * for. The exchange then re-derives the armed commit a fourth time.
+     */
+    private fun armAutomatic(opened: OpenSession) {
+        stopAutomaticWindow()
+        val armed = opened.exchange.armed ?: return
+        keptManual = null
+        val window = AutoWindow()
+        autoWindow = window
+        window.handle = scheduler.schedule(armed.cancelWindowMs) {
+            worker.execute {
+                if (autoWindow !== window || window.stopped || open !== opened) return@execute
+                autoWindow = null
+                // A guard the window should not have reached. Report it and leave the turn
+                // as it was, rather than letting it take the session's own thread down and
+                // the surface with it: this task runs outside [act]'s reporting.
+                val notice = try {
+                    opened.exchange.commitAutomatically().notice
+                } catch (e: IllegalStateException) {
+                    "Automatic grading did not run here: ${e.message}"
+                } catch (e: IllegalArgumentException) {
+                    "Automatic grading did not run here: ${e.message}"
+                }
+                publish(open, generation, notice)
+            }
+        }
+    }
+
+    /** Stop the armed window, from either thread. Safe to call when none is armed. */
+    private fun stopAutomaticWindow() {
+        val window = autoWindow ?: return
+        window.stopped = true
+        autoWindow = null
+        window.handle?.cancel()
     }
 
     /**
@@ -965,6 +1104,9 @@ internal class StudyController(
 
     /** Runs on [worker]. Builds the evidence, releases the platform objects and forgets the session. */
     private fun closeSession(current: OpenSession, reason: String) {
+        // AV-047: a window that outlives its session would find nothing to write, but it
+        // is stopped here anyway rather than left running behind a released synthesizer.
+        stopAutomaticWindow()
         val session = current.session
         lastHalt = session.halt
         lastOutcome = current.exchange.outcome
@@ -976,6 +1118,7 @@ internal class StudyController(
         grading = false
         heard = null
         lastGrade = null
+        keptManual = null
         capture = null
     }
 
@@ -1013,6 +1156,9 @@ internal class StudyController(
         }
         record.retries = turn.retries
         record.transcriptEdits = turn.corrections
+        // AV-047: recorded per turn, whatever the turn then did, so a run can be read back
+        // and an automatic commit told from one the learner confirmed.
+        record.automaticGrading = current.exchange.automatic.enabled
         session.intent?.let { intent ->
             intent.confirmation?.let { record.confirmationSource = it.source.specName }
             if (intent.state != ReviewState.PENDING) record.rating = intent.rating
@@ -1043,6 +1189,10 @@ internal class StudyController(
         // revision, a cancelled intent or a committed attempt all leave it null, so the
         // surface can never show a rating that is no longer waiting.
         val position = study?.exchange?.position
+        // AV-047: re-derived here, like the position it belongs to. A window whose rating
+        // is gone is stopped rather than left to fire into an exchange that would refuse it.
+        val armed = study?.exchange?.armed
+        if (current != null && armed == null) stopAutomaticWindow()
         val committed = study?.exchange?.settled
         val active = capture
         val answer = session?.answer
@@ -1083,6 +1233,10 @@ internal class StudyController(
             ratingSource = position?.source?.specName,
             announcedRevision = position?.transcriptRevision,
             confirmed = session?.intent?.hasConfirmation() == true,
+            automaticGrading = study?.exchange?.automatic?.enabled == true,
+            autoCommitWindowMs = armed?.cancelWindowMs,
+            // Only while the rating the learner kept manual is the one still pending.
+            autoCommitCancelled = keptManual != null && keptManual === session?.intent && armed == null,
             outcomeState = committed?.state?.specName,
             outcomeReason = committed?.reason,
             halt = halt,
@@ -1218,6 +1372,9 @@ internal class StudyController(
                 -> Unit
             }
         }
+        // AV-047: offered only while a window is actually armed, so it never appears as a
+        // control that would do nothing, and it never appears while the option is off.
+        if (current.exchange.armed != null) out += StudyControl.CANCEL_AUTOMATIC
         if (router.spokenAvailable().isNotEmpty()) out += StudyControl.SPEAK_COMMAND
         // A stop that left the session open — a missing deck, a moved card, an exhausted
         // queue — offers the way out and the way back in, and nothing that writes.
@@ -1242,6 +1399,23 @@ internal class StudyController(
         is CommandOutcome.Executed -> "${outcome.command.specName}: executed (${outcome.source.specName})"
         is CommandOutcome.Refused -> "${outcome.command?.specName ?: "none"}: refused (${outcome.reason.specName})"
         is CommandOutcome.AnswerText -> "answer text"
+    }
+
+    /**
+     * AV-047: one armed cancel window.
+     *
+     * Identity is what makes it safe: [autoWindow] holds the current one, so a task whose
+     * window was replaced or cleared can see that it is no longer the one to act on, and
+     * [stopped] closes the remaining gap where a timer fired before the learner's cancel
+     * reached it.
+     */
+    private class AutoWindow {
+        @Volatile
+        var stopped = false
+
+        /** Set on [worker] immediately after scheduling, read when the window is stopped. */
+        @Volatile
+        var handle: ScheduledWindow? = null
     }
 
     /** One capture in flight: what to stop or cancel, which attempt, and whose it is. */
@@ -1300,6 +1474,8 @@ internal class StudyController(
         var selfGrade: Int? = null
         val ratingCorrections = mutableListOf<RatingCorrection>()
         var confirmationSource: String? = null
+        var automaticGrading = false
+        var automaticCancelled = false
         var outcome: String? = null
         var rating: Int? = null
         val touchActions = mutableListOf<String>()
@@ -1309,7 +1485,8 @@ internal class StudyController(
         fun snapshot() = TurnEvidence(
             turn, cardId, transcriptRevision, recognition, retries, transcriptEdits,
             gradings.toList(), gradings.lastOrNull()?.path, selfGrade, ratingCorrections.toList(),
-            confirmationSource, outcome, rating, touchActions.toList(), spokenCommands.toList(), halts.toList(),
+            confirmationSource, automaticGrading, automaticCancelled,
+            outcome, rating, touchActions.toList(), spokenCommands.toList(), halts.toList(),
         )
     }
 

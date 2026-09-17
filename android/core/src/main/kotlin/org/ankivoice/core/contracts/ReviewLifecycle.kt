@@ -63,7 +63,8 @@ class ReviewIntent(
         val event = confirmation ?: return false
         val token = token ?: return false
         val confident = when (event.source) {
-            ConfirmationSource.TOUCH -> true
+            // Neither is a recognition event, so neither carries a recognizer's score.
+            ConfirmationSource.TOUCH, ConfirmationSource.AUTO -> true
             ConfirmationSource.SPOKEN -> event.confidence == Confidence.SUFFICIENT
         }
         return event.token == token &&
@@ -74,7 +75,14 @@ class ReviewIntent(
             confident
     }
 
-    /** Accept only a matching learner event; invalid events never authorize a write. */
+    /**
+     * Accept only a matching event; an invalid one never authorizes a write.
+     *
+     * AV-047 added [ConfirmationSource.AUTO] to the sources this will take. It did not
+     * relax anything here: every binding below is checked for it exactly as for a spoken
+     * or touched confirmation, and the policy that decides when one may be minted at all
+     * lives in [org.ankivoice.core.exchange.PrecommitExchange], not in this type.
+     */
     fun confirm(event: RatingConfirmation): Boolean {
         check(state == ReviewState.PENDING) { "Only pending reviews accept confirmation" }
         confirmation = event

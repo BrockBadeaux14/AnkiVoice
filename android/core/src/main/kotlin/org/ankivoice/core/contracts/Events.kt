@@ -71,12 +71,27 @@ data class GradingReply(
 enum class ConfirmationSource(val specName: String) {
     SPOKEN("spoken"),
     TOUCH("touch"),
+
+    /**
+     * AV-047: the session confirmed a grader proposal itself, because the learner turned
+     * **Automatic grading** on and let the cancel window run out.
+     *
+     * It is a named source rather than a forged touch, so the journal and the session
+     * record can tell an automatic commit from one the learner made. It is not a
+     * recognition event, so it carries no confidence requirement; every other binding the
+     * guard checks — token, identity, rating, transcript revision, finality — applies to
+     * it exactly as it does to the other two. Only
+     * [org.ankivoice.core.exchange.PrecommitExchange] mints one, and only while the option
+     * is on for the session.
+     */
+    AUTO("auto"),
 }
 
 /**
- * A distinct learner event that authorizes exactly one pending review. A spoken
- * command must be final and sufficiently confident; touch is an explicit gesture with
- * no recognition confidence requirement.
+ * A distinct event that authorizes exactly one pending review. A spoken command must be
+ * final and sufficiently confident; touch is an explicit gesture with no recognition
+ * confidence requirement; [ConfirmationSource.AUTO] is the automatic grading option's own,
+ * and is never produced while that option is off.
  */
 data class RatingConfirmation(
     val token: OperationToken,

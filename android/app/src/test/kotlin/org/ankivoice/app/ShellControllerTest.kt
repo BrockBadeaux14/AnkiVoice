@@ -15,6 +15,7 @@ class ShellControllerTest {
     private class Settings : ShellSettings {
         override var selectedDeckId: Long? = 7
         override var language = "en-US"
+        override var automaticGrading = false
     }
     private class Access : DeckAccess {
         val callbacks = ArrayDeque<(AccessSnapshot) -> Unit>()
@@ -223,6 +224,44 @@ class ShellControllerTest {
         assertEquals("en-GB", restored.state.language)
         assertEquals(7L, restored.state.selectedDeckId)
     }
+    // -- AV-047: the automatic grading option ---------------------------------- //
+
+    @Test fun `automatic grading is off on first run`() {
+        assertFalse(settings.automaticGrading, "the stored default was not off")
+        assertFalse(controller.state.automaticGrading, "the screen showed it on before anyone turned it on")
+    }
+
+    @Test fun `turning automatic grading on is stored and survives controller recreation`() {
+        ready(); controller.start(); access.deliver()
+        controller.setAutomaticGrading(true)
+
+        assertTrue(controller.state.automaticGrading)
+        assertTrue(settings.automaticGrading, "the option was not written to the store")
+        // The option changes nothing about the deck preview, unlike the language.
+        assertNotEquals(PreviewStatus.Stopped, controller.state.status)
+
+        val restored = ShellController(access, settings, provisioner) { provider }
+        assertTrue(restored.state.automaticGrading, "the option did not survive process death")
+    }
+
+    @Test fun `turning automatic grading off again is stored`() {
+        controller.setAutomaticGrading(true)
+        controller.setAutomaticGrading(false)
+
+        assertFalse(controller.state.automaticGrading)
+        assertFalse(settings.automaticGrading)
+        assertFalse(ShellController(access, settings, provisioner) { provider }.state.automaticGrading)
+    }
+
+    @Test fun `setting automatic grading to what it already is publishes nothing`() {
+        var published = 0
+        controller.observer = { published += 1 }
+        controller.setAutomaticGrading(false)
+        assertEquals(0, published)
+        controller.setAutomaticGrading(true)
+        assertEquals(1, published)
+    }
+
     @Test fun `configuration resume during start rechecks access and completes the authorized start`() {
         ready(); controller.start()
         controller.onForegroundEvent(ForegroundEvent.RESUME)
@@ -387,6 +426,7 @@ class ShellJournalTest {
     private class Settings : ShellSettings {
         override var selectedDeckId: Long? = 7
         override var language = "en-US"
+        override var automaticGrading = false
     }
 
     private class Access : DeckAccess {

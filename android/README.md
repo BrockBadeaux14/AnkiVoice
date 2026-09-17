@@ -1302,7 +1302,7 @@ control that writes**, and it reaches the writer only through the exchange.
 No halted state offers a control that writes; `StudyControllerTest` and
 `StudyScenariosTest` assert the set for each of them.
 
-### Automatic grading
+### Grading without a Grade button
 
 The debug surface had a Grade button. The study screen grades as soon as an answer settles
 as gradable and again after every transcript edit — rules on device first, the AI route
@@ -1341,3 +1341,85 @@ or how the screen reads on a device. Those are the [runbook](../docs/testing/av0
 ten-turn live check on the pinned AVD, driven by the owner on the app's own screen and
 recorded in [results](../docs/testing/av026/results.md) as it lands; the 30-turn human run
 stays in [#29](https://github.com/BrockBadeaux14/AnkiVoice/issues/29).
+
+## Automatic grading
+
+AV-047 (#76) adds an **Automatic grading** option to the setup screen. While it is on, a
+rating the grader proposed is saved after a short cancel window without the learner
+confirming it. This reverses two recorded decisions on purpose, at the owner's request on
+September 17, 2026: AV-007's "every rating requires an explicit learner confirmation" and
+AV-006's **no-go for unattended rating**. Both documents record the reversal where they
+made the original claim.
+
+- Issue: [#76 — AV-047: Add an automatic grading option to the main menu](https://github.com/BrockBadeaux14/AnkiVoice/issues/76).
+- Evidence: [results](../docs/testing/av047/results.md) and [runbook](../docs/testing/av047/runbook.md).
+
+### Off by default, and off is unchanged
+
+`ShellSettings.automaticGrading` lives beside `language` in the `shell` preferences, is
+`false` when the key is absent, and is read **once**, when a study session is built. The
+study screen cannot be reached without leaving the setup screen, so a running session never
+sees the setting move underneath it.
+
+With it off, nothing in the app behaves differently. The evidence is that
+`PrecommitExchangeTest`, `GuardedReviewWriterTest`, `ReviewLifecycleTest`,
+`ReviewJournalTest`, `StudyControllerTest` and `StudyScenariosTest` all pass **unmodified**.
+
+### A named confirmation source, not an auto-pressed Confirm
+
+`ConfirmationSource` gained `AUTO`. The alternative — having the session layer press
+Confirm — was rejected because an automatic write would then be indistinguishable from a
+touched one in the record, which breaks the action-source requirement AV-007 keeps for #29.
+
+`GuardedReviewWriter` is untouched. `ReviewIntent.hasConfirmation` treats `AUTO` the way it
+treats `TOUCH`: it is not a recognition event, so it carries no confidence requirement, and
+every other binding — token, identity, rating, transcript revision, finality — is checked
+exactly as before. An `AUTO` event that does not match is `confirmationRequired` like any
+other, and a correction, an edit or a cancellation clears it like any other. Only
+`PrecommitExchange.commitAutomatically` mints one.
+
+### The cancel window
+
+`PrecommitExchange` takes an `AutomaticGrading` and, when `openWithProposal` succeeds with
+it enabled, **arms** a five-second window. `armed` is derived from the session on every
+read, exactly as `position` is, so a correction, a self-grade, a transcript edit, a retry,
+a pause, an interruption or the commit itself retires it without anyone remembering to.
+
+The exchange never runs the clock. `StudyController` owns it, through a `DelayScheduler`
+seam so a JVM test can run a window out — or leave it running across an edit — without
+waiting on one:
+
+| Ordering | What happens |
+| --- | --- |
+| The window expires | the task asks the exchange again; if anything retired the rating, it writes nothing |
+| **Keep it manual** before the timer fires | the scheduled task is cancelled and the exchange disarms |
+| **Keep it manual** after the timer fired, before its task runs | the window is marked stopped; the released task reads that and writes nothing |
+| A second window arms | the first window is no longer the current one, so its task writes nothing |
+| The session is interrupted, finished or reloaded | the window is stopped, and a task that ran anyway finds a different session |
+
+### What stays manual whatever the option says
+
+A grader failure, an abstention (`partial`, `uncertain`, `RatingSource.NONE`) and a rating
+the learner named (`RatingSource.LEARNER`) all still wait for the learner's own
+confirmation. Only `openWithProposal` arms, and every other announcement disarms — which is
+why a correction closes the window rather than committing the corrected rating.
+
+### The record
+
+`JournalRequest` and `JournalEntry` carry the confirmation source, written into the
+`dispatch` record **before** the write is handed over, so an automatic commit is readable
+back as one even from a process that died before it could settle the entry. A line written
+before the field existed reads back as no source rather than as a confirmation it never
+recorded, and the field costs 20 bytes per entry — `JournalSizeTest`'s measurement and
+[AV-018's results](../docs/testing/av018/results.md) are re-recorded accordingly.
+`TurnEvidence` carries the option's state and whether the learner stopped the commit, per
+turn, so #29 can still count manual interventions with it on.
+
+### What this does not establish
+
+40 JVM tests prove the rules and the orderings against the fakes. They say nothing about
+whether an automatic rating is the *right* rating: AV-006's measured error rates stand
+unretracted, and #19 still owns held-out evaluation. Nothing here approves an automation
+*threshold* — the option is a learner's choice, not a measured confidence bar. The live
+layer is the [runbook](../docs/testing/av047/runbook.md)'s five turns on the pinned AVD,
+driven by the owner on the app's own screen.

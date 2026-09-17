@@ -5,8 +5,10 @@ import org.ankivoice.core.answer.AnswerRecovery
 import org.ankivoice.core.commands.CommandOutcome
 import org.ankivoice.core.commands.CommandRefusal
 import org.ankivoice.core.commands.VoiceCommand
+import org.ankivoice.core.contracts.ConfirmationSource
 import org.ankivoice.core.contracts.OperationToken
 import org.ankivoice.core.contracts.PlaybackResult
+import org.ankivoice.core.contracts.RatingConfirmation
 import org.ankivoice.core.contracts.ReviewIntent
 import org.ankivoice.core.contracts.ReviewOutcome
 import org.ankivoice.core.contracts.ReviewState
@@ -100,9 +102,63 @@ sealed interface ExchangeStep {
         override val notice: String,
     ) : ExchangeStep
 
+    /**
+     * AV-047: the automatic commit that was about to run was called off.
+     *
+     * Nothing was written and the pending rating is untouched: it is still on screen,
+     * still correctable, and still waiting for a confirmation the learner makes.
+     */
+    data class KeptManual(
+        val announcement: RatingAnnouncement,
+        override val notice: String,
+    ) : ExchangeStep
+
     /** The command was not part of the exchange. [notice] is the command layer's own. */
     data class Untouched(override val notice: String) : ExchangeStep
 }
+
+/**
+ * AV-047: the **Automatic grading** option, as one session was opened with it.
+ *
+ * It reverses AV-007's September 14, 2026 decision that every rating needs an explicit
+ * learner confirmation, at the owner's request on September 17, 2026, and only while
+ * [enabled] is true. [cancelWindowMs] is how long the learner has to stop a proposal the
+ * grader made before it is saved; it is the whole of the mitigation, because AV-007's
+ * "correction before commit only" still holds and a saved review is correctable in
+ * AnkiDroid alone.
+ */
+data class AutomaticGrading(
+    val enabled: Boolean,
+    val cancelWindowMs: Long = DEFAULT_CANCEL_WINDOW_MS,
+) {
+    init {
+        require(cancelWindowMs > 0) { "The cancel window must be a positive duration" }
+    }
+
+    companion object {
+        /** Long enough to read the rating and stop it, short enough not to be a second Confirm. */
+        const val DEFAULT_CANCEL_WINDOW_MS: Long = 5_000
+
+        val OFF: AutomaticGrading = AutomaticGrading(enabled = false)
+        val ON: AutomaticGrading = AutomaticGrading(enabled = true)
+    }
+}
+
+/**
+ * One armed automatic commit: what will be saved, where it came from, and how long the
+ * learner has to stop it.
+ *
+ * Holding one is not a promise that it will run. [PrecommitExchange.armed] re-derives it
+ * from the session on every read, so a correction, a transcript edit, a cancelled intent
+ * or a commit retires it without anyone having to remember to.
+ */
+class AutomaticCommit internal constructor(
+    val rating: Int,
+    val source: RatingSource,
+    val transcriptRevision: Int,
+    val cancelWindowMs: Long,
+    internal val intent: ReviewIntent,
+)
 
 /**
  * AV-019: the pre-commit exchange as a state of its own, over AV-013's session.
@@ -123,6 +179,19 @@ sealed interface ExchangeStep {
  * is no exchange timeout: a pending rating waits for an explicit action and never expires
  * into a write or a discard.
  *
+ * **AV-047's automatic grading, when the learner turned it on.** [automatic] reverses the
+ * confirmation rule for grader proposals alone. A rating that came from #16's rules or
+ * #18's grader **arms** a cancel window of [AutomaticGrading.cancelWindowMs]; when that
+ * window runs out the caller asks for [commitAutomatically], which mints a
+ * [ConfirmationSource.AUTO] confirmation for exactly this intent, identity, rating and
+ * revision and then takes the same commit path a spoken or touched Confirm takes. Nothing
+ * else changes: the guard is untouched, [ReviewSession.commit] is still the single write,
+ * and the record says `auto` so an automatic commit is never mistaken for one the learner
+ * made. A rating the **learner** named is never armed, an abstention is never armed, and
+ * [cancelAutomatic] disarms without writing and leaves the rating correctable. This
+ * exchange never runs the clock itself: it says what is armed and for how long, and the
+ * surface that owns a scheduler decides when to call back.
+ *
  * **Confinement.** Every call reaches straight into [ReviewSession], which fails loudly
  * when called from a thread other than the one that built it. Build this on that thread.
  *
@@ -135,6 +204,8 @@ sealed interface ExchangeStep {
 class PrecommitExchange(
     private val session: ReviewSession,
     private val speechOutput: SpeechOutput,
+    /** AV-047: the option this session was opened with. Off leaves every rule above as it was. */
+    val automatic: AutomaticGrading = AutomaticGrading.OFF,
     private val owner: Thread = Thread.currentThread(),
 ) {
     private val announcementSessionId: String = "${session.sessionId}/announcement"
@@ -143,6 +214,9 @@ class PrecommitExchange(
     /** The last announcement this exchange made, whether or not it still applies. */
     var announced: RatingAnnouncement? = null
         private set
+
+    /** What [openWithProposal] armed, if anything. Never read directly; see [armed]. */
+    private var automaticPending: AutomaticCommit? = null
 
     /** Spoken confirmations refused in the current Announced position. Reset by every announcement. */
     var refusals: Int = 0
@@ -195,6 +269,25 @@ class PrecommitExchange(
     val open: Boolean
         get() = position != null && session.state == SessionState.PROPOSING
 
+    /**
+     * AV-047: the automatic commit that will run when its cancel window ends, or null.
+     *
+     * Derived from the session for the same reason [position] is: nothing here may outlive
+     * what it describes. A correction, a self-grade, a transcript edit, a retry, a pause,
+     * a skip, an interruption and the commit itself all retire the Announced position, and
+     * the armed commit goes with it — so a window whose timer is still running can only
+     * ever find that there is nothing left to write.
+     */
+    val armed: AutomaticCommit?
+        get() {
+            val pending = automaticPending ?: return null
+            val made = position ?: return null
+            if (made.isAbstention || made.rating != pending.rating) return null
+            if (made.transcriptRevision != pending.transcriptRevision) return null
+            val intent = session.intent ?: return null
+            return pending.takeIf { intent === it.intent && session.state == SessionState.PROPOSING }
+        }
+
     // -- opening the exchange -------------------------------------------------- //
 
     /**
@@ -209,8 +302,24 @@ class PrecommitExchange(
         require(source == RatingSource.RULE || source == RatingSource.AI) {
             "A grader proposal is announced as a rule match or an AI suggestion, not ${source.specName}"
         }
-        return when (session.propose(rating)) {
-            is ProposalOutcome.Proposed -> announce(rating, source)
+        return when (val proposed = session.propose(rating)) {
+            is ProposalOutcome.Proposed -> {
+                // AV-047: a grader proposal is the one thing the option applies to, so the
+                // window is armed here and nowhere else. The announcement says so before it
+                // is armed, because the learner hears the announcement and not this call.
+                val window = automatic.cancelWindowMs.takeIf { automatic.enabled }
+                val step = announce(rating, source, automaticWindowMs = window)
+                if (window != null) {
+                    automaticPending = AutomaticCommit(
+                        rating = rating,
+                        source = source,
+                        transcriptRevision = proposed.intent.transcriptRevision,
+                        cancelWindowMs = window,
+                        intent = proposed.intent,
+                    )
+                }
+                step
+            }
             is ProposalOutcome.Rejected -> abstain("this card did not offer ${ratingName(rating)}")
         }
     }
@@ -246,7 +355,7 @@ class PrecommitExchange(
                 VoiceCommand.RATE_AGAIN, VoiceCommand.RATE_HARD,
                 VoiceCommand.RATE_GOOD, VoiceCommand.RATE_EASY,
                 -> corrected(outcome)
-                VoiceCommand.CONFIRM -> commit(outcome)
+                VoiceCommand.CONFIRM -> commit(outcome.notice)
                 // The pending rating stands until a different one replaces it; the learner
                 // has simply reopened the choice, so the re-prompt count starts over.
                 VoiceCommand.CHANGE -> {
@@ -270,6 +379,69 @@ class PrecommitExchange(
             session.state == SessionState.PROPOSING && it.state == ReviewState.PENDING
         } ?: return ExchangeStep.Untouched("There is no pending rating to announce.")
         return announce(pending.rating, RatingSource.LEARNER)
+    }
+
+    // -- AV-047: the automatic commit ------------------------------------------- //
+
+    /**
+     * Save the armed proposal without a learner gesture, once its cancel window has run.
+     *
+     * The caller owns the clock; this owns whether there is still anything to save. A
+     * window that expires over a rating the learner corrected, a revision a transcript
+     * edit replaced, an intent a pause or an interruption cancelled, or an attempt that
+     * already committed finds [armed] null and writes nothing at all.
+     *
+     * The confirmation it mints is bound exactly as a spoken or touched one is — this
+     * intent's token, the card's identity, the pending rating and its transcript revision
+     * — and is rejected by [ReviewIntent.confirm] on any mismatch, in which case the turn
+     * is handed back to the learner rather than forced through.
+     */
+    fun commitAutomatically(): ExchangeStep {
+        confine("commitAutomatically")
+        val nothingToDo = "Automatic grading had nothing left to save for this card, so nothing was written."
+        armed ?: return ExchangeStep.Untouched(nothingToDo)
+        val pending = session.intent ?: return ExchangeStep.Untouched(nothingToDo)
+        val token = pending.token ?: return ExchangeStep.Untouched(nothingToDo)
+        val accepted = session.confirm(
+            RatingConfirmation(
+                token = token,
+                identity = pending.cardSnapshot.identity,
+                rating = pending.rating,
+                transcriptRevision = pending.transcriptRevision,
+                source = ConfirmationSource.AUTO,
+            ),
+        )
+        automaticPending = null
+        if (!accepted) {
+            val notice = "Automatic grading did not match the rating that is waiting, so nothing was " +
+                "written. Say or tap Confirm to save it yourself."
+            speak(notice)
+            return ExchangeStep.Untouched(notice)
+        }
+        return commit(nothingToDo, automatic = true)
+    }
+
+    /**
+     * Call the armed commit off and hand this card's turn back to the learner.
+     *
+     * Nothing is written, the pending rating stays exactly where it was and is still
+     * correctable, and the option itself is untouched: the next card is offered
+     * automatically again, because this is a decision about one rating and not a settings
+     * change.
+     */
+    fun cancelAutomatic(): ExchangeStep {
+        confine("cancelAutomatic")
+        val armedNow = armed
+        automaticPending = null
+        val made = position
+        if (armedNow == null || made == null || made.rating == null) {
+            val notice = "Automatic grading was not about to save anything, so there was nothing to stop."
+            return ExchangeStep.Untouched(notice)
+        }
+        val notice = "Stopped, and nothing was written. ${ratingName(made.rating)} is still waiting and " +
+            "still yours to change. Say or tap Confirm when you want it saved."
+        speak(notice)
+        return ExchangeStep.KeptManual(made, notice)
     }
 
     // -- internals -------------------------------------------------------------- //
@@ -321,10 +493,10 @@ class PrecommitExchange(
      * plainly that nothing was written, and an unknown outcome says it is unknown and
      * hands the learner AV-018's halt rather than a success or a retry.
      */
-    private fun commit(executed: CommandOutcome.Executed): ExchangeStep {
+    private fun commit(untouched: String, automatic: Boolean = false): ExchangeStep {
         val pending = session.intent
         if (session.state != SessionState.PROPOSING || pending == null || !pending.hasConfirmation()) {
-            return ExchangeStep.Untouched(executed.notice)
+            return ExchangeStep.Untouched(untouched)
         }
         check(pending !== committedIntent) { "This attempt already committed a rating" }
         val rating = pending.rating
@@ -332,15 +504,21 @@ class PrecommitExchange(
         outcome = written
         committedIntent = pending
         announced = null
+        automaticPending = null
         refusals = 0
         return when (written.state) {
             ReviewState.CONFIRMED -> {
                 val spoken = session.announceResult(written)
                 speak(spoken.text)
+                val how = if (automatic) {
+                    "Automatic grading saved it; you did not confirm this one. "
+                } else {
+                    ""
+                }
                 ExchangeStep.Committed(
                     written,
                     spoken,
-                    "${spoken.text} Tap Next card to carry on. If ${ratingName(rating)} was the " +
+                    "${spoken.text} ${how}Tap Next card to carry on. If ${ratingName(rating)} was the " +
                         "wrong rating, use AnkiDroid's own Undo — AnkiVoice cannot take a review back.",
                 )
             }
@@ -362,9 +540,18 @@ class PrecommitExchange(
         }
     }
 
-    private fun announce(rating: Int?, source: RatingSource, detail: String = ""): ExchangeStep {
+    private fun announce(
+        rating: Int?,
+        source: RatingSource,
+        detail: String = "",
+        automaticWindowMs: Long? = null,
+    ): ExchangeStep {
+        // Every new Announced position retires the last one's armed commit. A correction,
+        // a self-grade and an abstention all land here, which is why none of them is ever
+        // saved without a confirmation.
+        automaticPending = null
         val revision = session.transcriptRevision
-        val text = announcementText(rating, source, revision, detail)
+        val text = announcementText(rating, source, revision, detail, automaticWindowMs)
         val utterance = Utterance(UtterancePurpose.ANNOUNCEMENT, text, session.language)
         val played = speak(utterance)
         val made = RatingAnnouncement(rating, source, revision, utterance, played)
@@ -380,7 +567,13 @@ class PrecommitExchange(
         return ExchangeStep.Announced(made, text)
     }
 
-    private fun announcementText(rating: Int?, source: RatingSource, revision: Int, detail: String): String {
+    private fun announcementText(
+        rating: Int?,
+        source: RatingSource,
+        revision: Int,
+        detail: String,
+        automaticWindowMs: Long?,
+    ): String {
         // AV-012 raises the revision for every settled answer, typed correction and Try
         // again, so the first settled answer is version 1 and the learner's own count of
         // how many times they have answered this card matches it.
@@ -397,8 +590,22 @@ class PrecommitExchange(
             // Unreachable: a rating is never announced without a source.
             RatingSource.NONE -> "for $heard"
         }
-        return "${ratingName(rating)} is waiting, $provenance. Say or tap Confirm to save it, or " +
-            "choose a different rating. Nothing is saved yet."
+        if (automaticWindowMs == null) {
+            return "${ratingName(rating)} is waiting, $provenance. Say or tap Confirm to save it, or " +
+                "choose a different rating. Nothing is saved yet."
+        }
+        // AV-047: the one announcement that says a write is coming without a confirmation.
+        // It says how long there is, how to stop it, and what a saved review costs to undo.
+        return "${ratingName(rating)} is waiting, $provenance. Automatic grading is on, so it will be " +
+            "saved in ${seconds(automaticWindowMs)} unless you stop it. Say or tap Confirm to save it " +
+            "now, choose a different rating, or tap Keep it manual to stop it. Once it is saved, only " +
+            "AnkiDroid's own Undo can take it back."
+    }
+
+    /** A window in the learner's words. Rounded up, so it never promises less time than there is. */
+    private fun seconds(ms: Long): String {
+        val whole = ((ms + 999) / 1_000).coerceAtLeast(1)
+        return if (whole == 1L) "1 second" else "$whole seconds"
     }
 
     /** #14's halt, in the learner's words, for a write that provably did not land. */

@@ -40,6 +40,9 @@ import org.ankivoice.core.exchange.ratingName
 /** How often the screen asks the transport what it has heard so far. */
 private const val HEARING_POLL_MS = 250L
 
+/** How often AV-047's cancel window is redrawn while it counts down. */
+private const val AUTO_COMMIT_TICK_MS = 100L
+
 /**
  * The study screen: one card at a time, reached after deck selection, provisioning and
  * AV-018's gate.
@@ -49,6 +52,12 @@ private const val HEARING_POLL_MS = 250L
  * it. Nothing on this screen writes except Confirm, and Confirm reaches the writer only
  * through AV-019's exchange for a confirmation AV-013 accepted for this attempt and
  * revision. Every voice command has a touch control; no control is voice-only.
+ *
+ * AV-047: when the learner has turned **Automatic grading** on in the setup screen, a
+ * rating the grader proposed is also saved when its cancel window runs out. The screen
+ * says so for the whole session, counts the window down where the rating is shown, and
+ * offers **Keep it manual** as the one control that stops it. It still writes nothing
+ * itself: the window is timed by the controller and committed through the same exchange.
  */
 @Composable
 internal fun StudyScreen(state: StudyState, study: StudyController, onBack: () -> Unit) {
@@ -68,6 +77,7 @@ internal fun StudyScreen(state: StudyState, study: StudyController, onBack: () -
             Text(state.status, style = MaterialTheme.typography.titleMedium)
 
             if (state.running) {
+                AutomaticGradingBanner(state)
                 CardPanel(state)
                 AnswerPanel(state, study)
                 RatingPanel(state, study)
@@ -248,6 +258,7 @@ private fun RatingPanel(state: StudyState, study: StudyController) {
                     style = MaterialTheme.typography.labelMedium,
                 )
                 if (state.confirmed) Text("Confirmed for this answer.", style = MaterialTheme.typography.labelMedium)
+                AutomaticGradingPanel(state, study)
             }
             if (StudyControl.RATE in controls) {
                 Text(
@@ -275,12 +286,100 @@ private fun RatingPanel(state: StudyState, study: StudyController) {
                     ) { Text("Change") }
                 }
                 Text(
-                    "Confirm is the one control that writes a review. Everything else leaves your collection alone.",
+                    if (state.automaticGrading) {
+                        "Automatic grading is on, so a rating the grader proposes is saved on its own. " +
+                            "Confirm saves it now; everything else here leaves your collection alone."
+                    } else {
+                        "Confirm is the one control that writes a review. Everything else leaves your collection alone."
+                    },
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
         }
     }
+}
+
+/**
+ * AV-047: the option's state, for as long as a session runs.
+ *
+ * It is on the screen whether or not a rating is waiting, because the learner needs to know
+ * before they answer that this session can save a rating without them.
+ */
+@Composable
+private fun AutomaticGradingBanner(state: StudyState) {
+    if (!state.automaticGrading) return
+    Card(
+        Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+    ) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text("Automatic grading is on", style = MaterialTheme.typography.titleSmall)
+            Text(
+                "A rating the grader proposes is saved without your confirmation, after a few " +
+                    "seconds you can use to stop it. A rating you name yourself, and a turn the " +
+                    "grader could not grade, still wait for you. Turn it off in Setup.",
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+    }
+}
+
+/**
+ * AV-047: the armed commit, where the rating it will save is shown.
+ *
+ * While a window is open it counts it down and offers the one control that stops it. The
+ * countdown is the surface's own display of a window the **controller** is timing; it never
+ * drives the write, so a countdown a recomposition restarts cannot lengthen or shorten what
+ * actually happens.
+ */
+@Composable
+private fun AutomaticGradingPanel(state: StudyState, study: StudyController) {
+    if (!state.automaticGrading) return
+    val window = state.autoCommitWindowMs
+    if (window == null) {
+        Text(
+            if (state.autoCommitCancelled) {
+                "You stopped automatic grading for this card. Nothing was written; confirm the " +
+                    "rating yourself when you are ready."
+            } else {
+                "This rating is yours to confirm: automatic grading saves only what the grader proposed."
+            },
+            style = MaterialTheme.typography.labelMedium,
+        )
+        return
+    }
+    // Restarted whenever a new window opens, which is what the key on the revision and the
+    // rating gives: a correction or an edit opens its own window, never a resumed one.
+    var remaining by remember(state.announcedRevision, state.pendingRating, window) {
+        mutableStateOf(window)
+    }
+    LaunchedEffect(state.announcedRevision, state.pendingRating, window) {
+        while (remaining > 0) {
+            delay(AUTO_COMMIT_TICK_MS)
+            remaining = (remaining - AUTO_COMMIT_TICK_MS).coerceAtLeast(0)
+        }
+    }
+    Text(
+        if (remaining > 0) {
+            "Saving automatically in ${(remaining + 999) / 1000}s. Stop it to keep this card manual."
+        } else {
+            "Saving automatically now…"
+        },
+        style = MaterialTheme.typography.titleSmall,
+        color = MaterialTheme.colorScheme.primary,
+    )
+    LinearProgressIndicator(
+        progress = { (remaining.toFloat() / window.toFloat()).coerceIn(0f, 1f) },
+        modifier = Modifier.fillMaxWidth(),
+    )
+    Button(
+        onClick = study::cancelAutomaticCommit,
+        enabled = !state.busy && StudyControl.CANCEL_AUTOMATIC in state.controls,
+    ) { Text("Keep it manual") }
+    Text(
+        "Once a review is saved, only AnkiDroid's own Undo can take it back.",
+        style = MaterialTheme.typography.bodySmall,
+    )
 }
 
 private fun sourceLabel(source: String?): String = when (source) {

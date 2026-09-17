@@ -24,7 +24,11 @@ documentation says plainly what has not been verified.
   route only if the free one fails, and only if you have entered your own OpenRouter key
   and acknowledged what is sent. Every suggestion is advisory: you confirm, change or name
   the rating yourself, and a transcript edit retires any earlier suggestion.
-- **One write, journalled.** A confirmed rating is written once, after freshness checks, and
+- **Or let it rate for you, if you ask.** **Automatic grading** is off until you turn it on
+  in setup. With it on, a rating the grader proposed is saved after a few seconds you can
+  use to stop it — and only that: a rating you named yourself, and a turn the grader could
+  not grade, still wait for you. A saved review can then only be undone in AnkiDroid.
+- **One write, journalled.** A rating is written once, after freshness checks, and
   verified by reading the card back. The intent is recorded in an app-private journal before
   the write and settled from the writer's own evidence, so a crash mid-write is reconciled on
   the next start rather than retried or assumed. An unconfirmable write is reported to you,
@@ -162,6 +166,7 @@ cold-boot between long sessions, and a capture that comes back empty is retried 
 | Grading quality and the paid fallback | [evaluation](docs/testing/av017/results.md) · [paid fallback](docs/testing/av043/results.md) |
 | Rating confirmation and the single write | [exchange](docs/testing/av019/results.md) |
 | The study screen and the integrated flow | [study surface](docs/testing/av026/results.md) |
+| Automatic grading, and the confirmation rule it reverses | [automatic grading](docs/testing/av047/results.md) |
 
 Work is tracked on the [project board](https://github.com/users/BrockBadeaux14/projects/2).
 

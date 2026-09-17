@@ -243,7 +243,7 @@ physical device has been identified. Each row says whether the pin was observed 
 | Text to speech | `com.google.android.tts` `googletts.google-speech-apk_20241125.02_p2.702443970` (code `210526444`), voice `en-US-language`, rate 1.0, pitch 1.0 | #6; same version in #5 | Validated for synthesis and playback |
 | Recognition | `com.google.android.tts/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService`, en-US, free-form, `EXTRA_PREFER_OFFLINE=false` | #5 (live path, no voice), #6 (file-fed) | **Not validated for a human voice**; #45 |
 | Grader | OpenRouter `liquid/lfm-2.5-2.6b:free` via `liquid/fp8`, `allow_fallbacks=false`, zero maximum prices, temperature 0, JSON object output, 1,024-token cap, pass-2 instruction from [`tools/av006_providers.py`](../../tools/av006_providers.py) | #6 | Validated in-sample only (11/12); advisory |
-| Rating automation | Disabled; every rating needs explicit confirmation | #6, #7 | Decided |
+| Rating automation | Disabled by default; every rating needs explicit confirmation unless the learner turns **Automatic grading** on, which AV-047 added on September 17, 2026 for grader proposals alone | #6, #7, #76 | Decided; amended by AV-047 |
 
 <!-- av022:baseline:end -->
 
@@ -546,7 +546,12 @@ record remains unchanged.
 - Voice-first with touch fallback: routine voice controls, explicit touch controls and
   transcript edits, and manual interventions counted for #29.
 - Every rating needs an explicit learner confirmation. Suggestions, silence, timeouts
-  and errors never submit or imply a rating.
+  and errors never submit or imply a rating. **Amended September 17, 2026 (AV-047, #76):**
+  with the learner's own **Automatic grading** option on, a rating *the grader proposed* is
+  confirmed by the session after a five-second cancel window and recorded as `auto`.
+  Silence, timeouts and errors still never submit, and a rating the learner named still
+  needs their own confirmation. The option is off on first run. See
+  [AV-007's amendment](../contracts/av007-session-contracts.md#automatic-grading-the-september-17-2026-reversal).
 - The selected free-only advisory provider route: no paid, model or provider fallback,
   and no automatic retries.
 - No skip: a skip request pauses or exits without writing. Correction happens before

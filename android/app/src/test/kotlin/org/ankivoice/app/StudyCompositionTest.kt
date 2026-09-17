@@ -132,6 +132,7 @@ class StudyCompositionTest {
             Executor { runnable -> gradingWorker.execute(runnable) },
             gate,
             { cardProvider },
+            ManualScheduler(),
         ) { sessionId -> journal.entries().filter { it.sessionId == sessionId } }
     }
 

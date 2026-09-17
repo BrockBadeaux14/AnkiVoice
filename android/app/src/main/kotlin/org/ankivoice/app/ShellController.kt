@@ -17,6 +17,15 @@ import org.ankivoice.core.eligibility.offerNextCard
 internal interface ShellSettings {
     var selectedDeckId: Long?
     var language: String
+
+    /**
+     * AV-047: save a rating the grader proposed without waiting for a confirmation.
+     *
+     * Off on first run and off unless the learner turned it on. It is read when a study
+     * session is built, so a session already running keeps the setting it opened with;
+     * there is no way to reach this screen without leaving that session first.
+     */
+    var automaticGrading: Boolean
 }
 
 internal sealed interface PreviewStatus {
@@ -41,6 +50,8 @@ internal data class ShellState(
     val decks: List<Deck> = emptyList(),
     val selectedDeckId: Long? = null,
     val language: String = "en-US",
+    /** AV-047: whether the next session saves grader proposals without a confirmation. */
+    val automaticGrading: Boolean = false,
     val accessFailure: Failure? = null,
     val checking: Boolean = true,
     val status: PreviewStatus = PreviewStatus.Idle,
@@ -71,7 +82,11 @@ internal class ShellController(
     private val journal: ReconciliationGate? = null,
     private val cardProvider: (Long) -> CardProvider?,
 ) : ForegroundEventPort {
-    var state = ShellState(selectedDeckId = settings.selectedDeckId, language = settings.language)
+    var state = ShellState(
+        selectedDeckId = settings.selectedDeckId,
+        language = settings.language,
+        automaticGrading = settings.automaticGrading,
+    )
         private set
     var observer: ((ShellState) -> Unit)? = null
     private val sessionId = UUID.randomUUID().toString()
@@ -164,6 +179,20 @@ internal class ShellController(
         publish(state.copy(setup = report, setupBusy = false, disclosing = false))
         // A created demo deck is the only thing provisioning adds to the deck list.
         if (foreground && report.demoDeck == ProvisioningStep.CREATED) refresh()
+    }
+
+    /**
+     * AV-047: turn automatic grading on or off for the sessions that come after this one.
+     *
+     * It changes no card, writes no review and does not touch the deck preview: the only
+     * thing it decides is what a **later** study session does with a grader proposal. The
+     * study screen is only reachable after leaving this one, so a session can never see the
+     * setting change underneath it.
+     */
+    fun setAutomaticGrading(enabled: Boolean) {
+        if (enabled == state.automaticGrading) return
+        settings.automaticGrading = enabled
+        publish(state.copy(automaticGrading = enabled))
     }
 
     fun setLanguage(language: String) {
