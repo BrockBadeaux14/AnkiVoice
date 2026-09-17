@@ -1,6 +1,7 @@
 package org.ankivoice.app
 
 import java.io.File
+import java.math.BigDecimal
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicInteger
 import org.ankivoice.core.answer.AnswerRecovery
@@ -40,9 +41,15 @@ class StudyCompositionTest {
     private val key = "sk-or-v1-0123456789abcdef0123456789abcdef"
     private val now = 1_789_400_000_000L
 
+    /**
+     * AV-043's paid route is off here: a $0 cap keeps every rule miss on the free route,
+     * which each fixture already refuses before the transport. Nothing in this class may
+     * reach a paid dispatch, so the cap is not a knob any test turns up.
+     */
     private class Settings(
         override var dailyLimit: Int = QuotaLedger.DEFAULT_DAILY_LIMIT,
         override var disclosureAcknowledged: Boolean = false,
+        override var dailyCapUsd: BigDecimal = BigDecimal.ZERO,
     ) : ProviderSettings
 
     private class Credentials(private var key: String? = null) : CredentialStore {

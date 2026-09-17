@@ -2,8 +2,8 @@ package org.ankivoice.app
 
 import android.app.Application
 import android.content.Context
-import java.util.UUID
 import java.math.BigDecimal
+import java.util.UUID
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
