@@ -151,7 +151,16 @@ private fun commandSession(
         sessionId = sessionId,
     )
     return Result.success(
-        CommandSession(session, CommandRouter(session, speech), studyGrader, revision, speech::releaseAll),
+        CommandSession(
+            session = session,
+            router = CommandRouter(session, speech),
+            grader = studyGrader,
+            revision = revision,
+            speech = speech,
+            language = settings.language,
+            partial = speech::lastPartial,
+            release = speech::releaseAll,
+        ),
     )
 }
 

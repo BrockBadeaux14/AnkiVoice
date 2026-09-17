@@ -53,10 +53,21 @@ data class SpeechTimings(
     val finalizationMs: Long = 5_000,
     val answerWindowMs: Long = 15_000,
     val playbackMs: Long = 30_000,
+    /**
+     * How long the microphone and recognizer have to open before the attempt is abandoned.
+     *
+     * [AndroidSpeechPlatform] already guards the recognizer start with five seconds of its
+     * own; this bounds the whole open, including the audio server call that an emulator or
+     * device with wedged audio input never returns from. It is generous on purpose — a slow
+     * open is still a usable turn — and short enough that a dead microphone is reported to
+     * the learner rather than waited on.
+     */
+    val captureOpenMs: Long = 8_000,
 ) {
     init {
         require(settleMs >= 0 && trailingSilenceMs >= 0) { "Negative settle or trailing silence" }
         require(finalizationMs > 0 && answerWindowMs > 0 && playbackMs > 0) { "Non-positive deadline" }
+        require(captureOpenMs > 0) { "Non-positive capture-open deadline" }
         require(trailingSilenceMs < finalizationMs) {
             "Finalization must include the trailing silence, not start after it"
         }

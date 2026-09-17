@@ -41,6 +41,7 @@ class SpeechTransportTest {
         finalizationMs = 300,
         answerWindowMs = 400,
         playbackMs = 300,
+        captureOpenMs = 150,
     )
     private val slept = mutableListOf<Long>()
     private val transport = SpeechTransport(
@@ -265,6 +266,38 @@ class SpeechTransportTest {
 
         assertEquals(SpeechInputFailure.RECOGNIZER_UNAVAILABLE, event.failure.mode)
         assertEquals(SpeechTransport.CAPTURE_UNAVAILABLE, event.failure.detail)
+    }
+
+    /**
+     * The failure this file exists to keep: a platform that never returns from opening the
+     * microphone used to hold the caller — and with it the whole turn — for good, while the
+     * surface still reported a live capture.
+     */
+    @Test fun `a microphone that never opens expires on its own deadline`() {
+        platform.captureOpenBlocks = true
+        val event = listenAsync().value() as CaptureEvent.Failed
+
+        assertEquals(SpeechInputFailure.RECOGNIZER_UNAVAILABLE, event.failure.mode)
+        assertEquals(SpeechTransport.CAPTURE_OPEN_DEADLINE, event.failure.detail)
+    }
+
+    @Test fun `a microphone that opens after its deadline is released, not used`() {
+        platform.captureOpenBlocks = true
+        listenAsync().value() as CaptureEvent.Failed
+
+        platform.releaseCaptureOpen()
+        await("the late stream to be released") { (platform.lastStream?.closeCount ?: 0) > 0 }
+        assertTrue(platform.lastStream?.microphoneStopped == true, "the late microphone was left running")
+    }
+
+    @Test fun `a later attempt still opens after one timed out`() {
+        platform.captureOpenBlocks = true
+        listenAsync().value() as CaptureEvent.Failed
+        platform.releaseCaptureOpen()
+
+        platform.captureOpenBlocks = false
+        val event = listenAsync().value()
+        assertTrue(event is CaptureEvent.Transcript, "the transport stayed idle after the timed-out open: $event")
     }
 
     // -------------------------------------------------------------------- deadlines
