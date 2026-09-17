@@ -31,6 +31,7 @@ import org.ankivoice.core.exchange.ratingName
 import org.ankivoice.core.grading.RuleGrader
 import org.ankivoice.core.journal.JournalEntry
 import org.ankivoice.core.journal.ReviewJournal
+import org.ankivoice.core.answer.AnswerRecovery
 import org.ankivoice.core.session.ProposalOutcome
 import org.ankivoice.core.session.ReviewSession
 import org.ankivoice.core.session.SessionState
@@ -205,9 +206,47 @@ class ExchangeInstrumentation : Instrumentation() {
         )
         result.put("action", action)
         if (action != "Start answer") return result
-        val token = session.startAnswer()
-        val event = speech.listen(token, language)
-        session.acceptCapture(event)
+
+        // A capture that comes back with nothing costs a Try again, not the whole case.
+        // AV-012 already owns that path: `retry` opens a new revision and waits for the
+        // next explicit Start answer, so each attempt is a real one and the earlier empty
+        // one stays in the turn's own record rather than being overwritten.
+        val attempts = JSONArray()
+        var settled = false
+        for (attempt in 1..MAX_ANSWER_ATTEMPTS) {
+            val token = session.startAnswer()
+            val event = speech.listen(token, language)
+            session.acceptCapture(event)
+            val answer = session.answer
+            attempts.put(
+                JSONObject()
+                    .put("attempt", attempt)
+                    .put("transcript", answer?.text)
+                    .put("status", answer?.status?.specName)
+                    .put("confidence", answer?.confidence?.specName)
+                    .put("recognizerConfidence", speech.lastConfidence ?: JSONObject.NULL)
+                    .put("sessionState", session.state.specName),
+            )
+            if (answer?.gradable == true) {
+                settled = true
+                break
+            }
+            if (attempt == MAX_ANSWER_ATTEMPTS) break
+            // Only a fault the learner can act on in place may be retried; a halt that lost
+            // the card is not one, and is reported rather than papered over.
+            if (AnswerRecovery.TRY_AGAIN !in session.recoveryOptions) break
+            val again = ui?.choose(
+                "Nothing was heard",
+                "The recognizer returned no answer (${session.lastFailure?.mode?.specName ?: "no answer"}). " +
+                    "The card is kept and nothing was written.\n\nTap Try again and speak as soon as " +
+                    "the button responds — the window is 15 seconds from the tap.",
+                "Try again", "Give up on this case",
+            )
+            if (again != "Try again") break
+            session.retry()
+        }
+        result.put("attempts", attempts)
+        result.put("settled", settled)
         result.put("transcript", session.answer?.text)
         result.put("answerStatus", session.answer?.status?.specName)
         result.put("confidence", session.answer?.confidence?.specName)
@@ -516,6 +555,11 @@ class ExchangeInstrumentation : Instrumentation() {
             if (passed) Activity.RESULT_OK else Activity.RESULT_CANCELED,
             Bundle().apply { putString("av019", output.toString()) },
         )
+    }
+
+    private companion object {
+        /** Three spoken attempts per case; the emulator's audio backend rarely survives more. */
+        const val MAX_ANSWER_ATTEMPTS = 3
     }
 
     /** AV-015's rules only, so this run needs no key, no quota and no network. */

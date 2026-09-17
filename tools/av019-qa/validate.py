@@ -84,6 +84,11 @@ def validate(name, record):
     # Every rating announced carries a source and the revision it was computed from.
     announcements = result.get("announcements", [])
     check(announcements, f"{name}: nothing was announced")
+    # A case has to have had a pending rating to act on. Without this, a turn whose answer
+    # never settled reaches Pause and Finish as no-ops and passes the no-write checks while
+    # never opening an exchange at all.
+    check(any(a["rating"] is not None for a in announcements),
+          f"{name}: no rating was ever pending, so there was no exchange to act on")
     for announced in announcements:
         source = announced["source"]
         check(source in ("rule", "ai", "learner", "none"), f"{name}: unknown source {source}")
@@ -134,11 +139,23 @@ def validate(name, record):
         duplicate = next(step for step in steps if step.get("step") == "duplicate-confirm")
         check(duplicate["offered"] is False, f"{name}: a second confirm was still offered")
         check(duplicate["outcome"]["kind"] == "untouched", f"{name}: the duplicate reached the exchange")
+    if name in ("corrected", "correction-only"):
+        correction = next(step for step in steps if step.get("step") == "correct")
+        check(correction.get("from") != correction.get("to"), f"{name}: the correction changed nothing")
+        check(correction["outcome"]["kind"] == "announced", f"{name}: the correction was not re-announced")
+        check(correction["sessionState"] == "proposing",
+              f"{name}: the correction left the session {correction['sessionState']}")
     if name == "corrected":
         correction = next(step for step in steps if step.get("step") == "correct")
-        check(correction["from"] != correction["to"], f"{name}: the correction changed nothing")
         check(added[0]["ease"] == correction["to"],
               f"{name}: the review recorded {added[0]['ease']}, not the corrected {correction['to']}")
+    if name == "abandoned":
+        pause = next(step for step in steps if step.get("step") == "pause")
+        # A pause that was refused because the turn had already halted abandons nothing.
+        check("not available" not in pause["outcome"]["notice"],
+              f"{name}: the pause was a no-op: {pause['outcome']['notice']}")
+        check(pause["sessionState"] == "paused", f"{name}: the pause left the session "
+                                                 f"{pause['sessionState']}")
     if name == "undo-handoff":
         handoff = next(step for step in steps if step.get("step") == "undo-handoff")
         check(handoff.get("reason") == "native_undo_handoff", f"{name}: the handoff did not stop the session")

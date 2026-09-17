@@ -1,5 +1,5 @@
 {
-  "utc": "2026-09-17T12:31:57Z",
+  "utc": "2026-09-17T13:03:11Z",
   "avd": "AnkiVoice_AV005",
   "flags": [
     "-allow-host-audio",
@@ -14,6 +14,22 @@
       "reviewsAdded": 1,
       "expectedReviewsAdded": 1,
       "journalEntriesAdded": 1,
+      "passed": true
+    },
+    {
+      "case": "correction-only",
+      "utc": "2026-09-17T12:56:02Z",
+      "reviewsAdded": 0,
+      "expectedReviewsAdded": 0,
+      "journalEntriesAdded": 0,
+      "passed": true
+    },
+    {
+      "case": "abandoned",
+      "utc": "2026-09-17T12:53:09Z",
+      "reviewsAdded": 0,
+      "expectedReviewsAdded": 0,
+      "journalEntriesAdded": 0,
       "passed": true
     }
   ]

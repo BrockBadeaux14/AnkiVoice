@@ -169,17 +169,15 @@ Every case needs one spoken answer, and each confirmation is the operator's choi
 spoken or touched, recorded as it happened. The owner asked on September 16, 2026 that
 spoken evidence be spoken; nothing in the harness synthesizes a voice or attests on the
 operator's behalf. `tools/av019-qa/validate.py` re-derives every claim above from the
-retained snapshots — 31 checks over the one completed case — and names the four still
+retained snapshots — 94 checks over the three completed cases — and names the two still
 outstanding rather than passing as though the run were done. Reproduce with the
 [runbook](runbook.md).
 
 ## What this does not establish
 
-One confirmed turn is not the four outstanding ones. Nothing here yet shows that a
-**corrected** rating is the one that gets written, that a correction or an abandoned
-exchange writes nothing against a real collection, or that AnkiDroid offers its own Undo
-after the handoff — those are the four cases still to run, and #21 should stay open until
-they have.
+Three cases are not five. Nothing here yet shows that a **corrected** rating is the one
+that gets written, or that AnkiDroid offers its own Undo after the handoff — those are the
+two cases still to run, and #21 should stay open until they have.
 
 One spoken confirmation is also not a recognition-accuracy estimate. It shows the guarded
 spoken path works on this route at all, which it had never been observed doing; it does not

@@ -1,0 +1,292 @@
+{
+  "case": "undo-handoff",
+  "utc": "2026-09-17T12:47:49Z",
+  "deck": 1789411952529,
+  "expectedReviewsAdded": 1,
+  "reviewsAdded": 0,
+  "integrityBefore": "ok",
+  "integrityAfter": "ok",
+  "revlogAdded": [],
+  "cardsBefore": [
+    {
+      "id": 1789411952535,
+      "nid": 1789411952535,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 0,
+      "queue": 0,
+      "due": 1,
+      "ivl": 0,
+      "reps": 0,
+      "lapses": 0,
+      "mod": 1789411952
+    },
+    {
+      "id": 1789411952536,
+      "nid": 1789411952536,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 1,
+      "queue": 1,
+      "due": 1789647968,
+      "ivl": 0,
+      "reps": 2,
+      "lapses": 0,
+      "mod": 1789647278
+    },
+    {
+      "id": 1789411952537,
+      "nid": 1789411952537,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 3,
+      "queue": 1,
+      "due": 1789411892,
+      "ivl": 1,
+      "reps": 4,
+      "lapses": 1,
+      "mod": 1789411952
+    },
+    {
+      "id": 1789411952538,
+      "nid": 1789411952538,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 2,
+      "queue": 2,
+      "due": 90,
+      "ivl": 30,
+      "reps": 3,
+      "lapses": 0,
+      "mod": 1789411952
+    },
+    {
+      "id": 1789411952539,
+      "nid": 1789411952539,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 0,
+      "queue": -1,
+      "due": 5,
+      "ivl": 0,
+      "reps": 0,
+      "lapses": 0,
+      "mod": 1789411952
+    },
+    {
+      "id": 1789411952540,
+      "nid": 1789411952540,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 0,
+      "queue": 0,
+      "due": 6,
+      "ivl": 0,
+      "reps": 0,
+      "lapses": 0,
+      "mod": 1789411952
+    },
+    {
+      "id": 1789411952541,
+      "nid": 1789411952541,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 0,
+      "queue": 0,
+      "due": 7,
+      "ivl": 0,
+      "reps": 0,
+      "lapses": 0,
+      "mod": 1789411952
+    },
+    {
+      "id": 1789411952542,
+      "nid": 1789411952542,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 2,
+      "queue": 2,
+      "due": 97,
+      "ivl": 30,
+      "reps": 3,
+      "lapses": 0,
+      "mod": 1789411952
+    }
+  ],
+  "cardsAfter": [
+    {
+      "id": 1789411952535,
+      "nid": 1789411952535,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 0,
+      "queue": 0,
+      "due": 1,
+      "ivl": 0,
+      "reps": 0,
+      "lapses": 0,
+      "mod": 1789411952
+    },
+    {
+      "id": 1789411952536,
+      "nid": 1789411952536,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 1,
+      "queue": 1,
+      "due": 1789647968,
+      "ivl": 0,
+      "reps": 2,
+      "lapses": 0,
+      "mod": 1789647278
+    },
+    {
+      "id": 1789411952537,
+      "nid": 1789411952537,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 3,
+      "queue": 1,
+      "due": 1789411892,
+      "ivl": 1,
+      "reps": 4,
+      "lapses": 1,
+      "mod": 1789411952
+    },
+    {
+      "id": 1789411952538,
+      "nid": 1789411952538,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 2,
+      "queue": 2,
+      "due": 90,
+      "ivl": 30,
+      "reps": 3,
+      "lapses": 0,
+      "mod": 1789411952
+    },
+    {
+      "id": 1789411952539,
+      "nid": 1789411952539,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 0,
+      "queue": -1,
+      "due": 5,
+      "ivl": 0,
+      "reps": 0,
+      "lapses": 0,
+      "mod": 1789411952
+    },
+    {
+      "id": 1789411952540,
+      "nid": 1789411952540,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 0,
+      "queue": 0,
+      "due": 6,
+      "ivl": 0,
+      "reps": 0,
+      "lapses": 0,
+      "mod": 1789411952
+    },
+    {
+      "id": 1789411952541,
+      "nid": 1789411952541,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 0,
+      "queue": 0,
+      "due": 7,
+      "ivl": 0,
+      "reps": 0,
+      "lapses": 0,
+      "mod": 1789411952
+    },
+    {
+      "id": 1789411952542,
+      "nid": 1789411952542,
+      "did": 1789411952529,
+      "ord": 0,
+      "type": 2,
+      "queue": 2,
+      "due": 97,
+      "ivl": 30,
+      "reps": 3,
+      "lapses": 0,
+      "mod": 1789411952
+    }
+  ],
+  "phases": [
+    {
+      "utc": "2026-09-17T12:47:23Z",
+      "phase": "Answer the card"
+    },
+    {
+      "utc": "2026-09-17T12:47:44Z",
+      "phase": "Speech result"
+    }
+  ],
+  "spokenBy": "the operator; see result.answer.attested for what they confirmed",
+  "result": {
+    "case": "undo-handoff",
+    "journalPath": "/data/user/0/org.ankivoice/files/av018-session-journal.jsonl",
+    "journalBefore": [],
+    "microphonePermission": true,
+    "cardId": 1789411952537,
+    "before": {
+      "reps": 4,
+      "cardType": 3,
+      "queue": 1,
+      "due": 1789411892,
+      "intervalDays": 1
+    },
+    "permittedRatings": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "answer": {
+      "action": "Start answer",
+      "transcript": "",
+      "answerStatus": "failed",
+      "confidence": "absent",
+      "recognizerConfidence": null,
+      "transcriptRevision": 1,
+      "sessionState": "paused",
+      "attested": {
+        "promptAudible": true,
+        "spokeExpectedPhrase": true,
+        "source": "operator-touch"
+      }
+    },
+    "announced": {
+      "skipped": "paused"
+    },
+    "steps": [
+      {
+        "skipped": "no rating is pending: paused"
+      }
+    ],
+    "announcements": [],
+    "after": {
+      "reps": 4,
+      "cardType": 3,
+      "queue": 1,
+      "due": 1789411892,
+      "intervalDays": 1
+    },
+    "stateUnchanged": true,
+    "journalAfter": [],
+    "sessionState": "paused",
+    "events": "  start             language en-US\n  offer_card        card 1789411952537, ratings [1, 2, 3, 4]\n  ask               In a game, a token is valid only if it is blue and square. A token is blue and round. Is it valid, and why?\n  start_answer      attempt 1\n  paused            noMatch: code 7",
+    "writes": [],
+    "journalEntriesAdded": 0,
+    "completed": true,
+    "passed": false
+  },
+  "passed": false
+}

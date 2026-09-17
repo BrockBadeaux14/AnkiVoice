@@ -162,7 +162,20 @@ python3 tools/av019-qa/run.py build/av019/deck.json --cases corrected
 **Keep an attempt that came back wrong.** Re-running until one comes back right and
 retaining only that one is not evidence. Move it to `evidence/inconclusive/` with a line
 saying what happened and why it proved nothing, as
-[the three from September 17, 2026](evidence/inconclusive/README.md) are kept.
+[those from September 17, 2026](evidence/inconclusive/README.md) are kept.
+
+**Tap the confirmation rather than speaking it**, unless the point of the run is the spoken
+path. `confirmed` already evidences a spoken confirm executing at 0.972; a spoken one costs
+a second microphone open in a boot that may not have one left, and two runs were lost that
+way — once to `noMatch`, once to the recognizer merging four words into a single utterance
+that whole-utterance matching correctly rejected.
+
+**A capture that comes back empty costs a Try again, not the case.** The harness offers up
+to three attempts through AV-012's own `retry` and records each one, so the revision the
+rating finally lands on may be higher than 1. That is the retry path working, not drift.
+
+Stopping the host-side driver does **not** stop the instrumentation on the device. Force-stop
+`org.ankivoice.test` as well, or the next run meets a screen from the last one.
 
 ### The Undo handoff
 

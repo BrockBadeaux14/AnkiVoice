@@ -32,3 +32,37 @@ Both were fixed the same day:
 
 These three cases are re-run from scratch with the fixed harness; their replacements go in
 the parent directory.
+
+## Second round, later the same day
+
+`abandoned` and `correction-only` passed on the re-run and moved to the parent directory.
+Two did not, both for the same reason and neither of them an exchange fault.
+
+| Attempt | What happened | Why it proved nothing |
+| --- | --- | --- |
+| `corrected-2.json` | The exchange ran in full — abstention, `self-grade` to Again, corrected to Hard, both announced at revision 1 — and the confirmation was spoken. The command capture returned `noMatch`. | The router refused it `recognition-failed` and the session paused with the card kept, so no review was written. Correct behaviour; the case still owes its write. |
+| `undo-handoff-2.json` | Three answer attempts, the first two empty. The host-side driver was stopped during the third to run a microphone diagnostic, which ended the instrumentation. | Abandoned by the operator, not by the app. Nothing was written. |
+
+### The capture problem, stated as what is actually known
+
+Several captures across the session returned nothing at all — `noMatch`, code 7 — with no
+audio reaching a transcript, on first and later opens of a boot alike. What is established:
+
+- The owner used Google's voice search **inside the same emulator** and it worked, so the
+  guest microphone can receive host audio. The host hardware is not the fault.
+- `Failed to create voice` — AV-017's coreaudio listener leak — appears once, in
+  `build/av019/emulator-boot-00.log`.
+- The emulator process **exited** later in the session, which is the other symptom AV-017
+  documented for that leak.
+- An unattended five-second probe returned `no-samples`. That is ambiguous: it means no PCM
+  file was read, which can equally mean the diagnostic did not run.
+
+What is **not** established is which layer drops the audio. AV-017 and AV-044 already
+record this emulator's capture as unreliable after a few microphone opens per boot, and
+AV-019's retry path was added because of it; whether these particular empty captures are
+that same fault, or something in AV-025's own pipe, is an AV-025 (#26) question and not one
+this card can answer. It is recorded here rather than guessed at.
+
+The practical consequence for anyone resuming: **tap the confirmation rather than speaking
+it.** The spoken path is already proven by `confirmed`, and a spoken confirm costs a second
+microphone open in a boot that may not have one left.
