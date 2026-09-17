@@ -3,8 +3,10 @@ package org.ankivoice.app
 import android.app.Application
 import android.content.Context
 import java.math.BigDecimal
+import java.util.UUID
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicInteger
 import org.ankivoice.ankidroid.AndroidAccessPlatform
 import org.ankivoice.ankidroid.AnkiDroidCardProvider
 import org.ankivoice.ankidroid.AnkiDroidAccess
@@ -15,13 +17,8 @@ import org.ankivoice.core.contracts.Capabilities
 import org.ankivoice.core.contracts.CardProviderFailure
 import org.ankivoice.core.contracts.Failure
 import org.ankivoice.core.contracts.ForegroundEventPort
-import org.ankivoice.core.contracts.GradeLabel
 import org.ankivoice.core.contracts.Grader
-import org.ankivoice.core.contracts.GradingReply
-import org.ankivoice.core.contracts.GradingRequest
-import org.ankivoice.core.contracts.GradingResult
 import org.ankivoice.core.contracts.GuardedReviewWriter
-import org.ankivoice.core.grading.RuleGrader
 import org.ankivoice.core.session.ReviewSession
 import org.ankivoice.provider.Diagnostics
 import org.ankivoice.provider.ProviderModule
@@ -64,6 +61,17 @@ class ShellApplication : Application() {
         // so a flush cannot delay a deck read.
         val journalWorker = Executors.newSingleThreadExecutor()
         val journal = JournalAccess(JournalModule.journal(filesDir), journalWorker, mainExecutor)
+        // AV-045: one reconciliation gate for the process. The readiness preview and the
+        // study session both go through it, so neither can offer a card around the other.
+        val gate = ReconciliationGate(journal, UUID.randomUUID().toString())
+        val cards = { settingsStore.selectedDeckId?.let { AnkiDroidCardProvider(platform, it, worker, mainExecutor) } }
+        // AV-020: :provider owns the only network route. Its work never runs on the main
+        // thread, and the study session's grading shares this one worker with settings.
+        val providerSettings = PrivateProviderSettings(this)
+        val diagnostics = Diagnostics()
+        val credentials = ProviderModule.credentialStore(this)
+        val ledger = ProviderModule.ledger(this)
+        val providerWorker = Executors.newSingleThreadExecutor()
         controller = ShellController(
             SpeechAwareAccess(
                 AnkiDroidAccess(platform, worker, mainExecutor),
@@ -73,29 +81,32 @@ class ShellApplication : Application() {
             settingsStore,
             AnkiDroidProvisioning(platform, worker, mainExecutor),
             worker, mainExecutor,
-            journal,
+            gate,
         ) { deckId -> AnkiDroidCardProvider(platform, deckId, worker, mainExecutor) }
         // AV-014: the command surface drives a real session on a thread of its own, because
         // AV-025's transport blocks its caller for the whole of playback and capture.
         commands = CommandController(
             CommandSessionFactory {
-                commandSession(platform, settingsStore, worker, mainExecutor, applicationContext)
+                // A fresh GradingProvider per session: #17 holds a refused key or route
+                // for the rest of the session and clears it only at the next one.
+                val grading = ProviderModule.grading(credentials, ledger, providerSettings, diagnostics)
+                commandSession(platform, settingsStore, worker, mainExecutor, applicationContext) { sessionId, revision ->
+                    StudyGrader(grading, sessionId, revision, providerWorker)
+                }
             },
             Executors.newSingleThreadExecutor(),
             mainExecutor,
+            providerWorker,
+            gate,
+            cards,
         )
-        // AV-020: :provider owns the only network route. Its work never runs on the main thread.
-        val settings = PrivateProviderSettings(this)
-        val diagnostics = Diagnostics()
-        val credentials = ProviderModule.credentialStore(this)
-        val ledger = ProviderModule.ledger(this)
         provider = ProviderController(
             credentials,
-            settings,
+            providerSettings,
             ledger,
             diagnostics,
-            ProviderModule.grading(credentials, ledger, settings, diagnostics),
-            Executors.newSingleThreadExecutor(),
+            ProviderModule.grading(credentials, ledger, providerSettings, diagnostics),
+            providerWorker,
             mainExecutor,
         )
         provider.refresh()
@@ -103,11 +114,12 @@ class ShellApplication : Application() {
 }
 
 /**
- * One AV-014 debug session over the real collection and the real AV-025 transport.
+ * One study session over the real collection, the real AV-025 transport and AV-045's
+ * grader: #16's rules on device, then #18's semantic grader on a rule miss.
  *
  * The **real** guarded writer is wired in deliberately. No command path reaches it, and
  * that is the property the pinned-AVD check is meant to demonstrate — a writer that could
- * not write would prove nothing.
+ * not write would prove nothing. #21 wraps it in the journal when it adds the commit step.
  */
 private fun commandSession(
     platform: AndroidAccessPlatform,
@@ -115,6 +127,7 @@ private fun commandSession(
     worker: Executor,
     delivery: Executor,
     context: Context,
+    grader: (sessionId: String, revision: AtomicInteger) -> Grader,
 ): Result<CommandSession> {
     val deckId = settings.selectedDeckId
         ?: return Result.failure(CommandSessionUnavailable(Failure(CardProviderFailure.DECK_MISSING, "no deck is selected")))
@@ -124,32 +137,22 @@ private fun commandSession(
         return Result.failure(CommandSessionUnavailable(capabilities as Failure))
     }
     val speech = SpeechModule.create(context)
+    val sessionId = UUID.randomUUID().toString()
+    val revision = AtomicInteger()
+    val studyGrader = grader(sessionId, revision)
     val session = ReviewSession(
         provider = provider,
         speechOutput = speech,
         speechInput = speech,
-        grader = RuleOnlyGrader,
+        grader = studyGrader,
         writer = GuardedReviewWriter(provider, AnkiDroidReviewTransport(platform), capabilities),
         capabilities = capabilities,
         language = settings.language,
+        sessionId = sessionId,
     )
     return Result.success(
-        CommandSession(session, CommandRouter(session, speech), speech::releaseAll),
+        CommandSession(session, CommandRouter(session, speech), studyGrader, revision, speech::releaseAll),
     )
-}
-
-/**
- * On-device rules only, so the command surface needs no key, no quota and no network.
- * A rule that matches nothing proposes no rating, which is what AV-015 requires.
- */
-private object RuleOnlyGrader : Grader {
-    override fun grade(request: GradingRequest): GradingReply = GradingReply(
-        request,
-        RuleGrader.grade(request.context)
-            ?: GradingResult(GradeLabel.UNCERTAIN, "no rule match; the learner supplies the rating"),
-    )
-
-    override fun cancel(request: GradingRequest) = Unit
 }
 
 private class PrivateShellSettings(context: Context) : ShellSettings {

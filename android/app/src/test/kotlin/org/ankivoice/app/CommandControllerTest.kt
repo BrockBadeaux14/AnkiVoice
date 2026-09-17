@@ -48,9 +48,10 @@ class CommandControllerTest {
         {
             failure?.let { return@CommandController Result.failure(CommandSessionUnavailable(it)) }
             Result.success(
-                CommandSession(session, CommandRouter(session, speechInput)) { released += 1 },
+                CommandSession(session, CommandRouter(session, speechInput), grader) { released += 1 },
             )
         },
+        direct,
         direct,
         direct,
     )

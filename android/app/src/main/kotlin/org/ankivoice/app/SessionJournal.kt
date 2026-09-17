@@ -126,3 +126,68 @@ internal class JournalAccess(
         onFailure?.invoke(e.javaClass.simpleName)
     }
 }
+
+/**
+ * AV-045: the one AV-018 gate every surface that offers a card goes through.
+ *
+ * Reconciliation runs once per process, whichever surface asks first, and every later
+ * [open] answers from what it found. An unacknowledged unknown outcome keeps [open]
+ * blocking for **every** surface until the learner acknowledges it on any of them, so the
+ * study session cannot go around a notice the readiness preview is still showing.
+ *
+ * Called and answered on [JournalAccess]'s delivery thread — the main thread in the app.
+ */
+internal class ReconciliationGate(
+    private val journal: JournalAccess,
+    private val sessionId: String,
+) {
+    /** Null until reconciliation has run in this process. */
+    private var report: JournalReport? = null
+
+    /** Callers that asked while the one reconciliation pass was still running. */
+    private var waiting: MutableList<(JournalReport) -> Unit>? = null
+
+    private val listeners = mutableListOf<(JournalReport) -> Unit>()
+
+    val reconciled: Boolean get() = report != null
+
+    /** Told whenever an acknowledgement changes what is outstanding, on whichever surface. */
+    fun listen(listener: (JournalReport) -> Unit) {
+        listeners += listener
+    }
+
+    /**
+     * Reconcile if this process has not, then answer. [JournalReport.blocking] means no
+     * card may be offered yet. [cards] is read only by the first, reconciling call.
+     */
+    fun open(cards: () -> CardProvider?, callback: (JournalReport) -> Unit) {
+        report?.let { return callback(it) }
+        waiting?.let {
+            it += callback
+            return
+        }
+        waiting = mutableListOf(callback)
+        journal.reconcile(sessionId, cards) { reconciled ->
+            report = reconciled
+            val callers = waiting.orEmpty()
+            waiting = null
+            callers.forEach { it(reconciled) }
+        }
+    }
+
+    /** The learner has seen the notice for [entryId]. Never inferred from a restart. */
+    fun acknowledge(entryId: Long, callback: (JournalReport) -> Unit = {}) {
+        journal.acknowledge(entryId) { acknowledged ->
+            val remaining = acknowledged.outstanding
+            val current = report ?: JournalReport()
+            val next = current.copy(
+                // Once nothing is outstanding there is nothing left to announce.
+                reconciliations = if (remaining.isEmpty()) emptyList() else current.reconciliations,
+                outstanding = remaining,
+            )
+            if (report != null) report = next
+            callback(next)
+            listeners.forEach { it(next) }
+        }
+    }
+}

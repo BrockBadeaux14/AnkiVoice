@@ -411,7 +411,8 @@ class ShellJournalTest {
     private val direct = java.util.concurrent.Executor { it.run() }
     private var creations = 0
     private val controller = ShellController(
-        access, Settings(), Provisioning(), direct, direct, JournalAccess(journal, direct, direct),
+        access, Settings(), Provisioning(), direct, direct,
+        ReconciliationGate(JournalAccess(journal, direct, direct), "shell-test"),
     ) { creations++; provider }
 
     private fun strand(rating: Int = 3) = journal.record(

@@ -67,7 +67,8 @@ internal class ShellController(
     private val provisioner: Provisioner,
     private val worker: Executor = Executor { it.run() },
     private val delivery: Executor = Executor { it.run() },
-    private val journal: JournalAccess? = null,
+    /** AV-045: the reconciliation gate this preview shares with the study session. */
+    private val journal: ReconciliationGate? = null,
     private val cardProvider: (Long) -> CardProvider?,
 ) : ForegroundEventPort {
     var state = ShellState(selectedDeckId = settings.selectedDeckId, language = settings.language)
@@ -79,8 +80,10 @@ internal class ShellController(
     private var selecting = false
     private var refreshAfterSelection = false
 
-    /** AV-018 reconciliation is a once-per-process pass, not a once-per-start one. */
-    private var reconciled = false
+    init {
+        // An acknowledgement made on another surface clears the notice here too.
+        journal?.listen(::publishJournal)
+    }
 
     private fun publish(next: ShellState) {
         state = next
@@ -178,10 +181,11 @@ internal class ShellController(
         publish(state.copy(checking = true, status = PreviewStatus.Starting, skipped = emptyList(), skipSummary = null))
         // AV-018: whatever an unclean exit left in the journal is resolved before any card
         // is offered, and an unknown outcome stops the start rather than being studied over.
-        if (journal != null && !reconciled) {
-            journal.reconcile(sessionId, { cardProvider(requireNotNull(deckId)) }) { report ->
-                if (token != generation || !foreground) return@reconcile
-                reconciled = true
+        // AV-045: the gate reconciles once per process and blocks every surface alike, so an
+        // outcome still unacknowledged after the first pass blocks this start as well.
+        if (journal != null) {
+            journal.open({ cardProvider(requireNotNull(deckId)) }) { report ->
+                if (token != generation || !foreground) return@open
                 val next = state.copy(
                     journalNotices = report.notices,
                     journalOutstanding = report.outstanding.map { it.entryId },
@@ -210,18 +214,19 @@ internal class ShellController(
      * never resubmits it.
      */
     fun acknowledgeJournalNotice(entryId: Long) {
-        val access = journal ?: return
-        access.acknowledge(entryId) { report ->
-            val remaining = report.outstanding.map { it.entryId }
-            publish(
-                state.copy(
-                    journalOutstanding = remaining,
-                    journalNotices = if (remaining.isEmpty()) emptyList() else state.journalNotices,
-                    status = if (remaining.isEmpty() && state.status == PreviewStatus.OutcomeUnknown)
-                        PreviewStatus.Idle else state.status,
-                ),
-            )
-        }
+        journal?.acknowledge(entryId)
+    }
+
+    private fun publishJournal(report: JournalReport) {
+        val remaining = report.outstanding.map { it.entryId }
+        publish(
+            state.copy(
+                journalOutstanding = remaining,
+                journalNotices = if (remaining.isEmpty()) emptyList() else state.journalNotices,
+                status = if (remaining.isEmpty() && state.status == PreviewStatus.OutcomeUnknown)
+                    PreviewStatus.Idle else state.status,
+            ),
+        )
     }
 
     private fun finishStart(result: AccessSnapshot, deckId: Long?, token: Long) {
