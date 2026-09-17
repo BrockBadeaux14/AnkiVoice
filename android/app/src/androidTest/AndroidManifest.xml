@@ -42,4 +42,8 @@
     <instrumentation
         android:name="org.ankivoice.app.StudyInstrumentation"
         android:targetPackage="org.ankivoice" />
+
+    <instrumentation
+        android:name="org.ankivoice.app.CaptureLayerInstrumentation"
+        android:targetPackage="org.ankivoice" />
 </manifest>

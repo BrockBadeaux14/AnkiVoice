@@ -33,3 +33,6 @@ jobs:
       # AV-026: every live study turn is judged from the collection's own revlog and the
       # controller's evidence export, and no-write turns left the card alone.
       - run: python tools/av026-qa/validate.py
+      # AV-046: every retained microphone-layer attempt is consistent and its layer is the
+      # one the rule derives.
+      - run: python tools/av046-qa/validate.py

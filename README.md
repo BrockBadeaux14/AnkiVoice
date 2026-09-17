@@ -157,7 +157,7 @@ cold-boot between long sessions, and a capture that comes back empty is retried 
 | Speech in the foreground, live microphone, human voice input | [foreground speech](docs/testing/av005-foreground-speech.md) · [live microphone](docs/testing/av040-live-microphone.md) · [voice input](docs/testing/av042/results.md) |
 | Shell, onboarding and note type provisioning | [shell](docs/testing/av023/results.md) · [provisioning](docs/testing/av039/results.md) |
 | Card eligibility and skipping | [eligibility](docs/testing/av010/results.md) |
-| Speech transport and recognizer confidence | [transport](docs/testing/av025/results.md) · [confidence](docs/testing/av044/results.md) |
+| Speech transport and recognizer confidence | [transport](docs/testing/av025/results.md) · [confidence](docs/testing/av044/results.md) · [microphone layers](docs/testing/av046/results.md) |
 | Session state machine, voice commands, journal and recovery | [session](docs/testing/av013/results.md) · [commands](docs/testing/av014/results.md) · [journal](docs/testing/av018/results.md) |
 | Grading quality and the paid fallback | [evaluation](docs/testing/av017/results.md) · [paid fallback](docs/testing/av043/results.md) |
 | Rating confirmation and the single write | [exchange](docs/testing/av019/results.md) |

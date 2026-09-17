@@ -787,6 +787,17 @@ preflight through `SpeechAwareAccess`, on a worker thread, so the shell cannot r
 learner ready to study and then fail in the middle of a card. An AnkiDroid failure still
 wins, and a capability check that throws is a failure rather than a ready device.
 
+### Where a dropped capture is lost (AV-046)
+
+Some captures on the pinned AVD have come back `noMatch` with no transcript, and which
+layer loses the audio — the emulator's host-audio backend, the guest HAL, or the pipe this
+module owns — was never established. AV-046 (#74) is the bounded diagnostic for that
+question, and it changes nothing here: `CaptureLayerInstrumentation` in `androidTest` runs
+the shipped transport over the shipped platform with two pass-through observers on the
+stream (`CaptureDiagnostics` for the samples, `PumpDiagnostics` for their timing and what
+reached the pipe) and a bare `AudioRecord` from the test APK recording the same window
+without the pipe. See [the results](../docs/testing/av046/results.md) for what it found.
+
 ### What this does not establish
 
 The offline suite proves the transport's rules, not recognition quality. Live evidence

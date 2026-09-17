@@ -97,4 +97,27 @@ internal class LiveVerificationUi(private val instrumentation: Instrumentation) 
         }
         return if (latch.await(300_000, TimeUnit.MILLISECONDS)) response.get() else null
     }
+
+    /** One statement, initially unchecked, for a capture with no prompt; only the operator may check it. */
+    fun attestSpoken(result: String, expected: String): JSONObject? {
+        val response = AtomicReference<JSONObject?>()
+        val latch = CountDownLatch(1)
+        render("Capture result", "$result\n\nConfirm only what actually happened:") { layout ->
+            val spoke = CheckBox(activity).apply {
+                text = "I said: $expected"
+                setTextColor(Color.BLACK)
+                textSize = 19f
+            }
+            layout.addView(spoke)
+            layout.addView(Button(activity).apply {
+                text = "Save result"
+                setOnClickListener {
+                    isEnabled = false
+                    response.set(JSONObject().put("spokeExpectedPhrase", spoke.isChecked).put("source", "operator-touch"))
+                    latch.countDown()
+                }
+            })
+        }
+        return if (latch.await(300_000, TimeUnit.MILLISECONDS)) response.get() else null
+    }
 }
