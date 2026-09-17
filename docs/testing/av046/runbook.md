@@ -107,8 +107,17 @@ One unattended capture of the room, on a fresh boot, under ignored `build/av046/
 checks that the harness runs on this host — both recorders open, the audio server lists
 both clients, the record comes out and validates — before any of the owner's budget is
 spent. It records silence and it says so (`source: nobody`); it is not an attempt and it
-is not evidence. Its reading should be `no-speech`; anything else is a harness problem to
-fix before the run.
+is not evidence.
+
+Its reading also says whether the host path is alive at all. A live input reads as a noise
+floor — `quiet`, a few units of peak — and the guest HAL logs nothing; that is the
+`no-speech` reading, and the run can proceed. Exact zeros on both recorders with
+`pcm_readi` read failures in the guest log mean the virtual sound device delivered no
+frames, before anyone spoke; the driver reads that as `emulator-or-host`, and a spoken run
+on that host input would only repeat it. Check the host's default input device before
+spending the owner's voice. `--smoke --no-boot --opens-before N` repeats the probe on the
+running boot as its N+1th open; `--smoke --reference none` runs it without the reference
+recorder, as a control.
 
 ## 6. The live diagnostic, in the owner's voice
 

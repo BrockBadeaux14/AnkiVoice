@@ -51,6 +51,7 @@ internal class PumpDiagnostics(
     private val writeErrors = JSONArray()
 
     private var stopMs: Long? = null
+    private var endOfInputMs: Long? = null
     private var closeMs: Long? = null
     private var micStopped = false
 
@@ -84,6 +85,9 @@ internal class PumpDiagnostics(
                     if (latency > maxReadMs) maxReadMs = latency
                     if (latency > SLOW_MS) slowReads++
                     when {
+                        // After Done the stream reports end of input with -1; that is the
+                        // stop working, not a failed read.
+                        read < 0 && micStopped -> if (endOfInputMs == null) endOfInputMs = after
                         read < 0 -> failedReads += read
                         read == 0 -> emptyReads++
                         else -> {
@@ -171,6 +175,7 @@ internal class PumpDiagnostics(
             .put("slowWrites", slowWrites)
             .put("writeErrors", writeErrors)
             .put("stopMicrophoneMs", stopMs ?: JSONObject.NULL)
+            .put("endOfInputMs", endOfInputMs ?: JSONObject.NULL)
             .put("closeMs", closeMs ?: JSONObject.NULL)
             .put("loudThreshold", LOUD)
             .put("slowThresholdMs", SLOW_MS)

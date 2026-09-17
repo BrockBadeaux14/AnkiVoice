@@ -64,8 +64,12 @@ FLAGS = ["-allow-host-audio", "-no-snapshot", "-no-boot-anim"]
 # the earlier drivers key on, the others precede it.
 EMULATOR_FAULT = re.compile(r"Failed to create voice|coreaudio: Could not|kAudioHardware")
 EMULATOR_AUDIO = re.compile(r"(?i)coreaudio|voice|audio|snd|hostmic")
-# The guest side: the ranchu audio HAL, the audio server and the recognizer.
-LOGCAT_KEEP = re.compile(r"(?i)audio|snd|alsa|ranchu|virtio|record|speech|recogni|googletts|ankivoice|silenc")
+# The guest side: the ranchu audio HAL, the audio server, the recognizer and the app, by tag.
+LOGCAT_KEEP = re.compile(
+    r"\b(android\.hardware\.audio\S*|AudioFlinger|AudioPolicy\w*|APM_\w+|AudioRecord|AudioService|AudioSystem|"
+    r"audio_hw\w*|RecordThread|virtio\w*|tinyalsa|alsa\w*|SpeechRecognizer|RecognitionService|GoogleTTS\w*|"
+    r"org\.ankivoice)\s*:"
+)
 HAL_READ_FAILURE = re.compile(r"pcm_readi failed|pcmRead:\d+ failure")
 HAL_SILENCE_INSERT = re.compile(r"inserting \d+ us of silence")
 
@@ -179,7 +183,8 @@ def install(device=DEVICE):
 
 
 def guest_time(device=DEVICE):
-    return adb("shell", "date", "+%m-%d %H:%M:%S.000", device=device).strip()
+    """The guest's clock in logcat's `-T` form; quoted for the remote shell, which re-splits arguments."""
+    return adb("shell", "date", shlex.quote("+%m-%d %H:%M:%S.000"), device=device).strip()
 
 
 # ------------------------------------------------------------------ the guest's view
@@ -196,17 +201,58 @@ def logcat_since(start, device=DEVICE):
     }
 
 
+def parse_audio_flinger(text):
+    """The RECORD threads in a `dumpsys media.audio_flinger`: device, rate, standby, frames read, tracks."""
+    threads, current = [], None
+    fields = (
+        ("standby", r"^\s*Standby: (\w+)"),
+        ("sampleRateHz", r"^\s*Sample rate: (\d+)"),
+        ("channelCount", r"^\s*Channel count: (\d+)"),
+        ("inputDevice", r"^\s*Input device: \S+ \(([^)]+)\)"),
+        ("framesRead", r"^\s*Frames read: (\d+)"),
+        ("readLatencyMs", r"^\s*Threadloop read latency stats: (.+)"),
+        ("tracks", r"^\s*(\d+) Tracks of which \d+ are active"),
+        ("activeTracks", r"^\s*\d+ Tracks of which (\d+) are active"),
+    )
+    for line in text.splitlines():
+        head = re.match(r"^-?\s*Input thread \S+, name (\S+), tid \d+, type \d+ \((\w+)\)", line)
+        if head:
+            current = {"name": head.group(1), "type": head.group(2)}
+            threads.append(current)
+            continue
+        if re.match(r"^-?\s*Output thread", line):
+            current = None
+            continue
+        if current is None:
+            continue
+        for key, pattern in fields:
+            match = re.match(pattern, line)
+            if match:
+                current[key] = match.group(1)
+    return [thread for thread in threads if "sampleRateHz" in thread]
+
+
+def parse_recording_clients(text):
+    """`dumpsys audio`'s RecordActivityMonitor lines: one per recording client, with its silenced flag."""
+    clients = []
+    for line in text.splitlines():
+        match = re.match(r"^\s*session:(\d+) -- source client=(\w+).*?-- pack:(\S+).*?-- silenced:(\w+)", line)
+        if match:
+            clients.append({"session": int(match.group(1)), "source": match.group(2),
+                            "package": match.group(3), "silenced": match.group(4) == "true"})
+    return clients
+
+
 def snapshot_audio_server(stem, device=DEVICE):
-    """The audio server while the microphone is open: input threads, tracks and the HAL stream."""
+    """The audio server while the microphone is open: the input thread, its tracks and every recording client."""
     flinger = adb("shell", "dumpsys", "media.audio_flinger", device=device, timeout=60)
     Path(f"{stem}-audio_flinger.txt").write_text(flinger, encoding="utf-8")
     audio = adb("shell", "dumpsys", "audio", device=device, timeout=60)
     kept = [line for line in audio.splitlines() if re.search(r"(?i)record|captur|input|mic|silenc|ankivoice", line)]
     Path(f"{stem}-audio.txt").write_text("\n".join(kept), encoding="utf-8")
     return {
-        "audioFlingerLines": len(flinger.splitlines()),
-        "inputThreads": sum(1 for line in flinger.splitlines() if re.search(r"(?i)input thread|RecordThread", line)),
-        "activeRecordTracks": sum(1 for line in flinger.splitlines() if re.search(r"(?i)active.*record|record.*active", line)),
+        "inputThreads": parse_audio_flinger(flinger),
+        "recordingClients": parse_recording_clients(audio),
     }
 
 
@@ -392,22 +438,18 @@ def environment(device, log_path):
 
 def _device_block(report, marker):
     """The name and transport of the `system_profiler SPAudioDataType` device block carrying `marker`."""
-    current, transport, found = None, None, {}
+    blocks, current = [], None
     for line in report.splitlines():
         if re.match(r"^\s{8}\S.*:$", line):
-            current, transport = line.strip().rstrip(":"), None
-        elif "Transport:" in line:
-            transport = line.split(":", 1)[1].strip()
-        elif marker in line:
-            found = {"name": current, "transport": transport}
-    if found and found.get("transport") is None:
-        # The transport line follows the marker in some blocks; take the block's own.
-        block = re.search(re.escape(found["name"] or "") + r":\n((?:\s{10}.*\n)+)", report)
-        if block:
-            hit = re.search(r"Transport:\s*(.+)", block.group(1))
-            if hit:
-                found["transport"] = hit.group(1).strip()
-    return found
+            current = {"name": line.strip().rstrip(":"), "lines": []}
+            blocks.append(current)
+        elif current is not None:
+            current["lines"].append(line.strip())
+    for block in blocks:
+        if any(marker in line for line in block["lines"]):
+            transport = next((line.split(":", 1)[1].strip() for line in block["lines"] if line.startswith("Transport:")), None)
+            return {"name": block["name"], "transport": transport}
+    return {}
 
 
 def reading(record):
@@ -438,6 +480,9 @@ def main():
     parser.add_argument("--no-boot", action="store_true", help="use the running emulator; never reboot")
     parser.add_argument("--skip-first-boot", action="store_true", help="start on the running emulator, then cold-boot as usual")
     parser.add_argument("--no-install", action="store_true", help="do not reinstall the APKs on the first boot")
+    parser.add_argument("--opens-before", type=int, default=0,
+                        help="with --no-boot or --skip-first-boot: harness captures already made on the running boot, "
+                             "so the open index stays honest")
     parser.add_argument("--smoke", action="store_true",
                         help="one unattended silent capture under build/av046/, to check the harness; not evidence")
     args = parser.parse_args()
@@ -459,9 +504,10 @@ def main():
     existing = sum(1 for line in ledger.open() if line.strip()) if ledger.is_file() else 0
     boots = 0
     log_path = args.evidence / f"emulator-boot-{boots:02d}.log"
-    since_boot = 0
-    records_opened = 0
     need_boot = not args.no_boot and not args.skip_first_boot
+    # On a boot this driver did not make, the open index is whatever the operator declares.
+    since_boot = 0 if need_boot else args.opens_before
+    records_opened = 0 if need_boot else args.opens_before
     installed = args.no_install
 
     if not args.no_boot:

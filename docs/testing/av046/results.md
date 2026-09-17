@@ -94,6 +94,53 @@ ticked attestation says that, and a capture without it counts as no spoken captu
 | Python suite in full | 317 tests, 0 failures |
 | `tools/av046-qa/validate.py` | nothing to validate yet |
 
+## The harness check, September 17, 2026: the guest HAL could not read the microphone at all
+
+Before any of the owner's budget was spent, the driver's `--smoke` mode ran the harness
+with **nobody speaking**, under ignored `build/av046/`. These are harness checks, not
+attempts, and they carry no attestation; they are recorded here because what they found
+bears directly on the card's question.
+
+| Probe | Boot · open | Host input | Reference | Transport recorder | Pipe | Recognizer | Emulator log | Guest HAL (logcat) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | 1 · 1 | `WH-1000XM5` (Bluetooth) | zeroed: 144,384 samples, 144,066 zero, peak 2 | zeroed: 131,840 samples, 131,569 zero, peak 2 | carried 263,680 bytes + 16,000 padding, closed | empty segment, then `noMatch` (7) | clean | not captured (a driver bug, fixed) |
+| 2 | 1 · 2, `hostmicon` re-issued | same | zeroed: 141,568 samples, peak 2 | zeroed: 128,640 samples, peak 2 | carried, closed | empty segment, then `noMatch` (7) | clean | **166 `pcm_readi` I/O errors, 544 silence inserts** in the window |
+| 3 (control) | 2 · 1, cold boot, **no reference** | same | none | quiet: 131,840 samples, 83,874 zero, peak 284, RMS 28 | carried 263,680 bytes + 16,000 padding, closed | empty segment, then `noMatch` (7) | clean | **86 `pcm_readi` I/O errors, 288 silence inserts** |
+
+What the second probe's guest log shows, on the guest clock: AudioFlinger's input thread
+started at 12:42:04.268; from 12:42:04.425 `android.hardware.audio@7.1-impl.ranchu` logged
+`pcm_readi was late delivering frames, inserting 16000 us of silence` every few
+milliseconds; from 12:42:04.693 `pcm_readi failed with 'cannot read/write stream data:
+I/O error' (-1)`, repeated until the stream stopped at 12:42:13.250. The audio server's own
+dump, taken while both recorders were open, showed **one** input thread (`AudioIn_2E`,
+16 kHz mono, device `AUDIO_DEVICE_IN_BUILTIN_MIC`, not in standby) with both recorders as
+its two active tracks, neither silenced. The emulator's log carried no `coreaudio:` line and
+the emulator did not exit.
+
+So on that boot the loss was **below the guest's audio server**: the virtual sound device
+(`virtio-snd`) delivered no frames to the guest HAL, every `AudioRecord` in the guest read
+zeros, the app's pump carried those zeros faithfully to the recognizer, and the recognizer
+answered with an empty segment and a no-match. Nothing in AV-025's pipe was involved; the
+same zeros reached the reference recorder that has no pipe. That is the shape of exit
+criterion 2, seen without speech: with a live host input a silent room still reads as a
+noise floor of a few units, not as exact zeros with the HAL reporting read errors.
+
+The control (probe 3) ran on a fresh boot with **no reference recorder**, and the HAL
+failed the same way, so the concurrent reference is not what starves the stream. That
+probe's recorder did receive a sparse noise floor — a peak of 284 with two thirds of the
+samples zero, the zeros being the HAL's own 16 ms silence inserts — so the path was
+stuttering rather than dead, which is also what an intermittently dropped spoken capture
+would look like from the app's side.
+
+What it does not yet say is **why** the host path delivered nothing on that boot. The
+host's default input device was the Bluetooth headset for both probes, whereas every
+earlier run that received audio used the MacBook Pro microphone; `-allow-host-audio` was
+in effect (the emulator logged `Allowing host microphone input.`) and `hostmicon` was
+acknowledged both times. The cheapest control is one silent probe on a cold boot with the
+built-in microphone as the host input, which needs the owner to change the input device
+first; the live run then needs the owner's voice on whichever input the probe shows to be
+alive.
+
 ## Live layer — not yet run
 
 Six attempts over three cold boots, `tools/av046-qa/run.py`, the owner's voice, the
