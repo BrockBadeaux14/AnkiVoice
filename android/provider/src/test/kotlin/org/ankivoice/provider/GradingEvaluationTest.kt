@@ -1,5 +1,6 @@
 package org.ankivoice.provider
 
+import java.math.BigDecimal
 import org.ankivoice.core.contracts.GradingRequest
 import org.ankivoice.core.contracts.OperationToken
 import org.ankivoice.core.grading.GradingSource
@@ -18,6 +19,13 @@ import java.io.File
  * reserves no quota, and every AI reply passes through the shipped instruction, the
  * shipped route guard and the shipped two-key validation. The only substitution is the
  * socket, in [RecordingTransport] and [ReplayTransport].
+ *
+ * AV-043 adds the paid fallback to the shipped grader. A recorded pass runs the shipped
+ * route order — free first, paid only after the free route is refused, unavailable, timed
+ * out or failed — under the cap given by `-Pav017.dailyCapUsd` (default: the shipped
+ * $1.00; 0 measures the free route alone). The AV-043 model spike, `-Pav043.spike=<model>@<tag>`,
+ * runs one paid candidate on the **tuning 20 only**, through this same harness and the
+ * shipped provider, with the free route off; it refuses any other split.
  *
  * Three modes, chosen with `-Pav017.mode`:
  *
@@ -40,6 +48,25 @@ class GradingEvaluationTest {
     private val mode = System.getProperty("ankivoice.av017.mode").orEmpty().ifEmpty { RULE_ONLY }
     private val dailyLimit = System.getProperty("ankivoice.av017.dailyLimit")?.toInt()
         ?: QuotaLedger.DEFAULT_DAILY_LIMIT
+    private val dailyCapUsd: BigDecimal = System.getProperty("ankivoice.av017.dailyCapUsd")?.let { text ->
+        checkNotNull(QuotaLedger.parseDailyCap(text)) { "av017.dailyCapUsd must be dollars and cents from 0 to ${QuotaLedger.MAX_DAILY_CAP_USD}" }
+    } ?: QuotaLedger.DEFAULT_DAILY_CAP_USD
+
+    /**
+     * AV-043's spike candidate, `<model>@<endpoint tag>`, or null for the shipped route.
+     * The candidate's pin carries the spike's price ceiling per token rather than a listed
+     * price: a candidate listed above it is refused by the same price check the app runs.
+     */
+    private val spike: PaidRoutePin? = System.getProperty("ankivoice.av043.spike")?.takeIf { it.isNotBlank() }?.let { candidate ->
+        val parts = candidate.split("@", limit = 2)
+        check(parts.size == 2 && parts.all { it.isNotBlank() }) { "av043.spike is <model>@<endpoint tag>, got '$candidate'" }
+        PaidRoutePin.of(
+            parts[0],
+            parts[1],
+            System.getProperty("ankivoice.av043.spikeMaxPromptUsd") ?: SPIKE_MAX_PROMPT_USD_PER_TOKEN,
+            System.getProperty("ankivoice.av043.spikeMaxCompletionUsd") ?: SPIKE_MAX_COMPLETION_USD_PER_TOKEN,
+        )
+    }
 
     /**
      * Which split this pass runs, so the tuning 20 can be inspected and adjusted against
@@ -52,6 +79,7 @@ class GradingEvaluationTest {
 
     private class Settings(
         override var dailyLimit: Int,
+        override var dailyCapUsd: BigDecimal,
         override var disclosureAcknowledged: Boolean = true,
     ) : ProviderSettings
 
@@ -95,7 +123,11 @@ class GradingEvaluationTest {
         val transcript = File(outputDirectory, "transcript.jsonl")
         // Only the record pass consumes a real allowance; a replay must not add to its ledger.
         val ledgerFile = File(outputDirectory, "av017-quota-ledger-$mode.jsonl")
-        val settings = Settings(dailyLimit)
+        val settings = Settings(dailyLimit, dailyCapUsd)
+        if (spike != null) {
+            check(mode != RULE_ONLY) { "the AV-043 spike needs a live (record) or replayed transport" }
+            check(split == CorpusAnswer.TUNING) { "the AV-043 spike runs on the tuning 20 only; the held-out 40 is never spent on a candidate" }
+        }
         val ledger = QuotaLedger(ledgerFile)
         val diagnostics = Diagnostics(capacity = 4_000)
 
@@ -113,7 +145,16 @@ class GradingEvaluationTest {
                 else -> null
             },
         )
-        val provider = GradingProvider(credentials, ledger, settings, transport, diagnostics)
+        val provider = GradingProvider(
+            credentials,
+            ledger,
+            settings,
+            transport,
+            diagnostics,
+            paidPin = spike ?: PaidRoute.PINNED,
+            // The spike measures one paid candidate on its own; the shipped route order otherwise.
+            enabledRoutes = if (spike != null) listOf(GradingRoute.PAID) else GradingRoute.ORDER,
+        )
 
         val scoreable = corpus.answers.filter { it.scoreable && (split == "all" || it.split == split) }
         check(scoreable.isNotEmpty()) { "no scoreable answer is in split '$split'" }
@@ -134,6 +175,7 @@ class GradingEvaluationTest {
                 transcriptRevision = REVISION,
                 context = corpus.context(answer),
             )
+            val spentBefore = ledger.budget(dailyCapUsd).spentTodayUsd
             val started = System.nanoTime()
             val grading = session.grader.suggest(request, permitted)
             // Microsecond resolution: a rule match is well under a millisecond, and
@@ -141,11 +183,13 @@ class GradingEvaluationTest {
             val wallMs = Math.round((System.nanoTime() - started) / 1_000.0) / 1_000.0
             val source = (grading as? TurnGrading.Graded)?.suggestion?.source
             if (source == GradingSource.AI) requestsInSession++
-            results += describe(answer, grading, wallMs, replay)
+            // What this answer cost: the paid charges it added, or the holds it left behind.
+            val costUsd = ledger.budget(dailyCapUsd).spentTodayUsd - spentBefore
+            results += describe(answer, grading, wallMs, replay, session.grader.lastRoute, costUsd)
         }
 
         replay?.let { assertTrue(it.exhausted(), "the transcript holds requests this run never replayed") }
-        writeRun(results, sessions, settings, ledger, diagnostics)
+        writeRun(results, sessions, settings, ledger, diagnostics, provider)
 
         // A rule match must never have reached the transport: that is #16's whole point.
         val ruleMatched = results.filter { it["source"] == GradingSource.RULE.specName }
@@ -166,6 +210,18 @@ class GradingEvaluationTest {
         "endpoint" to (session.start as? SessionStart.Ready)?.endpointName,
         "sessionRemaining" to (session.start as? SessionStart.Ready)?.allowance?.sessionRemaining,
         "dailyRemaining" to (session.start as? SessionStart.Ready)?.allowance?.dailyRemaining,
+        // AV-043: what each route's pre-session check said.
+        "routes" to when (val start = session.start) {
+            is SessionStart.Ready -> start.routes
+            is SessionStart.Unavailable -> start.routes
+        }.map { route ->
+            linkedMapOf(
+                "route" to route.route.specName,
+                "start" to (route.cause?.name ?: "ready"),
+                "endpoint" to route.endpointName,
+                "detail" to route.detail.ifEmpty { null },
+            )
+        },
     )
 
     /**
@@ -183,6 +239,8 @@ class GradingEvaluationTest {
         grading: TurnGrading,
         wallMs: Double,
         replay: ReplayTransport?,
+        route: GradingRoute?,
+        costUsd: BigDecimal,
     ): Map<String, Any?> {
         val recorded = replay?.latencies?.get(answer.id).orEmpty()
         val suggestion = (grading as? TurnGrading.Graded)?.suggestion
@@ -210,6 +268,9 @@ class GradingEvaluationTest {
             // Replay reports the live pass's own network time; a rule match is local work.
             "latencyMs" to if (recorded.isEmpty()) wallMs else recorded.sum().toDouble(),
             "latencySource" to if (recorded.isEmpty()) "measured" else "recorded-live-pass",
+            // AV-043: which route the AI leg ended on, and what the answer cost in USD.
+            "route" to if (source == GradingSource.RULE) null else route?.specName,
+            "costUsd" to costUsd.toPlainString(),
         )
     }
 
@@ -219,7 +280,10 @@ class GradingEvaluationTest {
         settings: Settings,
         ledger: QuotaLedger,
         diagnostics: Diagnostics,
+        provider: GradingProvider,
     ) {
+        val pin = spike ?: PaidRoute.PINNED
+        val budget = ledger.budget(settings.dailyCapUsd)
         val pending = corpus.answers.filter { !it.scoreable && (split == "all" || it.split == split) }
         val document = linkedMapOf(
             "schema_version" to 1,
@@ -236,6 +300,18 @@ class GradingEvaluationTest {
                 "deadline_ms" to SemanticGrader.DEADLINE_MS,
                 "attempts" to SemanticGrader.ATTEMPTS,
             ),
+            // AV-043: the route order this run used, the paid pin, and the spike candidate if any.
+            "routes" to provider.routes.map { it.specName },
+            "paid_route" to linkedMapOf(
+                "model" to pin.model,
+                "provider" to pin.provider,
+                "prompt_usd_per_token" to pin.promptUsdPerToken.toPlainString(),
+                "completion_usd_per_token" to pin.completionUsdPerToken.toPlainString(),
+                "prompt_token_cap" to PaidRoute.PROMPT_TOKEN_CAP,
+                "max_tokens" to PaidRoute.MAX_TOKENS,
+                "ceiling_usd" to pin.ceilingUsd.toPlainString(),
+            ),
+            "spike" to spike?.let { linkedMapOf("candidate" to "${it.model}@${it.provider}", "tuning_only" to true) },
             "quota" to linkedMapOf(
                 "daily_limit" to settings.dailyLimit,
                 "session_limit" to QuotaLedger.SESSION_LIMIT,
@@ -243,6 +319,9 @@ class GradingEvaluationTest {
                 "utc_day" to ledger.today(),
                 "counts" to ledger.counts("av017-eval-1"),
                 "reservations" to results.sumOf { it["aiRequests"] as Int },
+                "daily_cap_usd" to settings.dailyCapUsd.toPlainString(),
+                "spend_usd" to budget.spentTodayUsd.toPlainString(),
+                "budget_stop" to budget.stop?.name,
             ),
             "ai_path_run" to (mode != RULE_ONLY),
             "sessions" to sessions,
@@ -276,8 +355,18 @@ class GradingEvaluationTest {
         /** The transcript never changes during an evaluation, so every reply is current. */
         const val REVISION = 1
 
-        /** Headroom under the shipped 30-request session cap for #18's one retry. */
-        const val REQUESTS_PER_SESSION = 14
+        /**
+         * Headroom under the shipped 30-request session cap: with AV-043 a turn can
+         * dispatch #18's attempt and retry on each of the two routes, so 7 × 2 × 2 = 28.
+         */
+        const val REQUESTS_PER_SESSION = 7
+
+        /**
+         * The spike's price ceiling per token, $1 and $4 per million: generous enough for
+         * every candidate on the shortlist and still an upper bound the ledger can hold.
+         */
+        const val SPIKE_MAX_PROMPT_USD_PER_TOKEN = "0.000001"
+        const val SPIKE_MAX_COMPLETION_USD_PER_TOKEN = "0.000004"
 
         /**
          * Replay needs a key-shaped value to pass [CredentialPolicy], and must never carry

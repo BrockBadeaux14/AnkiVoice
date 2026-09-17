@@ -23,3 +23,5 @@ jobs:
       - run: python tools/av006-probe/validate_evidence.py
       # AV-017: the corpus table, the split discipline and the evidence guard.
       - run: python tools/av017-qa/validate.py
+      # AV-043: the paid pin, the tuning-only spike evidence and the disclosure.
+      - run: python tools/av043-qa/validate.py

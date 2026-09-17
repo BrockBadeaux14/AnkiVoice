@@ -1,12 +1,16 @@
 package org.ankivoice.app
 
+import java.math.BigDecimal
 import org.ankivoice.provider.CredentialStore
 import org.ankivoice.provider.Diagnostics
+import org.ankivoice.provider.GradingRoute
 import org.ankivoice.provider.LedgerStop
 import org.ankivoice.provider.ProviderModule
 import org.ankivoice.provider.QuotaLedger
+import org.ankivoice.provider.Reservation
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -14,7 +18,7 @@ import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.util.concurrent.Executor
 
-/** AV-020's settings surface: credentials, disclosure, allowance and diagnostics. */
+/** AV-020's settings surface: credentials, disclosure, allowance and diagnostics; AV-043's cap and spend. */
 class ProviderControllerTest {
     @TempDir
     lateinit var directory: File
@@ -25,6 +29,7 @@ class ProviderControllerTest {
     private class FakeSettings(
         override var dailyLimit: Int = QuotaLedger.DEFAULT_DAILY_LIMIT,
         override var disclosureAcknowledged: Boolean = false,
+        override var dailyCapUsd: BigDecimal = QuotaLedger.DEFAULT_DAILY_CAP_USD,
         override var retainContent: Boolean = false,
     ) : AppProviderSettings
 
@@ -54,6 +59,9 @@ class ProviderControllerTest {
         direct,
         direct,
     ).also { it.refresh() }
+
+    private fun same(expected: String, actual: BigDecimal) =
+        assertTrue(BigDecimal(expected).compareTo(actual) == 0, "expected $expected, got ${actual.toPlainString()}")
 
     @Test
     fun `grading is off until a key is saved and the disclosure is acknowledged`() {
@@ -176,5 +184,76 @@ class ProviderControllerTest {
         assertFalse(controller.state.busy)
         assertNull(controller.state.stop)
         assertEquals(50, controller.state.dailyRemaining, "no allowance was spent")
+        // The paid smoke request needs the same key, and spends nothing without one.
+        controller.sendSmokeRequest(GradingRoute.PAID)
+        assertTrue(controller.state.message!!.contains("Add an OpenRouter key"), controller.state.message!!)
+        same("0", controller.state.spentTodayUsd)
+    }
+
+    // AV-043: the paid route's cap and spend
+
+    @Test
+    fun `the paid budget defaults to one dollar and is shown beside the request counters`() {
+        val controller = controller()
+        same("1.00", controller.state.dailyCapUsd)
+        same("0", controller.state.spentTodayUsd)
+        assertTrue(controller.state.paidEnabled)
+        assertNull(controller.state.paidStop)
+    }
+
+    @Test
+    fun `the daily cap is configurable in dollars and cents, and zero turns the paid route off`() {
+        val controller = controller()
+        controller.setDailyCap("0.50")
+        same("0.50", settings.dailyCapUsd)
+        same("0.50", controller.state.dailyCapUsd)
+        assertTrue(controller.state.message!!.contains("\$0.50"), controller.state.message!!)
+        assertTrue(controller.state.message!!.contains("ceiling, not a target"))
+
+        for (rejected in listOf("abc", "-1", "10.01", "1,00", "")) {
+            controller.setDailyCap(rejected)
+            same("0.50", settings.dailyCapUsd)
+            assertEquals("Choose a daily paid budget from \$0 to \$10.00, in dollars and cents.", controller.state.message, rejected)
+        }
+
+        controller.setDailyCap("0")
+        same("0", settings.dailyCapUsd)
+        assertFalse(controller.state.paidEnabled)
+        assertTrue(controller.state.message!!.startsWith("Paid route off"), controller.state.message!!)
+        assertTrue(controller.state.diagnostics.any { it.contains("dailyCapSet") })
+    }
+
+    @Test
+    fun `the spend shown is the durable one, and a paid stop is shown apart from the free one`() {
+        val controller = controller()
+        val granted = assertInstanceOf(Reservation.Granted::class.java, ledger.reservePaid("earlier", 50, BigDecimal("1.00"), BigDecimal("0.0008192")))
+        controller.refresh()
+        same("0.0008192", controller.state.spentTodayUsd)
+        ledger.charge(granted.id, BigDecimal("0.0000318"))
+        controller.refresh()
+        same("0.0000318", controller.state.spentTodayUsd)
+
+        ledger.stop(LedgerStop.BUDGET_EXHAUSTED, GradingRoute.PAID)
+        controller.refresh()
+        assertEquals(LedgerStop.BUDGET_EXHAUSTED, controller.state.paidStop)
+        assertNull(controller.state.stop, "the free route is not stopped by a spent budget")
+        assertEquals(49, controller.state.dailyRemaining, "the paid reservation counts against the request limit too")
+
+        // A stop for every route is shown once, beside the request counters.
+        ledger.stop(LedgerStop.DAILY_LIMIT)
+        controller.refresh()
+        assertEquals(LedgerStop.DAILY_LIMIT, controller.state.stop)
+        assertNull(controller.state.paidStop)
+    }
+
+    @Test
+    fun `the disclosure names the cost, the cap and that a stop never rates a card`() {
+        val text = DISCLOSURE_COST.joinToString("\n")
+        assertTrue(text.contains(ProviderModule.freeRouteDescription))
+        assertTrue(text.contains(ProviderModule.paidRouteDescription))
+        assertTrue(text.contains("\$1.00"))
+        assertTrue(text.contains("\$0 turns the paid route off"))
+        assertTrue(text.contains("never rates a card"))
+        assertTrue(ProviderModule.routeDescription.contains("first"))
     }
 }

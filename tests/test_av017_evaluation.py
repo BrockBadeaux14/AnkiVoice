@@ -171,7 +171,15 @@ class QuotaAndGates(unittest.TestCase):
                 ).read_text(encoding="utf-8"),
             ).group(1)
         )
-        self.assertLessEqual(per_session * attempts, session_limit)
+        # AV-043: a turn may dispatch #18's attempt and retry on each route in order.
+        routes = (
+            ROOT / "android" / "provider" / "src" / "main" / "kotlin" / "org" / "ankivoice" /
+            "provider" / "GradingRoute.kt"
+        ).read_text(encoding="utf-8")
+        order = re.search(r"val ORDER: List<GradingRoute> = listOf\(([^)]*)\)", routes).group(1)
+        route_count = len([name for name in order.split(",") if name.strip()])
+        self.assertEqual(2, route_count)
+        self.assertLessEqual(per_session * attempts * route_count, session_limit)
 
     def test_the_harness_uses_the_shipped_durable_ledger(self):
         self.assertIn("QuotaLedger(ledgerFile)", HARNESS.read_text(encoding="utf-8"))

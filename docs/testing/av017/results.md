@@ -401,11 +401,33 @@ runs. Layers 2 and 3 need the pinned AVD and your own credential respectively, a
 replays layer 3 offline — `evidence/ai-20260916/transcript.jsonl` replays today with no
 network and no key.
 
+## Re-recording under AV-043 — September 16, 2026
+
+[AV-043 (#66)](https://github.com/BrockBadeaux14/AnkiVoice/issues/66) corrected the
+reply-side provider check: `FreeRoute.priceCheck` now reads the pinned endpoint's tag
+**and** provider name from the endpoints listing, and `replyCheck` accepts a reply that
+reports either. `FreeRouteRegressionTest` replays the recorded listing and reply from
+[`evidence/ai-20260916/transcript.jsonl`](evidence/ai-20260916/transcript.jsonl) and all
+24 AV-006 grading replies: the shipped comparison refuses every one of them and the
+corrected one accepts every one. The same card adds a paid fallback route behind a daily
+cap, which the shipped grader now tries after the free route fails.
+
+`FreeRoute.kt` is one of the sources the frozen configuration `4b093a06dd10` hashes, and
+`PaidRoute.kt` and `GradingRoute.kt` are now hashed with it, so this run's freeze no longer
+describes the build. The AI path therefore needs a **new frozen configuration, a new
+evidence directory and a new recorded pass**, exactly as the finding above said it would.
+That pass has **not yet been recorded**: it needs the owner's OpenRouter key, which was
+not present on the host that implemented AV-043, and it can spend money through the paid
+fallback within the cap it is run with. The [AV-043 runbook](../av043/runbook.md#3-re-record-the-av-017-ai-pass)
+gives the exact commands; its result is appended here and noted on #19 when it exists.
+Everything in this page above this section is the measurement of the build as it was on
+September 16, 2026, and stays in the ledger as such.
+
 ## Next
 
-1. **#17:** correct the reply-side provider check in `FreeRoute.replyCheck` — the reply
-   carries the provider *name*, the pin is the endpoint *tag* — then freeze anew and record
-   one more pass; the harness, corpus and scoring need no change.
+1. **AV-043 (#66), landed on its branch:** the reply-side provider check is corrected.
+   What remains is the re-recorded pass under a new freeze; the harness, corpus and scoring
+   need no change beyond the cap the pass is run with.
 2. Decide the STT criterion question above; the three open slots stay `live-pending` until
    it is decided or captured.
 
