@@ -708,6 +708,10 @@ internal class StudyController(
     private fun openMicrophone(opened: OpenSession): String? {
         val session = opened.session
         if (open !== opened || session.halted || capture != null || pendingInterrupt != null) return null
+        // AV-007: nothing opens a microphone for a session that is not in front of the
+        // learner. AV-050 made this matter more — every card opens one now, rather than
+        // only a card someone reached for — so the foreground is checked here too.
+        if (!foreground) return null
         val ready = when (session.state) {
             SessionState.LISTENING -> session.answerTurn?.phase == AnswerPhase.THINKING
             SessionState.RETRYING -> true
@@ -746,6 +750,18 @@ internal class StudyController(
         // Published before the transport blocks, so the surface reports the open window —
         // and offers Done and Cancel — for exactly as long as a capture is running.
         capture = ActiveCapture(opened.study.speech, token, opened.study.partial, CaptureKind.ANSWER)
+        // Re-checked with the capture registered. [interrupt] sets [pendingInterrupt] and
+        // then cancels whatever capture it can see; one that arrived between this attempt's
+        // guard and the line above found nothing to cancel, so it is caught here instead —
+        // otherwise the microphone would open behind another app and stay open to the
+        // backstop. Either order is covered: an interruption later than this line finds the
+        // registered capture and cancels it.
+        if (pendingInterrupt != null || !foreground) {
+            capture = null
+            val kind = pendingInterrupt ?: Interruption.APP_SWITCH
+            pendingInterrupt = null
+            return interruptNow(opened, kind)
+        }
         opened.observed.answerNext = true
         publish(opened, actionToken, LISTENING_NOTICE, busy = true)
         val event = opened.observed.listen(token, opened.study.language)

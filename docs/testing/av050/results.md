@@ -3,8 +3,8 @@
 Issue [#81 — Polishing hotfixes](https://github.com/BrockBadeaux14/AnkiVoice/issues/81).
 Branch `codex/av-050-polish-hotfixes`. Review remains pending.
 
-**The offline layer passed on September 17, 2026**: 371 `:core`, 166 `:app` and 81
-`:speech` tests, with no emulator and no network. **The live layer is prepared and not yet
+**The offline layer passed on September 17, 2026**: 802 JVM tests across the modules, with
+no emulator and no network. **The live layer is prepared and not yet
 run** — it needs the owner at the emulator speaking every answer, so the
 [runbook](runbook.md) is the routine and this page records the result when it is in.
 
@@ -89,6 +89,21 @@ time.
 | The engine's endpoint (primary) | `onEndOfSpeech`, or a segment the engine closed | 800 ms; any further speech, partial or segment takes it back |
 | Trailing silence in the frames (fallback) | mean frame amplitude below 500 on the 16-bit scale, measured in the pump that already reads every frame | 1,500 ms, and only when the engine offered no endpoint at all |
 
+**The wake-up is the load-bearing part.** `awaitCapture` parks on a deadline, and an
+endpoint that arrives mid-wait has to *signal* that wait rather than be discovered when it
+next looks. A first cut recorded the endpoint under the lock and left the wait parked on
+the backstop, so the primary route never ended a capture early — only the backstop behind
+it did, and the stop was then mislabelled `endpoint`. Four tests tell the routes apart from
+the backstop by asserting **when** the microphone stopped, against a backstop deliberately
+seconds away; all four fail if the signal is removed.
+
+The backstop mirrors `AnswerLimits` **as #13 measures it**: once the learner has been heard
+it runs from that onset, and only a capture nobody spoke into gets the whole pre-roll and
+then the whole window. Anchoring it to the microphone open instead let the capture outlive
+#13's own window by the length of the pre-roll — and a final arriving after that is past
+#13's finalization deadline before it is delivered, so a good answer settled as `TIMED_OUT`
+and was discarded.
+
 `onEndOfSpeech` and `onBeginningOfSpeech` used to go to the diagnostics observer alone;
 they are now reported to the transport. The fallback exists because the pinned engine has
 not been shown to endpoint reliably on the segmented external-audio route, and it needs no
@@ -103,7 +118,9 @@ settled statuses are unchanged: what the recognizer finally returns is still the
 
 **Guards.** Nothing stops before speech has begun — a learner still remembering gets the
 pre-roll and the window, not an instant timeout. A 1,200 ms minimum capture duration
-protects a false start. Done and Cancel take effect immediately and take precedence over
+protects a false start, measured **from the onset** rather than from the microphone open:
+what it protects is a duration of speech, and measured from the open it would be spent
+during the pre-roll and protect nothing. Done and Cancel take effect immediately and take precedence over
 both routes. An automatic stop re-arms nothing.
 
 ## D. The other small fixes

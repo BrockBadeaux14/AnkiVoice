@@ -124,6 +124,19 @@ class SpeechTransport(
     private var activeToken: OperationToken? = null
     private var outcomes: ArrayBlockingQueue<Outcome>? = null
 
+    /**
+     * Signalled whenever something shortens what [awaitCapture] is waiting for: an outcome,
+     * an endpoint the engine just offered, the onset that moves the backstop, or the
+     * handover to the finalization deadline.
+     *
+     * Without it the wait parks on the deadline it computed when it went to sleep, and an
+     * endpoint arriving four seconds into a thirty-second backstop does nothing at all until
+     * that backstop expires — which is to say the engine route would never end a capture
+     * early, only ever the backstop behind it. A spurious signal costs one extra pass, which
+     * re-reads the state and parks again.
+     */
+    private val wakeups = ArrayBlockingQueue<Boolean>(1)
+
     /** At-most-once delivery: the first outcome for a generation wins. */
     private var settled = false
     private var settleUntilMs = 0L
@@ -368,6 +381,8 @@ class SpeechTransport(
         finalizationUntilMs = clock.nowMs() + timings.finalizationMs
         // The pump sees the stopped microphone, writes the trailing silence and closes.
         stream?.stopMicrophone()
+        // The wait was parked on the backstop; the finalization deadline is nearer.
+        wake()
     }
 
     /**
@@ -383,7 +398,28 @@ class SpeechTransport(
         if (speechStartedMs != 0L) return
         speechStartedMs = now
         lastSpeechOnsetMs = (now - captureStartedMs).coerceAtLeast(0)
+        // The backstop moves from "the whole pre-roll and window" to "the window from here",
+        // which is nearer, so the wait has to look again.
+        wake()
     }
+
+    /**
+     * AV-050: the backstop, mirroring AV-012's pre-roll and window as #13 measures them.
+     *
+     * Once the learner has been heard the window runs **from that onset**, exactly as
+     * `AnswerTurn` runs it; before then it is the whole pre-roll followed by the whole
+     * window, which is what a capture nobody spoke into is allowed. Anchoring it to the
+     * open instead would let the microphone outlive #13's own window by the length of the
+     * pre-roll, and a final arriving after that is past #13's finalization deadline before
+     * it is even delivered — a good answer settled as a timeout and discarded. Callers hold
+     * [lock].
+     */
+    private fun backstopMs(): Long =
+        if (speechStartedMs != 0L) {
+            speechStartedMs + timings.answerWindowMs
+        } else {
+            captureStartedMs + timings.prerollMs + timings.answerWindowMs
+        }
 
     /**
      * AV-050: when, at the earliest, this capture may end itself, or null when it may not.
@@ -396,7 +432,11 @@ class SpeechTransport(
      */
     private fun endpointDeadlineMs(): Long? {
         if (speechStartedMs == 0L || endpointAtMs == 0L) return null
-        return maxOf(endpointAtMs + timings.endpointHoldMs, captureStartedMs + timings.minCaptureMs)
+        // The floor is measured from the **onset**, not the open: what it protects is a
+        // false start — a click, a breath, a first syllable the learner restarts — and that
+        // is a duration of speech, not a duration of microphone. Measured from the open it
+        // would be spent during the pre-roll and protect nothing.
+        return maxOf(endpointAtMs + timings.endpointHoldMs, speechStartedMs + timings.minCaptureMs)
     }
 
     private fun awaitCapture(
@@ -405,42 +445,47 @@ class SpeechTransport(
         queue: ArrayBlockingQueue<Outcome>,
     ): CaptureEvent {
         while (true) {
-            // AV-050: an endpoint the engine offered is a shorter deadline on the same wait,
-            // not a second timer. The loop re-reads it every pass, so speech arriving inside
-            // the hold — which clears the endpoint — simply restores the backstop.
-            val backstop = synchronized(lock) {
+            // AV-050: an endpoint the engine offered is a nearer deadline on the same wait,
+            // not a second timer. Every pass re-reads it, and [wake] is what guarantees there
+            // is a pass: an endpoint that arrives mid-wait signals the wait instead of being
+            // discovered when the backstop behind it finally expires.
+            val deadline = synchronized(lock) {
                 if (generation != current) {
                     return captureFailure(token, SpeechInputFailure.RECOGNIZER_ERROR, CANCELLED)
                 }
                 when (phase) {
-                    // The backstop mirrors #13's pre-roll and window together; it stops the
-                    // microphone exactly as Done does, so an in-flight final is still delivered.
-                    Phase.CAPTURE -> captureStartedMs + timings.answerWindowMs
+                    Phase.CAPTURE -> minOf(backstopMs(), endpointDeadlineMs() ?: Long.MAX_VALUE)
                     Phase.FINALIZING -> finalizationUntilMs
                     else -> return captureFailure(token, SpeechInputFailure.RECOGNIZER_ERROR, CANCELLED)
                 }
             }
-            val endpoint = synchronized(lock) { if (phase == Phase.CAPTURE) endpointDeadlineMs() else null }
-            val deadline = endpoint?.let { minOf(it, backstop) } ?: backstop
             val wait = deadline - clock.nowMs()
-            val outcome = if (wait > 0) queue.poll(wait, TimeUnit.MILLISECONDS) else null
-            if (outcome != null) return deliver(token, current, outcome)
+            if (wait > 0) wakeups.poll(wait, TimeUnit.MILLISECONDS)
+            queue.poll()?.let { return deliver(token, current, it) }
 
+            // Decided entirely from the state as it is now, never from the deadline this pass
+            // happened to wait on: an endpoint the engine took back while we were parked must
+            // not still stop the capture, and must never be recorded as one that did.
             val expired = synchronized(lock) {
                 if (generation != current) {
                     return captureFailure(token, SpeechInputFailure.RECOGNIZER_ERROR, CANCELLED)
                 }
-                when {
-                    clock.nowMs() < deadline -> false
-                    phase == Phase.CAPTURE -> {
-                        // Whose deadline ran out: the engine's endpoint, still standing after
-                        // its hold, or the backstop behind it. Either way one stop, one path.
-                        val reached = endpointDeadlineMs()
-                        val byEndpoint = reached != null && clock.nowMs() >= reached && reached <= backstop
-                        beginFinalization(if (byEndpoint) CaptureStop.ENDPOINT else CaptureStop.WINDOW_EXPIRY)
+                val now = clock.nowMs()
+                when (phase) {
+                    Phase.CAPTURE -> {
+                        val backstop = backstopMs()
+                        val endpoint = endpointDeadlineMs()
+                        when {
+                            endpoint != null && now >= endpoint && endpoint <= backstop ->
+                                beginFinalization(CaptureStop.ENDPOINT)
+                            now >= backstop -> beginFinalization(CaptureStop.WINDOW_EXPIRY)
+                            // Woken early, or the deadline moved out from under us: look again.
+                            else -> Unit
+                        }
                         false
                     }
-                    else -> true
+                    Phase.FINALIZING -> now >= finalizationUntilMs
+                    else -> return captureFailure(token, SpeechInputFailure.RECOGNIZER_ERROR, CANCELLED)
                 }
             }
             if (expired) {
@@ -540,7 +585,8 @@ class SpeechTransport(
             if (speechStartedMs == 0L || endpointAtMs != 0L) return
             val now = clock.nowMs()
             if (now - lastLoudMs < timings.silenceHoldMs) return
-            if (now - captureStartedMs < timings.minCaptureMs) return
+            // From the onset, for the reason [endpointDeadlineMs] gives.
+            if (now - speechStartedMs < timings.minCaptureMs) return
             beginFinalization(CaptureStop.ENDPOINT)
         }
     }
@@ -589,6 +635,8 @@ class SpeechTransport(
             // Provisional, so a callback that arrives while the microphone is still opening
             // is measured against this capture and not the previous one. The open refines it.
             captureStartedMs = clock.nowMs()
+            // A signal left over from the last capture would cost this one a wasted pass.
+            wakeups.clear()
         }
         segments.clear()
         val queue = ArrayBlockingQueue<Outcome>(1)
@@ -629,7 +677,13 @@ class SpeechTransport(
             }
             settled = true
             outcomes?.offer(outcome)
+            wake()
         }
+    }
+
+    /** Let [awaitCapture] look again. Callers hold [lock]; it never blocks. */
+    private fun wake() {
+        wakeups.offer(true)
     }
 
     private val playbackListener = object : PlaybackListener {

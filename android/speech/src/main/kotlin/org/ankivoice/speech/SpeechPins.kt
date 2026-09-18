@@ -58,9 +58,12 @@ object SpeechPins {
  * and normally stops capture first; this copy is only a backstop that keeps the
  * microphone from running forever if that stop never arrives. Reaching it behaves
  * exactly like Done, so it never converts a turn into a failure verdict of its own.
- * AV-050 raised it to mirror `AnswerLimits.captureMs` — the pre-roll followed by the
- * answer window — because a capture that now opens itself has to survive a learner who
- * spends the whole pre-roll remembering.
+ * AV-050 added [prerollMs] beside it so the backstop mirrors `AnswerLimits` **as #13
+ * measures it**: the window runs from the moment the learner is first heard, and only a
+ * capture nobody spoke into gets the whole pre-roll and then the whole window. Anchoring
+ * the backstop to the open instead would let this microphone outlive #13's own window by
+ * the length of the pre-roll, and a final that arrives after that is past #13's
+ * finalization deadline before it is even delivered.
  *
  * [endpointHoldMs], [silenceHoldMs] and [minCaptureMs] are AV-050's endpointing bounds.
  * Every one of them is a **selected engineering bound**, pinned in the same terms AV-042
@@ -70,8 +73,14 @@ data class SpeechTimings(
     val settleMs: Long = 400,
     val trailingSilenceMs: Long = 500,
     val finalizationMs: Long = 5_000,
-    val answerWindowMs: Long = 30_000,
+    val answerWindowMs: Long = 15_000,
     val playbackMs: Long = 30_000,
+    /**
+     * AV-050: AV-012's recall pre-roll, mirrored here for the backstop alone. It is the
+     * grace a capture gets before [answerWindowMs] starts counting, and it ends the moment
+     * the learner is first heard. #13 owns the policy; this copy only bounds the microphone.
+     */
+    val prerollMs: Long = 15_000,
     /**
      * AV-050: how long the capture waits after the engine says speech ended before it
      * finalizes itself.
@@ -112,6 +121,7 @@ data class SpeechTimings(
         require(settleMs >= 0 && trailingSilenceMs >= 0) { "Negative settle or trailing silence" }
         require(finalizationMs > 0 && answerWindowMs > 0 && playbackMs > 0) { "Non-positive deadline" }
         require(captureOpenMs > 0) { "Non-positive capture-open deadline" }
+        require(prerollMs > 0) { "Non-positive pre-roll" }
         require(endpointHoldMs > 0 && silenceHoldMs > 0 && minCaptureMs > 0) {
             "Non-positive endpointing bound"
         }

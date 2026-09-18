@@ -45,6 +45,9 @@ class SpeechTransportTest {
         finalizationMs = 300,
         answerWindowMs = 400,
         playbackMs = 300,
+        // AV-050: short enough that a capture nobody spoke into still ends inside a test,
+        // and long enough that the endpoint routes are what end one that somebody did.
+        prerollMs = 200,
         // AV-050's endpointing bounds, shrunk in the same proportion as the rest: an
         // endpoint hold and a trailing silence a test can wait out, and a floor under both.
         endpointHoldMs = 60,
@@ -845,5 +848,123 @@ class SpeechTransportTest {
         assertThrows<IllegalArgumentException> { SpeechTimings(answerWindowMs = 500, endpointHoldMs = 600) }
         assertThrows<IllegalArgumentException> { SpeechTimings(answerWindowMs = 500, silenceHoldMs = 900) }
         assertThrows<IllegalArgumentException> { SpeechTimings(minCaptureMs = 0) }
+    }
+
+    // ------------------------------------------- AV-050: the stop is *early*, not the backstop
+
+    /**
+     * A transport whose backstop is far enough away that reaching it is a visible failure.
+     * The four endpoint tests above pass against the 600 ms backstop of [timings] whether or
+     * not the endpoint route works, because the backstop stops the microphone too; these
+     * three are the ones that tell the routes apart from it.
+     */
+    private fun slowBackstop(
+        preroll: Long = 5_000,
+        window: Long = 5_000,
+    ): Pair<FakeSpeechPlatform, SpeechTransport> {
+        val platform = FakeSpeechPlatform()
+        val transport = SpeechTransport(
+            platform,
+            timings.copy(prerollMs = preroll, answerWindowMs = window),
+            sleeper = { millis -> if (millis > 0) Thread.sleep(minOf(millis, 50)) },
+        )
+        return platform to transport
+    }
+
+    /**
+     * Let the capture's wait settle on the far-away deadline it computes at the open.
+     *
+     * Without this the engine callbacks can land before the wait has parked at all, and the
+     * test then passes on the first pass rather than on a wake-up — which is exactly how
+     * these routes were able to look correct while a parked wait ignored them.
+     */
+    private fun letTheWaitPark() = Thread.sleep(PARK_MS)
+
+    @Test fun `the engine's endpoint stops the microphone at the hold, not at the backstop`() {
+        val (platform, transport) = slowBackstop()
+        platform.recognition = FakeSpeechPlatform.Recognition.Silent
+        val capture = worker.submit<CaptureEvent> { transport.listen(token, "en-US") }
+        assertTrue(platform.captureOpened.await(5, TimeUnit.SECONDS))
+        val stream = platform.lastStream ?: error("capture never opened")
+
+        letTheWaitPark()
+        platform.emitSpeechStarted()
+        val endpointAt = System.nanoTime()
+        platform.emitSpeechEnded()
+        await("the endpoint to stop the microphone") { stream.microphoneStopped }
+        val tookMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - endpointAt)
+
+        // The hold is 60 ms and the backstop five seconds away. Anything near the backstop
+        // means the endpoint was recorded and then slept through.
+        assertTrue(tookMs < 1_000, "the endpoint took $tookMs ms to stop the microphone")
+        assertEquals(CaptureStop.ENDPOINT, transport.lastCaptureStop)
+        transport.cancel(token)
+        capture.value()
+    }
+
+    @Test fun `trailing silence stops the microphone at the hold, not at the backstop`() {
+        val (platform, transport) = slowBackstop()
+        platform.recognition = FakeSpeechPlatform.Recognition.Silent
+        platform.microphoneFrames = 4
+        platform.loudFrames = 4
+        platform.quietAfterFrames = true
+        val started = System.nanoTime()
+        val capture = worker.submit<CaptureEvent> { transport.listen(token, "en-US") }
+        assertTrue(platform.captureOpened.await(5, TimeUnit.SECONDS))
+        val stream = platform.lastStream ?: error("capture never opened")
+
+        await("the trailing silence to stop the microphone") { stream.microphoneStopped }
+        val tookMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - started)
+        assertTrue(tookMs < 1_500, "the fallback took $tookMs ms to stop the microphone")
+        assertEquals(CaptureStop.ENDPOINT, transport.lastCaptureStop)
+        transport.cancel(token)
+        capture.value()
+    }
+
+    @Test fun `an endpoint the engine took back does not stop the capture at its old deadline`() {
+        val (platform, transport) = slowBackstop()
+        platform.recognition = FakeSpeechPlatform.Recognition.Silent
+        val capture = worker.submit<CaptureEvent> { transport.listen(token, "en-US") }
+        assertTrue(platform.captureOpened.await(5, TimeUnit.SECONDS))
+        val stream = platform.lastStream ?: error("capture never opened")
+
+        letTheWaitPark()
+        platform.emitSpeechStarted()
+        platform.emitSpeechEnded()
+        // Inside the hold, the engine hears more speech. The old deadline must not fire.
+        Thread.sleep(20)
+        platform.emitSpeechStarted()
+        Thread.sleep(timings.endpointHoldMs * 4)
+        assertFalse(stream.microphoneStopped, "a withdrawn endpoint still stopped the capture")
+        assertNull(transport.lastCaptureStop)
+        transport.cancel(token)
+        capture.value()
+    }
+
+    @Test fun `the backstop runs from the onset once the learner has been heard`() {
+        // A three-second pre-roll, so the wait parks on ~3.4 s, and a 400 ms window. Speech
+        // arriving after the park must bring the backstop in to onset + 400 ms: the
+        // microphone may not outlive #13's own window by the length of the pre-roll, or a
+        // final that arrives after it is past #13's finalization deadline before delivery.
+        val (platform, transport) = slowBackstop(preroll = 3_000, window = 400)
+        platform.recognition = FakeSpeechPlatform.Recognition.Silent
+        val capture = worker.submit<CaptureEvent> { transport.listen(token, "en-US") }
+        assertTrue(platform.captureOpened.await(5, TimeUnit.SECONDS))
+        val stream = platform.lastStream ?: error("capture never opened")
+
+        letTheWaitPark()
+        val onset = System.nanoTime()
+        platform.emitSpeechStarted()
+
+        await("the backstop to stop the microphone") { stream.microphoneStopped }
+        val tookMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - onset)
+        assertTrue(tookMs < 1_500, "the backstop ran $tookMs ms from the onset; the window is 400")
+        assertEquals(CaptureStop.WINDOW_EXPIRY, transport.lastCaptureStop)
+        capture.value()
+    }
+
+    private companion object {
+        /** Comfortably longer than an open, and a small fraction of any deadline waited on. */
+        const val PARK_MS = 150L
     }
 }
