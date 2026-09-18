@@ -342,7 +342,7 @@ put the recall time in front of it as a pre-roll, rather than lengthening the wi
 | Clock | Value | Rule |
 | --- | --- | --- |
 | Pre-roll | 15,000 ms | Recall time inside an open microphone, from the open. It ends the moment the learner is first heard. |
-| Answer window | 15,000 ms | The maximum **speaking** time, from speech onset — or from the pre-roll running out, when nobody was ever heard. |
+| Answer window | 5,000 ms | The maximum **speaking** time, from speech onset — or from the pre-roll running out, when nobody was ever heard. Cut from 15,000 at the owner's direction the same day. |
 | Finalization | 5,000 ms | Unchanged, and still separate. |
 
 Both values are **selected engineering bounds**, pinned in the same terms AV-042 pinned its

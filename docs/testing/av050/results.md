@@ -70,7 +70,7 @@ rather than a longer window, so the 15 seconds stays an honest speaking budget:
 | Clock | Value | What it measures |
 | --- | --- | --- |
 | Pre-roll | 15,000 ms | recall, from the microphone opening; it ends the moment the learner is heard |
-| Answer window | 15,000 ms | speaking, from speech onset — or from the pre-roll running out, when nobody was heard |
+| Answer window | 5,000 ms | speaking, from speech onset — or from the pre-roll running out, when nobody was heard. Cut from 15,000 at the owner's direction once endpointing was in: the window is the backstop, not the budget |
 | Finalization | 5,000 ms | unchanged |
 
 Both are **pinned engineering bounds, not measurements.** Nothing established that 15

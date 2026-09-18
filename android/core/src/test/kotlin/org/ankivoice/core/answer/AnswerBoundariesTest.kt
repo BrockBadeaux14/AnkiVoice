@@ -70,10 +70,12 @@ class AnswerBoundariesTest {
         // AV-050 added the pre-roll in front of AV-042's window rather than lengthening it,
         // so the 15 seconds stays a speaking budget and recall gets 15 of its own.
         assertEquals(15_000, limits.prerollMs)
-        assertEquals(15_000, limits.windowMs)
+        // Cut from 15,000 at the owner's direction: the window bounds speaking alone, and
+        // AV-050's endpointing normally ends a capture a second after the learner stops.
+        assertEquals(5_000, limits.windowMs)
         assertEquals(5_000, limits.finalizationMs)
-        assertEquals(30_000, limits.captureMs)
-        assertEquals(35_000, limits.attemptMs)
+        assertEquals(20_000, limits.captureMs)
+        assertEquals(25_000, limits.attemptMs)
         assertEquals(0, AnswerLimits.AUTOMATIC_REARMS)
 
         val turn = turn()
@@ -87,9 +89,9 @@ class AnswerBoundariesTest {
 
         turn.speechBegan(4_000)
         assertNull(turn.remainingPrerollMs())
-        assertEquals(15_000, turn.remainingWindowMs())
+        assertEquals(5_000, turn.remainingWindowMs())
         clock.advance(4_000)
-        assertEquals(11_000, turn.remainingWindowMs())
+        assertEquals(1_000, turn.remainingWindowMs())
 
         turn.done()
         clock.advance(1_000)
@@ -123,9 +125,9 @@ class AnswerBoundariesTest {
 
         turn.speechBegan(12_000)
         assertTrue(turn.heardSpeech)
-        assertEquals(15_000, turn.remainingWindowMs())
-        // Fourteen seconds of speaking, on top of the twelve spent remembering.
-        clock.advance(14_000)
+        assertEquals(5_000, turn.remainingWindowMs())
+        // Four seconds of speaking, on top of the twelve spent remembering.
+        clock.advance(4_000)
         assertNull(turn.poll())
         assertEquals(AnswerPhase.CAPTURING, turn.phase)
         turn.done()
@@ -142,10 +144,10 @@ class AnswerBoundariesTest {
         // who begins speaking late still gets all of it.
         assertNull(turn.poll())
         assertEquals(AnswerPhase.CAPTURING, turn.phase)
-        assertEquals(15_000, turn.remainingWindowMs())
+        assertEquals(5_000, turn.remainingWindowMs())
         assertFalse(turn.heardSpeech)
 
-        clock.advance(14_900)
+        clock.advance(4_900)
         assertNull(turn.poll())
         assertEquals(AnswerPhase.CAPTURING, turn.phase)
         clock.advance(100)
@@ -159,11 +161,11 @@ class AnswerBoundariesTest {
     fun `speech reported after the pre-roll cannot start the window later than the pre-roll did`() {
         val turn = turn()
         turn.startAnswer()
-        clock.advance(20_000)
+        clock.advance(17_000)
         // An onset the transport measured past the pre-roll is clamped to its end: a window
         // may start late, but never later than one that heard nobody at all.
         turn.speechBegan(20_000)
-        assertEquals(10_000, turn.remainingWindowMs())
+        assertEquals(3_000, turn.remainingWindowMs())
     }
 
     @Test
@@ -173,13 +175,13 @@ class AnswerBoundariesTest {
         clock.advance(15_000)
         // The pre-roll ran out with nobody heard, so poll() started the window.
         assertNull(turn.poll())
-        assertEquals(15_000, turn.remainingWindowMs())
+        assertEquals(5_000, turn.remainingWindowMs())
 
-        clock.advance(5_000)
+        clock.advance(2_000)
         // A late onset for speech that began during the pre-roll may not shorten the window
         // that already started; the learner keeps what the handover gave them.
         turn.speechBegan(2_000)
-        assertEquals(10_000, turn.remainingWindowMs())
+        assertEquals(3_000, turn.remainingWindowMs())
         assertTrue(turn.heardSpeech)
     }
 
@@ -187,7 +189,7 @@ class AnswerBoundariesTest {
     fun `a capture nobody spoke into reports no speech and refuses to end itself`() {
         val turn = turn()
         turn.startAnswer()
-        clock.advance(29_000)
+        clock.advance(19_000)
         assertNull(turn.poll())
         assertFalse(turn.heardSpeech)
         assertThrows<IllegalStateException> { turn.endpoint() }
@@ -274,8 +276,8 @@ class AnswerBoundariesTest {
         val token = turn.startAnswer()
         assertEquals(15_000, turn.remainingPrerollMs())
         turn.speechBegan(0)
-        assertEquals(15_000, turn.remainingWindowMs())
-        clock.advance(14_000)
+        assertEquals(5_000, turn.remainingWindowMs())
+        clock.advance(4_000)
         turn.done()
         clock.advance(690)
         val answer = checkNotNull(turn.deliver(final(token, "green blue red")))
@@ -311,7 +313,7 @@ class AnswerBoundariesTest {
         val expired = turn()
         val expiredToken = expired.startAnswer()
         // The pre-roll and then the window, because nobody spoke into either.
-        clock.advance(30_000)
+        clock.advance(20_000)
         assertNull(expired.poll())
         assertEquals(listOf(doneToken, expiredToken), speech.stopped)
     }
@@ -323,7 +325,7 @@ class AnswerBoundariesTest {
         val turn = turn()
         val token = turn.startAnswer()
         turn.speechBegan(0)
-        clock.advance(15_000)
+        clock.advance(5_000)
         // Expiry alone is not an answer and never finalizes the learner's recall.
         assertNull(turn.poll())
         assertEquals(AnswerPhase.FINALIZING, turn.phase)
@@ -341,7 +343,7 @@ class AnswerBoundariesTest {
         val turn = turn()
         turn.startAnswer()
         turn.speechBegan(0)
-        clock.advance(15_400)
+        clock.advance(5_400)
         turn.done()
         clock.advance(400)
         // The 400 ms the window overran is already gone when finalization starts.
@@ -548,7 +550,7 @@ class AnswerBoundariesTest {
         // A pre-roll and a window of its own, not what was left of the last attempt's.
         assertEquals(15_000, turn.remainingPrerollMs())
         turn.speechBegan(0)
-        assertEquals(15_000, turn.remainingWindowMs())
+        assertEquals(5_000, turn.remainingWindowMs())
         clock.advance(1_000)
         turn.done()
         clock.advance(690)

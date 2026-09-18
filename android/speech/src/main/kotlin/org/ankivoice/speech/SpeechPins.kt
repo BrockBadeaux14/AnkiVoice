@@ -108,7 +108,7 @@ data class SpeechTimings(
     val settleMs: Long = 400,
     val trailingSilenceMs: Long = 500,
     val finalizationMs: Long = 5_000,
-    val answerWindowMs: Long = 15_000,
+    val answerWindowMs: Long = 5_000,
     val playbackMs: Long = 30_000,
     /**
      * AV-050: AV-012's recall pre-roll, mirrored here for the backstop alone. It is the

@@ -36,10 +36,18 @@ import org.ankivoice.core.grading.bindSuggestion
  * silence #26 supplies; expiry of it is a timeout, not an answer. [attemptMs] is the
  * longest a recognizer attempt can live, which is the three in sequence — and the clocks
  * stay distinct.
+ *
+ * **[windowMs] cut from 15,000 to 5,000 ms on September 17, 2026 at the owner's direction.**
+ * It bounds speaking alone, and in ordinary use AV-050's endpointing ends a capture about a
+ * second after the learner stops, so the window is a backstop rather than a budget anybody
+ * spends. The pre-roll was deliberately left at 15,000: thinking time is not what was too
+ * long, and shortening it would cut off a learner who is still recalling. The cost is named
+ * rather than hidden — an answer that runs past five seconds of speech is stopped by the
+ * expiry, which preserves the card and offers Try again rather than inventing a transcript.
  */
 data class AnswerLimits(
     val prerollMs: Long = 15_000,
-    val windowMs: Long = 15_000,
+    val windowMs: Long = 5_000,
     val finalizationMs: Long = 5_000,
 ) {
     init {

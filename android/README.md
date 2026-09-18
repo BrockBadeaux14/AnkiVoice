@@ -262,10 +262,10 @@ control for a learner who wants to start early and for an automatic open that fa
 | --- | --- | --- |
 | Waiting for the attempt | unbounded | The gap between a card being offered and its prompt playback settling. No budget is consumed; since AV-050 this is the prompt playing rather than a learner deciding when to tap. |
 | Pre-roll | 15,000 ms | AV-050. Recall time inside an open microphone, from the open on a monotonic clock. It ends the moment the learner is first heard. |
-| Answer window | 15,000 ms | The maximum **speaking** capture, from speech onset — or from the pre-roll running out, when nobody was ever heard. |
+| Answer window | 5,000 ms | The maximum **speaking** capture, from speech onset — or from the pre-roll running out, when nobody was ever heard. Cut from 15,000 at the owner's direction on September 17, 2026: endpointing normally ends a capture about a second after the learner stops, so this is a backstop rather than a budget anybody spends. An answer that runs past it is stopped by the expiry, which preserves the card and offers Try again. |
 | Finalization | 5,000 ms | A separate deadline from Done, an endpoint or window expiry, inclusive of #26's 500 ms of trailing silence. Its expiry is a timeout, not an answer. |
-| Capture ceiling | 30,000 ms | The pre-roll and the window in sequence: the longest one microphone can be open. |
-| Attempt lifetime | 35,000 ms | The three in sequence. The clocks — pre-roll, window, attempt, finalization — stay distinct and are queried separately. |
+| Capture ceiling | 20,000 ms | The pre-roll and the window in sequence: the longest one microphone can be open. |
+| Attempt lifetime | 25,000 ms | The three in sequence. The clocks — pre-roll, window, attempt, finalization — stay distinct and are queried separately. |
 | Automatic opens | 1 per attempt | After that attempt's prompt playback settles, and never again inside the attempt. |
 | Automatic re-arms | 0 | Unchanged by AV-050. No re-arm, no retry loop and no extra recognizer attempt inside one attempt. An explicit Try again is a new attempt: it hears the prompt again and gets its own single automatic open. |
 
