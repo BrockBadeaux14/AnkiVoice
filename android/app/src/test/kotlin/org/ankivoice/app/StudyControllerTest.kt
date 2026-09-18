@@ -17,6 +17,7 @@ import org.ankivoice.core.contracts.OperationToken
 import org.ankivoice.core.contracts.ReviewOutcome
 import org.ankivoice.core.contracts.ReviewState
 import org.ankivoice.core.contracts.SpeechInputFailure
+import org.ankivoice.core.contracts.UtterancePurpose
 import org.ankivoice.core.fakes.FakeGrader
 import org.ankivoice.core.fakes.FakeJournalStore
 import org.ankivoice.core.fakes.FakeSpeechInput
@@ -814,6 +815,42 @@ class StudyControllerTest {
     }
 
     /** The abstain path: no suggestion, so the learner names a rating and still confirms it. */
+    /**
+     * AV-050 D.9: getting one wrong is the turn that most needs the answer key, and a
+     * hands-free session gives the learner no moment to go and read it.
+     */
+    @Test
+    fun `a card graded Again is told the answer, through the reveal channel`() {
+        val h = StudyHarness(grades = listOf(FakeGrader.Answer(GradingResult(GradeLabel.INCORRECT, "missed it"))))
+        h.settled()
+
+        assertEquals(1, h.state.pendingRating, "the fixture did not grade this Again")
+        assertEquals("Card graded again.", h.state.announcement)
+        val spoken = h.speechOutput.spoken
+        val reveal = spoken.last()
+        // AV-007 gives every utterance a purpose: the answer key is a `reveal`, never an
+        // `announcement`. Wrapping it into the announcement would put card answer text into
+        // the announcement channel, which is the separation Utterances.kt exists to keep.
+        assertEquals(UtterancePurpose.REVEAL, reveal.purpose)
+        assertEquals("Five blocks.", reveal.text)
+        // And it came after the grade, not instead of it.
+        assertEquals(UtterancePurpose.ANNOUNCEMENT, spoken[spoken.size - 2].purpose)
+        assertTrue(h.wroteNothing, "telling the learner the answer wrote a review")
+    }
+
+    /** Every other rating is not an Again, and hears no answer key. */
+    @Test
+    fun `a card graded Good is not told the answer`() {
+        val h = StudyHarness()
+        h.announced()
+
+        assertEquals(3, h.state.pendingRating)
+        assertTrue(
+            h.speechOutput.spoken.none { it.purpose == UtterancePurpose.REVEAL },
+            "a correct answer was read the answer key back",
+        )
+    }
+
     /**
      * AV-050 D.7: the grader would not rate this one, so the microphone opens for the word
      * the announcement just asked for, and that word is applied as if it had been tapped.

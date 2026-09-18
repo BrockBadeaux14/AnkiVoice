@@ -921,7 +921,9 @@ internal class StudyController(
         val opened = current ?: return@act NO_SESSION
         val pending = pendingRating(opened.session)
         val step = opened.exchange.onCommand(opened.router.touch(command))
-        val notice = advanceIfWritten(opened, step, step.notice)
+        // AV-050 D.9: an Again the learner named themselves is still an Again.
+        val announced = if (command.rating == AGAIN) revealIfAgain(opened, step.notice) else step.notice
+        val notice = advanceIfWritten(opened, step, announced)
         command.rating?.let { recordRating(opened, pending, it) }
         // AV-050: a resumed session picks the hands-free chain back up where the pause left
         // it — the card is read again and the microphone opens itself — rather than stranding
@@ -954,9 +956,40 @@ internal class StudyController(
             return interruptNow(opened, kind)
         }
         val step = opened.exchange.onCommand(outcome)
-        val notice = advanceIfWritten(opened, step, step.notice)
-        (outcome as? CommandOutcome.Executed)?.command?.rating?.let { recordRating(opened, pending, it) }
+        val spoken = (outcome as? CommandOutcome.Executed)?.command?.rating
+        // AV-050 D.9: an Again the learner spoke is still an Again.
+        val announced = if (spoken == AGAIN) revealIfAgain(opened, step.notice) else step.notice
+        val notice = advanceIfWritten(opened, step, announced)
+        spoken?.let { recordRating(opened, pending, it) }
         return notice
+    }
+
+    /**
+     * AV-050 D.9: a card rated **Again** is told what the answer was.
+     *
+     * Getting one wrong is the turn where the learner most needs the answer key, and a
+     * hands-free session gives them no moment to go and read it. So the ReferenceAnswer is
+     * spoken straight after "Card graded again."
+     *
+     * It goes through [ReviewSession.reveal], which is the one path that carries a
+     * ReferenceAnswer: AV-007 gives every utterance a purpose, and the answer key is a
+     * `reveal` and never an `announcement`. Wrapping it into the announcement instead would
+     * have been one string to change and would have put card answer text into the
+     * announcement channel, which is exactly the question/answer separation
+     * `core/contracts/Utterances.kt` exists to keep.
+     *
+     * Only for Again, and only while a rating is actually announced. Nothing is written, and
+     * a card with no ReferenceAnswer or a session that has halted simply says nothing more.
+     */
+    private fun revealIfAgain(opened: OpenSession, notice: String?): String? {
+        if (open !== opened || opened.session.halted || capture != null || pendingInterrupt != null) return notice
+        val position = opened.exchange.position ?: return notice
+        if (position.rating != AGAIN) return notice
+        if (opened.session.card?.fields?.referenceAnswer.isNullOrBlank()) return notice
+        return when (opened.session.reveal()) {
+            is SessionResult.Produced -> notice
+            is SessionResult.Halted, SessionResult.Ignored -> notice
+        }
     }
 
     /**
@@ -1014,7 +1047,8 @@ internal class StudyController(
             }
         }
         recordRating(opened, pending, rating)
-        notice
+        // AV-050 D.9: an Again the learner tapped is still an Again.
+        if (rating == AGAIN) revealIfAgain(opened, notice) else notice
     }
 
     /** The learner's own rating when no grader offered one. Kept for the debug-era name; see [rate]. */
@@ -1256,6 +1290,9 @@ internal class StudyController(
                 var notice: String? = openExchange(opened, request, accepted, source, route)
                 // AV-047: a grader proposal is the only thing that arms a window, so this
                 // is the one place that starts one.
+                // AV-050 D.9: a card rated Again hears the answer before anything else
+                // happens to it — in particular before the window below starts counting.
+                notice = revealIfAgain(opened, notice)
                 armAutomatic(opened)
                 // AV-050 D.7: and an abstention is the one outcome that asks the learner for
                 // a rating, so this is where the microphone opens to hear it.
@@ -1793,6 +1830,9 @@ internal class StudyController(
 
     private companion object {
         const val NO_SESSION = "Start a session first."
+
+        /** AV-050 D.9: the rating that means the learner got it wrong, and is told the answer. */
+        const val AGAIN = 1
 
         /** What the surface says while the microphone is open, before the attempt settles. */
         const val LISTENING_NOTICE = "Listening for your answer. Command words spoken now are part of the answer."
