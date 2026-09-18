@@ -814,6 +814,67 @@ class StudyControllerTest {
     }
 
     /** The abstain path: no suggestion, so the learner names a rating and still confirms it. */
+    /**
+     * AV-050 D.7: the grader would not rate this one, so the microphone opens for the word
+     * the announcement just asked for, and that word is applied as if it had been tapped.
+     */
+    @Test
+    fun `an abstention listens for a rating and applies the one it hears`() {
+        val h = StudyHarness(
+            grades = listOf(FakeGrader.Answer(GradingResult(GradeLabel.UNCERTAIN, "no concept matched"))),
+            transcripts = listOf(FakeSpeechInput.Say("Five blocks."), FakeSpeechInput.Say("hard")),
+        )
+        h.settled()
+
+        // The spoken word became the learner's own rating, with no tap anywhere.
+        assertEquals(2, h.state.pendingRating)
+        assertEquals("learner", h.state.ratingSource)
+        assertEquals(ReviewState.PENDING, h.open.intent?.state)
+        assertEquals(emptyList<String>(), h.evidence().turns.first().touchActions)
+        // A rating the learner named is never armed, so it still waits for a confirmation.
+        assertTrue(h.wroteNothing, "a spoken rating wrote a review on its own")
+        assertTrue(StudyControl.CONFIRM in h.state.controls)
+    }
+
+    /**
+     * The failure that matters: this microphone was opened for the learner, not by them, so
+     * saying nothing to it must not cost them the turn. AV-014 stops the session when a
+     * capture the learner *asked* for hears nothing; an offered one may not.
+     */
+    @Test
+    fun `an abstention that hears no rating leaves the turn exactly as it was`() {
+        val h = StudyHarness(
+            grades = listOf(FakeGrader.Answer(GradingResult(GradeLabel.UNCERTAIN, "no concept matched"))),
+            transcripts = listOf(FakeSpeechInput.Say("Five blocks.")),
+        )
+        h.settled()
+
+        val state = h.state
+        assertNull(state.halt, "an unanswered offer stopped the session: ${state.halt?.reason}")
+        assertTrue(state.running)
+        assertNull(state.pendingRating)
+        assertEquals("none", state.ratingSource)
+        assertEquals(listOf(1, 2, 3, 4), state.ratings, "the ratings left the screen")
+        assertTrue(StudyControl.RATE in state.controls)
+        assertTrue(h.wroteNothing)
+
+        // And the turn still finishes by hand, exactly as it did before D.7.
+        h.controller.rate(2)
+        assertEquals(2, h.state.pendingRating)
+    }
+
+    /** A grader proposal is not an abstention, and nothing opens a microphone for it. */
+    @Test
+    fun `a proposed rating opens no rating capture`() {
+        val h = StudyHarness()
+        h.announced()
+
+        assertEquals(3, h.state.pendingRating)
+        // One capture this turn: the answer. The rating came from the grader.
+        assertEquals(1, h.evidence().turns.first().recognition.size)
+        assertEquals(emptyList<String>(), h.evidence().turns.first().spokenCommands)
+    }
+
     @Test
     fun `an abstention offers a self-grade and still requires a separate confirmation`() {
         val h = StudyHarness(grades = listOf(FakeGrader.Answer(GradingResult(GradeLabel.UNCERTAIN, "no concept matched"))))

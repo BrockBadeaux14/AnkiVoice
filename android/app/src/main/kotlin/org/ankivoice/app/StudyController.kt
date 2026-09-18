@@ -934,19 +934,63 @@ internal class StudyController(
     /** One learner-opened command capture, through AV-025's transport. */
     fun listenForCommand() = act("speak a command") { current ->
         val opened = current ?: return@act NO_SESSION
+        captureCommand(opened)
+    }
+
+    /**
+     * One command capture, and whatever the router made of it. Runs on [worker].
+     *
+     * Separate from [listenForCommand] because AV-050 D.7 opens one without a tap, from
+     * inside the grading reply, and an action cannot call another action.
+     */
+    private fun captureCommand(opened: OpenSession, pauseIfNotHeard: Boolean = true): String? {
         val pending = pendingRating(opened.session)
-        val outcome = opened.router.listenForCommand()
-        if (open !== opened) return@act null
+        val outcome = opened.router.listenForCommand(pauseIfNotHeard)
+        if (open !== opened) return null
         val score = opened.study.rawConfidence()?.let { " score $it" } ?: ""
         currentTurn(opened).spokenCommands += describe(outcome) + score
         pendingInterrupt?.let { kind ->
             pendingInterrupt = null
-            return@act interruptNow(opened, kind)
+            return interruptNow(opened, kind)
         }
         val step = opened.exchange.onCommand(outcome)
         val notice = advanceIfWritten(opened, step, step.notice)
         (outcome as? CommandOutcome.Executed)?.command?.rating?.let { recordRating(opened, pending, it) }
-        notice
+        return notice
+    }
+
+    /**
+     * AV-050 D.7: a turn the grader would not rate listens for the learner's own rating.
+     *
+     * An abstention — a `partial`, an `uncertain`, a rating the card withdrew, a grading
+     * fault — is the one outcome that has always needed a hand. The announcement already
+     * says which words will do ("Say Again, Hard, Good or Easy"), so the microphone opens on
+     * the back of it and one of those words is applied as if it had been tapped.
+     *
+     * It opens **only** for an abstention, only while the router is actually offering rating
+     * commands, and only once: what comes back goes through the same
+     * [org.ankivoice.core.commands.CommandRouter] and the same exchange as a tapped rating,
+     * so a misheard word is refused exactly as it is today and nothing here writes. A rating
+     * named this way is still the learner's own, which AV-047 never arms for an automatic
+     * commit — it is proposed, and confirmed separately.
+     */
+    private fun listenForRating(opened: OpenSession, notice: String?): String? {
+        if (open !== opened || opened.session.halted || capture != null || pendingInterrupt != null) return notice
+        if (!foreground) return notice
+        val position = opened.exchange.position ?: return notice
+        if (position.rating != null) return notice
+        if (ratings(opened.session, opened.router).isEmpty()) return notice
+        if (VoiceCommand.RATE_GOOD !in opened.router.spokenAvailable()) return notice
+        // Published before the capture blocks the worker, so the abstention is on screen —
+        // and its list of words is readable — for as long as the microphone is open.
+        publish(opened, actionToken, notice, busy = true)
+        // This microphone was opened **for** the learner rather than **by** them, and that
+        // difference decides what a failure costs. AV-014 stops the session when a command
+        // capture hears nothing usable, which is right for a capture the learner asked for —
+        // they are owed an explanation — and wrong for one that simply arrived while they
+        // were deciding. So this one does not stop it: the turn is handed back exactly as
+        // the abstention left it, with every rating still on offer.
+        return captureCommand(opened, pauseIfNotHeard = false) ?: notice
     }
 
     /**
@@ -1209,10 +1253,13 @@ internal class StudyController(
                 if (open !== opened) return@execute
                 grading = false
                 val accepted = session.acceptGrade(reply)
-                val notice = openExchange(opened, request, accepted, source, route)
+                var notice: String? = openExchange(opened, request, accepted, source, route)
                 // AV-047: a grader proposal is the only thing that arms a window, so this
                 // is the one place that starts one.
                 armAutomatic(opened)
+                // AV-050 D.7: and an abstention is the one outcome that asks the learner for
+                // a rating, so this is where the microphone opens to hear it.
+                notice = listenForRating(opened, notice)
                 // A reply the session dropped as stale means the transcript moved on while
                 // it was in flight; the revision that replaced it is graded now.
                 if (accepted is SessionResult.Ignored && session.state == SessionState.GRADING) startGrading(opened)
