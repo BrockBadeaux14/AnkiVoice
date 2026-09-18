@@ -141,13 +141,13 @@ class StudyCompositionTest {
 
     /** Open a session and settle [spoken] as the answer to the first card. */
     private fun answered(spoken: String): ReviewSession {
+        // AV-050: opening a session is the whole hands-free chain — the first card is
+        // offered, its prompt is read, and the microphone opens itself when that playback
+        // settles. So the answer is scripted for the transport **before** the session
+        // starts, rather than between a tapped prompt and a tapped Start answer.
+        speechInput.script.addLast(FakeSpeechInput.Say(spoken))
         controller.onForegroundEvent(ForegroundEvent.RESUME)
         controller.start()
-        controller.ask()
-        // Start answer runs the capture itself, so the answer is scripted for the
-        // transport rather than delivered to the session by hand.
-        speechInput.script.addLast(FakeSpeechInput.Say(spoken))
-        controller.startAnswer()
         return checkNotNull(session)
     }
 

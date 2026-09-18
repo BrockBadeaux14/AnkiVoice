@@ -36,11 +36,13 @@ class StudyScenariosTest {
     @Scenario("confirmed-commit")
     fun confirmedCommit() {
         val h = StudyHarness(grades = listOf(FakeGrader.Answer(correct)))
+        // AV-050: opening the session reads the card and opens the microphone with no tap.
         h.started()
         assertEquals("A box has three red blocks and two blue blocks. How many blocks are there in total?", h.state.prompt)
-        h.controller.ask()
-        assertEquals("Take your time. Tap Start answer when you are ready to speak.", h.state.status)
-        h.controller.startAnswer()
+        assertEquals(
+            "Take your time. The microphone opens itself, or tap Start answer.",
+            h.beforeMicrophone().status,
+        )
 
         // The screen after the answer settled and was graded: transcript, version, source, rating.
         val announced = h.state

@@ -2,6 +2,7 @@ package org.ankivoice.speech
 
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.TimeUnit
+import org.ankivoice.core.answer.CaptureStop
 import org.ankivoice.core.contracts.CaptureEvent
 import org.ankivoice.core.contracts.Confidence
 import org.ankivoice.core.contracts.Failure
@@ -26,6 +27,16 @@ import org.ankivoice.core.contracts.Utterance
  * Both contract calls are synchronous, so each blocks the calling worker thread until the
  * platform resolves or a deadline expires. Callbacks are filtered by generation, so a late
  * one from an abandoned turn is recorded and dropped rather than delivered.
+ *
+ * **AV-050 (#81), September 17, 2026.** A capture now ends itself when the learner stops
+ * speaking. There is still exactly one way to stop a microphone — [beginFinalization], the
+ * one Done calls — and two ways to decide that it is time: the engine's own endpoint, held
+ * for [SpeechTimings.endpointHoldMs] in case the learner was only pausing, and, when the
+ * engine reports no endpoint at all, trailing silence measured over the PCM frames the pump
+ * already reads. Neither may run before speech has begun or before
+ * [SpeechTimings.minCaptureMs], and both lose to Done and Cancel, which take effect at once.
+ * [lastCaptureStop] says which of them ended the last capture, so an endpoint is never
+ * recorded as a gesture the learner made.
  */
 class SpeechTransport(
     private val platform: SpeechPlatform,
@@ -120,6 +131,34 @@ class SpeechTransport(
     private var finalizationUntilMs = 0L
     private var stream: CaptureStream? = null
 
+    /** AV-050: when the learner was first heard in this capture, or 0 when nobody has been. */
+    private var speechStartedMs = 0L
+
+    /** AV-050: when the engine last said speech ended, or 0 when it has not, or took it back. */
+    private var endpointAtMs = 0L
+
+    /**
+     * AV-050: how the last capture's microphone was stopped.
+     *
+     * Observability for #13, which turns it into [CaptureStop] on the answer turn so the
+     * journal can tell an endpoint from a Done. Null before the first capture, and for one
+     * that never opened.
+     */
+    @Volatile
+    var lastCaptureStop: CaptureStop? = null
+        private set
+
+    /**
+     * AV-050: how long after the microphone opened the learner was first heard, or null
+     * when they were not heard at all.
+     *
+     * #13 needs the offset rather than an instant, because its pre-roll is measured on the
+     * session's clock and this is measured on the transport's.
+     */
+    @Volatile
+    var lastSpeechOnsetMs: Long? = null
+        private set
+
     /** Observability for #13 and the live harness. Never used to decide an outcome. */
     @Volatile
     var lastPartial: String? = null
@@ -206,9 +245,15 @@ class SpeechTransport(
     // ----------------------------------------------------------------- SpeechInput
 
     /**
-     * Opens capture for one attempt. Calling this **is** the explicit Start answer: #13
-     * calls it when the learner asks to speak, never automatically, and this class never
-     * re-arms after a result.
+     * Opens capture for one attempt.
+     *
+     * **Amended by AV-050 (#81), September 17, 2026.** The rule used to be "capture opens
+     * only on an explicit Start answer": #13 called this when the learner asked to speak,
+     * never automatically. It is now **the microphone opens itself exactly once per
+     * attempt, after that attempt's prompt playback settles** — #13 makes that single call
+     * when the settle is over, and the learner may still bring it forward by tapping Start
+     * answer. What did not change: one open per attempt, no re-arm after a result, and the
+     * settle interval [speak] left behind is honoured whichever way the open arrives.
      */
     override fun listen(token: OperationToken, language: String): CaptureEvent {
         val queue: ArrayBlockingQueue<Outcome>
@@ -305,15 +350,53 @@ class SpeechTransport(
     override fun finishAnswer(token: OperationToken) {
         synchronized(lock) {
             if (activeToken != token || phase != Phase.CAPTURE) return
-            beginFinalization()
+            beginFinalization(CaptureStop.DONE)
         }
     }
 
-    private fun beginFinalization() {
+    /**
+     * The one way a microphone stops. Done, the backstop and both of AV-050's endpoint
+     * routes all arrive here, so there is one finalization deadline and one place that
+     * closes the pipe. [stop] is recorded rather than acted on: nothing downstream behaves
+     * differently, and the record is what keeps an endpoint out of the learner's gestures.
+     *
+     * Callers hold [lock].
+     */
+    private fun beginFinalization(stop: CaptureStop) {
         phase = Phase.FINALIZING
+        lastCaptureStop = stop
         finalizationUntilMs = clock.nowMs() + timings.finalizationMs
         // The pump sees the stopped microphone, writes the trailing silence and closes.
         stream?.stopMicrophone()
+    }
+
+    /**
+     * AV-050: the learner was heard. Callers hold [lock].
+     *
+     * Recorded once per capture, because the answer window runs from the first onset and not
+     * from every pause inside it. It records **only** the onset: taking back an endpoint the
+     * engine already offered is a separate decision, made where the signal is strong enough
+     * to make it, so the fallback detector's crude amplitude test can never overrule the
+     * engine's own opinion about where speech ended.
+     */
+    private fun speechBegan(now: Long) {
+        if (speechStartedMs != 0L) return
+        speechStartedMs = now
+        lastSpeechOnsetMs = (now - captureStartedMs).coerceAtLeast(0)
+    }
+
+    /**
+     * AV-050: when, at the earliest, this capture may end itself, or null when it may not.
+     *
+     * Null until the learner has been heard, so a learner who is still remembering gets the
+     * pre-roll and the window rather than an instant timeout, and null when the engine has
+     * offered no endpoint — the pump's own trailing silence is the route then.
+     * [SpeechTimings.minCaptureMs] is a floor under both, so a false start is never taken
+     * for a whole answer. Callers hold [lock].
+     */
+    private fun endpointDeadlineMs(): Long? {
+        if (speechStartedMs == 0L || endpointAtMs == 0L) return null
+        return maxOf(endpointAtMs + timings.endpointHoldMs, captureStartedMs + timings.minCaptureMs)
     }
 
     private fun awaitCapture(
@@ -322,18 +405,23 @@ class SpeechTransport(
         queue: ArrayBlockingQueue<Outcome>,
     ): CaptureEvent {
         while (true) {
-            val deadline = synchronized(lock) {
+            // AV-050: an endpoint the engine offered is a shorter deadline on the same wait,
+            // not a second timer. The loop re-reads it every pass, so speech arriving inside
+            // the hold — which clears the endpoint — simply restores the backstop.
+            val backstop = synchronized(lock) {
                 if (generation != current) {
                     return captureFailure(token, SpeechInputFailure.RECOGNIZER_ERROR, CANCELLED)
                 }
                 when (phase) {
-                    // The backstop mirrors #13's window; it stops the microphone exactly as
-                    // Done does, so an in-flight final is still delivered.
+                    // The backstop mirrors #13's pre-roll and window together; it stops the
+                    // microphone exactly as Done does, so an in-flight final is still delivered.
                     Phase.CAPTURE -> captureStartedMs + timings.answerWindowMs
                     Phase.FINALIZING -> finalizationUntilMs
                     else -> return captureFailure(token, SpeechInputFailure.RECOGNIZER_ERROR, CANCELLED)
                 }
             }
+            val endpoint = synchronized(lock) { if (phase == Phase.CAPTURE) endpointDeadlineMs() else null }
+            val deadline = endpoint?.let { minOf(it, backstop) } ?: backstop
             val wait = deadline - clock.nowMs()
             val outcome = if (wait > 0) queue.poll(wait, TimeUnit.MILLISECONDS) else null
             if (outcome != null) return deliver(token, current, outcome)
@@ -344,7 +432,14 @@ class SpeechTransport(
                 }
                 when {
                     clock.nowMs() < deadline -> false
-                    phase == Phase.CAPTURE -> { beginFinalization(); false }
+                    phase == Phase.CAPTURE -> {
+                        // Whose deadline ran out: the engine's endpoint, still standing after
+                        // its hold, or the backstop behind it. Either way one stop, one path.
+                        val reached = endpointDeadlineMs()
+                        val byEndpoint = reached != null && clock.nowMs() >= reached && reached <= backstop
+                        beginFinalization(if (byEndpoint) CaptureStop.ENDPOINT else CaptureStop.WINDOW_EXPIRY)
+                        false
+                    }
                     else -> true
                 }
             }
@@ -378,16 +473,34 @@ class SpeechTransport(
      * Streams microphone frames into the recognizer pipe, then the pinned trailing silence.
      * The silence is generated padding that lets the recognizer settle on the final word;
      * it is never presented as captured audio.
+     *
+     * AV-050 also measures each frame on its way past. This is the **fallback** endpoint
+     * route and it runs only when the engine has offered none: the frames are already here,
+     * so it needs no second audio path, and it changes nothing about what the recognizer
+     * receives — every frame is written exactly as it was read, loud or quiet.
      */
     private fun startPump(current: Long, open: CaptureStream) {
         val thread = Thread({
             val samples = ShortArray(SpeechPins.FRAME_SAMPLES)
             val bytes = ByteArray(SpeechPins.FRAME_SAMPLES * SpeechPins.BYTES_PER_SAMPLE)
+            var heardFrame = false
+            var lastLoudMs = 0L
             try {
                 while (true) {
                     val read = open.readFrame(samples)
                     if (read <= 0) break
                     if (synchronized(lock) { generation != current }) break
+                    if (loudEnough(samples, read)) {
+                        heardFrame = true
+                        lastLoudMs = clock.nowMs()
+                        // The onset only, which is what an engine that never reports
+                        // onBeginningOfSpeech leaves #13's pre-roll without. An endpoint the
+                        // engine offered is left exactly as it is: this test is far too crude
+                        // to overrule it.
+                        synchronized(lock) { if (generation == current && phase == Phase.CAPTURE) speechBegan(lastLoudMs) }
+                    } else if (heardFrame) {
+                        endpointFromSilence(current, lastLoudMs)
+                    }
                     for (i in 0 until read) {
                         val sample = samples[i].toInt()
                         bytes[i * 2] = sample.toByte()
@@ -412,12 +525,35 @@ class SpeechTransport(
         thread.start()
     }
 
+    /**
+     * AV-050's fallback stop, from the pump thread.
+     *
+     * It refuses to run when the engine has offered an endpoint of its own — that route
+     * owns the capture then — and it carries the same two guards the engine route carries:
+     * nothing before speech has begun, nothing before [SpeechTimings.minCaptureMs]. Done and
+     * Cancel have already left [Phase.CAPTURE] by the time this could win, so both still
+     * take precedence.
+     */
+    private fun endpointFromSilence(current: Long, lastLoudMs: Long) {
+        synchronized(lock) {
+            if (generation != current || phase != Phase.CAPTURE) return
+            if (speechStartedMs == 0L || endpointAtMs != 0L) return
+            val now = clock.nowMs()
+            if (now - lastLoudMs < timings.silenceHoldMs) return
+            if (now - captureStartedMs < timings.minCaptureMs) return
+            beginFinalization(CaptureStop.ENDPOINT)
+        }
+    }
+
     // --------------------------------------------------------------------- cancel
 
     /** Explicit Cancel from #13 or #14. Idempotent, and later callbacks are dropped. */
     override fun cancel(token: OperationToken) {
         val active = synchronized(lock) {
             if (activeToken != token) return
+            // AV-050: recorded before the outcome, so a cancel that races an endpoint hold
+            // is still what the record says stopped this microphone.
+            if (phase == Phase.CAPTURE || phase == Phase.FINALIZING) lastCaptureStop = CaptureStop.CANCELLED
             generation
         }
         offer(active, Outcome.Cancelled(CANCELLED), null)
@@ -441,7 +577,19 @@ class SpeechTransport(
         lastPartial = null
         // The last capture's score survives a playback that follows it (a spoken notice),
         // so a harness can still read it; only the next capture replaces it.
-        if (next == Phase.CAPTURE) lastConfidence = null
+        if (next == Phase.CAPTURE) {
+            lastConfidence = null
+            // AV-050: a fresh capture has heard nothing and has not been stopped. The two
+            // observables are cleared with it, so #13 can never read the previous attempt's
+            // endpoint as this one's.
+            speechStartedMs = 0
+            endpointAtMs = 0
+            lastCaptureStop = null
+            lastSpeechOnsetMs = null
+            // Provisional, so a callback that arrives while the microphone is still opening
+            // is measured against this capture and not the previous one. The open refines it.
+            captureStartedMs = clock.nowMs()
+        }
         segments.clear()
         val queue = ArrayBlockingQueue<Outcome>(1)
         outcomes = queue
@@ -495,8 +643,46 @@ class SpeechTransport(
         /** Partial text is progress for #13 to display. It never settles the capture. */
         override fun onPartial(generation: Long, text: String) {
             synchronized(lock) {
-                if (generation == this@SpeechTransport.generation) lastPartial = text
-                else staleCallbacks += "partial for generation $generation"
+                if (generation == this@SpeechTransport.generation) {
+                    lastPartial = text
+                    // AV-050: text in flight means the learner has been heard, which is what
+                    // ends #13's pre-roll. It does **not** take back an endpoint: engines
+                    // flush a last partial as speech ends, and treating that as more speech
+                    // would stop the primary route ever firing. Only [onSpeechStarted] does.
+                    if (phase == Phase.CAPTURE && text.isNotBlank()) speechBegan(clock.nowMs())
+                } else {
+                    staleCallbacks += "partial for generation $generation"
+                }
+            }
+        }
+
+        /**
+         * AV-050: the engine heard the learner begin. It starts #13's answer window, and it
+         * is the one signal that takes back an endpoint the engine offered earlier — a
+         * learner who turns out to have been mid-pause.
+         */
+        override fun onSpeechStarted(generation: Long) {
+            synchronized(lock) {
+                if (generation == this@SpeechTransport.generation && phase == Phase.CAPTURE) {
+                    speechBegan(clock.nowMs())
+                    endpointAtMs = 0
+                } else {
+                    staleCallbacks += "speech started for generation $generation"
+                }
+            }
+        }
+
+        /**
+         * AV-050: the engine's endpoint. Held rather than acted on, and ignored before the
+         * learner has been heard at all — an endpoint over silence is not an answer ending.
+         */
+        override fun onSpeechEnded(generation: Long) {
+            synchronized(lock) {
+                if (generation != this@SpeechTransport.generation || phase != Phase.CAPTURE) {
+                    staleCallbacks += "speech ended for generation $generation"
+                    return
+                }
+                if (speechStartedMs != 0L) endpointAtMs = clock.nowMs()
             }
         }
 
@@ -507,8 +693,19 @@ class SpeechTransport(
          */
         override fun onSegment(generation: Long, text: String, confidence: Float?) {
             synchronized(lock) {
-                if (generation == this@SpeechTransport.generation && !settled) segments += text to confidence
-                else staleCallbacks += "segment for generation $generation"
+                if (generation == this@SpeechTransport.generation && !settled) {
+                    segments += text to confidence
+                    // AV-050: a segment the engine closed is a pause it is sure of, so it
+                    // counts as an endpoint — the strongest one this route offers. A blank
+                    // segment carried no speech and says nothing about where one ended.
+                    if (phase == Phase.CAPTURE && text.isNotBlank()) {
+                        val now = clock.nowMs()
+                        speechBegan(now)
+                        endpointAtMs = now
+                    }
+                } else {
+                    staleCallbacks += "segment for generation $generation"
+                }
             }
         }
 
@@ -547,6 +744,20 @@ class SpeechTransport(
 
     companion object {
         private const val SILENCE_FRAME_MS = 20L
+
+        /**
+         * AV-050: whether one 20 ms frame carries speech, by mean absolute amplitude.
+         *
+         * Deliberately the crudest test that works. It decides when a capture stops and
+         * nothing else — never what was said, never whether an answer was right — and it is
+         * only ever consulted when the engine has offered no endpoint of its own.
+         */
+        fun loudEnough(samples: ShortArray, read: Int): Boolean {
+            if (read <= 0) return false
+            var total = 0L
+            for (i in 0 until read) total += Math.abs(samples[i].toInt()).toLong()
+            return total / read >= SpeechPins.SPEECH_FRAME_AMPLITUDE
+        }
 
         // Several platform conditions share one contract failure mode, so the detail carries
         // the distinction #26 requires. :core's taxonomy is AV-007's and is not extended here.

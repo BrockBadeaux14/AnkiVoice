@@ -7,7 +7,8 @@ confirmation** — that is the whole point of the card, so a run that wrote noth
 prove nothing about it. Back the collection up first.
 
   automatic-rule        option ON.  answer; touch nothing; let it save.    1 review, saved as `auto`
-  automatic-cancelled   option ON.  answer; tap Keep it manual; Finish.    0 reviews
+  automatic-corrected   option ON.  answer; name a different rating;
+                        Finish without confirming.                         0 reviews
   automatic-abstain     option ON.  answer so the grader abstains;
                         name a rating; confirm.                            1 review, saved as `touch`
   automatic-unavailable option ON, daily limit 0. answer in other words;
@@ -24,7 +25,7 @@ evidence file — is AV-026's driver, reused rather than forked, because AV-047'
 is the same harness on the same screen.
 
     .venv/bin/python tools/av047-qa/run.py build/av047/deck.json
-    .venv/bin/python tools/av047-qa/run.py build/av047/deck.json --turns automatic-cancelled
+    .venv/bin/python tools/av047-qa/run.py build/av047/deck.json --turns automatic-corrected
 
 One turn per boot: the emulator's coreaudio backend leaks a listener per microphone open
 and exits on the second or third of a boot.
@@ -42,34 +43,41 @@ spec = importlib.util.spec_from_file_location("av026_qa", ROOT / "tools/av026-qa
 qa = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(qa)
 
+# AV-050 (#81) deleted **Keep it manual** from the study screen along with every other sign
+# of the mode, so `automatic-cancelled` can no longer be driven as written. What it proved —
+# a window that is retired writes nothing — is proved instead by `automatic-corrected`: a
+# rating the operator names while the window is running retires it, and finishing without a
+# confirmation leaves the collection alone.
 TURNS = [
-    "automatic-rule", "automatic-cancelled", "automatic-abstain",
+    "automatic-rule", "automatic-corrected", "automatic-abstain",
     "automatic-unavailable", "automatic-off",
 ]
 
 # Writes each turn hands the writer. None of these is undone afterwards.
 WRITES = {
-    "automatic-rule": 1, "automatic-cancelled": 0, "automatic-abstain": 1,
+    "automatic-rule": 1, "automatic-corrected": 0, "automatic-abstain": 1,
     "automatic-unavailable": 1, "automatic-off": 1,
 }
 
 # Whether the setup screen's Automatic grading switch must be on for this turn, and what
 # the session must therefore report having run with.
 OPTION_ON = {
-    "automatic-rule": True, "automatic-cancelled": True, "automatic-abstain": True,
+    "automatic-rule": True, "automatic-corrected": True, "automatic-abstain": True,
     "automatic-unavailable": True, "automatic-off": False,
 }
 
-# Whether a cancel window must have been open on the screen at some point in the turn.
+# Whether a cancel window must have been armed at some point in the turn. AV-050 took the
+# countdown off the screen, so this is read from the snapshots the controller published and
+# is no longer something the operator can see.
 WINDOW = {
-    "automatic-rule": True, "automatic-cancelled": True, "automatic-abstain": False,
+    "automatic-rule": True, "automatic-corrected": True, "automatic-abstain": False,
     "automatic-unavailable": False, "automatic-off": False,
 }
 
 # What must have authorized each write. `automatic-rule` is the only turn in this
 # repository that may pass with a review the operator never confirmed.
 SOURCE = {
-    "automatic-rule": "auto", "automatic-cancelled": None, "automatic-abstain": "touch",
+    "automatic-rule": "auto", "automatic-corrected": None, "automatic-abstain": "touch",
     "automatic-unavailable": "touch", "automatic-off": "touch",
 }
 
@@ -77,12 +85,14 @@ NEEDS_KEY = {"automatic-unavailable"}
 
 ROUTINE = {
     "automatic-rule":
-        "Turn Automatic grading ON in setup. Start studying, Play prompt, Start answer, say the\n"
-        "    reference answer, Done — then TOUCH NOTHING. The screen counts down and saves it.\n"
-        "    Tap Finish once the review is saved.",
-    "automatic-cancelled":
-        "Turn Automatic grading ON in setup. Answer as above, then tap KEEP IT MANUAL while the\n"
-        "    countdown is still running. Leave the rating unconfirmed and tap Finish.",
+        "Turn Automatic grading ON in setup. Start studying — the card reads itself and the\n"
+        "    microphone opens on its own. Say the reference answer and stop speaking, then TOUCH\n"
+        "    NOTHING. Since AV-050 the screen says nothing about the mode and shows no countdown;\n"
+        "    it simply saves the review. Tap Finish once it is saved.",
+    "automatic-corrected":
+        "Turn Automatic grading ON in setup. Answer as above, then tap a DIFFERENT rating within\n"
+        "    about three seconds of the rating appearing — that retires the armed window. Leave the\n"
+        "    new rating unconfirmed and tap Finish.",
     "automatic-abstain":
         "Turn Automatic grading ON in setup. Answer with something only partly right, so the rules\n"
         "    abstain and no rating is proposed. Pick a rating yourself, tap Confirm, then Finish.",

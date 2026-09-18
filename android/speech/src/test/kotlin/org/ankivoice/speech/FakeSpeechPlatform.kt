@@ -71,6 +71,20 @@ class FakeSpeechPlatform : SpeechPlatform {
     /** Frames the microphone yields before Done; each is a distinct non-zero sample. */
     var microphoneFrames = 3
 
+    /**
+     * AV-050: how many of those frames carry speech-level amplitude. Zero by default, so the
+     * frames stay well under [SpeechPins.SPEECH_FRAME_AMPLITUDE] and the trailing-silence
+     * detector never fires in a test that is not about it.
+     */
+    var loudFrames = 0
+
+    /**
+     * AV-050: keep yielding quiet frames after [microphoneFrames] instead of blocking, which
+     * is what a real microphone does once the learner stops talking. Off by default, so an
+     * existing test's stream still parks until it is stopped.
+     */
+    var quietAfterFrames = false
+
     @Volatile
     var lastStream: FakeCaptureStream? = null
 
@@ -112,7 +126,9 @@ class FakeSpeechPlatform : SpeechPlatform {
         if (!captureOpens) return null
         this.listener = listener
         this.generation = generation
-        val stream = FakeCaptureStream(microphoneFrames) { deliver(generation, listener) }
+        val stream = FakeCaptureStream(microphoneFrames, loudFrames, quietAfterFrames) {
+            deliver(generation, listener)
+        }
         lastStream = stream
         captureOpened.countDown()
         return stream
@@ -159,6 +175,16 @@ class FakeSpeechPlatform : SpeechPlatform {
         listener?.onPartial(generation, text)
     }
 
+    /** AV-050: the engine heard the learner begin. */
+    fun emitSpeechStarted() {
+        listener?.onSpeechStarted(generation)
+    }
+
+    /** AV-050: the engine's endpoint — it believes the learner has stopped. */
+    fun emitSpeechEnded() {
+        listener?.onSpeechEnded(generation)
+    }
+
     override fun stopRecognizer() {
         recognizerStops.incrementAndGet()
     }
@@ -171,6 +197,8 @@ class FakeSpeechPlatform : SpeechPlatform {
 /** Records every byte the transport pumps, and what it did at the end of the stream. */
 class FakeCaptureStream(
     private val frames: Int,
+    private val loudFrames: Int = 0,
+    private val quietAfterFrames: Boolean = false,
     private val onClose: () -> Unit,
 ) : CaptureStream {
     private val recording = AtomicBoolean(true)
@@ -192,10 +220,18 @@ class FakeCaptureStream(
             if (produced >= frames) {
                 // A live microphone blocks here until it is stopped; mimic that cheaply.
                 Thread.sleep(1)
+                // AV-050: unless the test wants what a real one actually does — keep handing
+                // back quiet frames, which is the silence the fallback detector measures.
+                if (quietAfterFrames) {
+                    samples.fill(1)
+                    return samples.size
+                }
                 continue
             }
             produced += 1
-            samples.fill(produced.toShort())
+            // AV-050: the first [loudFrames] sit above SpeechPins.SPEECH_FRAME_AMPLITUDE; the
+            // rest keep the original distinct low samples, which read as silence.
+            samples.fill(if (produced <= loudFrames) (SpeechPins.SPEECH_FRAME_AMPLITUDE * 2).toShort() else produced.toShort())
             return samples.size
         }
         return -1

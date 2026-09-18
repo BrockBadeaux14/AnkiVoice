@@ -300,6 +300,36 @@ class ReviewSession(
         return settle(requireTurn().done())
     }
 
+    /**
+     * AV-050: the learner was first heard [afterOpenMs] after the microphone opened.
+     *
+     * Reported by the transport once the capture returns, because the session thread is
+     * blocked inside it while it happens. It ends AV-012's recall pre-roll and starts the
+     * answer window; it settles nothing and stops nothing.
+     */
+    fun reportSpeechOnset(afterOpenMs: Long) {
+        confine("reportSpeechOnset")
+        if (state != SessionState.LISTENING || !captureValid) return
+        answerTurn?.speechBegan(afterOpenMs)
+    }
+
+    /**
+     * AV-050: the capture ended itself because the learner stopped speaking.
+     *
+     * The same stop [finishAnswer] makes, through the same finalization, with
+     * [org.ankivoice.core.answer.CaptureStop.ENDPOINT] recorded instead of a learner's Done.
+     * Ignored unless an attempt is genuinely in flight and the learner was heard in it, so a
+     * Done or a Cancel that already settled the turn keeps precedence.
+     */
+    fun endpointAnswer(): SessionResult<Answer> {
+        confine("endpointAnswer")
+        val turn = answerTurn
+        if (state != SessionState.LISTENING || !captureValid || turn == null) return SessionResult.Ignored
+        if (turn.phase != AnswerPhase.CAPTURING || !turn.heardSpeech) return SessionResult.Ignored
+        log("endpoint", "attempt ${turn.attempt} ended on the learner's own silence")
+        return settle(turn.endpoint())
+    }
+
     /** Advance AV-012's deadlines without a callback. Expiry is never an answer. */
     fun poll(): SessionResult<Answer> {
         confine("poll")

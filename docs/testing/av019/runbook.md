@@ -128,6 +128,15 @@ The driver cold-boots the AVD, clears the journal, snapshots the collection, sta
 harness and then waits: **the operator drives the emulator screen from here.** Each case
 puts a short routine on the device, in this order:
 
+> **Amended September 17, 2026 by [AV-050](https://github.com/BrockBadeaux14/AnkiVoice/issues/81).**
+> The study screen no longer has two taps in front of the microphone. Wherever a routine
+> below says **Play prompt** and **Start answer**, the card now reads itself when it is
+> offered and the microphone opens itself when that playback settles — so you wait rather
+> than tap. Both controls are still there for a reading or an open that did not happen.
+> **Done** is likewise optional: the capture ends itself a moment after you stop speaking,
+> and tapping Done only hurries it. Everything else in these routines is unchanged.
+
+
 1. **Answer the card** — listen for the question, tap *Start answer*, say the answer out
    loud. Anything close to the card's reference answer is fine; the rating that comes back
    is what is being measured, not recall.

@@ -11,6 +11,8 @@ import org.ankivoice.core.contracts.ForegroundEvent
 import org.ankivoice.core.contracts.GradeLabel
 import org.ankivoice.core.contracts.GradingResult
 import org.ankivoice.core.contracts.GuardedReviewWriter
+import org.ankivoice.core.contracts.UtterancePurpose
+import org.ankivoice.core.answer.CaptureStop
 import org.ankivoice.core.contracts.OperationToken
 import org.ankivoice.core.exchange.AutomaticGrading
 import org.ankivoice.core.exchange.PrecommitExchange
@@ -93,6 +95,18 @@ internal class StudyHarness(
     /** What the recognizer has heard so far, as the surface polls it mid-capture. */
     var partialText: String? = null
 
+    /**
+     * AV-050: how the transport says the last capture's microphone was stopped.
+     *
+     * Null is what the `:core` fake produces — it answers inside `listen`, so nothing ever
+     * stopped a microphone. A test about the capture that ends itself sets
+     * [CaptureStop.ENDPOINT] here, which is exactly what the real transport reports.
+     */
+    var captureStop: CaptureStop? = null
+
+    /** AV-050: how long after the open the transport first heard the learner, or null. */
+    var speechOnsetMs: Long? = null
+
     /** Every snapshot the surface published while the microphone was open. */
     val duringCapture = mutableListOf<StudyState>()
 
@@ -135,6 +149,8 @@ internal class StudyHarness(
                     speech = speechInput,
                     language = "en-US",
                     partial = { partialText },
+                    speechOnsetMs = { speechOnsetMs },
+                    captureStop = { captureStop },
                     skips = cards::report,
                     release = { released += 1 },
                 ),
@@ -148,34 +164,63 @@ internal class StudyHarness(
         scheduler,
     ) { sessionId -> journal.entries().filter { it.sessionId == sessionId } }
 
+    /**
+     * Every snapshot the surface received, in order.
+     *
+     * AV-050 made some turn states transient: a prompt now plays and a microphone now opens
+     * inside one action, so "the card is read and waiting for a Start answer" is a snapshot
+     * the surface passes through rather than one it rests in. A test that is about that
+     * moment reads it from here.
+     */
+    val published = mutableListOf<StudyState>()
+
     init {
         speechInput.whileListening = { duringCapture += controller.state }
+        controller.observer = { published += it }
+    }
+
+    /**
+     * The snapshot published after this attempt's prompt played and before its microphone
+     * opened — AV-050's seam, and the last moment Start answer is the control on offer.
+     */
+    fun beforeMicrophone(): StudyState = checkNotNull(published.lastOrNull { it.notice == "The prompt was played." }) {
+        "no prompt playback was published: ${published.map { it.notice }}"
     }
 
     val state: StudyState get() = controller.state
+
+    /**
+     * Only the card prompts that were spoken, oldest first.
+     *
+     * AV-019's announcements go through the same synthesizer, so counting everything the
+     * transport said is not counting how many times a card was read.
+     */
+    val promptsSpoken: List<String>
+        get() = speechOutput.spoken.filter { it.purpose == UtterancePurpose.QUESTION }.map { it.text }
 
     val wroteNothing: Boolean get() = transport.calls.isEmpty() && collection.reviews.isEmpty()
 
     /** The open session, which every driven scenario has. */
     val open: ReviewSession get() = checkNotNull(session) { "no session was opened" }
 
-    /** Bring the app to the foreground and open a session. */
+    /**
+     * Bring the app to the foreground and open a session.
+     *
+     * AV-050: this is now the whole hands-free chain. The first card is offered, its prompt
+     * is read, the microphone opens itself when that playback settles, and the attempt
+     * settles on the fake's recognizer final and is graded at once. Nothing in it is a tap.
+     */
     fun started(): StudyState {
         controller.onForegroundEvent(ForegroundEvent.RESUME)
         controller.start()
         return controller.state
     }
 
-    /** Open a session, play the prompt and settle one attempt on the scripted transcript. */
-    fun settled(): StudyState {
-        started()
-        controller.ask()
-        // Start answer settles the attempt on the fake's recognizer final and grades it at
-        // once, so the ratings go live and a confirmation becomes possible. The surface
-        // never fabricates an answer.
-        controller.startAnswer()
-        return controller.state
-    }
+    /**
+     * Open a session and settle one attempt on the scripted transcript, which since AV-050
+     * is exactly what opening one does. The surface never fabricates an answer.
+     */
+    fun settled(): StudyState = started()
 
     /** Settle an attempt whose grade opened AV-019's Announced position with a pending rating. */
     fun announced(): StudyState {
@@ -241,6 +286,34 @@ internal class ManualScheduler : DelayScheduler {
 
     private class Window(val task: Runnable) {
         var cancelled = false
+    }
+}
+
+/**
+ * AV-050's guard, at the snapshot level: nothing a running study screen shows may name the
+ * grading mode.
+ *
+ * Every field [StudyScreen] renders as text is checked, so a mode name that moved from the
+ * banner into a status line, a notice or the spoken announcement is caught in the same
+ * assertion. The *source*-level half of the guard is
+ * [StudySurfaceGuardTest.no string literal in the study screen names the grading mode].
+ */
+internal fun assertNoAutomaticGradingText(state: StudyState) {
+    val shown = listOfNotNull(
+        state.status,
+        state.notice,
+        state.announcement,
+        state.grading?.let { StudyWords.grading(it) },
+        state.halt?.explanation,
+        state.halt?.reason,
+        state.outcomeState,
+        state.outcomeReason,
+    ) + state.skipped + listOfNotNull(state.skipSummary)
+    shown.forEach { text ->
+        assertFalse(
+            text.contains("Automatic grading", ignoreCase = true),
+            "the running study screen named the grading mode: \"$text\"",
+        )
     }
 }
 

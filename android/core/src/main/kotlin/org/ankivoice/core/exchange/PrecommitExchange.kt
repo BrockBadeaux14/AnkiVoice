@@ -305,10 +305,10 @@ class PrecommitExchange(
         return when (val proposed = session.propose(rating)) {
             is ProposalOutcome.Proposed -> {
                 // AV-047: a grader proposal is the one thing the option applies to, so the
-                // window is armed here and nowhere else. The announcement says so before it
-                // is armed, because the learner hears the announcement and not this call.
+                // window is armed here and nowhere else. AV-050 removed what the announcement
+                // used to say about it, so the arming is now invisible by design.
                 val window = automatic.cancelWindowMs.takeIf { automatic.enabled }
-                val step = announce(rating, source, automaticWindowMs = window)
+                val step = announce(rating, source)
                 if (window != null) {
                     automaticPending = AutomaticCommit(
                         rating = rating,
@@ -398,7 +398,10 @@ class PrecommitExchange(
      */
     fun commitAutomatically(): ExchangeStep {
         confine("commitAutomatically")
-        val nothingToDo = "Automatic grading had nothing left to save for this card, so nothing was written."
+        // AV-050: none of these notices names the mode. The study screen carries no sign of
+        // it, and a notice is text that screen shows. What they do report is exactly what
+        // AV-050 keeps visible: a rating that was **not** written.
+        val nothingToDo = "There was nothing left to save for this card, so nothing was written."
         armed ?: return ExchangeStep.Untouched(nothingToDo)
         val pending = session.intent ?: return ExchangeStep.Untouched(nothingToDo)
         val token = pending.token ?: return ExchangeStep.Untouched(nothingToDo)
@@ -413,12 +416,12 @@ class PrecommitExchange(
         )
         automaticPending = null
         if (!accepted) {
-            val notice = "Automatic grading did not match the rating that is waiting, so nothing was " +
-                "written. Say or tap Confirm to save it yourself."
+            val notice = "That rating was not saved: it no longer matched the rating that is waiting. " +
+                "Nothing was written. Say or tap Confirm to save it yourself."
             speak(notice)
             return ExchangeStep.Untouched(notice)
         }
-        return commit(nothingToDo, automatic = true)
+        return commit(nothingToDo)
     }
 
     /**
@@ -435,7 +438,7 @@ class PrecommitExchange(
         automaticPending = null
         val made = position
         if (armedNow == null || made == null || made.rating == null) {
-            val notice = "Automatic grading was not about to save anything, so there was nothing to stop."
+            val notice = "Nothing was about to be saved, so there was nothing to stop."
             return ExchangeStep.Untouched(notice)
         }
         val notice = "Stopped, and nothing was written. ${ratingName(made.rating)} is still waiting and " +
@@ -493,7 +496,7 @@ class PrecommitExchange(
      * plainly that nothing was written, and an unknown outcome says it is unknown and
      * hands the learner AV-018's halt rather than a success or a retry.
      */
-    private fun commit(untouched: String, automatic: Boolean = false): ExchangeStep {
+    private fun commit(untouched: String): ExchangeStep {
         val pending = session.intent
         if (session.state != SessionState.PROPOSING || pending == null || !pending.hasConfirmation()) {
             return ExchangeStep.Untouched(untouched)
@@ -510,15 +513,12 @@ class PrecommitExchange(
             ReviewState.CONFIRMED -> {
                 val spoken = session.announceResult(written)
                 speak(spoken.text)
-                val how = if (automatic) {
-                    "Automatic grading saved it; you did not confirm this one. "
-                } else {
-                    ""
-                }
+                // AV-050: one sentence for both modes. It names the rating that was saved and
+                // what it costs to take back, and never which mode saved it.
                 ExchangeStep.Committed(
                     written,
                     spoken,
-                    "${spoken.text} ${how}Tap Next card to carry on. If ${ratingName(rating)} was the " +
+                    "${spoken.text} Tap Next card to carry on. If ${ratingName(rating)} was the " +
                         "wrong rating, use AnkiDroid's own Undo — AnkiVoice cannot take a review back.",
                 )
             }
@@ -544,14 +544,13 @@ class PrecommitExchange(
         rating: Int?,
         source: RatingSource,
         detail: String = "",
-        automaticWindowMs: Long? = null,
     ): ExchangeStep {
         // Every new Announced position retires the last one's armed commit. A correction,
         // a self-grade and an abstention all land here, which is why none of them is ever
         // saved without a confirmation.
         automaticPending = null
         val revision = session.transcriptRevision
-        val text = announcementText(rating, source, revision, detail, automaticWindowMs)
+        val text = announcementText(rating, source, revision, detail)
         val utterance = Utterance(UtterancePurpose.ANNOUNCEMENT, text, session.language)
         val played = speak(utterance)
         val made = RatingAnnouncement(rating, source, revision, utterance, played)
@@ -572,7 +571,6 @@ class PrecommitExchange(
         source: RatingSource,
         revision: Int,
         detail: String,
-        automaticWindowMs: Long?,
     ): String {
         // AV-012 raises the revision for every settled answer, typed correction and Try
         // again, so the first settled answer is version 1 and the learner's own count of
@@ -590,22 +588,11 @@ class PrecommitExchange(
             // Unreachable: a rating is never announced without a source.
             RatingSource.NONE -> "for $heard"
         }
-        if (automaticWindowMs == null) {
-            return "${ratingName(rating)} is waiting, $provenance. Say or tap Confirm to save it, or " +
-                "choose a different rating. Nothing is saved yet."
-        }
-        // AV-047: the one announcement that says a write is coming without a confirmation.
-        // It says how long there is, how to stop it, and what a saved review costs to undo.
-        return "${ratingName(rating)} is waiting, $provenance. Automatic grading is on, so it will be " +
-            "saved in ${seconds(automaticWindowMs)} unless you stop it. Say or tap Confirm to save it " +
-            "now, choose a different rating, or tap Keep it manual to stop it. Once it is saved, only " +
-            "AnkiDroid's own Undo can take it back."
-    }
-
-    /** A window in the learner's words. Rounded up, so it never promises less time than there is. */
-    private fun seconds(ms: Long): String {
-        val whole = ((ms + 999) / 1_000).coerceAtLeast(1)
-        return if (whole == 1L) "1 second" else "$whole seconds"
+        // AV-050: one announcement, in both modes. AV-047's variant said the mode's name, how
+        // long the cancel window had left and which control stopped it; the study screen now
+        // carries none of that, and this sentence is spoken as well as shown.
+        return "${ratingName(rating)} is waiting, $provenance. Say or tap Confirm to save it, or " +
+            "choose a different rating. Nothing is saved yet."
     }
 
     /** #14's halt, in the learner's words, for a write that provably did not land. */

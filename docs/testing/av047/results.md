@@ -11,6 +11,17 @@ yet run** — it needs the owner at the emulator speaking every answer and setti
 themselves, so the [runbook](runbook.md) is the routine and this page records the result
 when it is in.
 
+> **Superseded in part on September 17, 2026 by
+> [AV-050](https://github.com/BrockBadeaux14/AnkiVoice/issues/81).** Everything below about
+> what the *study screen shows* — the "Automatic grading is on" banner, the countdown, the
+> progress bar, **Keep it manual**, and the announcement that said a write was coming — was
+> removed. The behaviour is unchanged: the option, the armed window, the `auto`
+> confirmation source and the journal's record of it are all exactly as this page describes
+> them. What changed is that a running session no longer says which mode it is in. This
+> page is left as the record of what was built and observed on the day; the current rule is
+> in [AV-007's amendment](../../contracts/av007-session-contracts.md#the-self-opening-and-self-closing-microphone-the-september-17-2026-amendment)
+> and the current live routine is in [the runbook](runbook.md).
+
 ## The open decision, settled
 
 The card left one decision open: how an automatic commit satisfies the writer's

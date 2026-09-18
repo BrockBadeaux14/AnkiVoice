@@ -42,21 +42,104 @@ class StudyControllerTest {
 
     // -- opening ----------------------------------------------------------------- //
 
+    /**
+     * AV-050: the card is offered, read and answered with no tap anywhere in between. The
+     * snapshots are what prove there was no resting state to tap in.
+     */
     @Test
-    fun `starting offers a card with its prompt and the controls that apply`() {
+    fun `starting reads the first card and opens the microphone with no tap`() {
         val h = StudyHarness()
         val state = h.started()
         assertTrue(state.running)
         assertFalse(state.busy)
-        assertEquals("asking", state.sessionState)
         assertEquals(1_789_414_083_106L, state.cardId)
         assertEquals("A box has three red blocks and two blue blocks. How many blocks are there in total?", state.prompt)
         assertEquals(listOf(1, 2, 3, 4), state.permittedRatings)
-        assertEquals("Card ready. Play the prompt to hear the question.", state.status)
-        assertEquals(setOf(StudyControl.PLAY_PROMPT, StudyControl.PAUSE, StudyControl.FINISH, StudyControl.SKIP), state.controls)
         assertNull(state.halt)
-        assertTrue(state.notice?.contains("ready") == true, state.notice)
         assertTrue(h.wroteNothing)
+
+        // The prompt was spoken, once, without anyone asking for it.
+        assertEquals(
+            listOf("A box has three red blocks and two blue blocks. How many blocks are there in total?"),
+            h.promptsSpoken,
+        )
+        // And the microphone opened itself when that playback settled.
+        assertNotNull(h.speechInput.listened, "the microphone never opened")
+        assertEquals(1, h.state.attempt)
+        assertEquals("Five blocks.", h.state.transcript)
+        // The only touch in the whole run was opening the session.
+        assertEquals(listOf("start"), h.evidence().sessionActions)
+        assertEquals(emptyList<String>(), h.evidence().turns.single().touchActions)
+        assertEquals(1, h.evidence().turns.single().automaticOpens)
+    }
+
+    /**
+     * AV-050 D.1: the learner never hears a question the screen has not shown them.
+     *
+     * The card is read on the session thread and the prompt is played on the same thread,
+     * so without an explicit publish between them the first thing a learner gets after
+     * tapping Start studying is audio over an "Opening your deck…" screen.
+     */
+    @Test
+    fun `the card is on screen before its prompt is spoken`() {
+        val h = StudyHarness()
+        val whenSpoken = mutableListOf<StudyState>()
+        h.controller.onForegroundEvent(ForegroundEvent.RESUME)
+        h.speechOutput.onSpeak = { whenSpoken += h.controller.state }
+        h.controller.start()
+
+        val atFirstWord = whenSpoken.first()
+        assertEquals(1_789_414_083_106L, atFirstWord.cardId, "the prompt was spoken before the card was published")
+        assertEquals(
+            "A box has three red blocks and two blue blocks. How many blocks are there in total?",
+            atFirstWord.prompt,
+        )
+        assertTrue(atFirstWord.running)
+        assertNotEquals(StudyWords.OPENING, atFirstWord.status)
+    }
+
+    /** Nothing is spoken for a card that is not there. */
+    @Test
+    fun `an exhausted queue reads nothing and opens no microphone`() {
+        val h = StudyHarness()
+        h.collection.order.clear()
+        h.started()
+
+        assertEquals(emptyList<String>(), h.promptsSpoken)
+        assertNull(h.speechInput.listened, "a microphone opened with no card to answer")
+        assertEquals("exhausted", h.state.sessionState)
+        assertTrue(h.wroteNothing)
+    }
+
+    /**
+     * AV-050: a capture the learner did not stop is recorded under a reason of its own, so
+     * a journal or a runbook can never read an endpoint as a gesture they made.
+     */
+    @Test
+    fun `a capture that ended itself is recorded as an endpoint and never as a Done`() {
+        val h = StudyHarness()
+        // What the real transport reports when the learner stops speaking and its own
+        // endpointing closes the microphone.
+        h.captureStop = CaptureStop.ENDPOINT
+        h.speechOnsetMs = 400
+        h.announced()
+
+        val turn = h.evidence().turns.single()
+        assertEquals(listOf("endpoint"), turn.captureStops)
+        assertFalse("done" in turn.touchActions, turn.touchActions.toString())
+        assertEquals("Five blocks.", h.state.transcript, "an endpoint changed what was heard")
+        assertEquals(3, h.state.pendingRating, "an endpoint changed the grading")
+    }
+
+    /** Both touch controls survive the automation: AV-048 keeps every control reachable. */
+    @Test
+    fun `Play prompt and Start answer are still offered where they apply`() {
+        val h = StudyHarness()
+        h.started()
+        val waiting = h.beforeMicrophone()
+        assertEquals("listening", waiting.sessionState)
+        assertEquals("thinking", waiting.answerPhase)
+        assertTrue(StudyControl.START_ANSWER in waiting.controls, waiting.controls.toString())
     }
 
     @Test
@@ -86,8 +169,9 @@ class StudyControllerTest {
     fun `every command has a control, and the surface offers only the runnable ones`() {
         val h = StudyHarness()
         h.started()
-        h.controller.ask()
-        val state = h.state
+        // AV-050: the card reads itself and the microphone opens on the settle, so the
+        // moment the answer phase is waiting is a snapshot the surface passed through.
+        val state = h.beforeMicrophone()
         assertEquals(CommandContext.COMMAND, state.context)
         // Waiting for a Start answer: repeat, pause, skip and finish are the live ones.
         assertEquals(
@@ -99,7 +183,7 @@ class StudyControllerTest {
             setOf(StudyControl.START_ANSWER, StudyControl.REPEAT, StudyControl.PAUSE, StudyControl.FINISH, StudyControl.SKIP, StudyControl.SPEAK_COMMAND),
             state.controls,
         )
-        assertEquals("Take your time. Tap Start answer when you are ready to speak.", state.status)
+        assertEquals("Take your time. The microphone opens itself, or tap Start answer.", state.status)
         assertTrue(h.wroteNothing)
     }
 
@@ -236,24 +320,22 @@ class StudyControllerTest {
             ),
         )
         h.started()
-        h.controller.ask()
-        h.controller.startAnswer()
         assertEquals("paused", h.state.halt?.kind)
 
+        // AV-050: a Try again is a new attempt in every sense — it hears the Prompt again
+        // and gets its own single automatic open after its own playback.
         h.controller.retry()
-        assertEquals("retrying", h.state.sessionState)
-        assertNull(h.state.halt)
-        assertEquals(2, h.state.transcriptRevision)
-        assertTrue(StudyControl.START_ANSWER in h.state.controls)
-        assertTrue(StudyControl.EDIT_TRANSCRIPT in h.state.controls)
-        assertFalse(StudyControl.TRY_AGAIN in h.state.controls, "Try again is not offered twice in a row")
-
-        h.controller.startAnswer()
         assertEquals("proposing", h.state.sessionState)
         assertEquals(3, h.state.transcriptRevision, "the settled retry raised the revision")
+        assertEquals(2, h.promptsSpoken.size, "the retry did not read the card again")
         val turn = h.evidence().turns.single()
         assertEquals(1, turn.retries)
         assertEquals(listOf("failed", "final"), turn.recognition.map { it.status })
+        // One automatic open per attempt, and two attempts. Never two inside one.
+        assertEquals(2, turn.automaticOpens)
+        assertEquals(2, h.state.attempt)
+        // The retry's own waiting snapshot still offered the touch control.
+        assertTrue(StudyControl.START_ANSWER in h.beforeMicrophone().controls)
     }
 
     @Test
@@ -363,8 +445,10 @@ class StudyControllerTest {
         assertNoWriteControl(state)
         assertTrue(h.wroteNothing)
 
+        // AV-050: a resumed session picks the hands-free chain back up rather than leaving
+        // the learner in front of a screen that waits for a tap. The script is exhausted, so
+        // the resumed attempt fails rather than settling; the card is what matters here.
         h.controller.run(VoiceCommand.RESUME)
-        assertEquals("asking", h.state.sessionState)
         assertEquals(1_789_414_083_106L, h.state.cardId, "resume re-read a different card")
         assertTrue(h.wroteNothing)
     }
@@ -376,7 +460,7 @@ class StudyControllerTest {
         h.started()
         h.controller.run(VoiceCommand.RESUME)
         assertTrue(h.state.notice?.contains("not available") == true, h.state.notice)
-        assertEquals("asking", h.state.sessionState)
+        assertEquals("proposing", h.state.sessionState, "the refused command moved the turn")
         assertTrue(h.wroteNothing)
     }
 
@@ -384,7 +468,6 @@ class StudyControllerTest {
     fun `finishing releases the transport, writes nothing and offers a fresh start`() {
         val h = StudyHarness()
         h.started()
-        h.controller.ask()
         h.controller.stop()
 
         assertFalse(h.state.running)
@@ -515,7 +598,9 @@ class StudyControllerTest {
         assertEquals(2, h.created, "the reload restarted the interrupted session instead of opening a new one")
         assertTrue(h.state.running)
         assertNull(h.state.closed)
-        assertEquals("asking", h.state.sessionState)
+        // AV-050: the reloaded session reads its card and opens its microphone on its own,
+        // and the harness's one scripted transcript went to the session before it.
+        assertEquals(1_789_414_083_106L, h.state.cardId)
         assertTrue(h.wroteNothing)
     }
 
@@ -636,21 +721,29 @@ class StudyControllerTest {
 
     @Test
     fun `Next card advances only after a confirmed review and clears the outcome`() {
-        val h = StudyHarness()
+        val h = StudyHarness(
+            grades = listOf(
+                FakeGrader.Answer(GradingResult(GradeLabel.CORRECT, "matched")),
+                FakeGrader.Answer(Failure(GraderFailure.PROVIDER_ERROR, "no route")),
+            ),
+        )
         h.announced()
         h.controller.run(VoiceCommand.CONFIRM)
 
         h.controller.nextCard()
 
         val state = h.state
-        assertEquals("asking", state.sessionState)
         assertEquals("Reverse the sequence red, blue, green.", state.prompt)
         assertNull(state.outcomeState, "the previous card's verdict outlived its turn")
         assertNull(state.announcement)
         assertNull(state.grading, "the previous card's grade outlived its turn")
-        assertNull(state.transcript)
         assertEquals(1, h.transport.calls.size)
         assertEquals(2, h.evidence().turns.size)
+        // AV-050: the new card read itself and opened its own microphone, with no Next-card
+        // tap followed by a Play-prompt tap followed by a Start-answer tap.
+        assertEquals(2, h.promptsSpoken.size)
+        assertEquals("Reverse the sequence red, blue, green.", h.promptsSpoken.last())
+        assertEquals(1, h.evidence().turns.last().automaticOpens)
     }
 
     @Test
@@ -839,7 +932,14 @@ class StudyControllerTest {
         val turn = evidence.turns.single()
         assertEquals(1, turn.turn)
         assertEquals(1_789_414_083_106L, turn.cardId)
-        assertEquals(listOf("play prompt", "start answer", "confirm", "finish"), turn.touchActions)
+        // AV-050: the prompt and the microphone are no longer taps, so they are no longer
+        // touch actions. What the learner actually did on this turn was confirm and finish.
+        assertEquals(listOf("confirm", "finish"), turn.touchActions)
+        assertEquals(1, turn.automaticOpens)
+        // The `:core` fake answers inside `listen`, so no microphone was ever stopped here;
+        // AV-050's own stop reasons are exercised against the transport and in
+        // [StudyControllerTest.a capture that ended itself is recorded as an endpoint].
+        assertEquals(emptyList<String>(), turn.captureStops)
         assertEquals("final", turn.recognition.single().status)
         assertEquals("sufficient", turn.recognition.single().confidence)
         assertEquals(0, turn.retries)

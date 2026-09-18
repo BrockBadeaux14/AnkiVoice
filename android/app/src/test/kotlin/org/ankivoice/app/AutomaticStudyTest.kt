@@ -68,17 +68,22 @@ class AutomaticStudyTest {
     // -- on: the window, and the commit at the end of it ----------------------- //
 
     @Test
-    fun `a grader proposal opens the window and says so on the screen`() {
+    fun `a grader proposal opens the window and the screen says nothing about it`() {
         val h = on()
         val state = h.announced()
 
+        // The behaviour is AV-047's, unchanged: the option is on and a window is armed.
         assertTrue(state.automaticGrading)
         assertEquals(AutomaticGrading.DEFAULT_CANCEL_WINDOW_MS, state.autoCommitWindowMs)
         assertEquals(listOf(AutomaticGrading.DEFAULT_CANCEL_WINDOW_MS), h.scheduler.delays)
-        assertTrue(StudyControl.CANCEL_AUTOMATIC in state.controls, state.controls.toString())
         assertEquals(3, state.pendingRating)
-        assertTrue(state.announcement?.contains("saved in 5 seconds unless you stop it") == true, state.announcement)
         assertTrue(h.wroteNothing, "opening the window wrote a review")
+
+        // AV-050: and nothing the learner can read says so. The announcement is spoken as
+        // well as shown, so it is the one that matters most.
+        assertNoAutomaticGradingText(state)
+        assertTrue(state.announcement?.contains("Good is waiting") == true, state.announcement)
+        assertFalse(state.announcement?.contains("unless you stop it") == true, state.announcement)
     }
 
     @Test
@@ -94,8 +99,11 @@ class AutomaticStudyTest {
         assertEquals(1, h.collection.reviews.size)
         assertEquals(3, h.collection.reviews.single().rating)
         assertNull(state.autoCommitWindowMs, "the window stayed open over a committed review")
-        assertFalse(StudyControl.CANCEL_AUTOMATIC in state.controls)
-        assertTrue(state.notice?.contains("Automatic grading saved it") == true, state.notice)
+        // AV-050: the saved review is still announced — a write the learner did not make is
+        // exactly what they need told — and the sentence names the rating, never the mode.
+        assertTrue(state.notice?.contains("Saved rating 3") == true, state.notice)
+        assertTrue(state.notice?.contains("Good") == true, state.notice)
+        assertNoAutomaticGradingText(state)
     }
 
     @Test
@@ -150,9 +158,8 @@ class AutomaticStudyTest {
         )
         h.announced()
         h.scheduler.elapse()
+        // AV-050: Next card reads the second card and opens its microphone by itself.
         h.controller.nextCard()
-        h.controller.ask()
-        h.controller.startAnswer()
 
         assertEquals(AutomaticGrading.DEFAULT_CANCEL_WINDOW_MS, h.state.autoCommitWindowMs)
         h.scheduler.elapse()
@@ -240,10 +247,52 @@ class AutomaticStudyTest {
     @Test
     fun `cancelling is offered only while a window is open`() {
         val h = on()
-        assertFalse(StudyControl.CANCEL_AUTOMATIC in h.started().controls)
-        assertTrue(StudyControl.CANCEL_AUTOMATIC in h.announced().controls)
+        // AV-050: opening a session now runs all the way to the proposal, so the moment
+        // before one is armed is a snapshot the surface passed through.
+        assertTrue(StudyControl.CANCEL_AUTOMATIC in h.started().controls)
+        assertFalse(StudyControl.CANCEL_AUTOMATIC in h.beforeMicrophone().controls)
         h.controller.cancelAutomaticCommit()
         assertFalse(StudyControl.CANCEL_AUTOMATIC in h.state.controls)
+    }
+
+    // -- AV-050: the running screen carries no sign of the mode ---------------- //
+
+    /**
+     * The guard AV-050 asks for: no text a running study screen can produce says
+     * "Automatic grading". It is applied to a whole session's worth of snapshots rather
+     * than to one, because the banner it replaces was on screen for the whole session.
+     */
+    @Test
+    fun `no snapshot of a whole automatic session names the mode`() {
+        val h = on()
+        h.announced()
+        h.scheduler.elapse()
+        h.controller.nextCard()
+        h.controller.retry()
+        h.controller.stop()
+
+        assertTrue(h.published.isNotEmpty())
+        h.published.forEach(::assertNoAutomaticGradingText)
+        // The evidence still records it, because the record is not the screen.
+        assertTrue(h.evidence().turns.all { it.automaticGrading })
+    }
+
+    /** A window that is retired mid-flight writes nothing and still says nothing. */
+    @Test
+    fun `a corrected rating retires the window, writes nothing and names no mode`() {
+        val h = on()
+        h.announced()
+        // The learner corrects the rating while the timer is already in the scheduler's
+        // hand: the released task finds a window that no longer applies and writes nothing.
+        val released = h.scheduler.release()
+        h.controller.rate(2)
+        released.run()
+
+        val state = h.state
+        assertTrue(h.collection.reviews.isEmpty(), "a retired window still wrote a review")
+        assertEquals(2, state.pendingRating)
+        assertNull(state.autoCommitWindowMs)
+        assertNoAutomaticGradingText(state)
     }
 
     // -- what stays manual whatever the option says ---------------------------- //

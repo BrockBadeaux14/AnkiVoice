@@ -218,6 +218,11 @@ private fun studySession(
             language = settings.language,
             partial = speech::lastPartial,
             rawConfidence = speech::lastConfidence,
+            // AV-050: what the transport measured about a capture the session thread was
+            // blocked inside — when the learner was first heard, and what stopped the
+            // microphone. Both are observations; neither decides anything here.
+            speechOnsetMs = speech::lastSpeechOnsetMs,
+            captureStop = speech::lastCaptureStop,
             skips = provider::report,
             release = speech::releaseAll,
         ),

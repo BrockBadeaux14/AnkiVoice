@@ -318,10 +318,32 @@ class AndroidSpeechPlatform(private val context: Context) : SpeechPlatform {
         private val listener: RecognitionListener,
     ) : AndroidRecognitionListener {
         override fun onReadyForSpeech(params: Bundle?) = observe("onReadyForSpeech", params)
-        override fun onBeginningOfSpeech() = observe("onBeginningOfSpeech", null)
+
+        /**
+         * AV-050: this used to go to the diagnostics observer alone. It is now also the
+         * signal that starts AV-012's answer window, because the pre-roll in front of it is
+         * recall time and not speaking time.
+         */
+        override fun onBeginningOfSpeech() {
+            observe("onBeginningOfSpeech", null)
+            listener.onSpeechStarted(generation)
+        }
+
         override fun onRmsChanged(rmsdB: Float) = Unit
         override fun onBufferReceived(buffer: ByteArray?) = Unit
-        override fun onEndOfSpeech() = observe("onEndOfSpeech", null)
+
+        /**
+         * AV-050: the engine's endpoint, reported rather than only observed.
+         *
+         * With `EXTRA_SEGMENTED_SESSION` over `EXTRA_AUDIO_SOURCE` the session ends when the
+         * transport closes the write end, so the engine cannot end a capture itself. Handing
+         * this over is what lets the transport end one on the learner's behalf.
+         */
+        override fun onEndOfSpeech() {
+            observe("onEndOfSpeech", null)
+            listener.onSpeechEnded(generation)
+        }
+
         override fun onEvent(eventType: Int, params: Bundle?) = observe("onEvent:$eventType", params)
 
         override fun onPartialResults(partialResults: Bundle?) {

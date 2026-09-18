@@ -44,6 +44,15 @@ Every turn is one card on the **app's own study screen**. The harness launches t
 app, watches the shipped controller's snapshots, and exports its evidence when you finish;
 it taps nothing and speaks nothing.
 
+> **Amended September 17, 2026 by [AV-050](https://github.com/BrockBadeaux14/AnkiVoice/issues/81).**
+> The study screen no longer has two taps in front of the microphone. Wherever a routine
+> below says **Play prompt** and **Start answer**, the card now reads itself when it is
+> offered and the microphone opens itself when that playback settles — so you wait rather
+> than tap. Both controls are still there for a reading or an open that did not happen.
+> **Done** is likewise optional: the capture ends itself a moment after you stop speaking,
+> and tapping Done only hurries it. Everything else in these routines is unchanged.
+
+
 | Turn | You do, on the study screen | What must happen |
 | --- | --- | --- |
 | `rule-match` | Play prompt · Start answer · say the reference answer · Done · Confirm · Finish | grading path `rule`; one review; journal settled `confirmed` |
