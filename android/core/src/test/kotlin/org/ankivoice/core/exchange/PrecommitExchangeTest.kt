@@ -110,19 +110,19 @@ class PrecommitExchangeTest {
     // -- the announcement, for each of the four sources ------------------------ //
 
     @Test
-    fun `an exact rule match is announced with its rating, its source and its answer version`() {
+    fun `an exact rule match is announced with its rating, and bound to its source and version`() {
         answered()
         val made = announced(announceGrade(GradeLabel.CORRECT, RatingSource.RULE))
 
+        // AV-050 D.4: the source and the revision still **bind** the announcement — they are
+        // what a stale suggestion is rejected by — but they are no longer spoken. The
+        // sentence is read aloud after every card, so it carries the grade and nothing else.
         assertEquals(3, made.rating)
         assertEquals(RatingSource.RULE, made.source)
         assertEquals(1, made.transcriptRevision, "the first settled answer is revision 1")
         assertTrue(made.spoken, "the announcement was not played")
         assertEquals(UtterancePurpose.ANNOUNCEMENT, made.utterance.purpose)
-        assertTrue(made.text.contains("Good is waiting"), made.text)
-        assertTrue(made.text.contains("exact rule match"), made.text)
-        assertTrue(made.text.contains("answer version 1"), made.text)
-        assertTrue(made.text.contains("Confirm"), made.text)
+        assertEquals("Card graded good.", made.text)
         assertEquals(listOf(made.text), announcements)
         assertEquals(ReviewState.PENDING, session.intent?.state)
         assertTrue(wroteNothing)
@@ -133,8 +133,10 @@ class PrecommitExchangeTest {
         answered()
         val made = announced(announceGrade(GradeLabel.CORRECT, RatingSource.AI))
 
+        // AV-050 D.4: the source still binds the announcement and still reaches the screen,
+        // the record and the journal. It is simply no longer read aloud.
         assertEquals(RatingSource.AI, made.source)
-        assertTrue(made.text.contains("AI grader"), made.text)
+        assertEquals("Card graded good.", made.text)
         assertFalse(made.text.contains("rule match"), made.text)
         assertTrue(wroteNothing)
     }
@@ -148,8 +150,7 @@ class PrecommitExchangeTest {
 
         assertEquals(2, made.rating)
         assertEquals(RatingSource.LEARNER, made.source)
-        assertTrue(made.text.contains("Hard is waiting"), made.text)
-        assertTrue(made.text.contains("you chose it"), made.text)
+        assertEquals("Card graded hard.", made.text)
         assertEquals(ReviewState.PENDING, session.intent?.state)
         assertTrue(wroteNothing)
     }
@@ -162,7 +163,7 @@ class PrecommitExchangeTest {
         assertNull(made.rating)
         assertTrue(made.isAbstention)
         assertEquals(RatingSource.NONE, made.source)
-        assertTrue(made.text.startsWith("No rating was suggested"), made.text)
+        assertTrue(made.text.startsWith("No grade"), made.text)
         assertTrue(made.text.contains("Again, Hard, Good or Easy"), made.text)
         assertNull(session.intent, "an abstention proposed a rating")
         assertEquals(SessionState.GRADING, session.state)
@@ -231,7 +232,7 @@ class PrecommitExchangeTest {
         assertEquals(1, corrected.rating)
         assertEquals(RatingSource.LEARNER, corrected.source)
         assertEquals(2, announcements.size, "the correction was not re-announced")
-        assertTrue(announcements.last().contains("Again is waiting"), announcements.last())
+        assertEquals("Card graded again.", announcements.last())
         assertEquals(SessionState.PROPOSING, session.state)
         assertEquals(ReviewState.PENDING, session.intent?.state)
         assertTrue(wroteNothing, "a correction reached the writer")
@@ -329,12 +330,14 @@ class PrecommitExchangeTest {
         assertTrue(step is ExchangeStep.Committed, "$step")
         step as ExchangeStep.Committed
         assertEquals(ReviewState.CONFIRMED, step.outcome.state)
-        assertEquals("Saved rating 3.", step.announcement?.text)
+        // AV-050 D.4: by name rather than as a number, and minted for the record only — the
+        // exchange no longer speaks it, because the grade was announced when it was reached.
+        assertEquals("Saved Good.", step.announcement?.text)
         assertEquals(SessionState.COMMITTED, session.state)
         assertEquals(1, transport.calls.size, "the single write was not single")
         assertEquals(3, transport.calls.single().rating)
         assertEquals(1, session.outcomes.size)
-        assertTrue(announcements.last().startsWith("Saved rating 3."), announcements.last())
+        assertEquals("Card graded good.", announcements.last(), "the saved review was spoken twice")
         assertNull(exchange.position, "a committed rating is still announced as waiting")
         assertEquals(step.outcome, exchange.settled)
     }
@@ -434,7 +437,7 @@ class PrecommitExchangeTest {
 
         val second = announced(announceGrade(GradeLabel.CORRECT, RatingSource.RULE))
         assertEquals(2, second.transcriptRevision)
-        assertTrue(second.text.contains("answer version 2"), second.text)
+        assertEquals("Card graded good.", second.text)
         assertEquals(1, first.transcriptRevision, "the edit rewrote the earlier announcement")
         assertTrue(wroteNothing)
     }
@@ -480,7 +483,7 @@ class PrecommitExchangeTest {
         val made = announced(announceGrade(GradeLabel.CORRECT, RatingSource.RULE))
 
         assertFalse(made.spoken, "a failed playback was reported as spoken")
-        assertTrue(made.text.contains("Good is waiting"), made.text)
+        assertEquals("Card graded good.", made.text)
         assertEquals(SessionState.PROPOSING, session.state)
         assertEquals(3, exchange.position?.rating)
         assertTrue(wroteNothing)

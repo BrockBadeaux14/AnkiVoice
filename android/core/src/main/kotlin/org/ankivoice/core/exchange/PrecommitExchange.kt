@@ -511,8 +511,12 @@ class PrecommitExchange(
         refusals = 0
         return when (written.state) {
             ReviewState.CONFIRMED -> {
+                // AV-050 D.4: minted for the record and the journal, and deliberately **not
+                // spoken**. The grade was announced once when it was reached; saying it again
+                // on the way to the next card is the second of two utterances the owner asked
+                // to be one. A write that *failed* still speaks, below — silence is only ever
+                // the sound of success.
                 val spoken = session.announceResult(written)
-                speak(spoken.text)
                 // AV-050: one sentence for both modes. It names the rating that was saved and
                 // what it costs to take back, and never which mode saved it.
                 ExchangeStep.Committed(
@@ -572,27 +576,20 @@ class PrecommitExchange(
         revision: Int,
         detail: String,
     ): String {
-        // AV-012 raises the revision for every settled answer, typed correction and Try
-        // again, so the first settled answer is version 1 and the learner's own count of
-        // how many times they have answered this card matches it.
-        val heard = "what I heard (answer version $revision)"
+        // AV-050 D.4, at the owner's direction: this is **spoken after every card**, so it is
+        // as short as it can be and still be true. Everything it used to carry — the
+        // provenance, the answer version, what to say next, whether anything is saved yet —
+        // is on the screen, which is where a learner who wants it can read it.
+        //
+        // "Graded" is the exact claim and the only safe one: the **grader** reached this
+        // rating. It says nothing about a review being written, which at this point has not
+        // happened and, in the manual mode, will not happen without a confirmation. AV-007's
+        // rule that nothing announces a write the writer did not confirm is untouched.
         if (rating == null) {
             val why = if (detail.isBlank()) "" else " ($detail)"
-            return "No rating was suggested for $heard$why. Say or tap Again, Hard, Good or Easy to " +
-                "choose one. Nothing is saved until you confirm it."
+            return "No grade$why. Say Again, Hard, Good or Easy."
         }
-        val provenance = when (source) {
-            RatingSource.RULE -> "from an exact rule match on $heard"
-            RatingSource.AI -> "suggested by the AI grader from $heard"
-            RatingSource.LEARNER -> "because you chose it for $heard"
-            // Unreachable: a rating is never announced without a source.
-            RatingSource.NONE -> "for $heard"
-        }
-        // AV-050: one announcement, in both modes. AV-047's variant said the mode's name, how
-        // long the cancel window had left and which control stopped it; the study screen now
-        // carries none of that, and this sentence is spoken as well as shown.
-        return "${ratingName(rating)} is waiting, $provenance. Say or tap Confirm to save it, or " +
-            "choose a different rating. Nothing is saved yet."
+        return "Card graded ${ratingName(rating).lowercase()}."
     }
 
     /** #14's halt, in the learner's words, for a write that provably did not land. */

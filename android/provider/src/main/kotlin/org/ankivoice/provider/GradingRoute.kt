@@ -17,7 +17,19 @@ enum class GradingRoute(val specName: String) {
     ;
 
     companion object {
-        /** The order the semantic grader tries the routes in. */
-        val ORDER: List<GradingRoute> = listOf(FREE, PAID)
+        /**
+         * The order the semantic grader tries the routes in.
+         *
+         * **Reversed September 17, 2026 at the owner's direction (AV-050 D.6).** It was
+         * free-then-paid, so a request only reached the owner's credits after the free route
+         * refused it. It is now **paid first, free as the backup**.
+         *
+         * This is a deliberate reversal of AV-043's cost posture, not an oversight. Every AI
+         * grading request now spends the owner's OpenRouter credits by default, and the free
+         * route is what catches a paid request that was refused, unavailable, over budget or
+         * failed. The daily paid budget and the per-request hold are unchanged and still
+         * bound the spend: what changed is which route the budget is spent on first.
+         */
+        val ORDER: List<GradingRoute> = listOf(PAID, FREE)
     }
 }

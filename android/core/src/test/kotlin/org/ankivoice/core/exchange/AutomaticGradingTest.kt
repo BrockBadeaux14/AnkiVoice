@@ -138,7 +138,11 @@ class AutomaticGradingTest {
         announceGrade(GradeLabel.CORRECT, on = manual)
 
         val said = announcements.last()
-        assertTrue("Nothing is saved yet." in said, said)
+        // AV-050 D.4 removed "Nothing is saved yet": with the option on it was said aloud
+        // moments before the rating saved itself. What the announcement must still not do is
+        // claim a write is coming.
+        assertFalse("Nothing is saved yet" in said, said)
+        assertEquals("Card graded good.", said)
         assertFalse("Automatic" in said, said)
     }
 
@@ -236,17 +240,17 @@ class AutomaticGradingTest {
     }
 
     @Test
-    fun `the announcement names the rating and its source, and never the mode`() {
+    fun `the announcement names the rating, and never the mode`() {
         answered()
         announceGrade(GradeLabel.CORRECT)
 
-        // AV-050 replaced AV-047's second announcement with the manual one. The study screen
-        // carries no sign of the mode, and this sentence is spoken as well as shown, so it
-        // says what is waiting and where it came from and nothing about how it will be saved.
+        // AV-050 replaced AV-047's second announcement with the manual one, and D.4 then cut
+        // that to the grade alone. It is spoken after every card, so what matters is that it
+        // is short and that it says nothing about how the rating will be saved. The source
+        // still binds it and still reaches the screen and the journal.
         val said = announcements.last()
-        assertTrue("Good is waiting" in said, said)
-        assertTrue("from an exact rule match" in said, said)
-        assertTrue("Say or tap Confirm to save it" in said, said)
+        assertEquals("Card graded good.", said)
+        assertEquals(RatingSource.RULE, checkNotNull(exchange.position).source)
         assertFalse("Automatic grading" in said, said)
         assertFalse("Keep it manual" in said, said)
         assertFalse("unless you stop it" in said, said)
@@ -260,8 +264,7 @@ class AutomaticGradingTest {
         // AV-047 had two announcements and AV-050 left one. Spelled out rather than matched
         // in fragments, because "the mode is not named" is a claim about the whole sentence.
         assertEquals(
-            "Good is waiting, from an exact rule match on what I heard (answer version 1). " +
-                "Say or tap Confirm to save it, or choose a different rating. Nothing is saved yet.",
+            "Card graded good.",
             announcements.last(),
         )
     }

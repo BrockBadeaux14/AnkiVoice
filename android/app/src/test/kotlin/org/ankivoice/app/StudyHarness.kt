@@ -187,6 +187,23 @@ internal class StudyHarness(
         "no prompt playback was published: ${published.map { it.notice }}"
     }
 
+    /**
+     * The snapshot published for the saved review, before AV-050 D.5 carried on to the next
+     * card.
+     *
+     * A confirmed write used to leave the screen on its outcome until Next card was tapped;
+     * it now advances by itself, so the committed screen is a moment the surface passes
+     * through. Everything about the write is still published — this is where a test reads it.
+     */
+    fun afterCommit(): StudyState = checkNotNull(published.lastOrNull { it.outcomeState != null }) {
+        "no committed snapshot was published"
+    }
+
+    /** The turn that produced the write, rather than the card D.5 advanced to. */
+    fun committedTurn(): TurnEvidence = checkNotNull(evidence().turns.firstOrNull { it.outcome != null }) {
+        "no turn recorded an outcome"
+    }
+
     val state: StudyState get() = controller.state
 
     /**

@@ -52,7 +52,7 @@ class NamedScenariosTest {
         assertEquals(ReviewState.CONFIRMED, committed.state)
         assertEquals(SessionState.COMMITTED, session.state)
         assertEquals(BindingSessionState.COMMITTED, session.bindingState)
-        assertEquals("Saved rating 3.", session.announceResult(committed).text)
+        assertEquals("Saved Good.", session.announceResult(committed).text)
         assertEquals(UtterancePurpose.ANNOUNCEMENT, session.announceResult(committed).purpose)
         session.advance()
         assertEquals(SessionState.IDLE, session.state)

@@ -69,8 +69,8 @@ class StudyControllerTest {
         assertEquals("Five blocks.", h.state.transcript)
         // The only touch in the whole run was opening the session.
         assertEquals(listOf("start"), h.evidence().sessionActions)
-        assertEquals(emptyList<String>(), h.evidence().turns.single().touchActions)
-        assertEquals(1, h.evidence().turns.single().automaticOpens)
+        assertEquals(emptyList<String>(), h.evidence().turns.first().touchActions)
+        assertEquals(1, h.evidence().turns.first().automaticOpens)
     }
 
     /**
@@ -124,7 +124,7 @@ class StudyControllerTest {
         h.speechOnsetMs = 400
         h.announced()
 
-        val turn = h.evidence().turns.single()
+        val turn = h.evidence().turns.first()
         assertEquals(listOf("endpoint"), turn.captureStops)
         assertFalse("done" in turn.touchActions, turn.touchActions.toString())
         assertEquals("Five blocks.", h.state.transcript, "an endpoint changed what was heard")
@@ -289,7 +289,7 @@ class StudyControllerTest {
 
         assertEquals(listOf(h.speechInput.listened), h.speechInput.stoppedWhileOpen)
         assertEquals(CaptureStop.DONE, h.open.answerTurn?.answer?.stoppedBy)
-        assertTrue(h.evidence().turns.single().touchActions.contains("done"))
+        assertTrue(h.evidence().turns.first().touchActions.contains("done"))
         assertTrue(h.wroteNothing)
     }
 
@@ -305,7 +305,7 @@ class StudyControllerTest {
         assertEquals("answer_cancelled", h.state.halt?.reason)
         assertTrue(h.state.halt?.explanation?.startsWith("You cancelled") == true, h.state.halt?.explanation)
         assertNotNull(h.open.card, "the card was dropped by a cancel")
-        assertEquals("cancelled", h.evidence().turns.single().recognition.single().status)
+        assertEquals("cancelled", h.evidence().turns.first().recognition.single().status)
         assertTrue(StudyControl.TRY_AGAIN in h.state.controls)
         assertNoWriteControl(h.state)
         assertTrue(h.wroteNothing)
@@ -328,7 +328,7 @@ class StudyControllerTest {
         assertEquals("proposing", h.state.sessionState)
         assertEquals(3, h.state.transcriptRevision, "the settled retry raised the revision")
         assertEquals(2, h.promptsSpoken.size, "the retry did not read the card again")
-        val turn = h.evidence().turns.single()
+        val turn = h.evidence().turns.first()
         assertEquals(1, turn.retries)
         assertEquals(listOf("failed", "final"), turn.recognition.map { it.status })
         // One automatic open per attempt, and two attempts. Never two inside one.
@@ -359,8 +359,8 @@ class StudyControllerTest {
         assertNull(state.pendingRating, "the edit did not retire the pending rating")
         assertEquals(2, state.grading?.revision, "the new version was not graded")
         assertEquals(GradingRecord.ABSTAIN, state.grading?.path)
-        assertTrue(state.announcement?.startsWith("No rating was suggested") == true, state.announcement)
-        assertEquals(1, h.evidence().turns.single().transcriptEdits)
+        assertTrue(state.announcement?.startsWith("No grade") == true, state.announcement)
+        assertEquals(1, h.evidence().turns.first().transcriptEdits)
         assertTrue(h.wroteNothing)
     }
 
@@ -512,7 +512,7 @@ class StudyControllerTest {
         assertEquals(setOf(StudyControl.RELOAD), state.controls)
         assertEquals(ReviewState.FAILED, h.open.intent?.state, "the pending rating survived the interruption")
         assertTrue(h.wroteNothing)
-        assertTrue(h.evidence().turns.single().halts.contains("app_switch"))
+        assertTrue(h.evidence().turns.first().halts.contains("app_switch"))
     }
 
     @Test
@@ -658,14 +658,15 @@ class StudyControllerTest {
     }
 
     @Test
-    fun `grading announces the pending rating with its source, its answer version and its grading status`() {
+    fun `grading announces the pending rating, and binds it to its source and grading status`() {
         val h = StudyHarness()
         val state = h.announced()
         assertEquals(3, state.pendingRating)
         assertEquals("rule", state.ratingSource)
         assertEquals(1, state.announcedRevision)
-        assertTrue(state.announcement?.contains("Good is waiting") == true, state.announcement)
-        assertTrue(state.announcement?.contains("exact rule match") == true, state.announcement)
+        // AV-050 D.4: the rule match still binds the announcement and is still on screen as
+        // the source and the grading status; it is simply no longer read aloud.
+        assertEquals("Card graded good.", state.announcement)
         assertEquals(GradingRecord.RULE, state.grading?.path)
         assertEquals("Rule match: matched", state.grading?.status)
         assertEquals(listOf(1, 2, 3, 4), state.ratings)
@@ -684,7 +685,7 @@ class StudyControllerTest {
         assertEquals("ai", state.ratingSource)
         assertEquals(GradingRecord.AI_PAID, state.grading?.path)
         assertTrue(state.grading?.status?.startsWith("AI suggestion (correct, paid route)") == true, state.grading?.status)
-        assertEquals(GradingRecord.AI_PAID, h.evidence().turns.single().gradingPath)
+        assertEquals(GradingRecord.AI_PAID, h.evidence().turns.first().gradingPath)
     }
 
     @Test
@@ -694,7 +695,8 @@ class StudyControllerTest {
 
         h.controller.run(VoiceCommand.CONFIRM)
 
-        val state = h.state
+        // AV-050 D.5: published, then advanced — so the write is read from its snapshot.
+        val state = h.afterCommit()
         assertEquals(ReviewState.CONFIRMED.specName, state.outcomeState)
         assertTrue(state.committed)
         assertFalse(state.reconcileRequired)
@@ -704,7 +706,7 @@ class StudyControllerTest {
         assertEquals(setOf(StudyControl.NEXT_CARD, StudyControl.UNDO_HANDOFF, StudyControl.FINISH, StudyControl.SPEAK_COMMAND), state.controls)
         assertEquals(1, h.transport.calls.size)
         assertEquals(1, h.collection.reviews.size)
-        assertTrue(state.notice?.contains("Saved rating 3.") == true, state.notice)
+        assertTrue(state.notice?.contains("Saved Good.") == true, state.notice)
 
         // A duplicate confirm is not even offered, and cannot write a second review.
         assertFalse(VoiceCommand.CONFIRM in state.available)
@@ -712,7 +714,7 @@ class StudyControllerTest {
         assertEquals(1, h.transport.calls.size)
         assertEquals(1, h.collection.reviews.size)
 
-        val turn = h.evidence().turns.single()
+        val turn = h.evidence().turns.first()
         assertEquals("touch", turn.confirmationSource)
         assertEquals("confirmed", turn.outcome)
         assertEquals(3, turn.rating)
@@ -819,7 +821,7 @@ class StudyControllerTest {
 
         assertNull(h.state.pendingRating)
         assertEquals("none", h.state.ratingSource)
-        assertTrue(h.state.announcement?.startsWith("No rating was suggested") == true)
+        assertTrue(h.state.announcement?.startsWith("No grade") == true, h.state.announcement)
         assertEquals(GradingRecord.ABSTAIN, h.state.grading?.path)
         assertTrue(h.state.grading?.status?.contains("Rate it yourself") == true, h.state.grading?.status)
         assertEquals(listOf(1, 2, 3, 4), h.state.ratings)
@@ -835,7 +837,7 @@ class StudyControllerTest {
         h.controller.run(VoiceCommand.CONFIRM)
         assertEquals(1, h.transport.calls.size)
         assertEquals(2, h.collection.reviews.single().rating)
-        val turn = h.evidence().turns.single()
+        val turn = h.evidence().turns.first()
         assertEquals(2, turn.selfGrade)
         assertEquals(GradingRecord.ABSTAIN, turn.gradingPath)
     }
@@ -869,7 +871,7 @@ class StudyControllerTest {
         h.controller.rate(2)
         h.controller.run(VoiceCommand.RATE_EASY)
         assertEquals(4, h.state.pendingRating)
-        assertEquals(listOf(RatingCorrection(3, 2), RatingCorrection(2, 4)), h.evidence().turns.single().ratingCorrections)
+        assertEquals(listOf(RatingCorrection(3, 2), RatingCorrection(2, 4)), h.evidence().turns.first().ratingCorrections)
         assertTrue(h.wroteNothing)
     }
 
@@ -929,12 +931,14 @@ class StudyControllerTest {
         assertEquals(h.open.outcomes, evidence.outcomes)
         assertEquals(1, evidence.journal.size)
         assertEquals("study", evidence.journal.single().sessionId)
-        val turn = evidence.turns.single()
+        val turn = evidence.turns.first()
         assertEquals(1, turn.turn)
         assertEquals(1_789_414_083_106L, turn.cardId)
         // AV-050: the prompt and the microphone are no longer taps, so they are no longer
-        // touch actions. What the learner actually did on this turn was confirm and finish.
-        assertEquals(listOf("confirm", "finish"), turn.touchActions)
+        // touch actions, and D.5 advances on the confirmation — so Finish is a touch on the
+        // card that followed, not on this one. Confirm is all this turn saw.
+        assertEquals(listOf("confirm"), turn.touchActions)
+        assertEquals(listOf("finish"), evidence.turns.last().touchActions)
         assertEquals(1, turn.automaticOpens)
         // The `:core` fake answers inside `listen`, so no microphone was ever stopped here;
         // AV-050's own stop reasons are exercised against the transport and in
@@ -956,7 +960,7 @@ class StudyControllerTest {
         h.announced()
         h.controller.listenForCommand()
         assertEquals(1, h.transport.calls.size)
-        val turn = h.evidence().turns.single()
+        val turn = h.evidence().turns.first()
         assertEquals("spoken", turn.confirmationSource)
         assertEquals(listOf("confirm: executed (spoken)"), turn.spokenCommands)
     }

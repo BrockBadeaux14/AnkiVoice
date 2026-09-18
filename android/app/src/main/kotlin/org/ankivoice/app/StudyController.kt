@@ -920,7 +920,8 @@ internal class StudyController(
     fun run(command: VoiceCommand) = act(command.specName) { current ->
         val opened = current ?: return@act NO_SESSION
         val pending = pendingRating(opened.session)
-        val notice = opened.exchange.onCommand(opened.router.touch(command)).notice
+        val step = opened.exchange.onCommand(opened.router.touch(command))
+        val notice = advanceIfWritten(opened, step, step.notice)
         command.rating?.let { recordRating(opened, pending, it) }
         // AV-050: a resumed session picks the hands-free chain back up where the pause left
         // it — the card is read again and the microphone opens itself — rather than stranding
@@ -942,7 +943,8 @@ internal class StudyController(
             pendingInterrupt = null
             return@act interruptNow(opened, kind)
         }
-        val notice = opened.exchange.onCommand(outcome).notice
+        val step = opened.exchange.onCommand(outcome)
+        val notice = advanceIfWritten(opened, step, step.notice)
         (outcome as? CommandOutcome.Executed)?.command?.rating?.let { recordRating(opened, pending, it) }
         notice
     }
@@ -1002,13 +1004,47 @@ internal class StudyController(
     /** Only a confirmed review advances, and the next card is read from AnkiDroid afresh. */
     fun nextCard() = act("next card") { current ->
         val opened = current ?: return@act NO_SESSION
+        advanceToNextCard(opened)
+    }
+
+    /**
+     * Advance to the next card and read it. Runs on [worker], inside whatever action asked.
+     *
+     * Separate from [nextCard] because AV-050 D.5 reaches it from a confirmed write as well
+     * as from the touch control, and an action cannot call another action: [act] refuses
+     * while one is running.
+     */
+    private fun advanceToNextCard(opened: OpenSession): String? {
         captureTurn(opened)
         opened.session.advance()
         lastGrade = null
         heard = null
         val offered = describeOffer(opened.session.offerCard())
         // AV-050: the next card reads itself too, so a run of cards needs no tap at all.
-        handsFreeToMicrophone(opened, offered) ?: offered
+        return handsFreeToMicrophone(opened, offered) ?: offered
+    }
+
+    /**
+     * AV-050 D.5: a review that was **written** carries straight on to the next card.
+     *
+     * The last tap in a turn was Next card, which did nothing a confirmed write had not
+     * already settled. Only [ReviewState.CONFIRMED] advances: a write that failed, or one
+     * whose outcome could not be established, leaves the screen exactly where it is, because
+     * those are the two states the learner has to see and act on.
+     *
+     * **What this costs.** The `COMMITTED` screen is also where **Wrong rating? Undo in
+     * AnkiDroid** is offered, and AV-007 makes AnkiDroid's own Undo the only correction
+     * after a write. Advancing past it does not remove that route — the Undo is AnkiDroid's
+     * and is still there — but it does stop AnkiVoice handing the learner to it. Recorded
+     * here rather than discovered later.
+     */
+    private fun advanceIfWritten(opened: OpenSession, step: ExchangeStep, notice: String?): String? {
+        if (step !is ExchangeStep.Committed || step.outcome.state != ReviewState.CONFIRMED) return notice
+        if (open !== opened || opened.session.state != SessionState.COMMITTED) return notice
+        // Published before the advance, so the saved review is reported as its own moment
+        // rather than being overwritten by the next card's arrival.
+        publish(opened, actionToken, notice, busy = true)
+        return advanceToNextCard(opened) ?: notice
     }
 
     /**
@@ -1215,7 +1251,9 @@ internal class StudyController(
                 // leave the learner believing a review exists when none does. It names the
                 // unwritten rating and what to do about it, never the mode.
                 val notice = try {
-                    opened.exchange.commitAutomatically().notice
+                    val step = opened.exchange.commitAutomatically()
+                    // AV-050 D.5: a written review carries on, however it was written.
+                    advanceIfWritten(opened, step, step.notice)
                 } catch (e: IllegalStateException) {
                     unwritten(e)
                 } catch (e: IllegalArgumentException) {
@@ -1578,6 +1616,12 @@ internal class StudyController(
                 -> Unit
             }
         }
+        // AV-050 D.5: a confirmed write now advances by itself, so the handoff to AnkiDroid's
+        // own Undo — AV-007's only correction after a write — is carried onto the cards that
+        // follow it rather than vanishing with the screen it used to live on. It is offered
+        // for as long as this session has written anything, because that is exactly as long
+        // as there is a last review for AnkiDroid to undo.
+        if (session.outcomes.any { it.state == ReviewState.CONFIRMED }) out += StudyControl.UNDO_HANDOFF
         // AV-047: offered only while a window is actually armed, so it never appears as a
         // control that would do nothing, and it never appears while the option is off.
         if (current.exchange.armed != null) out += StudyControl.CANCEL_AUTOMATIC

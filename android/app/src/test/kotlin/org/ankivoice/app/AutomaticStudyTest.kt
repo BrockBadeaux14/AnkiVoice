@@ -62,7 +62,7 @@ class AutomaticStudyTest {
         h.scheduler.elapse()
         assertTrue(h.wroteNothing)
         assertEquals(SessionState.PROPOSING.specName, h.state.sessionState)
-        assertFalse(h.evidence().turns.single().automaticGrading)
+        assertFalse(h.evidence().turns.first().automaticGrading)
     }
 
     // -- on: the window, and the commit at the end of it ----------------------- //
@@ -82,7 +82,7 @@ class AutomaticStudyTest {
         // AV-050: and nothing the learner can read says so. The announcement is spoken as
         // well as shown, so it is the one that matters most.
         assertNoAutomaticGradingText(state)
-        assertTrue(state.announcement?.contains("Good is waiting") == true, state.announcement)
+        assertEquals("Card graded good.", state.announcement)
         assertFalse(state.announcement?.contains("unless you stop it") == true, state.announcement)
     }
 
@@ -92,7 +92,7 @@ class AutomaticStudyTest {
         h.announced()
         h.scheduler.elapse()
 
-        val state = h.state
+        val state = h.afterCommit()
         assertEquals(ReviewState.CONFIRMED.specName, state.outcomeState)
         assertEquals(SessionState.COMMITTED.specName, state.sessionState)
         assertTrue(state.committed)
@@ -101,7 +101,7 @@ class AutomaticStudyTest {
         assertNull(state.autoCommitWindowMs, "the window stayed open over a committed review")
         // AV-050: the saved review is still announced — a write the learner did not make is
         // exactly what they need told — and the sentence names the rating, never the mode.
-        assertTrue(state.notice?.contains("Saved rating 3") == true, state.notice)
+        assertTrue(state.notice?.contains("Saved Good") == true, state.notice)
         assertTrue(state.notice?.contains("Good") == true, state.notice)
         assertNoAutomaticGradingText(state)
     }
@@ -116,7 +116,7 @@ class AutomaticStudyTest {
 
         h.scheduler.elapse()
 
-        assertEquals(ReviewState.CONFIRMED.specName, h.state.outcomeState)
+        assertEquals(ReviewState.CONFIRMED.specName, h.afterCommit().outcomeState)
         assertEquals(1, h.collection.reviews.single().rating)
     }
 
@@ -126,7 +126,7 @@ class AutomaticStudyTest {
         automatic.announced()
         automatic.scheduler.elapse()
 
-        val turn = automatic.evidence().turns.single()
+        val turn = automatic.committedTurn()
         assertEquals(ConfirmationSource.AUTO.specName, turn.confirmationSource)
         assertTrue(turn.automaticGrading)
         assertFalse(turn.automaticCancelled)
@@ -138,7 +138,7 @@ class AutomaticStudyTest {
         manual.announced()
         manual.controller.run(VoiceCommand.CONFIRM)
 
-        val confirmed = manual.evidence().turns.single()
+        val confirmed = manual.committedTurn()
         assertEquals(ConfirmationSource.TOUCH.specName, confirmed.confirmationSource)
         assertFalse(confirmed.automaticGrading)
         assertEquals(ConfirmationSource.TOUCH, manual.evidence().journal.single().confirmationSource)
@@ -156,13 +156,17 @@ class AutomaticStudyTest {
                 FakeSpeechInput.Say("Green, blue, red."),
             ),
         )
+        // AV-050 D.5: the saved first card advances by itself, reads the second and opens
+        // its microphone — so the second card arms a window of its own with no tap at all,
+        // and running the scheduler out carries the pair of them through.
         h.announced()
         h.scheduler.elapse()
-        // AV-050: Next card reads the second card and opens its microphone by itself.
-        h.controller.nextCard()
 
-        assertEquals(AutomaticGrading.DEFAULT_CANCEL_WINDOW_MS, h.state.autoCommitWindowMs)
-        h.scheduler.elapse()
+        assertEquals(
+            listOf(AutomaticGrading.DEFAULT_CANCEL_WINDOW_MS, AutomaticGrading.DEFAULT_CANCEL_WINDOW_MS),
+            h.scheduler.delays,
+            "the second card did not arm a window of its own",
+        )
         assertEquals(2, h.collection.reviews.size, "the second card was not saved automatically")
         assertEquals(2, h.evidence().turns.size)
         assertTrue(h.evidence().turns.all { it.automaticGrading })
@@ -194,8 +198,8 @@ class AutomaticStudyTest {
         h.controller.rate(2)
         h.controller.run(VoiceCommand.CONFIRM)
         assertEquals(2, h.collection.reviews.single().rating)
-        assertEquals(ConfirmationSource.TOUCH.specName, h.evidence().turns.single().confirmationSource)
-        assertTrue(h.evidence().turns.single().automaticCancelled)
+        assertEquals(ConfirmationSource.TOUCH.specName, h.committedTurn().confirmationSource)
+        assertTrue(h.evidence().turns.first().automaticCancelled)
     }
 
     @Test
@@ -211,7 +215,7 @@ class AutomaticStudyTest {
         assertTrue(h.wroteNothing, "a window that fired wrote over the learner's cancel")
         assertEquals(SessionState.PROPOSING.specName, h.state.sessionState)
         assertEquals(3, h.state.pendingRating)
-        assertTrue(h.evidence().turns.single().automaticCancelled)
+        assertTrue(h.evidence().turns.first().automaticCancelled)
     }
 
     @Test
@@ -322,7 +326,7 @@ class AutomaticStudyTest {
         assertTrue(h.scheduler.delays.isEmpty(), "a grading failure opened a window")
         h.scheduler.elapse()
         assertTrue(h.wroteNothing)
-        assertEquals(GradingRecord.UNAVAILABLE, h.evidence().turns.single().gradingPath)
+        assertEquals(GradingRecord.UNAVAILABLE, h.evidence().turns.first().gradingPath)
     }
 
     @Test
@@ -353,7 +357,7 @@ class AutomaticStudyTest {
 
         h.controller.run(VoiceCommand.CONFIRM)
         assertEquals(4, h.collection.reviews.single().rating)
-        assertEquals(ConfirmationSource.TOUCH.specName, h.evidence().turns.single().confirmationSource)
+        assertEquals(ConfirmationSource.TOUCH.specName, h.committedTurn().confirmationSource)
     }
 
     @Test
@@ -379,7 +383,7 @@ class AutomaticStudyTest {
         assertTrue(h.wroteNothing, "an edited answer's old rating was written")
         assertNull(h.state.pendingRating, "the edit did not withdraw the pending rating")
         assertEquals(2, h.state.transcriptRevision)
-        assertEquals(1, h.evidence().turns.single().transcriptEdits)
+        assertEquals(1, h.evidence().turns.first().transcriptEdits)
     }
 
     @Test
@@ -393,7 +397,7 @@ class AutomaticStudyTest {
         assertEquals("interrupted", h.state.closed)
         h.scheduler.elapse()
         assertTrue(h.wroteNothing, "a window fired into an interrupted session")
-        assertTrue(h.evidence().turns.single().halts.contains(Interruption.APP_SWITCH.specName))
+        assertTrue(h.evidence().turns.first().halts.contains(Interruption.APP_SWITCH.specName))
     }
 
     @Test
