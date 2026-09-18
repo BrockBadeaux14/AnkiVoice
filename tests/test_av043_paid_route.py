@@ -1,4 +1,8 @@
-"""AV-043 drift guard: free first, paid only within the cap, and nothing reaches a writer.
+"""AV-043 drift guard: the route order, the cap, and nothing reaching a writer.
+
+AV-050 D.6 reversed the order at the owner's direction — paid first, free as the backup —
+so this file guards the new order and the property that made it safe to change: the grader
+decides which failure to report without naming a route at all.
 
 These checks read the sources and the documents; no Gradle run, no emulator, no network.
 They fail if the route order changes, if the free-route guard grows a second hard-coded
@@ -27,14 +31,25 @@ def code(path):
 
 
 class RouteOrder(unittest.TestCase):
-    def test_free_is_tried_before_paid(self):
+    def test_paid_is_tried_before_free(self):
         routes = code(PROVIDER / "GradingRoute.kt")
-        self.assertIn("val ORDER: List<GradingRoute> = listOf(FREE, PAID)", routes)
+        self.assertIn("val ORDER: List<GradingRoute> = listOf(PAID, FREE)", routes)
         grader = code(PROVIDER / "SemanticGrader.kt")
         self.assertIn("for (route in provider.routes)", grader)
-        self.assertIn("if (route == GradingRoute.FREE) freeFailure = failure", grader)
+        # The loop used to test for FREE to decide which failure the learner is told about.
+        # It now reports the last route that actually dispatched, which is right under
+        # either order — and a route named here again would be the order hard-coded twice.
+        self.assertNotIn("GradingRoute.FREE", grader, "the route loop names a route again")
+        self.assertIn("if (attempted.dispatched)", grader)
         provider = code(PROVIDER / "GradingProvider.kt")
         self.assertIn("GradingRoute.ORDER.filter { it in enabledRoutes }", provider)
+
+    def test_the_app_describes_the_order_it_actually_uses(self):
+        """A learner reading "free first" while their credits are spent is the worst this
+        string could be, so the description is pinned to the order the code ships."""
+        module = code(PROVIDER / "ProviderModule.kt")
+        self.assertIn("$paidRouteDescription first", module)
+        self.assertNotIn("$freeRouteDescription first", module)
 
     def test_the_paid_route_keeps_the_deadline_and_the_single_retry(self):
         grader = code(PROVIDER / "SemanticGrader.kt")
