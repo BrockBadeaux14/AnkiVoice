@@ -26,6 +26,41 @@ object SpeechPins {
      */
     const val PREFER_OFFLINE = false
 
+    /**
+     * AV-050 D.3: the capture source, and the preprocessing that comes with it.
+     *
+     * **Amended September 17, 2026.** AV-042 opened `AudioSource.MIC`, the raw untuned
+     * capture, because what it was proving was that the external-audio route worked at all.
+     * The owner then compared it against Google's own voice search **inside the same
+     * emulator** and found ours plainly worse. The difference is structural: a recognizer
+     * that opens its own microphone gets `VOICE_RECOGNITION`, the source Android documents
+     * as tuned for speech recognition, and ours could not because AV-025 has to own the
+     * audio to bound the window and stop capture on command. Owning the microphone does not
+     * require giving up the tuning — we simply had not asked for it.
+     *
+     * `MIC` remains the fallback: if a device will not open `VOICE_RECOGNITION` the turn is
+     * still worth having, and a quieter capture is better than none.
+     */
+    const val CAPTURE_SOURCE_NAME = "VOICE_RECOGNITION"
+    const val CAPTURE_SOURCE_FALLBACK_NAME = "MIC"
+
+    /**
+     * AV-050 D.3: the platform effects attached to the capture session where the device
+     * offers them.
+     *
+     * Noise suppression and automatic gain control are what a tuned source would have
+     * applied anyway; attaching them explicitly means a device that gives us the raw source
+     * still gets them. **Gain is the one that matters for accuracy**: recognition degrades
+     * sharply with level, and a raw capture on a host-audio emulator arrives quiet.
+     *
+     * Echo cancellation is deliberately **not** attached. AV-025 already guarantees that
+     * playback and capture never overlap, so there is no echo to cancel, and an AEC with no
+     * reference signal can attenuate the very speech it is given.
+     */
+    const val SUPPRESS_NOISE = true
+    const val AUTOMATIC_GAIN_CONTROL = true
+    const val CANCEL_ECHO = false
+
     /** Capture format fed into the recognizer's external-audio pipe. */
     const val SAMPLE_RATE_HZ = 16_000
     const val CHANNEL_COUNT = 1

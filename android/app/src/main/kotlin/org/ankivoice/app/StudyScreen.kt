@@ -171,6 +171,14 @@ private fun AnswerPanel(state: StudyState, study: StudyController) {
                     )
                 }
             }
+            // AV-050 D.3: what the microphone actually gave us. The amplitude that decides
+            // when a capture ends itself is a pinned selection, and a peak read off a real
+            // voice is what turns it into a measurement — so it is on the screen rather than
+            // behind a logcat filter. It also separates "the audio is quiet" from "there is
+            // no audio", which look identical from the transcript alone.
+            state.captureAudio?.let {
+                Text("Microphone: $it", style = MaterialTheme.typography.labelSmall)
+            }
             val transcript = state.transcript
             when {
                 transcript != null -> {

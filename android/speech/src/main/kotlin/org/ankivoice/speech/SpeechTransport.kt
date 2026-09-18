@@ -162,6 +162,19 @@ class SpeechTransport(
         private set
 
     /**
+     * AV-050 D.3: the loudest 20 ms frame of the last capture, on the 16-bit mean-absolute
+     * scale [SpeechPins.SPEECH_FRAME_AMPLITUDE] is expressed in.
+     *
+     * The threshold that decides when a capture ends itself is a pinned **guess**; this is
+     * what turns it into a measurement. A live run reads the peak back and either confirms
+     * the bar sits under ordinary speech or says by how much it does not — which is also the
+     * fastest way to tell "the audio is quiet" from "the audio is absent".
+     */
+    @Volatile
+    var lastPeakAmplitude: Int = 0
+        private set
+
+    /**
      * AV-050: how long after the microphone opened the learner was first heard, or null
      * when they were not heard at all.
      *
@@ -193,6 +206,20 @@ class SpeechTransport(
 
     /** Callbacks rejected because their generation had already moved on. */
     fun staleCallbackLog(): List<String> = synchronized(lock) { staleCallbacks.toList() }
+
+    /**
+     * AV-050 D.3: what the last capture's audio was, in one line.
+     *
+     * The source the device gave us, the preprocessing that enabled, and the loudest frame
+     * measured. Together they answer the three questions a poor recognition raises — are we
+     * on the tuned source, is gain control on, and is the audio actually loud enough —
+     * without a logcat filter or a debugger. Null before the first capture of a session.
+     */
+    fun captureAudioReport(): String? {
+        val source = platform.captureSource ?: return null
+        val effects = platform.captureEffects.ifEmpty { listOf("none") }.joinToString(", ")
+        return "$source · $effects · peak $lastPeakAmplitude"
+    }
 
     // ---------------------------------------------------------------- SpeechOutput
 
@@ -530,12 +557,18 @@ class SpeechTransport(
             val bytes = ByteArray(SpeechPins.FRAME_SAMPLES * SpeechPins.BYTES_PER_SAMPLE)
             var heardFrame = false
             var lastLoudMs = 0L
+            var peak = 0
             try {
                 while (true) {
                     val read = open.readFrame(samples)
                     if (read <= 0) break
                     if (synchronized(lock) { generation != current }) break
-                    if (loudEnough(samples, read)) {
+                    val level = meanAmplitude(samples, read)
+                    if (level > peak) {
+                        peak = level
+                        lastPeakAmplitude = level
+                    }
+                    if (level >= SpeechPins.SPEECH_FRAME_AMPLITUDE) {
                         heardFrame = true
                         lastLoudMs = clock.nowMs()
                         // The onset only, which is what an engine that never reports
@@ -632,6 +665,7 @@ class SpeechTransport(
             endpointAtMs = 0
             lastCaptureStop = null
             lastSpeechOnsetMs = null
+            lastPeakAmplitude = 0
             // Provisional, so a callback that arrives while the microphone is still opening
             // is measured against this capture and not the previous one. The open refines it.
             captureStartedMs = clock.nowMs()
@@ -800,18 +834,22 @@ class SpeechTransport(
         private const val SILENCE_FRAME_MS = 20L
 
         /**
-         * AV-050: whether one 20 ms frame carries speech, by mean absolute amplitude.
+         * AV-050: one 20 ms frame's mean absolute amplitude, on the 16-bit scale.
          *
-         * Deliberately the crudest test that works. It decides when a capture stops and
+         * Deliberately the crudest measure that works. It decides when a capture stops and
          * nothing else — never what was said, never whether an answer was right — and it is
          * only ever consulted when the engine has offered no endpoint of its own.
          */
-        fun loudEnough(samples: ShortArray, read: Int): Boolean {
-            if (read <= 0) return false
+        fun meanAmplitude(samples: ShortArray, read: Int): Int {
+            if (read <= 0) return 0
             var total = 0L
             for (i in 0 until read) total += Math.abs(samples[i].toInt()).toLong()
-            return total / read >= SpeechPins.SPEECH_FRAME_AMPLITUDE
+            return (total / read).toInt()
         }
+
+        /** Whether that frame clears [SpeechPins.SPEECH_FRAME_AMPLITUDE]. */
+        fun loudEnough(samples: ShortArray, read: Int): Boolean =
+            read > 0 && meanAmplitude(samples, read) >= SpeechPins.SPEECH_FRAME_AMPLITUDE
 
         // Several platform conditions share one contract failure mode, so the detail carries
         // the distinction #26 requires. :core's taxonomy is AV-007's and is not extended here.

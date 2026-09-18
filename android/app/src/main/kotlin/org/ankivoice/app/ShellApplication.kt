@@ -223,6 +223,7 @@ private fun studySession(
             // microphone. Both are observations; neither decides anything here.
             speechOnsetMs = speech::lastSpeechOnsetMs,
             captureStop = speech::lastCaptureStop,
+            captureAudio = speech::captureAudioReport,
             skips = provider::report,
             release = speech::releaseAll,
         ),

@@ -37,6 +37,18 @@ interface SpeechPlatform {
 
     /** Release every retained object. Called on explicit cleanup and on foreground loss. */
     fun release()
+
+    /**
+     * AV-050 D.3: the audio source the last capture actually got, or null before the first.
+     *
+     * The tuned `VOICE_RECOGNITION` source is what is asked for; a device that refuses it
+     * gives the raw `MIC` and a quieter capture. Which one happened is not something the
+     * learner can see or the transport can infer, so the platform says.
+     */
+    val captureSource: String? get() = null
+
+    /** AV-050 D.3: the preprocessing effects that actually enabled on the last capture. */
+    val captureEffects: List<String> get() = emptyList()
 }
 
 sealed interface VoiceResolution {

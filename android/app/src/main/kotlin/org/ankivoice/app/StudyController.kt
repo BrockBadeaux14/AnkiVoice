@@ -95,6 +95,13 @@ internal class StudySession(
      * Cancel the learner made is applied from its own path and never read back from here.
      */
     val captureStop: () -> CaptureStop? = { null },
+    /**
+     * AV-050 D.3: the last capture's audio in one line — the source the device gave us, the
+     * preprocessing that enabled, and the loudest frame measured. Shown on the study screen
+     * because the amplitude that decides when a capture ends itself is a pinned guess, and
+     * this is what a live run replaces the guess with.
+     */
+    val captureAudio: () -> String? = { null },
     /** AV-010's skipped cards for this session, read on the session thread. */
     val skips: () -> SkipReport = { SkipReport() },
     val release: () -> Unit,
@@ -268,6 +275,8 @@ internal data class StudyState(
     val autoCommitWindowMs: Long? = null,
     /** True once the learner kept this card's turn manual, while that rating is still waiting. */
     val autoCommitCancelled: Boolean = false,
+    /** AV-050 D.3: the last capture's audio source, preprocessing and peak level. */
+    val captureAudio: String? = null,
     /** AV-019: the writer's own outcome for the committed attempt, or null before one. */
     val outcomeState: String? = null,
     /** The writer's own reason, shown as-is for a write that failed or could not be confirmed. */
@@ -337,6 +346,8 @@ internal data class TurnEvidence(
     val automaticGrading: Boolean,
     /** AV-047: the learner stopped an armed automatic commit on this turn. */
     val automaticCancelled: Boolean,
+    /** AV-050 D.3: the source, preprocessing and peak level of this turn's last capture. */
+    val captureAudio: String?,
     /**
      * AV-050: how many times the microphone opened itself on this turn, which is one per
      * attempt. A second one inside an attempt would be the re-arm
@@ -807,6 +818,7 @@ internal class StudyController(
         // stop to the answer it produced. A Done, an endpoint and an expiry are told apart
         // here and nowhere else in the evidence.
         session.answer?.stoppedBy?.let { currentTurn(opened).captureStops += it.specName }
+        currentTurn(opened).captureAudio = opened.study.captureAudio()
         if (session.state == SessionState.GRADING) startGrading(opened)
         return notice
     }
@@ -1430,6 +1442,7 @@ internal class StudyController(
             autoCommitWindowMs = armed?.cancelWindowMs,
             // Only while the rating the learner kept manual is the one still pending.
             autoCommitCancelled = keptManual != null && keptManual === session?.intent && armed == null,
+            captureAudio = study?.captureAudio?.invoke(),
             outcomeState = committed?.state?.specName,
             outcomeReason = committed?.reason,
             halt = halt,
@@ -1671,6 +1684,7 @@ internal class StudyController(
         var automaticCancelled = false
         var automaticOpens = 0
         val captureStops = mutableListOf<String>()
+        var captureAudio: String? = null
         var outcome: String? = null
         var rating: Int? = null
         val touchActions = mutableListOf<String>()
@@ -1680,7 +1694,7 @@ internal class StudyController(
         fun snapshot() = TurnEvidence(
             turn, cardId, transcriptRevision, recognition, retries, transcriptEdits,
             gradings.toList(), gradings.lastOrNull()?.path, selfGrade, ratingCorrections.toList(),
-            confirmationSource, automaticGrading, automaticCancelled,
+            confirmationSource, automaticGrading, automaticCancelled, captureAudio,
             automaticOpens, captureStops.toList(),
             outcome, rating, touchActions.toList(), spokenCommands.toList(), halts.toList(),
         )
