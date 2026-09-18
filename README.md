@@ -3,9 +3,9 @@
 Voice-first review for [Anki](https://apps.ankiweb.net/) flashcards on Android. AnkiVoice
 reads a card's question aloud, listens to your spoken answer, grades it on the device
 first and with an AI grader only when the rules cannot decide, and writes the review to
-AnkiDroid only after you explicitly confirm the rating. Nothing is ever rated for you.
+AnkiDroid.
 
-It is a single-owner coursework project built and verified against a pinned Android
+It is a coursework project built and verified against a pinned Android
 emulator. Every claim in the documentation is backed by a recorded run or a test, and the
 documentation says plainly what has not been verified.
 
@@ -181,6 +181,3 @@ The current release studies one deck at a time, in the foreground, on Android, i
 with the `VoiceQA` note type. Offline use, locked-screen study, general card compatibility,
 direct sync and other platforms are out of scope. All device evidence comes from one pinned
 emulator configuration; physical devices, Bluetooth audio and phone calls are unverified.
-The emulator's own audio backend is unreliable after a few microphone opens per boot, and
-the cause of some empty captures is not yet established; the app treats an empty capture as
-something to retry, never as a wrong answer.
