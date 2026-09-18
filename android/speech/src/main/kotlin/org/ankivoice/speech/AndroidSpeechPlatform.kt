@@ -8,6 +8,10 @@ import android.media.AudioFormat
 import android.media.AudioManager
 import android.media.AudioRecord
 import android.media.AudioRecordingConfiguration
+import android.media.audiofx.AcousticEchoCanceler
+import android.media.audiofx.AudioEffect
+import android.media.audiofx.AutomaticGainControl
+import android.media.audiofx.NoiseSuppressor
 import android.media.MediaPlayer
 import android.media.MediaRecorder
 import android.os.Bundle
@@ -49,6 +53,20 @@ class AndroidSpeechPlatform(private val context: Context) : SpeechPlatform {
     private var player: MediaPlayer? = null
     private var recognizer: SpeechRecognizer? = null
     private var recorder: AudioRecord? = null
+
+    /**
+     * AV-050 D.3: which source the last capture actually got, and which effects enabled.
+     *
+     * Observability, and the answer to "is this device giving us the tuned capture or the
+     * raw one". Neither decides anything; both are read by the harness and the live check.
+     */
+    @Volatile
+    override var captureSource: String? = null
+        private set
+
+    @Volatile
+    override var captureEffects: List<String> = emptyList()
+        private set
     private var pipe: Array<ParcelFileDescriptor>? = null
 
     override fun microphonePermissionGranted(): Boolean =
@@ -207,30 +225,12 @@ class AndroidSpeechPlatform(private val context: Context) : SpeechPlatform {
         language: String,
         listener: RecognitionListener,
     ): CaptureStream? {
-        val record = try {
-            val minimum = AudioRecord.getMinBufferSize(
-                SpeechPins.SAMPLE_RATE_HZ,
-                AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_16BIT,
-            )
-            AudioRecord.Builder()
-                .setAudioSource(MediaRecorder.AudioSource.MIC)
-                .setAudioFormat(
-                    AudioFormat.Builder()
-                        .setSampleRate(SpeechPins.SAMPLE_RATE_HZ)
-                        .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
-                        .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-                        .build(),
-                )
-                .setBufferSizeInBytes(maxOf(MIN_BUFFER_BYTES, minimum * 2))
-                .build()
-        } catch (_: RuntimeException) {
-            return null
-        }
-        if (record.state != AudioRecord.STATE_INITIALIZED) {
-            record.release()
-            return null
-        }
+        // AV-050 D.3: the tuned source first, the raw one only if the device refuses it.
+        val record = openRecorder(MediaRecorder.AudioSource.VOICE_RECOGNITION)
+            ?: openRecorder(MediaRecorder.AudioSource.MIC)
+            ?: return null
+        // The preprocessing a recognizer that opened its own microphone would have had.
+        val effects = attachEffects(record.audioSessionId)
 
         val channel = try {
             ParcelFileDescriptor.createPipe()
@@ -290,8 +290,85 @@ class AndroidSpeechPlatform(private val context: Context) : SpeechPlatform {
         return AudioRecordStream(
             record,
             ParcelFileDescriptor.AutoCloseOutputStream(channel[1]),
-            onRelease = { audio?.unregisterAudioRecordingCallback(silencing) },
+            onRelease = {
+                audio?.unregisterAudioRecordingCallback(silencing)
+                effects.forEach { runCatching { it.release() } }
+            },
         )
+    }
+
+    /**
+     * AV-050 D.3: one `AudioRecord` on [source], or null when the device will not give us
+     * one. The caller tries the tuned source first and the raw one after.
+     */
+    private fun openRecorder(source: Int): AudioRecord? {
+        val record = try {
+            val minimum = AudioRecord.getMinBufferSize(
+                SpeechPins.SAMPLE_RATE_HZ,
+                AudioFormat.CHANNEL_IN_MONO,
+                AudioFormat.ENCODING_PCM_16BIT,
+            )
+            AudioRecord.Builder()
+                .setAudioSource(source)
+                .setAudioFormat(
+                    AudioFormat.Builder()
+                        .setSampleRate(SpeechPins.SAMPLE_RATE_HZ)
+                        .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
+                        .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                        .build(),
+                )
+                .setBufferSizeInBytes(maxOf(MIN_BUFFER_BYTES, minimum * 2))
+                .build()
+        } catch (_: RuntimeException) {
+            return null
+        }
+        if (record.state != AudioRecord.STATE_INITIALIZED) {
+            record.release()
+            return null
+        }
+        captureSource = if (source == MediaRecorder.AudioSource.VOICE_RECOGNITION) {
+            SpeechPins.CAPTURE_SOURCE_NAME
+        } else {
+            SpeechPins.CAPTURE_SOURCE_FALLBACK_NAME
+        }
+        return record
+    }
+
+    /**
+     * AV-050 D.3: the platform's own speech preprocessing, attached to [session].
+     *
+     * Each effect is optional on purpose. `isAvailable` is a device capability, not a
+     * guarantee, and an effect that will not enable is a quieter capture rather than a
+     * failed turn — so every one of them is attempted, recorded and then let go of.
+     * Whatever is returned must be released when the capture is.
+     */
+    private fun attachEffects(session: Int): List<AudioEffect> {
+        val attached = mutableListOf<AudioEffect>()
+        val enabled = mutableListOf<String>()
+        fun add(name: String, wanted: Boolean, available: () -> Boolean, create: () -> AudioEffect?) {
+            if (!wanted) return
+            runCatching {
+                if (!available()) return@runCatching
+                create()?.let { effect ->
+                    effect.enabled = true
+                    attached += effect
+                    if (effect.enabled) enabled += name
+                }
+            }
+        }
+        add("noiseSuppressor", SpeechPins.SUPPRESS_NOISE, NoiseSuppressor::isAvailable) {
+            NoiseSuppressor.create(session)
+        }
+        add("automaticGainControl", SpeechPins.AUTOMATIC_GAIN_CONTROL, AutomaticGainControl::isAvailable) {
+            AutomaticGainControl.create(session)
+        }
+        // Not wanted: AV-025 never lets playback and capture overlap, so there is no echo,
+        // and an AEC without a reference signal can attenuate the speech it is given.
+        add("acousticEchoCanceler", SpeechPins.CANCEL_ECHO, AcousticEchoCanceler::isAvailable) {
+            AcousticEchoCanceler.create(session)
+        }
+        captureEffects = enabled
+        return attached
     }
 
     private fun recognitionIntent(language: String, readEnd: ParcelFileDescriptor): Intent =
@@ -318,10 +395,32 @@ class AndroidSpeechPlatform(private val context: Context) : SpeechPlatform {
         private val listener: RecognitionListener,
     ) : AndroidRecognitionListener {
         override fun onReadyForSpeech(params: Bundle?) = observe("onReadyForSpeech", params)
-        override fun onBeginningOfSpeech() = observe("onBeginningOfSpeech", null)
+
+        /**
+         * AV-050: this used to go to the diagnostics observer alone. It is now also the
+         * signal that starts AV-012's answer window, because the pre-roll in front of it is
+         * recall time and not speaking time.
+         */
+        override fun onBeginningOfSpeech() {
+            observe("onBeginningOfSpeech", null)
+            listener.onSpeechStarted(generation)
+        }
+
         override fun onRmsChanged(rmsdB: Float) = Unit
         override fun onBufferReceived(buffer: ByteArray?) = Unit
-        override fun onEndOfSpeech() = observe("onEndOfSpeech", null)
+
+        /**
+         * AV-050: the engine's endpoint, reported rather than only observed.
+         *
+         * With `EXTRA_SEGMENTED_SESSION` over `EXTRA_AUDIO_SOURCE` the session ends when the
+         * transport closes the write end, so the engine cannot end a capture itself. Handing
+         * this over is what lets the transport end one on the learner's behalf.
+         */
+        override fun onEndOfSpeech() {
+            observe("onEndOfSpeech", null)
+            listener.onSpeechEnded(generation)
+        }
+
         override fun onEvent(eventType: Int, params: Bundle?) = observe("onEvent:$eventType", params)
 
         override fun onPartialResults(partialResults: Bundle?) {

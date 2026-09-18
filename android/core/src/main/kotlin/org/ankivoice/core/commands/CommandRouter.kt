@@ -168,12 +168,19 @@ class CommandRouter(
         dispatch(command, ConfirmationSource.TOUCH, Confidence.ABSENT)
 
     /**
-     * One learner-opened command capture.
+     * One command capture.
      *
      * Refused outright inside the answer window: AV-025 permits one active capture, and a
      * second one would be the overlapping capture AV-012 forbids.
+     *
+     * [pauseIfNotHeard] is what separates a capture the learner **asked** for from one the
+     * app offered them. A learner who taps "Speak a command" and is not heard is owed an
+     * explanation and a stopped session, which is the default and AV-014's rule. AV-050 D.7
+     * opens a capture of its own after the grader abstains, and a learner who simply says
+     * nothing to that must not lose the turn for it — so that caller passes false, and a
+     * recognizer fault is refused without touching the session.
      */
-    fun listenForCommand(): CommandOutcome {
+    fun listenForCommand(pauseIfNotHeard: Boolean = true): CommandOutcome {
         when (context()) {
             CommandContext.ANSWER -> return refuse(
                 null,
@@ -191,7 +198,7 @@ class CommandRouter(
         val token = OperationToken(captureSessionId, 0, sequence)
         mintedTokens += token
         return when (val event = speech.listen(token, language)) {
-            is CaptureEvent.Failed -> recognitionFailed(event.failure)
+            is CaptureEvent.Failed -> recognitionFailed(event.failure, pauseIfNotHeard)
             is CaptureEvent.Transcript -> when {
                 event.token != token -> refuse(
                     null,
@@ -259,16 +266,24 @@ class CommandRouter(
     }
 
     /**
-     * A recognizer fault during a command capture. It pauses with the card preserved, and
-     * it is never treated as an answer, a rating or a command.
+     * A recognizer fault during a command capture. It is never treated as an answer, a
+     * rating or a command.
+     *
+     * With [pause] it stops the session with the card preserved, which is AV-014's rule for
+     * a capture the learner opened. Without it the session is left exactly as it was: see
+     * [listenForCommand].
      */
-    fun recognitionFailed(failure: Failure): CommandOutcome {
-        if (!session.halted) session.requestPause(failure)
+    fun recognitionFailed(failure: Failure, pause: Boolean = true): CommandOutcome {
+        if (pause && !session.halted) session.requestPause(failure)
         return refuse(
             null,
             CommandRefusal.RECOGNITION_FAILED,
-            "The command was not heard (${failure.mode.specName}). Study is paused and the card is " +
-                "kept. Use the on-screen controls to continue.",
+            if (pause) {
+                "The command was not heard (${failure.mode.specName}). Study is paused and the card " +
+                    "is kept. Use the on-screen controls to continue."
+            } else {
+                "That was not heard (${failure.mode.specName}). The card is kept and nothing changed."
+            },
         )
     }
 

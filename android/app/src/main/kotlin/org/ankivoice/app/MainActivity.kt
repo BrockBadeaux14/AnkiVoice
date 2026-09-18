@@ -294,10 +294,16 @@ private fun AutomaticGradingCard(state: ShellState, controller: ShellController)
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text("Automatic grading", style = MaterialTheme.typography.titleLarge)
+            // AV-050 D.2: the second sentence used to promise "you can stop each one during
+            // those seconds", which was the study screen's **Keep it manual** control. That
+            // control is gone, along with every other sign of the mode on the running screen,
+            // so the promise is withdrawn here rather than left standing as the one place the
+            // app still describes a button the learner will never see.
             Text(
                 "While this is on, a rating the grader proposes — an exact rule match, or the AI " +
-                    "grader's suggestion — is saved without your confirmation, a few seconds after it " +
-                    "is announced. You can stop each one during those seconds.",
+                    "grader's suggestion — is saved without your confirmation, shortly after it is " +
+                    "announced. The study screen will not warn you or ask: that is what this switch " +
+                    "buys, and it is the whole of what it buys.",
             )
             Text(
                 "Once a review is saved, AnkiVoice cannot take it back: only AnkiDroid's own Undo can, " +

@@ -34,9 +34,13 @@ internal val DISCLOSURE_NEVER_SENT = listOf(
  */
 internal val DISCLOSURE_COST: List<String>
     get() = listOf(
-        "The free route (${ProviderModule.freeRouteDescription}) is always tried first and costs nothing.",
-        "If the free route is refused, unavailable, times out or fails, one paid request may be sent to " +
-            "${ProviderModule.paidRouteDescription}. It is charged to your OpenRouter credits.",
+        // AV-050 D.6 reversed the order at the owner's direction. The disclosure is the one
+        // place a learner is told what their money is spent on, so it says the new order
+        // plainly rather than softening it: the paid route is what an AI grade normally uses.
+        "The paid route (${ProviderModule.paidRouteDescription}) is tried first, and is charged to your " +
+            "OpenRouter credits. An AI grade normally costs money.",
+        "If the paid route is refused, unavailable, times out, fails, or is stopped by your budget, the " +
+            "free route (${ProviderModule.freeRouteDescription}) is tried instead and costs nothing.",
         "Paid requests stop for the UTC day at the budget you set below: the default is " +
             "\$${QuotaLedger.formatUsd(QuotaLedger.DEFAULT_DAILY_CAP_USD)}, and \$0 turns the paid route off. " +
             "Each paid request holds its maximum cost before it is sent, and the reply's own cost replaces the hold.",

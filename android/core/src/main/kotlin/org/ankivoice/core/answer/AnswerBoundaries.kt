@@ -17,46 +17,82 @@ import org.ankivoice.core.grading.bindSuggestion
 /**
  * AV-012: one learner-answer policy above the Android speech transport.
  *
- * The limits are AV-042's selected MVP values, accepted with #51. They are engineering
- * bounds, not optimized or validated recall durations, and no measurement says that 15
- * seconds is long enough to recall an answer.
+ * The limits are AV-042's selected MVP values, accepted with #51, plus AV-050's
+ * [prerollMs]. Every one of them is a selected engineering bound, not an optimized or
+ * validated recall duration: no measurement says that 15 seconds is long enough to recall
+ * an answer, and none says that 15 seconds is long enough to say one.
  *
- * [windowMs] is the default *and* the maximum active capture, measured from the explicit
- * Start answer on a monotonic clock. [finalizationMs] is a separate deadline from
- * Done or window expiry, inclusive of the 500 ms of trailing silence #26 supplies;
- * expiry of it is a timeout, not an answer. [attemptMs] is the longest a recognizer
- * attempt can live, which is the two in sequence — the three clocks stay distinct.
+ * **Amended by AV-050 (#81), September 17, 2026.** Capture no longer opens on a tap, so
+ * the unbounded thinking time the explicit Start answer used to buy is gone. The owner's
+ * decision was to keep the 15-second answer window honest as a *speaking* budget and put
+ * the recall time in front of it: [prerollMs] runs from the microphone opening until the
+ * learner is first heard, and only then does [windowMs] start counting. A learner who
+ * never speaks gets the pre-roll and then the window, and the expiry preserves the card.
+ *
+ * [prerollMs] is recall time inside an open microphone; it ends early the moment speech
+ * begins. [windowMs] is the maximum *speaking* time, measured from speech onset, or from
+ * the pre-roll running out when no speech was ever heard. [finalizationMs] is a separate
+ * deadline from Done, an endpoint or window expiry, inclusive of the 500 ms of trailing
+ * silence #26 supplies; expiry of it is a timeout, not an answer. [attemptMs] is the
+ * longest a recognizer attempt can live, which is the three in sequence — and the clocks
+ * stay distinct.
+ *
+ * **[windowMs] cut from 15,000 to 5,000 ms on September 17, 2026 at the owner's direction.**
+ * It bounds speaking alone, and in ordinary use AV-050's endpointing ends a capture about a
+ * second after the learner stops, so the window is a backstop rather than a budget anybody
+ * spends. The pre-roll was deliberately left at 15,000: thinking time is not what was too
+ * long, and shortening it would cut off a learner who is still recalling. The cost is named
+ * rather than hidden — an answer that runs past five seconds of speech is stopped by the
+ * expiry, which preserves the card and offers Try again rather than inventing a transcript.
  */
 data class AnswerLimits(
-    val windowMs: Long = 15_000,
+    val prerollMs: Long = 15_000,
+    val windowMs: Long = 5_000,
     val finalizationMs: Long = 5_000,
 ) {
     init {
+        require(prerollMs > 0) { "The pre-roll must be a positive duration" }
         require(windowMs > 0) { "The answer window must be a positive duration" }
         require(finalizationMs > 0) { "The finalization deadline must be a positive duration" }
     }
 
-    /** The recognizer attempt lifetime: the answer window followed by finalization. */
-    val attemptMs: Long get() = windowMs + finalizationMs
+    /** The longest the microphone can be open for one attempt: the pre-roll and the window. */
+    val captureMs: Long get() = prerollMs + windowMs
+
+    /** The recognizer attempt lifetime: the whole capture followed by finalization. */
+    val attemptMs: Long get() = captureMs + finalizationMs
 
     companion object {
-        /** AV-042's selected values, pinned by the accepted #51 handoff. */
+        /** AV-042's selected values with AV-050's pre-roll, pinned by the accepted #51 handoff. */
         val SELECTED: AnswerLimits = AnswerLimits()
 
         /**
-         * Automatic re-arms inside one answer window. Zero: an explicit Try again opens a
-         * new bounded window, and nothing in this file opens one on its own.
+         * Automatic re-arms inside one attempt. Zero, and AV-050 did not change it: the
+         * microphone opens itself **once**, after that attempt's prompt playback settles,
+         * and nothing in this file reopens it after a result. An explicit Try again is a
+         * new attempt, with a pre-roll and a window of its own.
          */
         const val AUTOMATIC_REARMS: Int = 0
     }
 }
 
-/** What the turn is doing now. Thinking time is outside active capture. */
+/** What the turn is doing now. */
 enum class AnswerPhase(val specName: String) {
-    /** Prompt played and settled; waiting indefinitely for an explicit Start answer. */
+    /**
+     * The attempt has not opened yet.
+     *
+     * **Amended by AV-050 (#81):** this used to mean "waiting indefinitely for an explicit
+     * Start answer". The microphone now opens itself exactly once per attempt, when that
+     * attempt's prompt playback settles, so this phase is the gap between the card being
+     * offered and that settle. Start answer remains a touch control for a learner who wants
+     * to start early and for an automatic open that failed.
+     */
     THINKING("thinking"),
 
-    /** Active capture. The answer window is running. */
+    /**
+     * Active capture: the pre-roll first, and the answer window from the moment the learner
+     * is first heard.
+     */
     CAPTURING("capturing"),
 
     /** The microphone stopped; the finalization deadline is running. */
@@ -71,6 +107,15 @@ enum class CaptureStop(val specName: String) {
     DONE("done"),
     WINDOW_EXPIRY("window-expiry"),
     CANCELLED("cancelled"),
+
+    /**
+     * AV-050: the learner stopped speaking and the capture ended itself.
+     *
+     * A reason of its own, beside the three above, so a journal or a runbook can never read
+     * an endpoint as a gesture the learner made. It runs the same finalization the learner's
+     * own Done runs, and it re-arms nothing.
+     */
+    ENDPOINT("endpoint"),
 }
 
 /** The six answer states, kept separate so none can stand in for another. */
@@ -149,9 +194,10 @@ data class Answer(
  * orchestration; #15/#27 own voice commands. Nothing here plays audio, reads a card or
  * writes a review.
  *
- * Three clocks stay distinct on [clock]: the app-owned answer window from Start answer,
- * the recognizer attempt lifetime ([AnswerLimits.attemptMs]) and the finalization
- * deadline from Done or expiry. No deadline runs while the learner is thinking.
+ * Four clocks stay distinct on [clock]: AV-050's pre-roll from the microphone opening, the
+ * app-owned answer window from speech onset, the recognizer attempt lifetime
+ * ([AnswerLimits.attemptMs]) and the finalization deadline from Done, an endpoint or
+ * expiry. No deadline runs before the attempt opens.
  *
  * Not thread-safe. Confine it to the session's owned execution context, like
  * [org.ankivoice.core.contracts.ReviewIntent].
@@ -207,16 +253,49 @@ class AnswerTurn(
     val recognitions: Int get() = settled.count { it.status == AnswerStatus.FINAL }
 
     private var sequence = 0
+    private var prerollStartedMs = 0L
+
+    /** When the answer window started counting, or 0 while the pre-roll still is. */
     private var windowStartedMs = 0L
     private var captureEndedMs = 0L
     private var stoppedBy: CaptureStop? = null
 
-    /** Thinking time is unbounded, and outside active capture. */
+    /** The attempt has not opened yet; no deadline is running. */
     val thinking: Boolean get() = phase == AnswerPhase.THINKING
 
-    /** What is left of the answer window, or null when it is not running. */
+    /**
+     * AV-050: true once the learner has been heard in this attempt, which is what started
+     * the answer window. False through the pre-roll, and false for a whole attempt in which
+     * nobody spoke.
+     */
+    val heardSpeech: Boolean get() = speechStartedMs != 0L
+
+    private var speechStartedMs = 0L
+
+    /**
+     * AV-050: what is left of the recall pre-roll, or null when it is not running.
+     *
+     * Null once speech has begun, because the window replaced it, and null outside capture.
+     */
+    fun remainingPrerollMs(): Long? =
+        if (phase == AnswerPhase.CAPTURING && windowStartedMs == 0L) {
+            (prerollStartedMs + limits.prerollMs - clock.nowMs()).coerceAtLeast(0)
+        } else {
+            null
+        }
+
+    /**
+     * What is left of the answer window, or null when it is not running.
+     *
+     * AV-050: null through the pre-roll as well, because the window has not started
+     * counting yet. [remainingPrerollMs] is what is running then.
+     */
     fun remainingWindowMs(): Long? =
-        if (phase == AnswerPhase.CAPTURING) (windowStartedMs + limits.windowMs - clock.nowMs()).coerceAtLeast(0) else null
+        if (phase == AnswerPhase.CAPTURING && windowStartedMs != 0L) {
+            (windowStartedMs + limits.windowMs - clock.nowMs()).coerceAtLeast(0)
+        } else {
+            null
+        }
 
     /** What is left of the finalization deadline, or null when it is not running. */
     fun remainingFinalizationMs(): Long? =
@@ -228,11 +307,14 @@ class AnswerTurn(
 
     /** How long the recognizer attempt has been alive, or null outside an attempt. */
     fun attemptElapsedMs(): Long? =
-        if (phase == AnswerPhase.CAPTURING || phase == AnswerPhase.FINALIZING) clock.nowMs() - windowStartedMs else null
+        if (phase == AnswerPhase.CAPTURING || phase == AnswerPhase.FINALIZING) clock.nowMs() - prerollStartedMs else null
 
     /**
-     * Explicit Start answer. Opens one bounded window; no budget was consumed before it,
-     * however long the learner thought.
+     * Open one attempt: AV-050's automatic open after the prompt settled, or the Start
+     * answer the learner tapped to begin early.
+     *
+     * Exactly one per attempt either way. It starts the pre-roll; the answer window waits
+     * for [speechBegan], or for the pre-roll to run out with nobody heard.
      */
     fun startAnswer(): OperationToken {
         check(phase == AnswerPhase.THINKING) { "Start answer needs a turn waiting for one, not ${phase.specName}" }
@@ -240,13 +322,43 @@ class AnswerTurn(
         sequence += 1
         val opened = OperationToken(sessionId, turn, sequence)
         token = opened
-        windowStartedMs = clock.nowMs()
+        prerollStartedMs = clock.nowMs()
+        windowStartedMs = 0
+        speechStartedMs = 0
         captureEndedMs = 0
         stoppedBy = null
         partialText = ""
         answer = null
         phase = AnswerPhase.CAPTURING
         return opened
+    }
+
+    /**
+     * AV-050: the learner was heard for the first time in this attempt, [afterOpenMs] after
+     * the microphone opened.
+     *
+     * It ends the pre-roll and starts the answer window, which is what keeps the 15 seconds
+     * an honest speaking budget rather than a budget the learner spent remembering. Later
+     * calls in the same attempt do nothing: the window is measured from the first onset, not
+     * from every pause the learner takes inside it.
+     *
+     * It takes an **offset** rather than an instant because the transport measures it on a
+     * clock of its own while this class is blocked inside the capture, and two monotonic
+     * clocks share no origin. An offset past the pre-roll is clamped to it: a window may
+     * start late, but never later than a capture that heard nobody at all would have started
+     * one.
+     */
+    fun speechBegan(afterOpenMs: Long) {
+        if (phase != AnswerPhase.CAPTURING || speechStartedMs != 0L) return
+        // A pre-roll that already handed over to the window keeps that handover: an onset
+        // reported afterwards may not wind the window back and shorten it.
+        if (windowStartedMs != 0L) {
+            speechStartedMs = windowStartedMs
+            return
+        }
+        val onset = prerollStartedMs + afterOpenMs.coerceIn(0, limits.prerollMs)
+        speechStartedMs = onset
+        windowStartedMs = onset
     }
 
     /** [startAnswer] plus one capture through the contract, for a synchronous transport. */
@@ -263,6 +375,22 @@ class AnswerTurn(
     }
 
     /**
+     * AV-050: the capture ended itself because the learner stopped speaking.
+     *
+     * The same stop [done] makes, with a reason of its own, so the record never reads an
+     * endpoint as a gesture. It is refused before speech has begun: a learner who is still
+     * thinking gets the pre-roll and then the window, never an instant timeout. Done and
+     * Cancel have already taken effect by the time this could run, because both leave
+     * [AnswerPhase.CAPTURING] behind them.
+     */
+    fun endpoint(): Answer? {
+        check(phase == AnswerPhase.CAPTURING) { "An endpoint needs active capture, not ${phase.specName}" }
+        check(heardSpeech) { "An endpoint needs speech to have begun" }
+        stopCapture(CaptureStop.ENDPOINT)
+        return poll()
+    }
+
+    /**
      * Advance the deadlines without a callback.
      *
      * Window expiry stops the microphone and preserves the card: it produces no answer and
@@ -270,8 +398,15 @@ class AnswerTurn(
      */
     fun poll(): Answer? {
         val now = clock.nowMs()
-        if (phase == AnswerPhase.CAPTURING && now - windowStartedMs >= limits.windowMs) {
-            stopCapture(CaptureStop.WINDOW_EXPIRY)
+        if (phase == AnswerPhase.CAPTURING) {
+            // AV-050: a pre-roll nobody spoke into hands over to the window rather than
+            // ending the attempt, so a learner who starts late still gets the full window.
+            if (windowStartedMs == 0L && now - prerollStartedMs >= limits.prerollMs) {
+                windowStartedMs = prerollStartedMs + limits.prerollMs
+            }
+            if (windowStartedMs != 0L && now - windowStartedMs >= limits.windowMs) {
+                stopCapture(CaptureStop.WINDOW_EXPIRY)
+            }
         }
         if (phase == AnswerPhase.FINALIZING && now - captureEndedMs >= limits.finalizationMs) {
             val stop = stoppedBy?.specName.orEmpty()
@@ -339,9 +474,12 @@ class AnswerTurn(
     }
 
     /**
-     * Explicit Try again: a new attempt and a new revision for the same card. It only
-     * returns the turn to thinking — the next window opens on the next explicit Start
-     * answer, never on its own.
+     * Explicit Try again: a new attempt and a new revision for the same card.
+     *
+     * It only returns the turn to [AnswerPhase.THINKING]. **Amended by AV-050 (#81):** the
+     * next attempt's microphone opens itself once, after that attempt's own prompt playback
+     * settles — not on a result, and not from here. Nothing this class does reopens a
+     * capture inside an attempt; [AnswerLimits.AUTOMATIC_REARMS] is still zero.
      */
     fun tryAgain() {
         check(attempt > 0) { "Try again needs an attempt to repeat" }
@@ -351,6 +489,8 @@ class AnswerTurn(
         partialText = ""
         token = null
         stoppedBy = null
+        speechStartedMs = 0
+        windowStartedMs = 0
         phase = AnswerPhase.THINKING
     }
 
@@ -367,9 +507,15 @@ class AnswerTurn(
     fun bind(reply: GradingReply, source: GradingSource, permittedRatings: List<Int>): TurnGrading =
         bindSuggestion(reply, source, permittedRatings, transcriptRevision)
 
-    /** Done and expiry both stop the microphone; neither cancels the pending final. */
+    /** Done, an endpoint and expiry all stop the microphone; none cancels the pending final. */
     private fun stopCapture(stop: CaptureStop) {
-        val expiresAtMs = windowStartedMs + limits.windowMs
+        // Through the pre-roll the window has not started, so the latest this capture could
+        // run to is the whole pre-roll followed by the whole window.
+        val expiresAtMs = if (windowStartedMs != 0L) {
+            windowStartedMs + limits.windowMs
+        } else {
+            prerollStartedMs + limits.captureMs
+        }
         val now = clock.nowMs()
         // A Done that arrives after the window already ran out is recorded as the expiry.
         captureEndedMs = minOf(now, expiresAtMs)

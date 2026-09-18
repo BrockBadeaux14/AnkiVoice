@@ -41,8 +41,13 @@ object ProviderModule {
                 "\$${QuotaLedger.formatUsd(pin.ceilingUsd, 4)} is held per request"
         }
 
-    /** What the shipped route is: free first, then paid within the daily cap. */
+    /**
+     * What the shipped route is. **Reversed by AV-050 D.6:** the paid route is tried first,
+     * within today's budget, and the free route is the backup behind it. The app must never
+     * describe an order it does not use — a learner reading "free first" while their credits
+     * are being spent is the worst kind of wrong this string could be.
+     */
     val routeDescription: String
-        get() = "$freeRouteDescription first; if that route is refused, unavailable, times out or fails, " +
-            "$paidRouteDescription, within today's paid budget"
+        get() = "$paidRouteDescription first, within today's paid budget; if that route is refused, " +
+            "unavailable, times out or fails, $freeRouteDescription"
 }

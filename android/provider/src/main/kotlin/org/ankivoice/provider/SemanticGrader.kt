@@ -28,12 +28,17 @@ import org.ankivoice.core.grading.bindSuggestion
  *
  * ### Routes (AV-043)
  *
- * The AI leg tries the provider's routes in [GradingRoute.ORDER]: the pinned free route
- * first, and the pinned paid route only after the free route is refused by its guard,
- * unavailable for the session, past the deadline or failed — and only within the owner's
- * daily cap, which the provider enforces. A paid request is never sent while the free
- * route would have been tried. The paid route carries the same instruction, the same
- * two-key validation, the same deadline and the same single retry.
+ * The AI leg tries the provider's routes in [GradingRoute.ORDER], whatever that order is;
+ * nothing in this class names a route or assumes which comes first. Each route is tried
+ * only after the one before it was refused by its guard, was unavailable for the session,
+ * ran past the deadline or failed, and the paid route is tried only within the owner's
+ * daily cap, which the provider enforces. Every route carries the same instruction, the
+ * same two-key validation, the same deadline and the same single retry.
+ *
+ * **[GradingRoute.ORDER] was reversed on September 17, 2026 at the owner's direction:** it
+ * is now paid first with the free route as the backup, so an AI grading request spends the
+ * owner's credits by default. That is the order's business, not this class's — which is why
+ * the loop below was rewritten to stop naming `FREE`.
  *
  * ### Deadline and retry
  *
@@ -105,28 +110,41 @@ class SemanticGrader(
         return Graded(GradingReply(request, ai(request)), GradingSource.AI)
     }
 
-    /** One route after another, free first; each route gets at most [ATTEMPTS] dispatches. */
+    /**
+     * One route after another, in [GradingRoute.ORDER]; each gets at most [ATTEMPTS]
+     * dispatches.
+     *
+     * The order used to be free-then-paid and this loop named `FREE` to decide which
+     * failure to report. It no longer names any route: what it reports is the failure of
+     * the last route that **actually dispatched**, because a route that never left the
+     * device — off, blocked for the session, or refused by the ledger — adds nothing the
+     * learner can act on. That rule gave the right answer under the old order and gives the
+     * right answer under the reversed one, which is the point of stating it this way.
+     */
     private fun ai(request: GradingRequest): GradingOutcome {
         if (invalidated(request)) return WITHDRAWN
         val system = GradingInstruction.system(request.context)
         val user = GradingInstruction.user(request.context)
-        var freeFailure: Failure? = null
+        var dispatchedFailure: Failure? = null
+        var dispatchedRoute: GradingRoute? = null
         var last: Failure? = null
         for (route in provider.routes) {
             val attempted = attempts(route, request, system, user)
             lastRoute = route
             if (attempted.outcome is GradingResult) return attempted.outcome
             val failure = attempted.outcome as Failure
-            if (route == GradingRoute.FREE) freeFailure = failure
             last = failure
+            if (attempted.dispatched) {
+                dispatchedFailure = failure
+                dispatchedRoute = route
+            }
             // An edited or withdrawn request is not carried to the next route.
             if (invalidated(request)) return failure
-            // A paid route that never dispatched — off, blocked for the session, or refused
-            // by the ledger — adds nothing the learner can act on; the free failure is what
-            // actually happened this turn.
-            if (route != GradingRoute.FREE && !attempted.dispatched && freeFailure != null) {
-                lastRoute = GradingRoute.FREE
-                return freeFailure
+            // This route never left the device, but an earlier one did: that earlier failure
+            // is what actually happened this turn, and is what the learner is told.
+            if (!attempted.dispatched && dispatchedFailure != null) {
+                lastRoute = dispatchedRoute
+                return dispatchedFailure
             }
         }
         return last ?: WITHDRAWN

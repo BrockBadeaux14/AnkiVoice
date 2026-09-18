@@ -65,50 +65,219 @@ class AnswerBoundariesTest {
     // The selected limits
 
     @Test
-    fun `the pinned AV-042 limits, and three distinct clocks`() {
+    fun `the pinned limits, and four distinct clocks`() {
         val limits = AnswerLimits.SELECTED
-        assertEquals(15_000, limits.windowMs)
+        // AV-050 added the pre-roll in front of AV-042's window rather than lengthening it,
+        // so the 15 seconds stays a speaking budget and recall gets 15 of its own.
+        assertEquals(15_000, limits.prerollMs)
+        // Cut from 15,000 at the owner's direction: the window bounds speaking alone, and
+        // AV-050's endpointing normally ends a capture a second after the learner stops.
+        assertEquals(5_000, limits.windowMs)
         assertEquals(5_000, limits.finalizationMs)
-        assertEquals(20_000, limits.attemptMs)
+        assertEquals(20_000, limits.captureMs)
+        assertEquals(25_000, limits.attemptMs)
         assertEquals(0, AnswerLimits.AUTOMATIC_REARMS)
 
         val turn = turn()
         val token = turn.startAnswer()
         clock.advance(4_000)
-        assertEquals(11_000, turn.remainingWindowMs())
+        // Four seconds of remembering: the pre-roll is what is running, not the window.
+        assertEquals(11_000, turn.remainingPrerollMs())
+        assertNull(turn.remainingWindowMs())
         assertNull(turn.remainingFinalizationMs())
         assertEquals(4_000, turn.attemptElapsedMs())
+
+        turn.speechBegan(4_000)
+        assertNull(turn.remainingPrerollMs())
+        assertEquals(5_000, turn.remainingWindowMs())
+        clock.advance(4_000)
+        assertEquals(1_000, turn.remainingWindowMs())
 
         turn.done()
         clock.advance(1_000)
         // The window stops; the finalization deadline runs on its own; the attempt keeps going.
         assertNull(turn.remainingWindowMs())
+        assertNull(turn.remainingPrerollMs())
         assertEquals(4_000, turn.remainingFinalizationMs())
-        assertEquals(5_000, turn.attemptElapsedMs())
+        assertEquals(9_000, turn.attemptElapsedMs())
         assertEquals(CaptureStop.DONE, checkNotNull(turn.deliver(final(token, "Five."))).stoppedBy)
     }
 
     @Test
-    fun `a nonpositive window or finalization deadline is refused`() {
+    fun `a nonpositive pre-roll, window or finalization deadline is refused`() {
+        assertThrows<IllegalArgumentException> { AnswerLimits(prerollMs = 0) }
         assertThrows<IllegalArgumentException> { AnswerLimits(windowMs = 0) }
         assertThrows<IllegalArgumentException> { AnswerLimits(finalizationMs = -1) }
+    }
+
+    // AV-050: the pre-roll in front of the window
+
+    @Test
+    fun `the answer window starts when the learner is heard, not when the microphone opens`() {
+        val turn = turn()
+        val token = turn.startAnswer()
+        // Twelve seconds of silence: well past the old 15-second window's halfway mark, and
+        // the window has not started at all.
+        clock.advance(12_000)
+        assertNull(turn.poll())
+        assertEquals(AnswerPhase.CAPTURING, turn.phase)
+        assertFalse(turn.heardSpeech)
+
+        turn.speechBegan(12_000)
+        assertTrue(turn.heardSpeech)
+        assertEquals(5_000, turn.remainingWindowMs())
+        // Four seconds of speaking, on top of the twelve spent remembering.
+        clock.advance(4_000)
+        assertNull(turn.poll())
+        assertEquals(AnswerPhase.CAPTURING, turn.phase)
+        turn.done()
+        clock.advance(500)
+        assertEquals(CaptureStop.DONE, checkNotNull(turn.deliver(final(token, "green blue"))).stoppedBy)
+    }
+
+    @Test
+    fun `a pre-roll nobody spoke into hands over to the window rather than ending the attempt`() {
+        val turn = turn()
+        val token = turn.startAnswer()
+        clock.advance(15_000)
+        // The pre-roll ran out. That is not an expiry: the window starts now, and a learner
+        // who begins speaking late still gets all of it.
+        assertNull(turn.poll())
+        assertEquals(AnswerPhase.CAPTURING, turn.phase)
+        assertEquals(5_000, turn.remainingWindowMs())
+        assertFalse(turn.heardSpeech)
+
+        clock.advance(4_900)
+        assertNull(turn.poll())
+        assertEquals(AnswerPhase.CAPTURING, turn.phase)
+        clock.advance(100)
+        assertNull(turn.poll())
+        assertEquals(AnswerPhase.FINALIZING, turn.phase)
+        clock.advance(500)
+        assertEquals(CaptureStop.WINDOW_EXPIRY, checkNotNull(turn.deliver(final(token, "late"))).stoppedBy)
+    }
+
+    @Test
+    fun `speech reported after the pre-roll cannot start the window later than the pre-roll did`() {
+        val turn = turn()
+        turn.startAnswer()
+        clock.advance(17_000)
+        // An onset the transport measured past the pre-roll is clamped to its end: a window
+        // may start late, but never later than one that heard nobody at all.
+        turn.speechBegan(20_000)
+        assertEquals(3_000, turn.remainingWindowMs())
+    }
+
+    @Test
+    fun `an onset reported after the pre-roll handed over does not wind the window back`() {
+        val turn = turn()
+        turn.startAnswer()
+        clock.advance(15_000)
+        // The pre-roll ran out with nobody heard, so poll() started the window.
+        assertNull(turn.poll())
+        assertEquals(5_000, turn.remainingWindowMs())
+
+        clock.advance(2_000)
+        // A late onset for speech that began during the pre-roll may not shorten the window
+        // that already started; the learner keeps what the handover gave them.
+        turn.speechBegan(2_000)
+        assertEquals(3_000, turn.remainingWindowMs())
+        assertTrue(turn.heardSpeech)
+    }
+
+    @Test
+    fun `a capture nobody spoke into reports no speech and refuses to end itself`() {
+        val turn = turn()
+        turn.startAnswer()
+        clock.advance(19_000)
+        assertNull(turn.poll())
+        assertFalse(turn.heardSpeech)
+        assertThrows<IllegalStateException> { turn.endpoint() }
+        assertEquals(AnswerPhase.CAPTURING, turn.phase)
+    }
+
+    // AV-050: the capture that ends itself
+
+    @Test
+    fun `an endpoint stops the microphone through the same path as Done, under its own reason`() {
+        val turn = turn()
+        val token = turn.startAnswer()
+        turn.speechBegan(200)
+        clock.advance(3_000)
+        assertNull(turn.endpoint())
+        assertEquals(AnswerPhase.FINALIZING, turn.phase)
+        // The same contract stop Done makes, and not a cancel: the attempt lives on until
+        // its final or its deadline.
+        assertEquals(listOf(token), speech.stopped)
+        assertEquals(emptyList<OperationToken>(), speech.cancelled)
+
+        clock.advance(400)
+        val answer = checkNotNull(turn.deliver(final(token, "green blue")))
+        assertEquals(AnswerStatus.FINAL, answer.status)
+        assertEquals("green blue", answer.text)
+        // AV-012's settled statuses are unchanged; only the reason for the stop is new.
+        assertEquals(CaptureStop.ENDPOINT, answer.stoppedBy)
+    }
+
+    @Test
+    fun `nothing ends a capture before the learner has been heard`() {
+        val turn = turn()
+        turn.startAnswer()
+        clock.advance(9_000)
+        assertThrows<IllegalStateException> { turn.endpoint() }
+        assertEquals(AnswerPhase.CAPTURING, turn.phase)
+        assertEquals(emptyList<OperationToken>(), speech.stopped)
+    }
+
+    @Test
+    fun `an endpoint after Done is refused, so the learner's own stop is what is recorded`() {
+        val turn = turn()
+        val token = turn.startAnswer()
+        turn.speechBegan(100)
+        clock.advance(2_000)
+        turn.done()
+        assertThrows<IllegalStateException> { turn.endpoint() }
+        clock.advance(400)
+        assertEquals(CaptureStop.DONE, checkNotNull(turn.deliver(final(token, "five"))).stoppedBy)
+    }
+
+    @Test
+    fun `an endpoint re-arms nothing, and Try again is what opens the next attempt`() {
+        val turn = turn()
+        val first = turn.startAnswer()
+        turn.speechBegan(100)
+        clock.advance(2_000)
+        turn.endpoint()
+        clock.advance(400)
+        turn.deliver(final(first, "green"))
+        assertEquals(AnswerPhase.SETTLED, turn.phase)
+        assertEquals(1, turn.attempt)
+        // Nothing reopened: a settled turn stays settled until an explicit Try again.
+        clock.advance(60_000)
+        assertEquals(1, turn.attempt)
+        assertEquals(AnswerPhase.SETTLED, turn.phase)
+        assertThrows<IllegalStateException> { turn.startAnswer() }
     }
 
     // Thinking time is outside active capture
 
     @Test
-    fun `thinking is unbounded and consumes no part of the window`() {
+    fun `time before the attempt opens consumes no part of the pre-roll or the window`() {
         val turn = turn()
         assertTrue(turn.thinking)
+        assertNull(turn.remainingPrerollMs())
         assertNull(turn.remainingWindowMs())
-        // Far longer than the whole 15-second window, and longer than a whole attempt.
+        // Far longer than the whole capture, and longer than a whole attempt. AV-050 makes
+        // this the prompt playing rather than a learner deciding when to tap.
         clock.advance(120_000)
         assertTrue(turn.thinking)
         assertEquals(0, turn.attempt)
 
         val token = turn.startAnswer()
-        assertEquals(15_000, turn.remainingWindowMs())
-        clock.advance(14_000)
+        assertEquals(15_000, turn.remainingPrerollMs())
+        turn.speechBegan(0)
+        assertEquals(5_000, turn.remainingWindowMs())
+        clock.advance(4_000)
         turn.done()
         clock.advance(690)
         val answer = checkNotNull(turn.deliver(final(token, "green blue red")))
@@ -143,7 +312,8 @@ class AnswerBoundariesTest {
 
         val expired = turn()
         val expiredToken = expired.startAnswer()
-        clock.advance(15_000)
+        // The pre-roll and then the window, because nobody spoke into either.
+        clock.advance(20_000)
         assertNull(expired.poll())
         assertEquals(listOf(doneToken, expiredToken), speech.stopped)
     }
@@ -154,7 +324,8 @@ class AnswerBoundariesTest {
     fun `window expiry stops the microphone, preserves the card and manufactures nothing`() {
         val turn = turn()
         val token = turn.startAnswer()
-        clock.advance(15_000)
+        turn.speechBegan(0)
+        clock.advance(5_000)
         // Expiry alone is not an answer and never finalizes the learner's recall.
         assertNull(turn.poll())
         assertEquals(AnswerPhase.FINALIZING, turn.phase)
@@ -171,7 +342,8 @@ class AnswerBoundariesTest {
     fun `a Done after the window ran out is recorded as the expiry`() {
         val turn = turn()
         turn.startAnswer()
-        clock.advance(15_400)
+        turn.speechBegan(0)
+        clock.advance(5_400)
         turn.done()
         clock.advance(400)
         // The 400 ms the window overran is already gone when finalization starts.
@@ -219,7 +391,10 @@ class AnswerBoundariesTest {
             AnswerStatus.entries.map { it.specName },
         )
         assertEquals(listOf("thinking", "capturing", "finalizing", "settled"), AnswerPhase.entries.map { it.specName })
-        assertEquals(listOf("done", "window-expiry", "cancelled"), CaptureStop.entries.map { it.specName })
+        assertEquals(
+            listOf("done", "window-expiry", "cancelled", "endpoint"),
+            CaptureStop.entries.map { it.specName },
+        )
     }
 
     @Test
@@ -362,7 +537,9 @@ class AnswerBoundariesTest {
         assertEquals(afterFailure + 1, turn.transcriptRevision)
         assertTrue(turn.thinking)
         assertNull(turn.answer)
-        // Thinking again: the new window still only opens on an explicit Start answer.
+        assertFalse(turn.heardSpeech)
+        // Waiting again: AV-050 gives the new attempt its own single open after its own
+        // prompt playback, and nothing in this class opens one on its own.
         clock.advance(30_000)
         assertTrue(turn.thinking)
 
@@ -370,7 +547,10 @@ class AnswerBoundariesTest {
         assertNotEquals(first, second)
         assertEquals(2, turn.attempt)
         assertEquals(1, turn.retries)
-        assertEquals(15_000, turn.remainingWindowMs())
+        // A pre-roll and a window of its own, not what was left of the last attempt's.
+        assertEquals(15_000, turn.remainingPrerollMs())
+        turn.speechBegan(0)
+        assertEquals(5_000, turn.remainingWindowMs())
         clock.advance(1_000)
         turn.done()
         clock.advance(690)

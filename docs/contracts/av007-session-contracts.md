@@ -176,6 +176,17 @@ Captures one spoken answer.
 | `finishAnswer` | capture token | AV-012's Done: the microphone stops, the attempt lives on until its final or its deadline. Called from another thread, because `listen` blocks for the whole attempt |
 | `cancel` | capture token | idempotent cleanup; later events are ignored |
 
+**Amended September 17, 2026 (AV-050).** This specification used to say that capture opens
+only on an **explicit Start answer**. The rule that replaces it: **the microphone opens
+itself exactly once per attempt, after that attempt's prompt playback settles.** #13 makes
+that single `listen` call when the settle is over; the learner may bring it forward by
+tapping Start answer, which stays a touch control and is offered whenever capture is not
+running. What is unchanged: one open per attempt, no re-arm after a result inside an
+attempt, no capture during playback, and the settle interval AV-025 opens on playback
+completion, which `listen` still honours whichever way the open arrives. An explicit **Try
+again** is a new attempt, which hears the prompt again and gets its own single automatic
+open. See [The self-opening and self-closing microphone](#the-self-opening-and-self-closing-microphone-the-september-17-2026-amendment).
+
 Failures: `permissionDenied`, `recognizerUnavailable`, `recognizerError`,
 `noSpeechDetected`, `listenTimeout`, `networkUnavailable`, `quotaExhausted`,
 `noMatch`, `earlyClosure`, `lowConfidence`.
@@ -314,6 +325,44 @@ and an active recognizer attempt must remain distinguishable. This specification
 chooses no silence duration, retry count, confidence threshold or focus-loss duration.
 Ordinary internal playback-to-capture handoff is not an external interruption; #45
 must measure how to distinguish them. #23 chooses framework/ownership independently.
+
+## The self-opening and self-closing microphone: the September 17, 2026 amendment
+
+[AV-050](https://github.com/BrockBadeaux14/AnkiVoice/issues/81) removes the two taps
+between a card being offered and the learner speaking, at the owner's request. A card that
+is offered has its Prompt spoken, and when that playback settles the microphone opens on
+its own.
+
+**What the old rule bought, and what replaces it.** The explicit Start answer bought
+*unbounded thinking time*: no budget was consumed however long the learner took. An
+automatic open cannot offer that, because the microphone is already running. The owner's
+decision was to keep AV-042's 15-second answer window honest as a **speaking** budget and
+put the recall time in front of it as a pre-roll, rather than lengthening the window:
+
+| Clock | Value | Rule |
+| --- | --- | --- |
+| Pre-roll | 15,000 ms | Recall time inside an open microphone, from the open. It ends the moment the learner is first heard. |
+| Answer window | 5,000 ms | The maximum **speaking** time, from speech onset — or from the pre-roll running out, when nobody was ever heard. Cut from 15,000 at the owner's direction the same day. |
+| Finalization | 5,000 ms | Unchanged, and still separate. |
+
+Both values are **selected engineering bounds**, pinned in the same terms AV-042 pinned its
+own. Nothing measured says 15 seconds is long enough to recall an answer, and nothing
+measured says 15 seconds is long enough to say one. A learner who never speaks gets the
+pre-roll and then the window, and the expiry preserves the card as it always did.
+
+**Ending a capture.** AV-012's Done and an expiry were the only ways an active capture
+ended. A capture now also ends itself when the learner stops speaking, through the **same**
+`finishAnswer` path and the same finalization deadline — one way to stop a microphone, two
+ways to decide it is time. The engine's own endpoint is the primary route, held briefly in
+case the learner was mid-pause; where the engine reports no endpoint, trailing silence
+measured over the capture's own PCM frames is the fallback. Neither may run before the
+learner has been heard or before a pinned minimum capture duration, and both lose to Done
+and Cancel, which take effect at once.
+
+An automatic stop is **not** a Done. `CaptureStop` gains `endpoint` beside `done`,
+`window-expiry` and `cancelled`, so a journal or a runbook can never read an endpoint as a
+gesture the learner made. AV-012's settled statuses are unchanged: what the recognizer
+finally returns is still the answer, and an endpoint is never a verdict about it.
 
 ## Automatic grading: the September 17, 2026 reversal
 

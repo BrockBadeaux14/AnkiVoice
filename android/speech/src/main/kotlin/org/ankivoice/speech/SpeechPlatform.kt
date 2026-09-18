@@ -37,6 +37,18 @@ interface SpeechPlatform {
 
     /** Release every retained object. Called on explicit cleanup and on foreground loss. */
     fun release()
+
+    /**
+     * AV-050 D.3: the audio source the last capture actually got, or null before the first.
+     *
+     * The tuned `VOICE_RECOGNITION` source is what is asked for; a device that refuses it
+     * gives the raw `MIC` and a quieter capture. Which one happened is not something the
+     * learner can see or the transport can infer, so the platform says.
+     */
+    val captureSource: String? get() = null
+
+    /** AV-050 D.3: the preprocessing effects that actually enabled on the last capture. */
+    val captureEffects: List<String> get() = emptyList()
 }
 
 sealed interface VoiceResolution {
@@ -85,6 +97,25 @@ interface PlaybackListener {
  */
 interface RecognitionListener {
     fun onPartial(generation: Long, text: String)
+
+    /**
+     * AV-050: the engine heard the learner start speaking.
+     *
+     * It is what ends AV-012's recall pre-roll and starts the answer window, and it is the
+     * precondition for any automatic stop: nothing may end a capture before it has arrived.
+     * A capture in which it never arrives is a learner who never spoke, and it runs to its
+     * bound rather than being cut short.
+     */
+    fun onSpeechStarted(generation: Long)
+
+    /**
+     * AV-050: the engine's endpoint — it believes the learner has stopped speaking.
+     *
+     * An opinion, not a stop. The transport holds it for [SpeechTimings.endpointHoldMs] and
+     * drops it if the learner turns out to be mid-pause, because the engine takes this back
+     * by reporting more speech. Only the hold expiring ends the capture.
+     */
+    fun onSpeechEnded(generation: Long)
 
     /**
      * One segment of a segmented session, as the engine delivered it: its text and the

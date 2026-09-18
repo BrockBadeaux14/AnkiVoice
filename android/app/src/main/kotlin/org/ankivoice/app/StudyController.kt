@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import org.ankivoice.core.answer.AnswerPhase
 import org.ankivoice.core.answer.AnswerRecovery
 import org.ankivoice.core.answer.AnswerStatus
+import org.ankivoice.core.answer.CaptureStop
 import org.ankivoice.core.commands.CommandContext
 import org.ankivoice.core.commands.CommandOutcome
 import org.ankivoice.core.commands.CommandRouter
@@ -81,6 +82,26 @@ internal class StudySession(
      * engine supplied none. Evidence only: `:core`'s classification is what the session sees.
      */
     val rawConfidence: () -> Float? = { null },
+    /**
+     * AV-050: how long after the microphone opened the transport first heard the learner,
+     * or null when it heard nobody at all. Read on [StudyController]'s worker the moment a
+     * capture returns, because AV-012's recall pre-roll ends at that offset and the session
+     * thread was blocked inside the capture while it passed.
+     */
+    val speechOnsetMs: () -> Long? = { null },
+    /**
+     * AV-050: how the last capture's microphone was stopped, as the transport recorded it.
+     * [CaptureStop.ENDPOINT] is the capture ending on the learner's own silence; a Done or a
+     * Cancel the learner made is applied from its own path and never read back from here.
+     */
+    val captureStop: () -> CaptureStop? = { null },
+    /**
+     * AV-050 D.3: the last capture's audio in one line — the source the device gave us, the
+     * preprocessing that enabled, and the loudest frame measured. Shown on the study screen
+     * because the amplitude that decides when a capture ends itself is a pinned guess, and
+     * this is what a live run replaces the guess with.
+     */
+    val captureAudio: () -> String? = { null },
     /** AV-010's skipped cards for this session, read on the session thread. */
     val skips: () -> SkipReport = { SkipReport() },
     val release: () -> Unit,
@@ -254,6 +275,8 @@ internal data class StudyState(
     val autoCommitWindowMs: Long? = null,
     /** True once the learner kept this card's turn manual, while that rating is still waiting. */
     val autoCommitCancelled: Boolean = false,
+    /** AV-050 D.3: the last capture's audio source, preprocessing and peak level. */
+    val captureAudio: String? = null,
     /** AV-019: the writer's own outcome for the committed attempt, or null before one. */
     val outcomeState: String? = null,
     /** The writer's own reason, shown as-is for a write that failed or could not be confirmed. */
@@ -323,6 +346,16 @@ internal data class TurnEvidence(
     val automaticGrading: Boolean,
     /** AV-047: the learner stopped an armed automatic commit on this turn. */
     val automaticCancelled: Boolean,
+    /** AV-050 D.3: the source, preprocessing and peak level of this turn's last capture. */
+    val captureAudio: String?,
+    /**
+     * AV-050: how many times the microphone opened itself on this turn, which is one per
+     * attempt. A second one inside an attempt would be the re-arm
+     * [org.ankivoice.core.answer.AnswerLimits.AUTOMATIC_REARMS] forbids.
+     */
+    val automaticOpens: Int,
+    /** AV-050: how each of this turn's captures ended, oldest first. */
+    val captureStops: List<String>,
     /** The writer's outcome for this turn, or null when nothing was committed. */
     val outcome: String?,
     val rating: Int?,
@@ -572,7 +605,10 @@ internal class StudyController(
         val opened = OpenSession(study, ObservedSpeech(study.speech, study.partial))
         open = opened
         study.session.start()
-        describeOffer(study.session.offerCard())
+        val offered = describeOffer(study.session.offerCard())
+        // AV-050: the first card reads itself. Nothing between opening the deck and the
+        // learner speaking is a tap any more — but the card is on screen before it is read.
+        handsFreeToMicrophone(opened, offered) ?: offered
     }
 
     /** End the session and let the recognizer and synthesizer go. Finishing writes nothing. */
@@ -586,27 +622,137 @@ internal class StudyController(
 
     // -- the answer ------------------------------------------------------------ //
 
-    /** Play the Prompt, which is what opens AV-012's answer phase. */
+    /**
+     * Play the Prompt, which is what opens AV-012's answer phase.
+     *
+     * AV-050: a tap is no longer how a prompt is normally played — a card that is offered
+     * plays its own. This stays as the touch control for a prompt whose automatic play did
+     * not happen, and it runs the same chain, so the microphone still opens after it.
+     */
     fun ask() = act("play prompt") { current ->
-        val session = current?.session ?: return@act NO_SESSION
-        when (val spoken = session.ask()) {
-            is SessionResult.Produced -> "The prompt was played. Tap Start answer when you are ready."
-            is SessionResult.Halted -> "Paused: ${spoken.halt.reason}."
+        val opened = current ?: return@act NO_SESSION
+        handsFreeToMicrophone(opened)
+    }
+
+    /**
+     * AV-050 D.1: the card reaches the screen before anything is spoken.
+     *
+     * The card is read from AnkiDroid on this thread, so by the time the chain starts it is
+     * loaded — but the surface has not been told yet, because a published snapshot crosses
+     * to the main thread only when the action ends. Without this the learner taps Start
+     * studying and hears the question while the screen still says "Opening your deck…".
+     * Publishing here puts the loaded card, its prompt and its identity on screen first, and
+     * it is also the guard that nothing is spoken for a card that is not there: a queue that
+     * came back empty, a halt on the way in, or a card the provider refused all leave
+     * [ReviewSession.card] null and stop the chain before the synthesizer is touched.
+     */
+    private fun cardIsOnScreen(opened: OpenSession, offered: String?): Boolean {
+        if (opened.session.card == null) return false
+        publish(opened, actionToken, offered, busy = true)
+        return true
+    }
+
+    /**
+     * AV-050: everything between a card being offered and the learner speaking, with no tap.
+     *
+     * Two steps, in one action: this attempt's Prompt is spoken, and when that playback
+     * settles the microphone opens itself. Both are published as they happen, so the surface
+     * shows the card while it is being read and the open capture while it is running, rather
+     * than one silent busy spell covering the pair.
+     *
+     * It runs on [worker] from the four places an attempt becomes possible — a card being
+     * offered, a tapped Play prompt, a Try again, and a resume — and each of them reaches it
+     * once, which is what makes "exactly one automatic open per attempt" structural rather
+     * than a flag to keep in step. Every step re-reads the session first, so a halt, an
+     * interruption, a failed playback or a session that was torn down underneath it ends the
+     * chain where it stands rather than opening a microphone into a turn that is over.
+     *
+     * The card goes to the screen before the first of the two steps, so the learner never
+     * hears a question the screen has not shown them yet. [offered] is what the offer said,
+     * carried through so that first snapshot reads as the offer rather than as nothing.
+     */
+    private fun handsFreeToMicrophone(opened: OpenSession, offered: String? = null): String? {
+        if (!cardIsOnScreen(opened, offered)) return null
+        val spoken = speakPrompt(opened) ?: return null
+        if (open !== opened) return spoken
+        // Published before the capture blocks the worker, so the prompt's own outcome — and
+        // a halt it ran into — reaches the surface rather than being overwritten by the
+        // microphone's notice several seconds later.
+        publish(opened, actionToken, spoken, busy = true)
+        return openMicrophone(opened) ?: spoken
+    }
+
+    /**
+     * AV-050: speak this attempt's Prompt, by whichever route its state allows.
+     *
+     * A card that has never been read goes through [ReviewSession.ask], which is what opens
+     * the answer phase. An attempt that follows a Try again or a resume has an open card and
+     * a prompt already played once, so it goes through AV-014's repeat instead: it plays the
+     * same Prompt and nothing else, and returns the session to the state it was asked from.
+     * Null means there was nothing to play here, which ends the chain quietly.
+     */
+    private fun speakPrompt(opened: OpenSession): String? {
+        val session = opened.session
+        if (session.halted || capture != null || pendingInterrupt != null) return null
+        val played = when (session.state) {
+            SessionState.ASKING -> session.ask()
+            SessionState.RETRYING -> session.replayQuestion()
+            SessionState.LISTENING ->
+                if (session.answerTurn?.phase == AnswerPhase.THINKING) session.replayQuestion() else return null
+            else -> return null
+        }
+        return when (played) {
+            is SessionResult.Produced -> PROMPT_PLAYED
+            is SessionResult.Halted -> "Paused: ${played.halt.reason}."
             SessionResult.Ignored -> "That playback belonged to an earlier turn."
         }
     }
 
     /**
-     * The explicit Start answer. Thinking time before it is unbounded.
+     * AV-050: the one automatic open of this attempt, after its prompt playback settled.
      *
-     * It opens AV-012's window **and** the microphone: AV-025 defines the call to `listen`
-     * as this touch. The capture then blocks [worker] for the whole attempt, exactly as
-     * playback does, so the open window is published before it blocks and [finishAnswer],
-     * [cancelAnswer] and an interruption reach the transport without queueing behind it.
-     * Once the answer settles as gradable it is graded at once.
+     * The settle itself is untouched: AV-025's transport starts it on `PlaybackDone` and
+     * honours whatever is left of it inside `listen`, so the automatic open simply arrives
+     * where the tap used to. Null means the turn was not in a state to open one — halted,
+     * interrupted, already capturing, or past the answer phase — and no microphone opens.
+     */
+    private fun openMicrophone(opened: OpenSession): String? {
+        val session = opened.session
+        if (open !== opened || session.halted || capture != null || pendingInterrupt != null) return null
+        // AV-007: nothing opens a microphone for a session that is not in front of the
+        // learner. AV-050 made this matter more — every card opens one now, rather than
+        // only a card someone reached for — so the foreground is checked here too.
+        if (!foreground) return null
+        val ready = when (session.state) {
+            SessionState.LISTENING -> session.answerTurn?.phase == AnswerPhase.THINKING
+            SessionState.RETRYING -> true
+            else -> false
+        }
+        if (!ready) return null
+        currentTurn(opened).automaticOpens += 1
+        return captureAnswer(opened)
+    }
+
+    /**
+     * The explicit Start answer, for a learner who wants to start before the prompt is over
+     * or whose automatic open did not happen. AV-048 keeps it: no control is voice-only, and
+     * none of AV-050's automation removes the touch behind it.
      */
     fun startAnswer() = act("start answer") { current ->
         val opened = current ?: return@act NO_SESSION
+        captureAnswer(opened)
+    }
+
+    /**
+     * One attempt: open the microphone, block on it, and settle whatever comes back.
+     *
+     * It opens AV-012's pre-roll and window **and** the microphone: AV-025 defines the call
+     * to `listen` as exactly this. The capture then blocks [worker] for the whole attempt,
+     * exactly as playback does, so the open window is published before it blocks and
+     * [finishAnswer], [cancelAnswer] and an interruption reach the transport without queueing
+     * behind it. Once the answer settles as gradable it is graded at once.
+     */
+    private fun captureAnswer(opened: OpenSession): String? {
         val session = opened.session
         val token = session.startAnswer()
         // The previous attempt's transcript is not this one's, so it goes before the
@@ -615,6 +761,18 @@ internal class StudyController(
         // Published before the transport blocks, so the surface reports the open window —
         // and offers Done and Cancel — for exactly as long as a capture is running.
         capture = ActiveCapture(opened.study.speech, token, opened.study.partial, CaptureKind.ANSWER)
+        // Re-checked with the capture registered. [interrupt] sets [pendingInterrupt] and
+        // then cancels whatever capture it can see; one that arrived between this attempt's
+        // guard and the line above found nothing to cancel, so it is caught here instead —
+        // otherwise the microphone would open behind another app and stay open to the
+        // backstop. Either order is covered: an interruption later than this line finds the
+        // registered capture and cancels it.
+        if (pendingInterrupt != null || !foreground) {
+            capture = null
+            val kind = pendingInterrupt ?: Interruption.APP_SWITCH
+            pendingInterrupt = null
+            return interruptNow(opened, kind)
+        }
         opened.observed.answerNext = true
         publish(opened, actionToken, LISTENING_NOTICE, busy = true)
         val event = opened.observed.listen(token, opened.study.language)
@@ -624,29 +782,45 @@ internal class StudyController(
         stoppedByOperator = false
         heard = (event as? CaptureEvent.Transcript)?.text?.takeIf { it.isNotBlank() }
         // Torn down while the microphone was open: the late result is dropped, never applied.
-        if (open !== opened) return@act null
+        if (open !== opened) return null
         session.answerTurn?.let { turn -> currentTurn(opened).rawScores[turn.attempt] = opened.study.rawConfidence() }
         pendingInterrupt?.let { kind ->
             pendingInterrupt = null
-            return@act interruptNow(opened, kind)
+            return interruptNow(opened, kind)
         }
+        // AV-050: what the transport measured while this thread was blocked inside the
+        // capture. The onset ends AV-012's recall pre-roll and starts the answer window, and
+        // it is reported before anything settles, because the stop that follows is labelled
+        // against the window it started.
+        opened.study.speechOnsetMs()?.let { session.reportSpeechOnset(it) }
         if (cancelled) {
             currentTurn(opened).touchActions += "cancel"
             val halt = session.cancelAnswer()
-            return@act "Cancelled: ${halt.detail}."
+            return "Cancelled: ${halt.detail}."
         }
         if (stopped) {
             currentTurn(opened).touchActions += "done"
             // An operator Done is recorded as AV-012's Done rather than as a window expiry.
             session.finishAnswer()
+        } else if (opened.study.captureStop() == CaptureStop.ENDPOINT) {
+            // AV-050: the capture ended on the learner's own silence. It goes through the
+            // same finalization Done goes through, and is recorded under a reason of its own
+            // so nothing downstream can read it as a gesture the learner made. Done and
+            // Cancel are checked first, so either of them still takes precedence.
+            session.endpointAnswer()
         }
         val notice = when (val settled = session.acceptCapture(event)) {
             is SessionResult.Produced -> "Answer settled as ${settled.value.status.specName}."
             is SessionResult.Halted -> "Paused: ${settled.halt.reason}."
             SessionResult.Ignored -> "That capture belonged to an earlier attempt."
         }
+        // AV-050: read once the attempt has settled, because that is when AV-012 binds the
+        // stop to the answer it produced. A Done, an endpoint and an expiry are told apart
+        // here and nowhere else in the evidence.
+        session.answer?.stoppedBy?.let { currentTurn(opened).captureStops += it.specName }
+        currentTurn(opened).captureAudio = opened.study.captureAudio()
         if (session.state == SessionState.GRADING) startGrading(opened)
-        notice
+        return notice
     }
 
     /**
@@ -685,12 +859,19 @@ internal class StudyController(
         }
     }
 
-    /** AV-012's Try again: a new revision for the same card, waiting on the next Start answer. */
+    /**
+     * AV-012's Try again: a new revision for the same card.
+     *
+     * AV-050: the new attempt is a new attempt in every sense — it hears the Prompt again and
+     * gets its own single automatic open after its own playback. That is not a re-arm of the
+     * attempt that just ended; `AnswerLimits.AUTOMATIC_REARMS` is still zero and nothing
+     * reopens a capture after a result inside one attempt.
+     */
     fun retry() = act("try again") { current ->
-        val session = current?.session ?: return@act NO_SESSION
+        val opened = current ?: return@act NO_SESSION
         heard = null
-        session.retry()
-        "Ready to try again. Tap Start answer when you are ready to speak."
+        opened.session.retry()
+        handsFreeToMicrophone(opened, RETRY_READY) ?: RETRY_READY
     }
 
     /**
@@ -739,26 +920,110 @@ internal class StudyController(
     fun run(command: VoiceCommand) = act(command.specName) { current ->
         val opened = current ?: return@act NO_SESSION
         val pending = pendingRating(opened.session)
-        val notice = opened.exchange.onCommand(opened.router.touch(command)).notice
+        val step = opened.exchange.onCommand(opened.router.touch(command))
+        // AV-050 D.9: an Again the learner named themselves is still an Again.
+        val announced = if (command.rating == AGAIN) revealIfAgain(opened, step.notice) else step.notice
+        val notice = advanceIfWritten(opened, step, announced)
         command.rating?.let { recordRating(opened, pending, it) }
-        notice
+        // AV-050: a resumed session picks the hands-free chain back up where the pause left
+        // it — the card is read again and the microphone opens itself — rather than stranding
+        // a learner who paused mid-turn in front of a screen that waits for a tap. Every
+        // other command leaves it alone, and a resume that did not reach the answer phase
+        // finds nothing to play and nothing to open.
+        if (command == VoiceCommand.RESUME) handsFreeToMicrophone(opened, notice) ?: notice else notice
     }
 
     /** One learner-opened command capture, through AV-025's transport. */
     fun listenForCommand() = act("speak a command") { current ->
         val opened = current ?: return@act NO_SESSION
+        captureCommand(opened)
+    }
+
+    /**
+     * One command capture, and whatever the router made of it. Runs on [worker].
+     *
+     * Separate from [listenForCommand] because AV-050 D.7 opens one without a tap, from
+     * inside the grading reply, and an action cannot call another action.
+     */
+    private fun captureCommand(opened: OpenSession, pauseIfNotHeard: Boolean = true): String? {
         val pending = pendingRating(opened.session)
-        val outcome = opened.router.listenForCommand()
-        if (open !== opened) return@act null
+        val outcome = opened.router.listenForCommand(pauseIfNotHeard)
+        if (open !== opened) return null
         val score = opened.study.rawConfidence()?.let { " score $it" } ?: ""
         currentTurn(opened).spokenCommands += describe(outcome) + score
         pendingInterrupt?.let { kind ->
             pendingInterrupt = null
-            return@act interruptNow(opened, kind)
+            return interruptNow(opened, kind)
         }
-        val notice = opened.exchange.onCommand(outcome).notice
-        (outcome as? CommandOutcome.Executed)?.command?.rating?.let { recordRating(opened, pending, it) }
-        notice
+        val step = opened.exchange.onCommand(outcome)
+        val spoken = (outcome as? CommandOutcome.Executed)?.command?.rating
+        // AV-050 D.9: an Again the learner spoke is still an Again.
+        val announced = if (spoken == AGAIN) revealIfAgain(opened, step.notice) else step.notice
+        val notice = advanceIfWritten(opened, step, announced)
+        spoken?.let { recordRating(opened, pending, it) }
+        return notice
+    }
+
+    /**
+     * AV-050 D.9: a card rated **Again** is told what the answer was.
+     *
+     * Getting one wrong is the turn where the learner most needs the answer key, and a
+     * hands-free session gives them no moment to go and read it. So the ReferenceAnswer is
+     * spoken straight after "Card graded again."
+     *
+     * It goes through [ReviewSession.reveal], which is the one path that carries a
+     * ReferenceAnswer: AV-007 gives every utterance a purpose, and the answer key is a
+     * `reveal` and never an `announcement`. Wrapping it into the announcement instead would
+     * have been one string to change and would have put card answer text into the
+     * announcement channel, which is exactly the question/answer separation
+     * `core/contracts/Utterances.kt` exists to keep.
+     *
+     * Only for Again, and only while a rating is actually announced. Nothing is written, and
+     * a card with no ReferenceAnswer or a session that has halted simply says nothing more.
+     */
+    private fun revealIfAgain(opened: OpenSession, notice: String?): String? {
+        if (open !== opened || opened.session.halted || capture != null || pendingInterrupt != null) return notice
+        val position = opened.exchange.position ?: return notice
+        if (position.rating != AGAIN) return notice
+        if (opened.session.card?.fields?.referenceAnswer.isNullOrBlank()) return notice
+        return when (opened.session.reveal()) {
+            is SessionResult.Produced -> notice
+            is SessionResult.Halted, SessionResult.Ignored -> notice
+        }
+    }
+
+    /**
+     * AV-050 D.7: a turn the grader would not rate listens for the learner's own rating.
+     *
+     * An abstention — a `partial`, an `uncertain`, a rating the card withdrew, a grading
+     * fault — is the one outcome that has always needed a hand. The announcement already
+     * says which words will do ("Say Again, Hard, Good or Easy"), so the microphone opens on
+     * the back of it and one of those words is applied as if it had been tapped.
+     *
+     * It opens **only** for an abstention, only while the router is actually offering rating
+     * commands, and only once: what comes back goes through the same
+     * [org.ankivoice.core.commands.CommandRouter] and the same exchange as a tapped rating,
+     * so a misheard word is refused exactly as it is today and nothing here writes. A rating
+     * named this way is still the learner's own, which AV-047 never arms for an automatic
+     * commit — it is proposed, and confirmed separately.
+     */
+    private fun listenForRating(opened: OpenSession, notice: String?): String? {
+        if (open !== opened || opened.session.halted || capture != null || pendingInterrupt != null) return notice
+        if (!foreground) return notice
+        val position = opened.exchange.position ?: return notice
+        if (position.rating != null) return notice
+        if (ratings(opened.session, opened.router).isEmpty()) return notice
+        if (VoiceCommand.RATE_GOOD !in opened.router.spokenAvailable()) return notice
+        // Published before the capture blocks the worker, so the abstention is on screen —
+        // and its list of words is readable — for as long as the microphone is open.
+        publish(opened, actionToken, notice, busy = true)
+        // This microphone was opened **for** the learner rather than **by** them, and that
+        // difference decides what a failure costs. AV-014 stops the session when a command
+        // capture hears nothing usable, which is right for a capture the learner asked for —
+        // they are owed an explanation — and wrong for one that simply arrived while they
+        // were deciding. So this one does not stop it: the turn is handed back exactly as
+        // the abstention left it, with every rating still on offer.
+        return captureCommand(opened, pauseIfNotHeard = false) ?: notice
     }
 
     /**
@@ -782,7 +1047,8 @@ internal class StudyController(
             }
         }
         recordRating(opened, pending, rating)
-        notice
+        // AV-050 D.9: an Again the learner tapped is still an Again.
+        if (rating == AGAIN) revealIfAgain(opened, notice) else notice
     }
 
     /** The learner's own rating when no grader offered one. Kept for the debug-era name; see [rate]. */
@@ -816,11 +1082,47 @@ internal class StudyController(
     /** Only a confirmed review advances, and the next card is read from AnkiDroid afresh. */
     fun nextCard() = act("next card") { current ->
         val opened = current ?: return@act NO_SESSION
+        advanceToNextCard(opened)
+    }
+
+    /**
+     * Advance to the next card and read it. Runs on [worker], inside whatever action asked.
+     *
+     * Separate from [nextCard] because AV-050 D.5 reaches it from a confirmed write as well
+     * as from the touch control, and an action cannot call another action: [act] refuses
+     * while one is running.
+     */
+    private fun advanceToNextCard(opened: OpenSession): String? {
         captureTurn(opened)
         opened.session.advance()
         lastGrade = null
         heard = null
-        describeOffer(opened.session.offerCard())
+        val offered = describeOffer(opened.session.offerCard())
+        // AV-050: the next card reads itself too, so a run of cards needs no tap at all.
+        return handsFreeToMicrophone(opened, offered) ?: offered
+    }
+
+    /**
+     * AV-050 D.5: a review that was **written** carries straight on to the next card.
+     *
+     * The last tap in a turn was Next card, which did nothing a confirmed write had not
+     * already settled. Only [ReviewState.CONFIRMED] advances: a write that failed, or one
+     * whose outcome could not be established, leaves the screen exactly where it is, because
+     * those are the two states the learner has to see and act on.
+     *
+     * **What this costs.** The `COMMITTED` screen is also where **Wrong rating? Undo in
+     * AnkiDroid** is offered, and AV-007 makes AnkiDroid's own Undo the only correction
+     * after a write. Advancing past it does not remove that route — the Undo is AnkiDroid's
+     * and is still there — but it does stop AnkiVoice handing the learner to it. Recorded
+     * here rather than discovered later.
+     */
+    private fun advanceIfWritten(opened: OpenSession, step: ExchangeStep, notice: String?): String? {
+        if (step !is ExchangeStep.Committed || step.outcome.state != ReviewState.CONFIRMED) return notice
+        if (open !== opened || opened.session.state != SessionState.COMMITTED) return notice
+        // Published before the advance, so the saved review is reported as its own moment
+        // rather than being overwritten by the next card's arrival.
+        publish(opened, actionToken, notice, busy = true)
+        return advanceToNextCard(opened) ?: notice
     }
 
     /**
@@ -985,10 +1287,16 @@ internal class StudyController(
                 if (open !== opened) return@execute
                 grading = false
                 val accepted = session.acceptGrade(reply)
-                val notice = openExchange(opened, request, accepted, source, route)
+                var notice: String? = openExchange(opened, request, accepted, source, route)
                 // AV-047: a grader proposal is the only thing that arms a window, so this
                 // is the one place that starts one.
+                // AV-050 D.9: a card rated Again hears the answer before anything else
+                // happens to it — in particular before the window below starts counting.
+                notice = revealIfAgain(opened, notice)
                 armAutomatic(opened)
+                // AV-050 D.7: and an abstention is the one outcome that asks the learner for
+                // a rating, so this is where the microphone opens to hear it.
+                notice = listenForRating(opened, notice)
                 // A reply the session dropped as stale means the transcript moved on while
                 // it was in flight; the revision that replaced it is graded now.
                 if (accepted is SessionResult.Ignored && session.state == SessionState.GRADING) startGrading(opened)
@@ -1020,17 +1328,36 @@ internal class StudyController(
                 // A guard the window should not have reached. Report it and leave the turn
                 // as it was, rather than letting it take the session's own thread down and
                 // the surface with it: this task runs outside [act]'s reporting.
+                //
+                // AV-050 keeps this on screen and reworded it. Everything else this session
+                // says about the grading mode is gone, but a rating that was left
+                // **unwritten** still has to be reported: a silent version of this would
+                // leave the learner believing a review exists when none does. It names the
+                // unwritten rating and what to do about it, never the mode.
                 val notice = try {
-                    opened.exchange.commitAutomatically().notice
+                    val step = opened.exchange.commitAutomatically()
+                    // AV-050 D.5: a written review carries on, however it was written.
+                    advanceIfWritten(opened, step, step.notice)
                 } catch (e: IllegalStateException) {
-                    "Automatic grading did not run here: ${e.message}"
+                    unwritten(e)
                 } catch (e: IllegalArgumentException) {
-                    "Automatic grading did not run here: ${e.message}"
+                    unwritten(e)
                 }
                 publish(open, generation, notice)
             }
         }
     }
+
+    /**
+     * AV-050: a rating that was not written, in the learner's words.
+     *
+     * The one thing about this mode the study screen still says, because the alternative is
+     * a learner who believes a review was saved when it was not. It reports the rating that
+     * is still waiting and what saves it; it never names the mode that failed to.
+     */
+    private fun unwritten(cause: RuntimeException): String =
+        "That rating was not saved: ${cause.message}. Nothing was written, and the rating is " +
+            "still waiting — say or tap Confirm to save it yourself."
 
     /** Stop the armed window, from either thread. Safe to call when none is armed. */
     private fun stopAutomaticWindow() {
@@ -1237,6 +1564,7 @@ internal class StudyController(
             autoCommitWindowMs = armed?.cancelWindowMs,
             // Only while the rating the learner kept manual is the one still pending.
             autoCommitCancelled = keptManual != null && keptManual === session?.intent && armed == null,
+            captureAudio = study?.captureAudio?.invoke(),
             outcomeState = committed?.state?.specName,
             outcomeReason = committed?.reason,
             halt = halt,
@@ -1372,6 +1700,12 @@ internal class StudyController(
                 -> Unit
             }
         }
+        // AV-050 D.5: a confirmed write now advances by itself, so the handoff to AnkiDroid's
+        // own Undo — AV-007's only correction after a write — is carried onto the cards that
+        // follow it rather than vanishing with the screen it used to live on. It is offered
+        // for as long as this session has written anything, because that is exactly as long
+        // as there is a last review for AnkiDroid to undo.
+        if (session.outcomes.any { it.state == ReviewState.CONFIRMED }) out += StudyControl.UNDO_HANDOFF
         // AV-047: offered only while a window is actually armed, so it never appears as a
         // control that would do nothing, and it never appears while the option is off.
         if (current.exchange.armed != null) out += StudyControl.CANCEL_AUTOMATIC
@@ -1476,6 +1810,9 @@ internal class StudyController(
         var confirmationSource: String? = null
         var automaticGrading = false
         var automaticCancelled = false
+        var automaticOpens = 0
+        val captureStops = mutableListOf<String>()
+        var captureAudio: String? = null
         var outcome: String? = null
         var rating: Int? = null
         val touchActions = mutableListOf<String>()
@@ -1485,7 +1822,8 @@ internal class StudyController(
         fun snapshot() = TurnEvidence(
             turn, cardId, transcriptRevision, recognition, retries, transcriptEdits,
             gradings.toList(), gradings.lastOrNull()?.path, selfGrade, ratingCorrections.toList(),
-            confirmationSource, automaticGrading, automaticCancelled,
+            confirmationSource, automaticGrading, automaticCancelled, captureAudio,
+            automaticOpens, captureStops.toList(),
             outcome, rating, touchActions.toList(), spokenCommands.toList(), halts.toList(),
         )
     }
@@ -1493,8 +1831,16 @@ internal class StudyController(
     private companion object {
         const val NO_SESSION = "Start a session first."
 
+        /** AV-050 D.9: the rating that means the learner got it wrong, and is told the answer. */
+        const val AGAIN = 1
+
         /** What the surface says while the microphone is open, before the attempt settles. */
         const val LISTENING_NOTICE = "Listening for your answer. Command words spoken now are part of the answer."
+
+        /** AV-050: what the surface says once a prompt has been read and before the microphone opens. */
+        const val PROMPT_PLAYED = "The prompt was played."
+
+        const val RETRY_READY = "Ready to try again."
 
         fun ratingCommand(rating: Int): VoiceCommand? = VoiceCommand.entries.firstOrNull { it.rating == rating }
     }

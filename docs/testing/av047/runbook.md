@@ -34,7 +34,7 @@ cd android && ./gradlew --console=plain checkModuleBoundaries :core:test :app:te
 | Suite | What it proves |
 | --- | --- |
 | `AutomaticGradingTest` (`:core`) | The exchange's own rules, over the **shipped** `GuardedReviewWriter` inside AV-018's journal. With the option off, a proposal arms nothing, `commitAutomatically` writes nothing and the announcement says nothing about saving on its own. With it on, a rule match and an AI suggestion each commit through a `ConfirmationSource.AUTO` event bound to this intent, identity, rating and revision — and the guard still rejects that event when any of those does not match, or when a correction cleared it. An abstention, a grading failure, a self-grade and a correction each arm nothing. A transcript edit and an interruption inside the window leave the card unwritten. Cancelling writes nothing, leaves the rating correctable, and a window that expires afterwards still writes nothing. The journal says `auto` for an automatic commit and `touch` for a confirmed one, and a line written before the field existed reads back with no source. |
-| `AutomaticStudyTest` (`:app`) | The surface's part: the window is a timer the controller owns, `Keep it manual` is the one control that stops it and is offered only while one is open, and **a cancel that arrives after the timer has already fired still writes nothing**. The option's state and the countdown reach the screen; the next card opens a window of its own; an abstention, a grader failure, a self-grade and a correction open none; an edit, an interruption and Finish inside the window all leave the card unwritten. The per-turn record carries the option's state and `auto`. |
+| `AutomaticStudyTest` (`:app`) | The surface's part: the window is a timer the controller owns, and **a cancel that arrives after the timer has already fired still writes nothing**. The next card opens a window of its own; an abstention, a grader failure, a self-grade and a correction open none; an edit, an interruption and Finish inside the window all leave the card unwritten. The per-turn record carries the option's state and `auto`. **Amended by AV-050:** the option's state and the countdown no longer reach the screen, and this suite now also asserts that no snapshot of a whole automatic session names the mode. |
 | `ShellControllerTest` (`:app`) | The toggle: off on first run, written to the store, survives a controller rebuild, and — unlike the language — does not stop the deck preview. |
 
 **The evidence that "off" is unchanged** is that `PrecommitExchangeTest`,
@@ -46,7 +46,17 @@ new suites:
 cd android && git diff --stat main -- '*PrecommitExchangeTest.kt' '*GuardedReviewWriterTest.kt' '*ReviewLifecycleTest.kt' '*ReviewJournalTest.kt' '*StudyControllerTest.kt' '*StudyScenariosTest.kt'
 ```
 
-That must print nothing.
+That used to print nothing. **It no longer does, and that is expected.** AV-050 changed
+what a study session *does* — the card reads itself, the microphone opens and closes itself
+— so `StudyControllerTest` and `StudyScenariosTest` changed with it, in both modes alike.
+What AV-047's claim is now checked against is the narrower set that never touched the
+surface:
+
+```sh
+cd android && git diff --stat main -- '*PrecommitExchangeTest.kt' '*GuardedReviewWriterTest.kt' '*ReviewLifecycleTest.kt' '*ReviewJournalTest.kt'
+```
+
+That must still print nothing.
 
 ## 2. Live: five turns on the pinned AVD
 
@@ -59,11 +69,25 @@ snapshots, and exports its evidence when you finish; it taps nothing, speaks not
 
 | Turn | Switch | You do, on the study screen | What must happen |
 | --- | --- | --- | --- |
-| `automatic-rule` | **ON** | Play prompt · Start answer · say the reference answer · Done · **touch nothing** · Finish | a countdown appears; one review is saved with no confirmation; the record and the journal both say `auto` |
-| `automatic-cancelled` | **ON** | answer · tap **Keep it manual** while it counts down · Finish without confirming | a countdown appeared and stopped; nothing written; the rating still waiting |
-| `automatic-abstain` | **ON** | answer with something only partly right · pick a rating yourself · Confirm · Finish | path `abstain`; **no** countdown; one review, `touch` |
-| `automatic-unavailable` | **ON**, daily limit `0` | answer in your own words · pick a rating · Confirm · Finish | path `unavailable`; **no** countdown; one review, `touch` |
-| `automatic-off` | **OFF** | answer with the reference answer · Confirm · Finish | **no** countdown, and no control to stop one; one review, `touch` |
+**Amended September 17, 2026 by [AV-050](https://github.com/BrockBadeaux14/AnkiVoice/issues/81).**
+Two things about these turns changed. The study screen no longer shows a banner, a
+countdown or **Keep it manual**, so nothing in the "what must happen" column can be judged
+by the operator's eye any more — the driver reads it from the snapshots the controller
+published. And the card reads itself and opens its own microphone, so no turn begins with
+Play prompt and Start answer. `automatic-cancelled` is retired with the control it used to
+tap, and `automatic-corrected` proves the same thing — a window that is retired writes
+nothing — by naming a different rating instead.
+
+| Turn | Switch | You do, on the study screen | What must happen |
+| --- | --- | --- | --- |
+| `automatic-rule` | **ON** | Start studying · say the reference answer · stop speaking · **touch nothing** · Finish | a window is armed (in the snapshots, not on screen); one review is saved with no confirmation; the record and the journal both say `auto` |
+| `automatic-corrected` | **ON** | answer · tap a **different rating** within about three seconds · Finish without confirming | a window was armed and retired; nothing written; the new rating still waiting |
+| `automatic-abstain` | **ON** | answer with something only partly right · pick a rating yourself · Confirm · Finish | path `abstain`; **no** window; one review, `touch` |
+| `automatic-unavailable` | **ON**, daily limit `0` | answer in your own words · pick a rating · Confirm · Finish | path `unavailable`; **no** window; one review, `touch` |
+| `automatic-off` | **OFF** | answer with the reference answer · Confirm · Finish | **no** window; one review, `touch` |
+
+In every one of these turns the study screen must **never** say "Automatic grading". That
+is AV-050's acceptance criterion and it applies to all five, including `automatic-off`.
 
 The switch is on the setup screen under **Automatic grading**, below the Study card. It
 applies to the **next** session you start, so set it before tapping Start studying. The
@@ -76,7 +100,7 @@ in the journal, and requires that `confirm` is **not** among the turn's touch ac
 
 **A capture that comes back empty costs a Try again, not the turn.** The screen says so and
 offers Try again; the answer version the rating lands on may be higher than 1. On
-`automatic-rule` the countdown starts when the grade lands, so speak, tap Done, and then
+`automatic-rule` the window starts when the grade lands, so speak, stop speaking, and then
 keep your hands off the screen.
 
 ### Prerequisites
@@ -131,8 +155,8 @@ Expected output:
 ---- automatic-rule: Automatic grading must be ON ----
 == automatic-rule ==
   reviews added 1 (expected 1) · journal entries 1 · passed True
----- automatic-cancelled: Automatic grading must be ON ----
-== automatic-cancelled ==
+---- automatic-corrected: Automatic grading must be ON ----
+== automatic-corrected ==
   reviews added 0 (expected 0) · journal entries 0 · passed True
 ---- automatic-abstain: Automatic grading must be ON ----
 == automatic-abstain ==
@@ -151,7 +175,7 @@ A subset re-runs on its own, which is how a turn interrupted by an emulator faul
 repeated:
 
 ```sh
-.venv/bin/python tools/av047-qa/run.py build/av047/deck.json --turns automatic-cancelled
+.venv/bin/python tools/av047-qa/run.py build/av047/deck.json --turns automatic-corrected
 ```
 
 **Keep an attempt that came back wrong.** Re-running until one comes back right and
@@ -164,7 +188,8 @@ Force-stop `org.ankivoice.test` as well.
 
 ### The cancelled turn
 
-The countdown is five seconds. Tap **Keep it manual** while it is still on screen. If you
+The window is five seconds and, since AV-050, invisible. Tap the different rating within
+about three seconds of the rating appearing. If you
 miss it, the review is saved — that is the option working as asked, not a defect — and the
 turn fails because it wrote. Re-run the turn; keep the attempt that wrote, in
 `evidence/inconclusive/`, with a line saying you were too slow.

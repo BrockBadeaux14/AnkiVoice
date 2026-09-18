@@ -381,6 +381,11 @@ class StudyInstrumentation : Instrumentation() {
         .put("confirmationSource", turn.confirmationSource ?: JSONObject.NULL)
         .put("automaticGrading", turn.automaticGrading)
         .put("automaticCancelled", turn.automaticCancelled)
+        // AV-050: how many times the microphone opened itself on this turn — one per
+        // attempt — and how each of its captures ended. `endpoint` is a capture that ended
+        // on the learner's own silence and is never a Done they made.
+        .put("automaticOpens", turn.automaticOpens)
+        .put("captureStops", JSONArray(turn.captureStops))
         .put("outcome", turn.outcome ?: JSONObject.NULL)
         .put("rating", turn.rating ?: JSONObject.NULL)
         .put("touchActions", JSONArray(turn.touchActions))

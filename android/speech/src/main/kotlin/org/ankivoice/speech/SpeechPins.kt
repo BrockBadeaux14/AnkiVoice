@@ -26,6 +26,41 @@ object SpeechPins {
      */
     const val PREFER_OFFLINE = false
 
+    /**
+     * AV-050 D.3: the capture source, and the preprocessing that comes with it.
+     *
+     * **Amended September 17, 2026.** AV-042 opened `AudioSource.MIC`, the raw untuned
+     * capture, because what it was proving was that the external-audio route worked at all.
+     * The owner then compared it against Google's own voice search **inside the same
+     * emulator** and found ours plainly worse. The difference is structural: a recognizer
+     * that opens its own microphone gets `VOICE_RECOGNITION`, the source Android documents
+     * as tuned for speech recognition, and ours could not because AV-025 has to own the
+     * audio to bound the window and stop capture on command. Owning the microphone does not
+     * require giving up the tuning — we simply had not asked for it.
+     *
+     * `MIC` remains the fallback: if a device will not open `VOICE_RECOGNITION` the turn is
+     * still worth having, and a quieter capture is better than none.
+     */
+    const val CAPTURE_SOURCE_NAME = "VOICE_RECOGNITION"
+    const val CAPTURE_SOURCE_FALLBACK_NAME = "MIC"
+
+    /**
+     * AV-050 D.3: the platform effects attached to the capture session where the device
+     * offers them.
+     *
+     * Noise suppression and automatic gain control are what a tuned source would have
+     * applied anyway; attaching them explicitly means a device that gives us the raw source
+     * still gets them. **Gain is the one that matters for accuracy**: recognition degrades
+     * sharply with level, and a raw capture on a host-audio emulator arrives quiet.
+     *
+     * Echo cancellation is deliberately **not** attached. AV-025 already guarantees that
+     * playback and capture never overlap, so there is no echo to cancel, and an AEC with no
+     * reference signal can attenuate the very speech it is given.
+     */
+    const val SUPPRESS_NOISE = true
+    const val AUTOMATIC_GAIN_CONTROL = true
+    const val CANCEL_ECHO = false
+
     /** Capture format fed into the recognizer's external-audio pipe. */
     const val SAMPLE_RATE_HZ = 16_000
     const val CHANNEL_COUNT = 1
@@ -33,6 +68,18 @@ object SpeechPins {
 
     /** 20 ms of audio. Small enough that Done stops the microphone promptly. */
     const val FRAME_SAMPLES = 320
+
+    /**
+     * AV-050: the frame amplitude at or above which a 20 ms frame counts as speech, for the
+     * trailing-silence detector that ends a capture when the engine reports no endpoint.
+     *
+     * A **selected engineering bound**, not a measured noise floor. It is a mean absolute
+     * sample value on the 16-bit scale — roughly 1.5% of full scale — chosen to sit above
+     * an idle emulator's microphone floor and below ordinary speech. It decides only when a
+     * capture *stops*; it never decides what was said, and a frame below it is still written
+     * to the recognizer unchanged.
+     */
+    const val SPEECH_FRAME_AMPLITUDE = 500
 
     /** The one permission this module needs. AV-020 forbids READ_PHONE_STATE outright. */
     const val MICROPHONE_PERMISSION = "android.permission.RECORD_AUDIO"
@@ -46,13 +93,54 @@ object SpeechPins {
  * and normally stops capture first; this copy is only a backstop that keeps the
  * microphone from running forever if that stop never arrives. Reaching it behaves
  * exactly like Done, so it never converts a turn into a failure verdict of its own.
+ * AV-050 added [prerollMs] beside it so the backstop mirrors `AnswerLimits` **as #13
+ * measures it**: the window runs from the moment the learner is first heard, and only a
+ * capture nobody spoke into gets the whole pre-roll and then the whole window. Anchoring
+ * the backstop to the open instead would let this microphone outlive #13's own window by
+ * the length of the pre-roll, and a final that arrives after that is past #13's
+ * finalization deadline before it is even delivered.
+ *
+ * [endpointHoldMs], [silenceHoldMs] and [minCaptureMs] are AV-050's endpointing bounds.
+ * Every one of them is a **selected engineering bound**, pinned in the same terms AV-042
+ * pinned its own: nothing here was measured against a learner's speech.
  */
 data class SpeechTimings(
     val settleMs: Long = 400,
     val trailingSilenceMs: Long = 500,
     val finalizationMs: Long = 5_000,
-    val answerWindowMs: Long = 15_000,
+    val answerWindowMs: Long = 5_000,
     val playbackMs: Long = 30_000,
+    /**
+     * AV-050: AV-012's recall pre-roll, mirrored here for the backstop alone. It is the
+     * grace a capture gets before [answerWindowMs] starts counting, and it ends the moment
+     * the learner is first heard. #13 owns the policy; this copy only bounds the microphone.
+     */
+    val prerollMs: Long = 15_000,
+    /**
+     * AV-050: how long the capture waits after the engine says speech ended before it
+     * finalizes itself.
+     *
+     * The engine's endpoint is the primary route. The hold exists because a learner who
+     * pauses mid-answer produces an endpoint the engine then takes back, and finalizing on
+     * the first one would cut them off; any further speech, segment or partial inside the
+     * hold cancels it.
+     */
+    val endpointHoldMs: Long = 800,
+    /**
+     * AV-050: the fallback route's trailing silence, measured over the PCM frames the pump
+     * already reads.
+     *
+     * Longer than [endpointHoldMs] on purpose. This one is our own judgement about audio
+     * rather than the engine's about speech, so it is the more cautious of the two and only
+     * ever runs when the engine reported no endpoint at all.
+     */
+    val silenceHoldMs: Long = 1_500,
+    /**
+     * AV-050: the shortest a capture may be before anything is allowed to end it on its
+     * own. It protects a false start — a click, a breath, a first syllable the learner
+     * restarts — from being taken for a whole answer. Done and Cancel are not bound by it.
+     */
+    val minCaptureMs: Long = 1_200,
     /**
      * How long the microphone and recognizer have to open before the attempt is abandoned.
      *
@@ -68,6 +156,13 @@ data class SpeechTimings(
         require(settleMs >= 0 && trailingSilenceMs >= 0) { "Negative settle or trailing silence" }
         require(finalizationMs > 0 && answerWindowMs > 0 && playbackMs > 0) { "Non-positive deadline" }
         require(captureOpenMs > 0) { "Non-positive capture-open deadline" }
+        require(prerollMs > 0) { "Non-positive pre-roll" }
+        require(endpointHoldMs > 0 && silenceHoldMs > 0 && minCaptureMs > 0) {
+            "Non-positive endpointing bound"
+        }
+        require(endpointHoldMs < answerWindowMs && silenceHoldMs < answerWindowMs) {
+            "An endpoint hold that outlasts the backstop could never end a capture early"
+        }
         require(trailingSilenceMs < finalizationMs) {
             "Finalization must include the trailing silence, not start after it"
         }

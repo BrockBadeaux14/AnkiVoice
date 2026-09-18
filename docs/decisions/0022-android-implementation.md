@@ -243,7 +243,8 @@ physical device has been identified. Each row says whether the pin was observed 
 | Text to speech | `com.google.android.tts` `googletts.google-speech-apk_20241125.02_p2.702443970` (code `210526444`), voice `en-US-language`, rate 1.0, pitch 1.0 | #6; same version in #5 | Validated for synthesis and playback |
 | Recognition | `com.google.android.tts/com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService`, en-US, free-form, `EXTRA_PREFER_OFFLINE=false` | #5 (live path, no voice), #6 (file-fed) | **Not validated for a human voice**; #45 |
 | Grader | OpenRouter `liquid/lfm-2.5-2.6b:free` via `liquid/fp8`, `allow_fallbacks=false`, zero maximum prices, temperature 0, JSON object output, 1,024-token cap, pass-2 instruction from [`tools/av006_providers.py`](../../tools/av006_providers.py) | #6 | Validated in-sample only (11/12); advisory |
-| Rating automation | Disabled by default; every rating needs explicit confirmation unless the learner turns **Automatic grading** on, which AV-047 added on September 17, 2026 for grader proposals alone | #6, #7, #76 | Decided; amended by AV-047 |
+| Rating automation | Disabled by default; every rating needs explicit confirmation unless the learner turns **Automatic grading** on, which AV-047 added on September 17, 2026 for grader proposals alone. AV-050 then removed every sign of the mode from the running study screen, leaving the setting, the switch and both of its warnings on the setup screen | #6, #7, #76, #81 | Decided; amended by AV-047 and AV-050 |
+| Opening and closing the microphone | The microphone opens itself once per attempt, after that attempt's prompt playback settles, and closes itself when the learner stops speaking. Start answer and Done stay as touch controls | #81 | Decided by AV-050, September 17, 2026; amends the explicit-Start-answer rule |
 
 <!-- av022:baseline:end -->
 
@@ -520,7 +521,14 @@ The measured disposable route owns an `AudioRecord` MIC stream (mono PCM16,
 segmentation until stream closure. `EXTRA_PREFER_OFFLINE=false` preserves AV-006's
 online-permitted selection. Explicit Start answer keeps thinking outside capture;
 Done ends microphone capture and appends 500 ms of silence before closing the
-pipe. Probe limits are 15 seconds capture/five seconds finalization. The two
+pipe. Probe limits are 15 seconds capture/five seconds finalization.
+**Amended September 17, 2026 by [AV-050](https://github.com/BrockBadeaux14/AnkiVoice/issues/81):**
+the microphone now opens itself exactly once per attempt, after that attempt's
+prompt playback settles, and a capture also ends itself when the learner stops
+speaking. The unbounded thinking the explicit Start answer bought is replaced by a
+15-second recall pre-roll in front of the unchanged 15-second answer window, which
+now measures speaking alone; Start answer stays as a touch control. See
+[Product constraints preserved](#product-constraints-preserved). The two
 successful Done-to-final measurements were 690 ms and 687 ms. The handoff selects
 zero automatic re-arms and zero additional attempts within one answer window;
 explicit Try again opens a fresh bounded window on the same card and invalidates
@@ -552,6 +560,20 @@ record remains unchanged.
   Silence, timeouts and errors still never submit, and a rating the learner named still
   needs their own confirmation. The option is off on first run. See
   [AV-007's amendment](../contracts/av007-session-contracts.md#automatic-grading-the-september-17-2026-reversal).
+  **Amended again the same day (AV-050, #81):** the running study screen carries no sign of
+  which mode a session opened in. The setting, its switch and both of its warnings stay on
+  the setup screen, where the learner chooses; what a saved review announces is the rating,
+  never the mode; and a rating that was left **unwritten** is still reported, because
+  silence about a review that does not exist would be worse than naming the mode.
+- **The microphone opens and closes itself.** Added September 17, 2026 (AV-050, #81),
+  amending the explicit-Start-answer rule this ADR recorded for AV-042. A card that is
+  offered has its Prompt spoken, and when that playback settles the microphone opens on its
+  own — once per attempt, never again inside one. A capture then ends itself when the
+  learner stops speaking, through the same stop Done uses and under a `CaptureStop` reason
+  of its own. Start answer, Done and Cancel all stay as touch controls, and the unbounded
+  thinking time the tap used to buy is replaced by a 15-second recall pre-roll in front of
+  the unchanged 15-second answer window. See
+  [AV-007's amendment](../contracts/av007-session-contracts.md#the-self-opening-and-self-closing-microphone-the-september-17-2026-amendment).
 - The selected free-only advisory provider route: no paid, model or provider fallback,
   and no automatic retries.
 - No skip: a skip request pauses or exits without writing. Correction happens before

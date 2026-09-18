@@ -246,17 +246,46 @@ cleanup; #14 owns session orchestration; #15/#27 own voice commands. Nothing her
 audio, reads a card or writes a review, and there is no second speech implementation and
 no cloud STT candidate.
 
-The limits are AV-042's selected MVP values. They are engineering bounds, not optimized
-or validated recall durations — no measurement says 15 seconds is long enough to recall
-an answer.
+The limits are AV-042's selected MVP values plus AV-050's pre-roll. They are engineering
+bounds, not optimized or validated recall durations — no measurement says 15 seconds is
+long enough to recall an answer, and none says 15 seconds is long enough to say one.
+
+**Amended September 17, 2026 by [AV-050](https://github.com/BrockBadeaux14/AnkiVoice/issues/81).**
+The rule used to be that capture opens only on an **explicit Start answer**, which is what
+made thinking time unbounded. It is now **the microphone opens itself exactly once per
+attempt, after that attempt's prompt playback settles**. The unbounded thinking that the
+tap bought is replaced by a pre-roll in front of the window, so the 15 seconds stays an
+honest *speaking* budget rather than being spent remembering. Start answer remains a touch
+control for a learner who wants to start early and for an automatic open that failed.
 
 | Limit | Value | Rule |
 | --- | --- | --- |
-| Thinking time | unbounded | Outside active capture. After Prompt playback settles the turn waits for an explicit Start answer, and no budget is consumed meanwhile. |
-| Answer window | 15,000 ms | The default **and** the maximum active capture, from Start answer on a monotonic clock. |
-| Finalization | 5,000 ms | A separate deadline from Done or window expiry, inclusive of #26's 500 ms of trailing silence. Its expiry is a timeout, not an answer. |
-| Attempt lifetime | 20,000 ms | The two in sequence. The three clocks — window, attempt, finalization — stay distinct and are queried separately. |
-| Automatic re-arms | 0 | No re-arm, no retry loop and no extra recognizer attempt inside one window. An explicit Try again opens a fresh bounded window with a new attempt and revision. |
+| Waiting for the attempt | unbounded | The gap between a card being offered and its prompt playback settling. No budget is consumed; since AV-050 this is the prompt playing rather than a learner deciding when to tap. |
+| Pre-roll | 15,000 ms | AV-050. Recall time inside an open microphone, from the open on a monotonic clock. It ends the moment the learner is first heard. |
+| Answer window | 5,000 ms | The maximum **speaking** capture, from speech onset — or from the pre-roll running out, when nobody was ever heard. Cut from 15,000 at the owner's direction on September 17, 2026: endpointing normally ends a capture about a second after the learner stops, so this is a backstop rather than a budget anybody spends. An answer that runs past it is stopped by the expiry, which preserves the card and offers Try again. |
+| Finalization | 5,000 ms | A separate deadline from Done, an endpoint or window expiry, inclusive of #26's 500 ms of trailing silence. Its expiry is a timeout, not an answer. |
+| Capture ceiling | 20,000 ms | The pre-roll and the window in sequence: the longest one microphone can be open. |
+| Attempt lifetime | 25,000 ms | The three in sequence. The clocks — pre-roll, window, attempt, finalization — stay distinct and are queried separately. |
+| Automatic opens | 1 per attempt | After that attempt's prompt playback settles, and never again inside the attempt. |
+| Automatic re-arms | 0 | Unchanged by AV-050. No re-arm, no retry loop and no extra recognizer attempt inside one attempt. An explicit Try again is a new attempt: it hears the prompt again and gets its own single automatic open. |
+
+### Ending a capture on the learner's own silence
+
+AV-050 also lets an active capture end itself. There is still exactly one way to stop a
+microphone — the `finishAnswer` path Done uses, and the same finalization deadline behind
+it — and two ways to decide that it is time:
+
+| Route | When | Bound |
+| --- | --- | --- |
+| The engine's endpoint | `onEndOfSpeech`, or a segment the engine closed | held 800 ms, in case the learner was mid-pause; any further speech, partial or segment takes it back |
+| Trailing silence in the frames | only when the engine offered no endpoint at all | 1,500 ms below a mean frame amplitude of 500 on the 16-bit scale |
+
+Both are refused before the learner has been heard, and before a **1,200 ms** minimum
+capture duration that protects a false start. Done and Cancel take effect at once and take
+precedence over either. Every one of these values is a
+**selected engineering bound**, pinned in the same terms AV-042 pinned its own; none was
+measured against a learner's speech. An automatic stop is recorded as `CaptureStop.endpoint`
+and never as a Done.
 
 ### The six answer states
 
@@ -722,10 +751,12 @@ and produced no-match on every attempt.
 
 ### Ordering and ownership
 
-Playback completes, the settle interval opens, and capture opens **only** when #13 calls
-`listen` — that call *is* the explicit Start answer. Capture never opens during playback,
-at most one capture is active, and the transport never re-arms after a result. Thinking
-time, the answer window, the transcript and every retry decision stay with #13.
+Playback completes, the settle interval opens, and capture opens when #13 calls `listen`.
+**Amended by AV-050:** that call used to be the explicit Start answer and is now the
+attempt's single automatic open, which #13 makes once the settle is over; the learner may
+still bring it forward with the Start answer control. Capture never opens during playback,
+at most one capture is active, and the transport never re-arms after a result. The pre-roll,
+the answer window, the transcript and every retry decision stay with #13.
 
 `finishAnswer` is Done, and it is part of AV-007's `SpeechInput` contract rather than an
 extra on this class: `listen` blocks for the whole attempt, so the stop arrives from
@@ -1287,8 +1318,8 @@ control that writes**, and it reaches the writer only through the exchange.
 
 | State | Controls |
 | --- | --- |
-| Card offered | Play prompt · Pause · Skip · Finish |
-| Thinking | Start answer · Repeat · Pause · Skip · Finish · Speak a command |
+| Card offered | Play prompt · Pause · Skip · Finish — since AV-050 the card reads itself, so this is a state the surface passes through rather than rests in, and Play prompt is the control for a reading that did not happen |
+| Waiting for the attempt | Start answer · Repeat · Pause · Skip · Finish · Speak a command — Start answer starts the capture early; otherwise it opens itself when the prompt settles |
 | Capturing | Done · Cancel — and nothing else, because the session thread is inside the capture |
 | Graded, a rating waiting | Confirm · Change · the other ratings · Edit transcript · Try again · Repeat · Show answer · Pause · Skip · Finish · Speak a command |
 | Saved | Next card · Wrong rating? Undo in AnkiDroid · Finish |
@@ -1353,6 +1384,17 @@ made the original claim.
 
 - Issue: [#76 — AV-047: Add an automatic grading option to the main menu](https://github.com/BrockBadeaux14/AnkiVoice/issues/76).
 - Evidence: [results](../docs/testing/av047/results.md) and [runbook](../docs/testing/av047/runbook.md).
+
+**Amended September 17, 2026 by [AV-050](https://github.com/BrockBadeaux14/AnkiVoice/issues/81):
+the running study screen says nothing about the mode.** The banner, the countdown, the
+progress bar, **Keep it manual** and the announcement that said a write was coming are all
+gone, and a guard test fails if any string the study screen can render says "Automatic
+grading". Nothing about the behaviour changed: the setting, the armed window, the `auto`
+confirmation source and the journal's record of it are exactly as described below. What
+stays visible is the switch and both of its warnings on the **setup** screen, the spoken
+confirmation of a saved rating — which names the rating, never the mode — and a rating that
+was left **unwritten**, because silence about a review that does not exist would be worse.
+See [AV-050's results](../docs/testing/av050/results.md).
 
 ### Off by default, and off is unchanged
 

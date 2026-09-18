@@ -137,9 +137,20 @@ class GradingProvider internal constructor(
     /**
      * Why grading is off for the rest of this session — every route blocked — or null while
      * any route remains. Terminal: #18 reads it to know that a failure must not be retried.
+     *
+     * When the routes were blocked for different reasons this reports one of them, and which
+     * one is not arbitrary: a route that is **off by configuration** is passed over in favour
+     * of one that actually **failed**. AV-050 D.6 made this matter by putting the paid route
+     * first — a learner who has simply left the paid cap at zero would otherwise be told
+     * "paid grading is disabled" when what went wrong is that the free route refused a reply.
+     * A setting the learner chose is not a fault, and a fault is what they can act on.
      */
     val unavailableCause: GradingUnavailable?
-        get() = if (routes.any { unavailableCause(it) == null }) null else routes.firstNotNullOfOrNull { unavailableCause(it) }
+        get() {
+            if (routes.any { unavailableCause(it) == null }) return null
+            val causes = routes.mapNotNull { unavailableCause(it) }
+            return causes.firstOrNull { it !in CONFIGURED_OFF } ?: causes.firstOrNull()
+        }
 
     /** Today's paid spend against the owner's cap, for the settings screen. */
     fun budget(): Budget = ledger.budget(settings.dailyCapUsd)
@@ -393,4 +404,15 @@ class GradingProvider internal constructor(
     }
 
     private fun millisSince(started: Long): Long = (elapsed() - started) / 1_000_000
+
+    private companion object {
+        /**
+         * Causes that mean "the learner turned this route off", not "this route broke".
+         * [unavailableCause] passes over these when another route actually failed.
+         */
+        val CONFIGURED_OFF = setOf(
+            GradingUnavailable.PAID_DISABLED,
+            GradingUnavailable.NOT_ENABLED,
+        )
+    }
 }

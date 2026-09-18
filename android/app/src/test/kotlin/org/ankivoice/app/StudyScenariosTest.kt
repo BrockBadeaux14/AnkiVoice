@@ -36,11 +36,13 @@ class StudyScenariosTest {
     @Scenario("confirmed-commit")
     fun confirmedCommit() {
         val h = StudyHarness(grades = listOf(FakeGrader.Answer(correct)))
+        // AV-050: opening the session reads the card and opens the microphone with no tap.
         h.started()
         assertEquals("A box has three red blocks and two blue blocks. How many blocks are there in total?", h.state.prompt)
-        h.controller.ask()
-        assertEquals("Take your time. Tap Start answer when you are ready to speak.", h.state.status)
-        h.controller.startAnswer()
+        assertEquals(
+            "Take your time. The microphone opens itself, or tap Start answer.",
+            h.beforeMicrophone().status,
+        )
 
         // The screen after the answer settled and was graded: transcript, version, source, rating.
         val announced = h.state
@@ -54,7 +56,9 @@ class StudyScenariosTest {
         assertTrue(h.wroteNothing, "nothing may be written before the confirmation")
 
         h.controller.run(VoiceCommand.CONFIRM)
-        val committed = h.state
+        // AV-050 D.5: the write is published and the session carries straight on, so the
+        // saved review is read from the snapshot it was published in.
+        val committed = h.afterCommit()
         assertEquals(ReviewState.CONFIRMED.specName, committed.outcomeState)
         assertEquals("Review saved.", committed.status)
         assertEquals(setOf(StudyControl.NEXT_CARD, StudyControl.UNDO_HANDOFF, StudyControl.FINISH, StudyControl.SPEAK_COMMAND), committed.controls)
@@ -62,10 +66,12 @@ class StudyScenariosTest {
         assertEquals(3, h.collection.reviews.single().rating)
         assertEquals(JournalPhase.SETTLED, h.journal.entries().single().phase)
 
-        h.controller.nextCard()
+        // No Next card tap: the confirmation advanced, and the next card read itself.
         assertEquals("Reverse the sequence red, blue, green.", h.state.prompt)
         assertNull(h.state.outcomeState)
         assertEquals(1, h.transport.calls.size)
+        // AV-007's only post-commit correction survives the advance.
+        assertTrue(StudyControl.UNDO_HANDOFF in h.state.controls)
     }
 
     /** The learner changes the rating twice before it is submitted. */
@@ -90,7 +96,7 @@ class StudyScenariosTest {
         h.controller.run(VoiceCommand.CONFIRM)
         assertEquals(1, h.transport.calls.size)
         assertEquals(3, h.transport.calls.single().rating)
-        val turn = h.evidence().turns.single()
+        val turn = h.committedTurn()
         assertEquals(1, turn.selfGrade)
         assertEquals(listOf(RatingCorrection(1, 2), RatingCorrection(2, 3)), turn.ratingCorrections)
     }
@@ -122,7 +128,7 @@ class StudyScenariosTest {
         assertTrue(h.wroteNothing)
 
         h.controller.run(VoiceCommand.CONFIRM)
-        assertEquals(ReviewState.CONFIRMED.specName, h.state.outcomeState)
+        assertEquals(ReviewState.CONFIRMED.specName, h.afterCommit().outcomeState)
         assertEquals("Five blocks.", h.grader.seen.last().learnerAnswer)
         assertEquals("Five blocks.", h.journal.entries().single().transcript)
     }
@@ -169,9 +175,9 @@ class StudyScenariosTest {
 
         // Heard clearly: the confirmation executes and the single write runs.
         h.controller.listenForCommand()
-        assertEquals(ReviewState.CONFIRMED.specName, h.state.outcomeState)
+        assertEquals(ReviewState.CONFIRMED.specName, h.afterCommit().outcomeState)
         assertEquals(1, h.transport.calls.size)
-        val turn = h.evidence().turns.single()
+        val turn = h.committedTurn()
         assertEquals("spoken", turn.confirmationSource)
         assertEquals(2, turn.spokenCommands.size)
     }
@@ -201,8 +207,8 @@ class StudyScenariosTest {
         assertEquals("proposing", h.state.sessionState)
         assertEquals("user-corrected", h.state.transcriptKind)
         h.controller.run(VoiceCommand.CONFIRM)
-        assertEquals(ReviewState.CONFIRMED.specName, h.state.outcomeState)
-        val turn = h.evidence().turns.single()
+        assertEquals(ReviewState.CONFIRMED.specName, h.afterCommit().outcomeState)
+        val turn = h.committedTurn()
         assertEquals(1, turn.transcriptEdits)
         assertEquals("failed", turn.recognition.first().status)
     }
@@ -227,7 +233,7 @@ class StudyScenariosTest {
         assertEquals("learner", h.state.ratingSource)
         h.controller.run(VoiceCommand.CONFIRM)
         assertEquals(2, h.collection.reviews.single().rating)
-        val turn = h.evidence().turns.single()
+        val turn = h.committedTurn()
         assertEquals(GradingRecord.UNAVAILABLE, turn.gradingPath)
         assertEquals(2, turn.selfGrade)
     }

@@ -141,13 +141,13 @@ class StudyCompositionTest {
 
     /** Open a session and settle [spoken] as the answer to the first card. */
     private fun answered(spoken: String): ReviewSession {
+        // AV-050: opening a session is the whole hands-free chain — the first card is
+        // offered, its prompt is read, and the microphone opens itself when that playback
+        // settles. So the answer is scripted for the transport **before** the session
+        // starts, rather than between a tapped prompt and a tapped Start answer.
+        speechInput.script.addLast(FakeSpeechInput.Say(spoken))
         controller.onForegroundEvent(ForegroundEvent.RESUME)
         controller.start()
-        controller.ask()
-        // Start answer runs the capture itself, so the answer is scripted for the
-        // transport rather than delivered to the session by hand.
-        speechInput.script.addLast(FakeSpeechInput.Say(spoken))
-        controller.startAnswer()
         return checkNotNull(session)
     }
 
@@ -314,12 +314,15 @@ class StudyCompositionTest {
         controller.run(VoiceCommand.CONFIRM)
 
         assertEquals(1, transport.calls.size, "the single write was not single")
-        assertEquals(ReviewState.CONFIRMED, open.intent?.state)
+        // AV-050 D.5: the confirmation advances, so the turn's own intent is cleared with
+        // it. What the write was is read from the outcome the writer returned and from the
+        // journal entry it settled — which is where this test's claim actually lives.
+        assertEquals(ReviewState.CONFIRMED, open.outcomes.last().state)
         val entry = journal.entries().single()
         assertEquals(JournalPhase.SETTLED, entry.phase)
         assertEquals(ReviewState.CONFIRMED, entry.outcomeState)
         assertEquals(3, entry.rating)
-        assertEquals(open.transcriptRevision, entry.transcriptRevision)
+        assertEquals(1, entry.transcriptRevision, "the first settled answer is revision 1")
         assertEquals("Five blocks.", entry.transcript, "the settled transcript was not journalled")
         assertEquals("study", entry.sessionId)
         assertTrue(journal.unsettled().isEmpty())
@@ -434,7 +437,7 @@ class StudyCompositionTest {
         var evidence: StudyEvidence? = null
         controller.evidence { evidence = it }
         val recorded = checkNotNull(evidence)
-        assertEquals("touch", recorded.turns.single().confirmationSource)
+        assertEquals("touch", recorded.turns.first { it.outcome != null }.confirmationSource)
         assertEquals(1, recorded.journal.size)
         val prompt = checkNotNull(open.card).fields.prompt
         diagnostics.entries().forEach { entry ->
@@ -455,7 +458,7 @@ class StudyCompositionTest {
         assertEquals(open.events, recorded.events)
         assertEquals(open.outcomes, recorded.outcomes)
         assertTrue(recorded.events.any { it.detail.contains("mix of several things") }, "the evidence keeps the turn")
-        assertEquals(GradingRecord.UNAVAILABLE, recorded.turns.single().gradingPath)
+        assertEquals(GradingRecord.UNAVAILABLE, recorded.turns.first().gradingPath)
 
         val prompt = checkNotNull(open.card).fields.prompt
         diagnostics.entries().forEach { entry ->

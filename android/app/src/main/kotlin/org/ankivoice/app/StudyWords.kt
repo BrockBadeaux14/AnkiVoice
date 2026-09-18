@@ -24,20 +24,23 @@ import org.ankivoice.core.session.SessionState
 internal object StudyWords {
     const val READY = "Ready to study."
     const val OPENING = "Opening your deck…"
-    const val LISTENING_ANSWER = "Listening. Speak your answer, then tap Done."
+    /** AV-050: the microphone stops itself when the learner stops; Done is the way to hurry it. */
+    const val LISTENING_ANSWER = "Listening. Speak your answer — it stops on its own when you do, or tap Done."
     const val LISTENING_COMMAND = "Listening for a command."
 
     /** The line under the card while a turn is in progress. Halts are described by [explain]. */
     fun status(state: SessionState, phase: AnswerPhase?, gradingInFlight: Boolean): String = when (state) {
         SessionState.IDLE -> OPENING
-        SessionState.ASKING -> "Card ready. Play the prompt to hear the question."
+        SessionState.ASKING -> "Card ready. Reading the question…"
         SessionState.LISTENING -> when (phase) {
-            AnswerPhase.THINKING, null -> "Take your time. Tap Start answer when you are ready to speak."
+            // AV-050: the microphone opens itself once this card's prompt has settled, so
+            // the tap is the way to start early rather than the way to start.
+            AnswerPhase.THINKING, null -> "Take your time. The microphone opens itself, or tap Start answer."
             AnswerPhase.CAPTURING -> LISTENING_ANSWER
             AnswerPhase.FINALIZING -> "Finishing up what you said…"
             AnswerPhase.SETTLED -> "Your answer is recorded."
         }
-        SessionState.RETRYING -> "Ready to try again. Tap Start answer when you are ready to speak."
+        SessionState.RETRYING -> "Ready to try again. The microphone opens itself, or tap Start answer."
         SessionState.GRADING -> if (gradingInFlight) "Checking your answer…" else "Your answer is recorded."
         SessionState.REVEALING -> "Playing…"
         SessionState.PROPOSING -> "A rating is waiting for your confirmation. Confirm it, or change it."

@@ -20,14 +20,18 @@ documentation says plainly what has not been verified.
   own.
 - **Rules first, AI second, you last.** Deterministic rules on the device match your
   transcript against the card's answers with no network call. Only when they cannot decide
-  is the transcript sent to a pinned grading model, free route first and a budgeted paid
-  route only if the free one fails, and only if you have entered your own OpenRouter key
-  and acknowledged what is sent. Every suggestion is advisory: you confirm, change or name
+  is the transcript sent to a pinned grading model, the paid route first within the daily
+  budget you set and the free route as the backup behind it, and only if you have entered
+  your own OpenRouter key and acknowledged what is sent. An AI grade normally costs money. Every suggestion is advisory: you confirm, change or name
   the rating yourself, and a transcript edit retires any earlier suggestion.
 - **Or let it rate for you, if you ask.** **Automatic grading** is off until you turn it on
-  in setup. With it on, a rating the grader proposed is saved after a few seconds you can
-  use to stop it — and only that: a rating you named yourself, and a turn the grader could
-  not grade, still wait for you. A saved review can then only be undone in AnkiDroid.
+  in setup. With it on, a rating the grader proposed is saved without you confirming it —
+  and only that: a rating you named yourself, and a turn the grader could not grade, still
+  wait for you. A saved review can then only be undone in AnkiDroid. The study screen shows
+  no sign of which mode you chose; the choice, and both of its warnings, are in setup.
+- **Hands off once you start.** A card that comes up reads itself, and the microphone opens
+  when the question is over and closes when you stop talking. **Start answer** and **Done**
+  are still there to tap whenever you would rather.
 - **One write, journalled.** A rating is written once, after freshness checks, and
   verified by reading the card back. The intent is recorded in an app-private journal before
   the write and settled from the writer's own evidence, so a crash mid-write is reconciled on
@@ -167,6 +171,7 @@ cold-boot between long sessions, and a capture that comes back empty is retried 
 | Rating confirmation and the single write | [exchange](docs/testing/av019/results.md) |
 | The study screen and the integrated flow | [study surface](docs/testing/av026/results.md) |
 | Automatic grading, and the confirmation rule it reverses | [automatic grading](docs/testing/av047/results.md) |
+| The hands-free turn: a silent automatic mode, and a microphone that opens and closes itself | [polish](docs/testing/av050/results.md) |
 
 Work is tracked on the [project board](https://github.com/users/BrockBadeaux14/projects/2).
 

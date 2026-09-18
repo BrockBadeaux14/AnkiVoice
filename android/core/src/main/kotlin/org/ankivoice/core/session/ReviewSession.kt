@@ -8,6 +8,7 @@ import org.ankivoice.core.answer.AnswerRecovery
 import org.ankivoice.core.answer.AnswerStatus
 import org.ankivoice.core.answer.AnswerTurn
 import org.ankivoice.core.contracts.Capabilities
+import org.ankivoice.core.exchange.ratingName
 import org.ankivoice.core.contracts.CaptureEvent
 import org.ankivoice.core.contracts.CardProvider
 import org.ankivoice.core.contracts.CardProviderFailure
@@ -298,6 +299,36 @@ class ReviewSession(
         confine("finishAnswer")
         check(state == SessionState.LISTENING) { "Done needs active capture, not ${state.specName}" }
         return settle(requireTurn().done())
+    }
+
+    /**
+     * AV-050: the learner was first heard [afterOpenMs] after the microphone opened.
+     *
+     * Reported by the transport once the capture returns, because the session thread is
+     * blocked inside it while it happens. It ends AV-012's recall pre-roll and starts the
+     * answer window; it settles nothing and stops nothing.
+     */
+    fun reportSpeechOnset(afterOpenMs: Long) {
+        confine("reportSpeechOnset")
+        if (state != SessionState.LISTENING || !captureValid) return
+        answerTurn?.speechBegan(afterOpenMs)
+    }
+
+    /**
+     * AV-050: the capture ended itself because the learner stopped speaking.
+     *
+     * The same stop [finishAnswer] makes, through the same finalization, with
+     * [org.ankivoice.core.answer.CaptureStop.ENDPOINT] recorded instead of a learner's Done.
+     * Ignored unless an attempt is genuinely in flight and the learner was heard in it, so a
+     * Done or a Cancel that already settled the turn keeps precedence.
+     */
+    fun endpointAnswer(): SessionResult<Answer> {
+        confine("endpointAnswer")
+        val turn = answerTurn
+        if (state != SessionState.LISTENING || !captureValid || turn == null) return SessionResult.Ignored
+        if (turn.phase != AnswerPhase.CAPTURING || !turn.heardSpeech) return SessionResult.Ignored
+        log("endpoint", "attempt ${turn.attempt} ended on the learner's own silence")
+        return settle(turn.endpoint())
     }
 
     /** Advance AV-012's deadlines without a callback. Expiry is never an answer. */
@@ -598,7 +629,9 @@ class ReviewSession(
             outcome.state == ReviewState.CONFIRMED && state == SessionState.COMMITTED &&
                 recordedOutcomes.lastOrNull() === outcome,
         ) { "Only a confirmed review may be announced as saved" }
-        return Utterance(UtterancePurpose.ANNOUNCEMENT, "Saved rating ${requireIntent().rating}.", language)
+        // AV-050 D.4: by name, never as a number — a rating spoken as "3" is not something a
+        // learner can act on. The exchange keeps this for the record and no longer speaks it.
+        return Utterance(UtterancePurpose.ANNOUNCEMENT, "Saved ${ratingName(requireIntent().rating)}.", language)
     }
 
     /** Permitted only after a confirmed review. */
@@ -682,12 +715,24 @@ class ReviewSession(
         return stop(SESSION_FINISHED, "the learner finished the session; nothing was written")
     }
 
-    /** Correction is pre-commit only. Hand off to AnkiDroid's native Undo. */
+    /**
+     * Correction is pre-commit only. Hand off to AnkiDroid's native Undo.
+     *
+     * **Amended by AV-050 D.5.** This used to require the session to be sitting on the
+     * review it had just committed, which was true for as long as the learner had to tap
+     * Next card. A confirmed write now advances by itself, so that condition would have made
+     * AV-007's only post-commit correction unreachable the instant it became relevant. It is
+     * now "this session has written a review", which is the thing that actually makes the
+     * handoff meaningful: AnkiDroid's Undo undoes the last review whatever AnkiVoice has
+     * moved on to since. Nothing else changed — this still writes nothing, still refuses a
+     * collection that offers programmatic undo, and still stops the session.
+     */
     fun requestCorrectionAfterCommit(): Halt {
         confine("requestCorrectionAfterCommit")
         check(!capabilities.supportsProgrammaticUndo) { "Programmatic undo would need its own contract" }
         val current = intent
-        check(current != null && current.state == ReviewState.CONFIRMED) {
+        val committedThisSession = recordedOutcomes.any { it.state == ReviewState.CONFIRMED }
+        check((current != null && current.state == ReviewState.CONFIRMED) || committedThisSession) {
             "There is no confirmed review to hand off"
         }
         return stop(

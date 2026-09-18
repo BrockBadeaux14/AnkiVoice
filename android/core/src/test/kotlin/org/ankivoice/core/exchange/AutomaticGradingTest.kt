@@ -138,7 +138,11 @@ class AutomaticGradingTest {
         announceGrade(GradeLabel.CORRECT, on = manual)
 
         val said = announcements.last()
-        assertTrue("Nothing is saved yet." in said, said)
+        // AV-050 D.4 removed "Nothing is saved yet": with the option on it was said aloud
+        // moments before the rating saved itself. What the announcement must still not do is
+        // claim a write is coming.
+        assertFalse("Nothing is saved yet" in said, said)
+        assertEquals("Card graded good.", said)
         assertFalse("Automatic" in said, said)
     }
 
@@ -236,16 +240,33 @@ class AutomaticGradingTest {
     }
 
     @Test
-    fun `the announcement says a write is coming, how long there is and what undo costs`() {
+    fun `the announcement names the rating, and never the mode`() {
         answered()
         announceGrade(GradeLabel.CORRECT)
 
+        // AV-050 replaced AV-047's second announcement with the manual one, and D.4 then cut
+        // that to the grade alone. It is spoken after every card, so what matters is that it
+        // is short and that it says nothing about how the rating will be saved. The source
+        // still binds it and still reaches the screen and the journal.
         val said = announcements.last()
-        assertTrue("Good is waiting" in said, said)
-        assertTrue("from an exact rule match" in said, said)
-        assertTrue("saved in 5 seconds unless you stop it" in said, said)
-        assertTrue("Keep it manual" in said, said)
-        assertTrue("AnkiDroid's own Undo" in said, said)
+        assertEquals("Card graded good.", said)
+        assertEquals(RatingSource.RULE, checkNotNull(exchange.position).source)
+        assertFalse("Automatic grading" in said, said)
+        assertFalse("Keep it manual" in said, said)
+        assertFalse("unless you stop it" in said, said)
+    }
+
+    @Test
+    fun `the option is on and the announcement is word for word the manual one`() {
+        answered()
+        announceGrade(GradeLabel.CORRECT)
+
+        // AV-047 had two announcements and AV-050 left one. Spelled out rather than matched
+        // in fragments, because "the mode is not named" is a claim about the whole sentence.
+        assertEquals(
+            "Card graded good.",
+            announcements.last(),
+        )
     }
 
     // -- what stays manual whatever the option says ---------------------------- //
@@ -452,11 +473,16 @@ class AutomaticGradingTest {
     }
 
     @Test
-    fun `a one-second window is announced in the singular`() {
+    fun `a window of any length is announced no differently, because none of it is announced`() {
         val brief = PrecommitExchange(session, speechOutput, AutomaticGrading(enabled = true, cancelWindowMs = 1_000))
         answered()
         announceGrade(GradeLabel.CORRECT, on = brief)
 
-        assertTrue("saved in 1 second unless" in announcements.last(), announcements.last())
+        // AV-050: the window still exists and still arms; the learner is simply never told
+        // about it, so its length cannot reach the announcement at all.
+        val said = announcements.last()
+        assertEquals(1_000, checkNotNull(brief.armed).cancelWindowMs)
+        assertFalse("1 second" in said, said)
+        assertFalse("second" in said, said)
     }
 }

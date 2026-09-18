@@ -48,6 +48,18 @@ these limits permits implementation; it does not make unexercised cases pass.
 | Native route | `com.google.android.tts`, version `googletts.google-speech-apk_20241125.02_p2.702443970`; `GoogleTTSRecognitionService`; `en-US`; `EXTRA_PREFER_OFFLINE=false`. Local TTS voice `en-US-language`. | Same pins as AV-006; owner-confirmed live results in attempts 7/8. #26 owns platform objects and runtime resolution. |
 | Capture | App-owned MIC `AudioRecord`, mono PCM16 at 16 kHz, passed through `EXTRA_AUDIO_SOURCE`; segmented session ends at pipe closure. | Working probe route, to be implemented in #26. No new provider or phone-state permission. |
 | Playback to input | Complete Prompt playback, settle for at least 400 ms, then wait for explicit Start answer. Thinking is outside active capture. | Probe used the settling interval; both successful trials used explicit Start answer. #26 owns transport ordering; #13 owns answer state. |
+> **Amended September 17, 2026 by [AV-050](https://github.com/BrockBadeaux14/AnkiVoice/issues/81).**
+> Two of the selections below no longer describe the shipped app, and the table is left as
+> the record of what AV-042 measured and chose rather than rewritten. The microphone now
+> **opens itself** once per attempt, after that attempt's prompt playback settles, so
+> "from Start answer" is no longer how the window starts — Start answer remains a touch
+> control for starting early. The unbounded thinking time that tap bought is replaced by a
+> **15,000 ms recall pre-roll** in front of the window, and the **answer window was cut to
+> 5,000 ms**, because it now bounds speaking alone and AV-050's endpointing normally ends a
+> capture about a second after the learner stops. Finalization, the trailing silence and the
+> zero re-arm cap are unchanged. Current values: `AnswerLimits` and
+> [AV-050's results](../av050/results.md).
+
 | Answer window | Default and maximum active capture: 15,000 ms from Start answer, using a monotonic clock. Do not consume this budget while the learner is thinking. | Selected initial limit; automatic expiry observed on diagnostic attempts 1/2. No claim that 15 seconds is an optimized recall duration. #13 owns the deadline; #26 stops capture on request. |
 | Done and finalization | Done or capture expiry stops the microphone. #26 sends 500 ms of trailing silence, then closes the pipe. Finalization has a separate 5,000 ms deadline from Done/expiry, including that trailing silence. | Successful Done-to-final times: 690 ms and 687 ms. The five-second ceiling is an engineering bound; forced finalization expiry remains unverified on-device. |
 | Retry cap | Zero automatic re-arms and zero additional recognizer attempts inside one answer window. An explicit Try again opens a new bounded window for the same card with a new attempt/transcript revision. | Conservative initial policy; the probe only repeated on explicit Start. No automatic retry accuracy or shared-window retry behavior was validated. #13 owns the window and invalidation. |

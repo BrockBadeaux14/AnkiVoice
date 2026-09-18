@@ -76,10 +76,20 @@ class PinnedLimits(unittest.TestCase):
         return int(found.group(1).replace("_", ""))
 
     def test_the_window_and_finalization_deadlines_match_the_accepted_handoff(self):
-        self.assertEqual(15_000, self.kotlin_number("windowMs"))
+        """AV-042 selected these; AV-050 amended two of them, and the handoff records it.
+
+        The point of this guard is that the code and the accepted handoff agree — not that
+        the numbers never move. AV-050 replaced the explicit Start answer with a microphone
+        that opens itself, so the unbounded thinking time the tap bought became a 15,000 ms
+        recall pre-roll, and the window — which now bounds speaking alone — was cut to
+        5,000 ms. Finalization is untouched.
+        """
+        self.assertEqual(15_000, self.kotlin_number("prerollMs"))
+        self.assertEqual(5_000, self.kotlin_number("windowMs"))
         self.assertEqual(5_000, self.kotlin_number("finalizationMs"))
         self.assertIn("15,000 ms from Start answer", self.handoff)
         self.assertIn("5,000 ms deadline from Done/expiry", self.handoff)
+        self.assertIn("AV-050", self.handoff, "the handoff does not record the amendment")
 
     def test_no_automatic_rearms_are_permitted(self):
         self.assertIn("const val AUTOMATIC_REARMS: Int = 0", self.policy)
