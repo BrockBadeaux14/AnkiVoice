@@ -133,11 +133,13 @@ class GradingProviderTest {
     fun `the pre-session checks run for both routes and consume no allowance`() {
         val (provider, transport, _) = stack()
         val start = assertInstanceOf(SessionStart.Ready::class.java, provider.startSession("s1"))
-        assertEquals("Liquid | fp8", start.endpointName)
-        assertEquals(listOf("GET ${FreeRoute.endpointsUrl}", "GET ${PaidRoute.endpointsUrl(pin)}"), transport.calls)
-        assertEquals(listOf(GradingRoute.FREE, GradingRoute.PAID), start.routes.map { it.route })
+        // AV-050 D.6 reversed GradingRoute.ORDER, and the checks follow it: the paid route
+        // is checked first and names the session.
+        assertEquals("OpenAI | paid", start.endpointName)
+        assertEquals(listOf("GET ${PaidRoute.endpointsUrl(pin)}", "GET ${FreeRoute.endpointsUrl}"), transport.calls)
+        assertEquals(listOf(GradingRoute.PAID, GradingRoute.FREE), start.routes.map { it.route })
         assertTrue(start.routes.all { it.ready }, start.routes.toString())
-        assertEquals("OpenAI | paid", start.routes[1].endpointName)
+        assertEquals("Liquid | fp8", start.routes.single { it.route == GradingRoute.FREE }.endpointName)
         assertEquals(30, start.allowance.sessionRemaining)
         assertFalse(ledgerFile.exists(), "a price check is not a grading request")
         assertNull(provider.unavailableCause)
@@ -150,7 +152,7 @@ class GradingProviderTest {
         val (provider, transport, _) = stack(FakeTransport(priceCheck = FakeTransport.ok(changed)))
         val start = assertInstanceOf(SessionStart.Ready::class.java, provider.startSession("s1"))
         assertEquals("OpenAI | paid", start.endpointName, "the first usable route names the session")
-        assertEquals(GradingUnavailable.ROUTE_REFUSED, start.routes[0].cause)
+        assertEquals(GradingUnavailable.ROUTE_REFUSED, start.routes.single { it.route == GradingRoute.FREE }.cause)
         assertEquals(LedgerStop.ROUTE_REFUSED, ledger().stopToday(GradingRoute.FREE))
         assertNull(ledger().stopToday(GradingRoute.PAID))
         assertEquals(GradingUnavailable.ROUTE_REFUSED, provider.unavailableCause(GradingRoute.FREE))
@@ -170,9 +172,10 @@ class GradingProviderTest {
         val repriced = FakeTransport.PAID_ENDPOINTS.replace(""""completion":"${pin.completionUsdPerToken.toPlainString()}"""", """"completion":"0.001"""")
         val (provider, transport, _) = stack(FakeTransport(paidPriceCheck = FakeTransport.ok(repriced)))
         val start = assertInstanceOf(SessionStart.Ready::class.java, provider.startSession("s1"))
-        assertEquals("Liquid | fp8", start.endpointName)
-        assertEquals(GradingUnavailable.PAID_ROUTE_REFUSED, start.routes[1].cause)
-        assertTrue(start.routes[1].detail.contains("completion"), start.routes[1].detail)
+        assertEquals("Liquid | fp8", start.endpointName, "the first usable route names the session")
+        val refusedPaid = start.routes.single { it.route == GradingRoute.PAID }
+        assertEquals(GradingUnavailable.PAID_ROUTE_REFUSED, refusedPaid.cause)
+        assertTrue(refusedPaid.detail.contains("completion"), refusedPaid.detail)
         assertEquals(LedgerStop.PAID_ROUTE_REFUSED, ledger().stopToday(GradingRoute.PAID))
         assertNull(ledger().stopToday(GradingRoute.FREE))
         val paid = assertInstanceOf(ProviderOutcome.Failed::class.java, provider.request("s1", "s", "u", route = GradingRoute.PAID))
@@ -185,9 +188,10 @@ class GradingProviderTest {
     fun `both routes refused is unavailable grading`() {
         val (provider, _, _) = stack(FakeTransport(priceCheck = HttpResult.Timeout, paidPriceCheck = HttpResult.Response(500, "")))
         val start = assertInstanceOf(SessionStart.Unavailable::class.java, provider.startSession("s1"))
-        assertEquals(GradingUnavailable.ROUTE_REFUSED, start.cause)
-        assertEquals(listOf(GradingUnavailable.ROUTE_REFUSED, GradingUnavailable.PAID_ROUTE_REFUSED), start.routes.map { it.cause })
-        assertEquals(GradingUnavailable.ROUTE_REFUSED, provider.unavailableCause)
+        // The cause the session reports is the first route's, which AV-050 D.6 made the paid one.
+        assertEquals(GradingUnavailable.PAID_ROUTE_REFUSED, start.cause)
+        assertEquals(listOf(GradingUnavailable.PAID_ROUTE_REFUSED, GradingUnavailable.ROUTE_REFUSED), start.routes.map { it.cause })
+        assertEquals(GradingUnavailable.PAID_ROUTE_REFUSED, provider.unavailableCause)
     }
 
     @Test
@@ -203,8 +207,8 @@ class GradingProviderTest {
     fun `a zero cap turns the paid route off without a price check`() {
         val (provider, transport, _) = stack(settings = FakeSettings(dailyCapUsd = BigDecimal.ZERO))
         val start = assertInstanceOf(SessionStart.Ready::class.java, provider.startSession("s1"))
-        assertEquals(listOf("GET ${FreeRoute.endpointsUrl}"), transport.calls)
-        assertEquals(GradingUnavailable.PAID_DISABLED, start.routes[1].cause)
+        assertEquals(listOf("GET ${FreeRoute.endpointsUrl}"), transport.calls, "a disabled route was price-checked")
+        assertEquals(GradingUnavailable.PAID_DISABLED, start.routes.single { it.route == GradingRoute.PAID }.cause)
         val paid = assertInstanceOf(ProviderOutcome.Failed::class.java, provider.request("s1", "s", "u", route = GradingRoute.PAID))
         assertFalse(paid.dispatched)
         assertEquals(GraderFailure.PROVIDER_ERROR, paid.failure.mode)
@@ -423,9 +427,10 @@ class GradingProviderTest {
         assertEquals(GradingUnavailable.BUDGET, provider.unavailableCause(GradingRoute.PAID))
         assertNull(ledger().stopToday(GradingRoute.FREE))
         assertInstanceOf(ProviderOutcome.Content::class.java, provider.request("s1", "s", "u"))
-        // A new session the same day starts with the paid route already off.
+        // A new session the same day starts with the paid route already off — and is still
+        // Ready, because the free route AV-050 D.6 put behind it is not bounded by the cap.
         val start = assertInstanceOf(SessionStart.Ready::class.java, provider.startSession("s2"))
-        assertEquals(GradingUnavailable.BUDGET, start.routes[1].cause)
+        assertEquals(GradingUnavailable.BUDGET, start.routes.single { it.route == GradingRoute.PAID }.cause)
     }
 
     @Test
@@ -435,9 +440,10 @@ class GradingProviderTest {
         ledger.charge(granted.id, BigDecimal("0.0495"))
         val (provider, transport, _) = stack(settings = FakeSettings(dailyCapUsd = BigDecimal("0.05")))
         val start = assertInstanceOf(SessionStart.Ready::class.java, provider.startSession("s1"))
-        assertEquals(GradingUnavailable.BUDGET, start.routes[1].cause)
-        assertTrue(start.routes[1].detail.contains("0.0495"), start.routes[1].detail)
-        assertEquals(listOf("GET ${FreeRoute.endpointsUrl}"), transport.calls)
+        val blocked = start.routes.single { it.route == GradingRoute.PAID }
+        assertEquals(GradingUnavailable.BUDGET, blocked.cause)
+        assertTrue(blocked.detail.contains("0.0495"), blocked.detail)
+        assertEquals(listOf("GET ${FreeRoute.endpointsUrl}"), transport.calls, "a blocked route was price-checked")
     }
 
     // Diagnostics

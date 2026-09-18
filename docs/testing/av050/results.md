@@ -136,6 +136,32 @@ card that is not there: an exhausted queue, a halt on the way in, or a card the 
 refused all leave `ReviewSession.card` null and stop the chain before the synthesizer is
 touched.
 
+## D.6 The paid route goes first
+
+At the owner's direction, `GradingRoute.ORDER` is reversed: **paid first, free as the
+backup**. This deliberately reverses AV-043's cost posture — an AI grading request now
+spends the owner's OpenRouter credits by default. The daily budget and the per-request hold
+are unchanged and still bound the spend; what changed is which route the budget is spent on
+first.
+
+Three things followed that were not just a constant:
+
+- **`SemanticGrader` no longer names a route.** It used to check for `FREE` when deciding
+  which failure to report. It now reports the failure of the last route that actually
+  **dispatched**, because a route that never left the device adds nothing the learner can
+  act on. That rule was right under the old order too; naming the route was the shortcut.
+- **A spent budget no longer ends AI grading.** Under free-first, the cap was reached only
+  after the free route had already been refused, so there was nothing left. Under
+  paid-first the cap stops the route it bounds and the free route carries the turn.
+- **A route that is off by configuration no longer masks one that failed.** With the paid
+  route first, a learner who left the cap at zero would have been told "paid grading is
+  disabled" when the real fault was the free route refusing. `unavailableCause` now passes
+  over a configured-off route in favour of one that broke.
+
+The disclosure and the route summary the learner reads were rewritten with it: the app must
+never describe an order it does not use, and "free first" shown while credits are being
+spent is the worst thing that string could say.
+
 ## What this does not establish
 
 - **No live evidence yet.** Every claim above is from JVM tests against the `:core` fakes

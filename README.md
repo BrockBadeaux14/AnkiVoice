@@ -20,9 +20,9 @@ documentation says plainly what has not been verified.
   own.
 - **Rules first, AI second, you last.** Deterministic rules on the device match your
   transcript against the card's answers with no network call. Only when they cannot decide
-  is the transcript sent to a pinned grading model, free route first and a budgeted paid
-  route only if the free one fails, and only if you have entered your own OpenRouter key
-  and acknowledged what is sent. Every suggestion is advisory: you confirm, change or name
+  is the transcript sent to a pinned grading model, the paid route first within the daily
+  budget you set and the free route as the backup behind it, and only if you have entered
+  your own OpenRouter key and acknowledged what is sent. An AI grade normally costs money. Every suggestion is advisory: you confirm, change or name
   the rating yourself, and a transcript edit retires any earlier suggestion.
 - **Or let it rate for you, if you ask.** **Automatic grading** is off until you turn it on
   in setup. With it on, a rating the grader proposed is saved without you confirming it —

@@ -5,6 +5,17 @@ Branch `codex/av-043-paid-grading-fallback`. September 16, 2026, America/Chicago
 Decision: the dated [AV-006 addendum](../../decisions/0006-speech-and-grading-providers.md#addendum--september-16-2026-av-043-a-paid-grading-fallback-within-a-daily-cap).
 Reproduce with [the runbook](runbook.md).
 
+> **Route order reversed on September 17, 2026 by
+> [AV-050](https://github.com/BrockBadeaux14/AnkiVoice/issues/81) D.6, at the owner's
+> direction.** This page describes free-first, with the paid route reached only on a free
+> refusal, which is what AV-043 built and what its evidence covers. The shipped order is now
+> **paid first, free as the backup**: an AI grading request spends the owner's credits by
+> default. The daily budget and the per-request hold are unchanged and still bound the
+> spend; what changed is which route the budget is spent on first, and that a spent budget
+> now hands the turn to the free route rather than ending AI grading for the session. This
+> page is left as the record of what was built and measured; the current order is in
+> `GradingRoute.ORDER` and in [AV-050's results](../av050/results.md).
+
 **Status, stated plainly.** The correction, the paid route, the budget, the settings and
 disclosure changes, the harness extension and the offline suite are complete and
 reproducible with no network. The three live layers — the bounded model spike, the
